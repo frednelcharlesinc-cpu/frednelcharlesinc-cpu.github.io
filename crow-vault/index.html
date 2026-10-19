@@ -517,7 +517,7 @@ function boot(){setTimeout(()=>{const sp=$("#splash");if(sp){sp.classList.add("o
 }
 function normalize(s){
   const d={v:1,currency:"$",bank:0,savings:0,trading:{balance:0,basis:0,limit:0,history:[]},sources:[],bills:[],tx:[],goals:[],split:{save:10,trade:10},grocery:{weekly:0},subCheck:"",lastBackup:"",checkins:[],lessons:[],created:today()};
-  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"bank"},s.prefs||{});s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
+  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"bank"},s.prefs||{});s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
   return s;
 }
 
@@ -996,6 +996,7 @@ function reverseTx(x){const a=x.amount;
   else if(x.cat==="From trading"){S.bank-=a;S.trading.balance+=a;S.trading.basis+=a}
   else if(x.cat==="To savings"){S.bank+=a;const g=S.goals.find(g=>g.id===x.goal);if(g)g.saved=Math.max(0,g.saved-a)}
   else if(x.cat==="To cash vault"){S.bank+=a;S.cash.balance-=a}
+  else if(x.cat==="Cash stash"){S.cash.balance-=a}
   else if(x.cat==="From cash vault"){S.bank-=a;S.cash.balance+=a}
 }
 
@@ -1087,9 +1088,10 @@ const A2={
    S.quick=V("f-q").split("\n").map(l=>l.split(",").map(x=>x.trim())).filter(p=>p[0]).slice(0,16).map(([n,c,a])=>({name:n.slice(0,24),cat:EXP_CATS.find(x=>x.toLowerCase()===(c||"").toLowerCase())||"Other",amount:+a>0?Math.round(+a*100)/100:0}));commit();toast("Buttons saved")}),
  renameBuddy:()=>openSheet("Name your chibi",txt("f-bn","Name",S.buddy.name,"Lil Crow"),()=>{S.buddy.name=V("f-bn").trim().slice(0,20)||"Lil Crow";commit();say(`${esc(S.buddy.name)}? I like it. That's me now.`,"laugh")}),
  cashVault:()=>cashVaultSheet(),
- cashIn:()=>openSheet("Put cash in",amt("f-amt","Amount","")+sel("f-from","Where's it from",[["tips","Cash tips"],["bank","Took it out of the bank (ATM)"],["other","Other cash (side work, gift, sold something)"]],"tips")+txt("f-note","Note (optional)","",""),()=>{
+ cashIn:()=>openSheet("Put cash in",amt("f-amt","Amount","")+sel("f-from","Where's it from",[["stash","Money I already had / saved tips (not new income)"],["tips","New cash tips from a shift"],["bank","Took it out of the bank (ATM)"],["other","Other new cash (side work, gift, sold something)"]],"stash")+txt("f-note","Note (optional)","",""),()=>{
    const a=N("f-amt");if(!(a>0)){toast("Enter an amount above zero");return false}const fr=V("f-from"),note=V("f-note").trim();
    if(fr==="bank"){S.bank-=a;addTx({type:"move",cat:"To cash vault",amount:a,note:note||"Bank → Cash vault"})}
+   else if(fr==="stash"){addTx({type:"move",cat:"Cash stash",amount:a,note:note||"Added to cash vault (savings)",dest:"cash"})}
    else{addTx({type:"in",cat:fr==="tips"?"Tips":"Cash in",amount:a,note:note||(fr==="tips"?"Tips · cash":"Cash in"),dest:"cash"})}
    S.cash.balance+=a;commit();vibe();say(`<b>${money(a)}</b> in the vault. ${pickL("vault")}`,"happy",true);window.__strike?.()}),
  cashOut:()=>openSheet("Take cash out",amt("f-amt","Amount","")+sel("f-for","What for",[["spend","Spent it on something"],["bank","Deposited it to the bank"]],"spend")+sel("f-cat","Category (if spent)",EXP_CATS,"Food out")+txt("f-note","What was it? (optional)","",""),()=>{
