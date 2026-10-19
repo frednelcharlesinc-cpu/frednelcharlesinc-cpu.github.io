@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c0a0b">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Emberkeep">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>Emberkeep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: one phone column — dragon lair up top, fast clock + calorie bar, scan button, today's log, settings at the foot */
+:root{
+  --bg:#0c0a0b; --cloud:#1d1416; --panel:#171113; --line:#3a2427;
+  --fg:#f1e6e2; --muted:#a8918c; --ember:#ff4a2b; --flame:#ffb347; --blood:#b3131b; --ok:#5fd18a; --warn:#ffb347; --bad:#ff4a5a;
+  --display:"Pirata One","Georgia",serif; --body:"Barlow",system-ui,sans-serif; --data:"Barlow Condensed","Arial Narrow",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));margin:0;
+  background:
+    radial-gradient(120% 40% at 20% -5%,#2a1518 0%,transparent 60%),
+    radial-gradient(90% 35% at 90% 0%,#241016 0%,transparent 55%),
+    var(--bg);
+  overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(60% 30% at 70% 5%,rgba(255,74,43,.35),transparent 70%);opacity:0;animation:flash 9s infinite}
+@keyframes flash{0%,88%,100%{opacity:0}89%{opacity:.9}90%{opacity:.1}91.5%{opacity:.7}93%{opacity:0}}
+@media (prefers-reduced-motion:reduce){body::after{animation:none}.egg-glow,.pulse{animation:none!important}}
+main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:400;font-size:2.4rem;margin:0;letter-spacing:.5px;line-height:1;
+  background:linear-gradient(180deg,var(--flame),var(--ember) 60%,var(--blood));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-family:var(--data);text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;color:var(--muted)}
+.lair{position:relative;border:1px solid var(--line);border-radius:18px;padding:16px;background:linear-gradient(180deg,#1a1012,#0f0b0c);overflow:hidden}
+.lair::before{content:"";position:absolute;inset:auto -20% -40% -20%;height:70%;background:radial-gradient(closest-side,rgba(255,74,43,.22),transparent);pointer-events:none}
+.lair-row{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center;position:relative}
+@media (max-width:360px){.lair-row{grid-template-columns:1fr}}
+#dragon{width:150px;height:150px;max-width:100%}
+.stage{font-family:var(--display);font-size:1.7rem;line-height:1.05;margin:0}
+.dname{font-family:var(--data);letter-spacing:.1em;text-transform:uppercase;color:var(--flame);font-size:.8rem}
+.xpbar{height:10px;border-radius:6px;background:#2a1a1c;overflow:hidden;margin-top:8px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blood),var(--ember),var(--flame));width:0;transition:width .6s}
+.xpmeta{display:flex;justify-content:space-between;font-family:var(--data);font-size:.85rem;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-family:var(--data);font-size:.82rem;letter-spacing:.04em;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--fg);background:#1f1416}
+.chip b{color:var(--flame);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:380px){.grid2{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);min-width:0}
+.label{font-family:var(--data);text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--muted)}
+.big{font-family:var(--data);font-weight:700;font-size:2rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.state{display:inline-block;font-family:var(--data);font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:6px;margin-top:6px}
+.state.fast{background:rgba(255,74,43,.15);color:var(--ember)}
+.state.eat{background:rgba(95,209,138,.14);color:var(--ok)}
+.calbar{height:12px;border-radius:7px;background:#2a1a1c;overflow:hidden;margin-top:10px;position:relative}
+.calbar i{display:block;height:100%;width:0;background:var(--ok);transition:width .5s,background .3s}
+.small{font-size:.85rem;color:var(--muted)}
+.cta{display:flex;gap:10px}
+button,.btn{font:600 1rem var(--data);letter-spacing:.06em;text-transform:uppercase;border-radius:12px;border:1px solid var(--line);background:#22171a;color:var(--fg);padding:12px 14px;cursor:pointer}
+button:focus-visible,input:focus-visible,.btn:focus-within{outline:2px solid var(--flame);outline-offset:2px}
+.primary{flex:1;background:linear-gradient(180deg,var(--ember),var(--blood));border-color:transparent;color:#fff;box-shadow:0 6px 24px -8px rgba(255,74,43,.7)}
+.btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex:1}
+.btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+.panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:10px}
+.panel h2{font-family:var(--display);font-weight:400;font-size:1.4rem;margin:0}
+input[type=text],input[type=number],input[type=time],textarea{width:100%;font:500 1rem var(--body);color:var(--fg);background:#0f0b0c;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{resize:vertical;min-height:56px}
+.row{display:flex;gap:10px;align-items:end}
+.row>*{flex:1;min-width:0}
+#preview{border-radius:12px;max-height:220px;object-fit:cover;width:100%}
+.verdict{border-radius:12px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.verdict .v{font-family:var(--display);font-size:1.6rem;line-height:1}
+.verdict.eat{border-color:rgba(95,209,138,.5);background:rgba(95,209,138,.07)}.verdict.eat .v{color:var(--ok)}
+.verdict.half{border-color:rgba(255,179,71,.5);background:rgba(255,179,71,.07)}.verdict.half .v{color:var(--warn)}
+.verdict.skip{border-color:rgba(255,74,90,.5);background:rgba(255,74,90,.07)}.verdict.skip .v{color:var(--bad)}
+.macros{display:flex;gap:12px;font-family:var(--data);font-size:.95rem;color:var(--muted);flex-wrap:wrap}
+.macros b{color:var(--fg)}
+ul.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+ul.log li{display:grid;grid-template-columns:52px 1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+ul.log li:last-child{border-bottom:0}
+.t{font-family:var(--data);color:var(--muted);font-variant-numeric:tabular-nums}
+.f{min-width:0;overflow-wrap:anywhere}
+.k{font-family:var(--data);font-weight:600;font-variant-numeric:tabular-nums}
+.oow{font-size:.72rem;color:var(--ember);font-family:var(--data);letter-spacing:.05em;text-transform:uppercase}
+.x{background:none;border:0;color:var(--muted);padding:4px 8px;font-size:1.1rem}
+.empty{color:var(--muted);font-size:.9rem;padding:6px 0}
+details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-size:.8rem}
+.howxp{font-size:.88rem;color:var(--muted);margin:0;padding-left:18px}
+.howxp b{color:var(--flame)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(140%);background:#2a1518;border:1px solid var(--ember);color:var(--fg);padding:10px 16px;border-radius:12px;font-family:var(--data);letter-spacing:.04em;transition:transform .35s;max-width:calc(100% - 32px);z-index:20;text-align:center}
+#toast.on{transform:translateX(-50%) translateY(0)}
+.hatch{animation:shake .6s 2}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.egg-glow{animation:glow 2.6s ease-in-out infinite}
+@keyframes glow{50%{opacity:.35}}
+.note{font-size:.78rem;color:var(--muted)}
+[hidden]{display:none!important}
+img{max-width:100%}
+.keyrow{display:flex;gap:8px}
+.keyrow input{flex:1}
+</style>
+</head>
+<body>
+
+<main>
+  <header>
+    <h1>Emberkeep</h1>
+    <span class="sub" id="today"></span>
+  </header>
+
+  <section class="lair" aria-label="Your dragon">
+    <div class="lair-row">
+      <svg id="dragon" viewBox="0 0 200 200" role="img" aria-label="Dragon"></svg>
+      <div>
+        <div class="dname">Cinder · Stage <span id="stageNum">1</span> of 6</div>
+        <p class="stage" id="stageName">Ember Egg</p>
+        <div class="xpbar"><i id="xpFill"></i></div>
+        <div class="xpmeta"><span id="xpText">0 XP</span><span id="xpNext"></span></div>
+        <div class="chips">
+          <span class="chip">🔥 Streak <b id="streak">0</b></span>
+          <span class="chip">Today <b id="xpToday">+0</b> XP</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="label">Fast clock</div>
+      <div class="big pulse" id="fastBig">--:--</div>
+      <span class="state" id="fastState">—</span>
+      <div class="small" id="fastSub"></div>
+    </div>
+    <div class="card">
+      <div class="label">Calories today</div>
+      <div class="big" id="calBig">0</div>
+      <div class="small" id="calSub">of 2000</div>
+      <div class="calbar"><i id="calFill"></i></div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <label class="btn primary" for="photo">📸 Scan a meal<input id="photo" type="file" accept="image/*" capture="environment"></label>
+    <button id="typeBtn" type="button">Type it</button>
+  </div>
+
+  <section class="panel" id="scanPanel" hidden>
+    <h2 id="scanTitle">Read the plate</h2>
+    <img id="preview" alt="Your meal photo" hidden>
+    <label class="label" for="desc">What is it? (helps the estimate)</label>
+    <textarea id="desc" placeholder="e.g. jerk chicken, rice and peas, small coleslaw"></textarea>
+    <button class="primary" id="askBtn" type="button">Ask Cinder</button>
+    <div id="result" hidden></div>
+    <div class="row">
+      <div><label class="label" for="food">Food</label><input id="food" type="text"></div>
+      <div style="flex:.6"><label class="label" for="kcal">Calories</label><input id="kcal" type="number" min="0" inputmode="numeric"></div>
+    </div>
+    <div class="row">
+      <button class="primary" id="logBtn" type="button">Log it</button>
+      <button id="cancelBtn" type="button">Cancel</button>
+    </div>
+    <p class="note">Photo estimates are rough. Adjust the number if you know better.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Today's log</h2>
+    <ul class="log" id="log"></ul>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>How Cinder grows</summary>
+      <ul class="howxp">
+        <li>Open the app each day: <b>+15</b></li>
+        <li>Log a meal: <b>+10</b> (up to 4 a day)</li>
+        <li>Meal inside your eating window: <b>+5</b></li>
+        <li>Finish a day on target and inside the window: <b>+40</b></li>
+        <li>Streak bonus each day: <b>+5 per streak day</b> (max +50)</li>
+      </ul>
+      <p class="note">On target means between 70% and 100% of your goal. Eating far under your goal earns nothing extra, so don't starve the dragon.</p>
+    </details>
+    <details>
+      <summary>Settings</summary>
+      <div class="row" style="margin-top:10px">
+        <div><label class="label" for="goal">Daily calories</label><input id="goal" type="number" min="1200" step="50"></div>
+      </div>
+      <div class="row">
+        <div><label class="label" for="winStart">Window opens</label><input id="winStart" type="time"></div>
+        <div><label class="label" for="winEnd">Window closes</label><input id="winEnd" type="time"></div>
+      </div>
+      <div><label class="label" for="apiKey">Anthropic API key (for photo scans)</label>
+        <input id="apiKey" type="password" autocomplete="off" placeholder="sk-ant-..."></div>
+      <p class="note">Stays on this phone only. Each scan costs about a cent. Set a monthly spend limit in your Anthropic console.</p>
+      <button id="saveSettings" type="button">Save settings</button>
+    </details>
+    <details>
+      <summary>Backup</summary>
+      <p class="note">Your logs and dragon live on this phone. Save a backup now and then so you never lose Cinder.</p>
+      <div class="row"><button id="exportBtn" type="button">Save backup</button>
+      <label class="btn" for="importFile">Restore backup<input id="importFile" type="file" accept="application/json,.json"></label></div>
+    </details>
+  </section>
+  <p class="note" id="storeNote"></p>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const STAGES = [
+  {xp:0, name:"Ember Egg"},
+  {xp:120, name:"Cracking Egg"},
+  {xp:350, name:"Hatchling"},
+  {xp:800, name:"Whelp"},
+  {xp:1600, name:"Drake"},
+  {xp:3000, name:"Elder Wyrm"}
+];
+const DEFAULT_PROFILE = {xp:0, streak:0, lastCheckIn:null, lastEvaluated:null, goal:2000, winStart:"12:00", winEnd:"20:00", xpLog:{}};
+
+let profile = {...DEFAULT_PROFILE};
+let meals = [];
+let store = null;
+let pending = null; // {photoBlob}
+
+// ---------- dates ----------
+const pad = n => String(n).padStart(2,"0");
+const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const toMin = s => { const [h,m] = (s||"0:0").split(":").map(Number); return h*60+m; };
+const fmtClock = m => { const h=Math.floor(m/60), mm=Math.floor(m%60); return `${h}h ${pad(mm)}m`; };
+const fmtTime = ts => { const d=new Date(ts); let h=d.getHours(); const ap=h>=12?"pm":"am"; h=h%12||12; return `${h}:${pad(d.getMinutes())}${ap}`; };
+function inWindow(ts){ const d=new Date(ts); const m=d.getHours()*60+d.getMinutes(); const s=toMin(profile.winStart), e=toMin(profile.winEnd);
+  return s<=e ? (m>=s && m<e) : (m>=s || m<e); }
+function stageFor(xp){ let i=0; STAGES.forEach((s,k)=>{ if(xp>=s.xp) i=k; }); return i; }
+
+// ---------- storage ----------
+function localStore(){
+  const K="emberkeep.v1";
+  const read=()=>{ try{ return JSON.parse(localStorage.getItem(K))||{}; }catch(e){ return {}; } };
+  const write=d=>{ try{ localStorage.setItem(K,JSON.stringify(d)); }catch(e){} };
+  return {
+    kind:"local",
+    async loadProfile(){ return read().profile||null; },
+    async saveProfile(p){ const d=read(); d.profile=p; write(d); },
+    watchMeals(cb){ cb(read().meals||[]); this._cb=cb; },
+    async addMeal(m){ const d=read(); d.meals=[m,...(d.meals||[])].slice(0,400); write(d); this._cb&&this._cb(d.meals); },
+    async deleteMeal(id){ const d=read(); d.meals=(d.meals||[]).filter(x=>x.id!==id); write(d); this._cb&&this._cb(d.meals); }
+  };
+}
+// ---------- XP ----------
+function addXP(n, why){
+  const before = stageFor(profile.xp);
+  profile.xp += n;
+  const k = dayKey(new Date());
+  profile.xpLog = profile.xpLog||{}; profile.xpLog[k]=(profile.xpLog[k]||0)+n;
+  // keep xpLog short
+  const keys=Object.keys(profile.xpLog).sort(); while(keys.length>14){ delete profile.xpLog[keys.shift()]; }
+  const after = stageFor(profile.xp);
+  if(after>before){ toast(`Cinder grew! Now a ${STAGES[after].name}`); $("dragon").classList.add("hatch"); setTimeout(()=>$("dragon").classList.remove("hatch"),1300); }
+  else if(why) toast(`+${n} XP · ${why}`);
+}
+function mealsOn(k){ return meals.filter(m=>m.day===k); }
+function dayOnTarget(k){
+  const ms = mealsOn(k); if(!ms.length) return false;
+  const tot = ms.reduce((a,m)=>a+(+m.kcal||0),0);
+  return tot>=profile.goal*0.7 && tot<=profile.goal && ms.every(m=>m.inWindow);
+}
+let checkedIn=false;
+async function dailyCheckIn(){
+  if(checkedIn) return; checkedIn=true;
+  const today = dayKey(new Date());
+  if(profile.lastCheckIn===today) return;
+  const y = new Date(); y.setDate(y.getDate()-1);
+  const yk = dayKey(y);
+  // judge the last active day
+  if(profile.lastCheckIn && profile.lastEvaluated!==profile.lastCheckIn){
+    if(dayOnTarget(profile.lastCheckIn)) addXP(40,"on-target day");
+    profile.lastEvaluated = profile.lastCheckIn;
+  }
+  profile.streak = profile.lastCheckIn===yk ? (profile.streak||0)+1 : 1;
+  profile.lastCheckIn = today;
+  addXP(15 + Math.min(50, 5*profile.streak), `daily check-in, ${profile.streak}-day streak`);
+  await save();
+}
+async function save(){ try{ await store.saveProfile(profile); }catch(e){ toast("Couldn't save progress. Try again."); } render(); }
+
+// ---------- dragon art (original) ----------
+function drawDragon(stage){
+  const S = $("dragon");
+  const defs = `<defs>
+    <radialGradient id="eg" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#4a1d20"/><stop offset=".7" stop-color="#1c0d0f"/><stop offset="1" stop-color="#0c0607"/></radialGradient>
+    <linearGradient id="bd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e1f22"/><stop offset="1" stop-color="#3a0d10"/></linearGradient>
+    <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5c1417"/><stop offset="1" stop-color="#1e080a"/></linearGradient>
+    <radialGradient id="gl" r=".5"><stop offset="0" stop-color="#ff4a2b" stop-opacity=".55"/><stop offset="1" stop-color="#ff4a2b" stop-opacity="0"/></radialGradient>
+  </defs>`;
+  const glow = `<ellipse cx="100" cy="170" rx="80" ry="22" fill="url(#gl)"/>`;
+  let art="";
+  if(stage<=1){
+    const cracks = stage===1 ? `<path d="M78 70 l10 14 -8 10 12 12 -6 12" stroke="#ffb347" stroke-width="3" fill="none" class="egg-glow"/><path d="M120 92 l-9 10 7 9 -8 11" stroke="#ff4a2b" stroke-width="2.5" fill="none" class="egg-glow"/>` : "";
+    art = `<ellipse cx="100" cy="105" rx="48" ry="62" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
+      <g fill="none" stroke="#ff4a2b" stroke-width="1.6" class="egg-glow" opacity=".8">
+        <path d="M70 80 q15 8 30 0 q15 -8 30 0"/><path d="M62 108 q19 9 38 0 q19 -9 38 0"/><path d="M66 136 q17 8 34 0 q17 -8 34 0"/></g>
+      ${cracks}<ellipse cx="84" cy="78" rx="10" ry="16" fill="#fff" opacity=".07"/>`;
+  } else if(stage===2){
+    art = `<path d="M60 110 q-2 50 40 54 q42 -4 40 -54 l-10 10 -8 -12 -9 12 -8 -13 -8 12 -9 -12 -8 12 z" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
+      <g transform="translate(100 98)">
+        <path d="M-22 -18 l-10 -22 18 14z M22 -18 l10 -22 -18 14z" fill="#d9b48a"/>
+        <ellipse cx="0" cy="0" rx="30" ry="24" fill="url(#bd)"/>
+        <ellipse cx="0" cy="12" rx="14" ry="8" fill="#6e171b"/>
+        <circle cx="-11" cy="-3" r="6" fill="#ffb347"/><circle cx="11" cy="-3" r="6" fill="#ffb347"/>
+        <ellipse cx="-11" cy="-3" rx="1.6" ry="4.5" fill="#1a0507"/><ellipse cx="11" cy="-3" rx="1.6" ry="4.5" fill="#1a0507"/>
+        <circle cx="-5" cy="12" r="1.4" fill="#2a0709"/><circle cx="5" cy="12" r="1.4" fill="#2a0709"/>
+      </g>`;
+  } else {
+    const w = [0,0,0,0.75,1,1.2][stage];
+    const crown = stage===5 ? `<path d="M88 44 l4 -14 4 10 4 -16 4 16 4 -10 4 14z" fill="#ffb347" class="egg-glow"/>` : "";
+    const spines = Array.from({length:stage+2},(_,i)=>`<path d="M${120+i*9} ${118+i*5} l6 -9 2 11z" fill="#d9b48a"/>`).join("");
+    art = `
+      <g transform="translate(100 110) scale(${w}) translate(-100 -110)">
+        <path d="M95 95 C60 40 25 45 12 60 C30 62 34 72 30 84 C42 80 50 86 50 96 C62 92 70 98 74 108 Z" fill="url(#wg)" stroke="#2a090b"/>
+        <path d="M105 95 C140 40 175 45 188 60 C170 62 166 72 170 84 C158 80 150 86 150 96 C138 92 130 98 126 108 Z" fill="url(#wg)" stroke="#2a090b"/>
+      </g>
+      <path d="M118 140 C150 150 170 140 178 120 C172 150 150 168 116 156 Z" fill="url(#bd)"/>
+      <path d="M178 120 l8 -14 -2 18z" fill="#ffb347"/>
+      ${spines}
+      <ellipse cx="100" cy="130" rx="30" ry="34" fill="url(#bd)"/>
+      <ellipse cx="100" cy="138" rx="17" ry="22" fill="#c9733f" opacity=".55"/>
+      <path d="M100 140 m-14 -6 h28 M86 146 h28 M88 152 h24" stroke="#7a2a17" stroke-width="1.2"/>
+      <path d="M82 160 l-6 12 h12z M118 160 l6 12 h-12z" fill="#3a0d10"/>
+      <g transform="translate(100 74)">
+        <path d="M-16 -14 C-24 -30 -30 -36 -36 -38 C-28 -28 -24 -20 -22 -8z M16 -14 C24 -30 30 -36 36 -38 C28 -28 24 -20 22 -8z" fill="#d9b48a"/>
+        <path d="M-24 -6 C-24 -24 24 -24 24 -6 C24 8 14 22 0 24 C-14 22 -24 8 -24 -6z" fill="url(#bd)"/>
+        <path d="M-10 14 C-6 20 6 20 10 14" stroke="#2a0709" stroke-width="1.5" fill="none"/>
+        <path d="M-15 -4 l9 2 -9 4z M15 -4 l-9 2 9 4z" fill="#ffb347"/>
+        <circle cx="-4" cy="10" r="1.3" fill="#2a0709"/><circle cx="4" cy="10" r="1.3" fill="#2a0709"/>
+      </g>${crown}`;
+  }
+  S.innerHTML = defs + glow + art;
+}
+
+// ---------- render ----------
+let lastStage=-1;
+function render(){
+  const now = new Date(), today = dayKey(now);
+  $("today").textContent = now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+  const st = stageFor(profile.xp);
+  if(st!==lastStage){ drawDragon(st); lastStage=st; }
+  $("stageNum").textContent = st+1;
+  $("stageName").textContent = STAGES[st].name;
+  const nextXP = STAGES[st+1]?.xp;
+  const base = STAGES[st].xp;
+  $("xpFill").style.width = nextXP ? `${Math.min(100,(profile.xp-base)/(nextXP-base)*100)}%` : "100%";
+  $("xpText").textContent = `${profile.xp} XP`;
+  $("xpNext").textContent = nextXP ? `${nextXP-profile.xp} to ${STAGES[st+1].name}` : "Fully grown";
+  $("streak").textContent = profile.streak||0;
+  $("xpToday").textContent = `+${(profile.xpLog||{})[today]||0}`;
+
+  // fast clock
+  const m = now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const s=toMin(profile.winStart), e=toMin(profile.winEnd);
+  const eating = inWindow(now.getTime());
+  if(eating){
+    const left = ((e - m) + 1440) % 1440;
+    $("fastBig").textContent = fmtClock(left);
+    $("fastState").className="state eat"; $("fastState").textContent="Eating window";
+    $("fastSub").textContent = `left · closes ${fmtTime(new Date().setHours(Math.floor(e/60),e%60,0))}`;
+  } else {
+    const since = ((m - e) + 1440) % 1440;
+    const until = ((s - m) + 1440) % 1440;
+    $("fastBig").textContent = fmtClock(since);
+    $("fastState").className="state fast"; $("fastState").textContent="Fasting";
+    $("fastSub").textContent = `fasted · eat in ${fmtClock(until)}`;
+  }
+
+  // calories
+  const todays = mealsOn(today);
+  const tot = todays.reduce((a,x)=>a+(+x.kcal||0),0);
+  $("calBig").textContent = tot;
+  $("calSub").textContent = `of ${profile.goal} · ${Math.max(0,profile.goal-tot)} left`;
+  const pct = tot/profile.goal;
+  const f=$("calFill"); f.style.width = `${Math.min(100,pct*100)}%`;
+  f.style.background = pct>1 ? "var(--bad)" : pct>0.9 ? "var(--warn)" : "var(--ok)";
+
+  // log
+  const ul=$("log"); ul.textContent="";
+  if(!todays.length){ const li=document.createElement("li"); li.className="empty"; li.style.display="block"; li.textContent="Nothing logged yet. Scan your first meal when the window opens."; ul.append(li); }
+  todays.slice().sort((a,b)=>a.ts-b.ts).forEach(x=>{
+    const li=document.createElement("li");
+    const t=document.createElement("span"); t.className="t"; t.textContent=fmtTime(x.ts);
+    const fd=document.createElement("span"); fd.className="f"; fd.textContent=x.food;
+    if(!x.inWindow){ const o=document.createElement("div"); o.className="oow"; o.textContent="Outside window"; fd.append(o); }
+    const k=document.createElement("span"); k.className="k"; k.textContent=`${x.kcal}`;
+    const del=document.createElement("button"); del.className="x"; del.type="button"; del.setAttribute("aria-label",`Remove ${x.food}`); del.textContent="×";
+    del.onclick=async()=>{ try{ await store.deleteMeal(x.id); }catch(err){ toast("Couldn't remove that entry."); } };
+    li.append(t,fd,k,del); ul.append(li);
+  });
+}
+
+// ---------- scan flow ----------
+function openPanel(withPhoto){
+  $("scanPanel").hidden=false; $("result").hidden=true; $("result").textContent="";
+  $("food").value=""; $("kcal").value=""; $("desc").value="";
+  $("scanTitle").textContent = withPhoto ? "Read the plate" : "Describe the meal";
+  $("scanPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closePanel(){ $("scanPanel").hidden=true; $("preview").hidden=true; pending=null; $("photo").value=""; }
+
+async function shrink(file){
+  try{
+    const bmp = await createImageBitmap(file);
+    const sc = Math.min(1, 1024/Math.max(bmp.width,bmp.height));
+    const c=document.createElement("canvas"); c.width=Math.round(bmp.width*sc); c.height=Math.round(bmp.height*sc);
+    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",0.82));
+  }catch(e){ return file; }
+}
+
+$("photo").addEventListener("change", async ev=>{
+  const file = ev.target.files?.[0]; if(!file) return;
+  openPanel(true);
+  const blob = await shrink(file);
+  pending = {photoBlob:blob};
+  const p=$("preview"); p.src=URL.createObjectURL(blob); p.hidden=false;
+});
+$("typeBtn").onclick=()=>{ pending={}; $("preview").hidden=true; openPanel(false); $("desc").focus(); };
+$("cancelBtn").onclick=closePanel;
+
+const KEY_K="emberkeep.apikey";
+const getKey=()=>{ try{ return localStorage.getItem(KEY_K)||""; }catch(e){ return ""; } };
+const blobToB64=b=>new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(b); });
+async function askClaude(prompt, blob){
+  const key=getKey(); if(!key) throw {code:"no_key"};
+  const content=[];
+  if(blob) content.push({type:"image",source:{type:"base64",media_type:"image/jpeg",data:await blobToB64(blob)}});
+  content.push({type:"text",text:prompt});
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+    "content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-haiku-5-5",max_tokens:500,messages:[{role:"user",content}]})});
+  if(!r.ok){ throw {code: r.status===401?"bad_key": r.status===429?"rate_limited": r.status===400?"bad_request":"api_error"}; }
+  const j=await r.json();
+  const txt=(j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
+  const m=txt.match(/\{[\s\S]*\}/); if(!m) throw {code:"parse"};
+  return JSON.parse(m[0]);
+}
+
+function localVerdict(kcal){
+  const today=dayKey(new Date());
+  const left = profile.goal - mealsOn(today).reduce((a,x)=>a+(+x.kcal||0),0);
+  if(!inWindow(Date.now())) return {verdict:"skip",reason:"You're fasting right now. Save it for when your window opens."};
+  if(kcal>left) return {verdict:"half",reason:`This is more than the ${Math.max(0,left)} calories you have left today. Eat half and save the rest.`};
+  return {verdict:"eat",reason:"Fits your budget and you're inside your eating window."};
+}
+
+$("askBtn").onclick = async ()=>{
+  const btn=$("askBtn"); const res=$("result");
+  const desc = $("desc").value.trim();
+  if(!pending?.photoBlob && !desc){ toast("Add a photo or describe the meal first."); return; }
+  if(!getKey()){ res.hidden=false; res.className="note"; res.textContent="Add your API key in Settings to scan meals. Until then, type the calories yourself and log it."; return; }
+  if(!navigator.onLine){ res.hidden=false; res.className="note"; res.textContent="You're offline. Type the calories yourself and log it."; return; }
+  const today=dayKey(new Date());
+  const eaten = mealsOn(today).reduce((a,x)=>a+(+x.kcal||0),0);
+  const now=new Date();
+  const prompt = `You are Cinder, a fierce but supportive dragon coach inside a calorie tracker. The user is a casino dealer doing 16:8 intermittent fasting for weight loss.
+Estimate the meal ${pending?.photoBlob?"in the attached photo":"described below"}${desc?` (user's description: "${desc}")`:""}.
+Context: current local time ${now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}; eating window ${profile.winStart}-${profile.winEnd}; currently ${inWindow(now.getTime())?"INSIDE":"OUTSIDE"} the window; daily goal ${profile.goal} kcal; already eaten today ${eaten} kcal; remaining ${profile.goal-eaten} kcal.
+Decide a verdict: "eat" (fits), "half" (eat a smaller portion), or "skip" (outside the window, or a poor choice that blows the budget). Never encourage eating far below the goal or skipping a proper meal when the user has plenty of budget left. Give one short, punchy reason (max 25 words) and one tip to make it better.
+Reply ONLY with JSON: {"food":string (short name),"calories":number,"protein_g":number,"carbs_g":number,"fat_g":number,"confidence":"low"|"medium"|"high","verdict":"eat"|"half"|"skip","reason":string,"tip":string}`;
+  btn.disabled=true; btn.textContent="Cinder is sniffing…";
+  try{
+    const r = await askClaude(prompt, pending?.photoBlob||null);
+    const kc = Math.round(+r.calories||0);
+    $("food").value = r.food||desc||"Meal"; $("kcal").value = kc;
+    res.hidden=false; res.className=`verdict ${["eat","half","skip"].includes(r.verdict)?r.verdict:"eat"}`;
+    res.textContent="";
+    const v=document.createElement("div"); v.className="v"; v.textContent={eat:"Eat it",half:"Half it",skip:"Skip it"}[r.verdict]||"Eat it";
+    const mac=document.createElement("div"); mac.className="macros";
+    mac.innerHTML=`<span><b></b> kcal</span><span>P <b></b>g</span><span>C <b></b>g</span><span>F <b></b>g</span><span></span>`;
+    const bs=mac.querySelectorAll("b"); bs[0].textContent=kc; bs[1].textContent=Math.round(+r.protein_g||0); bs[2].textContent=Math.round(+r.carbs_g||0); bs[3].textContent=Math.round(+r.fat_g||0);
+    mac.lastElementChild.textContent = `${r.confidence||"medium"} confidence`;
+    const rs=document.createElement("div"); rs.textContent=r.reason||"";
+    const tp=document.createElement("div"); tp.className="small"; tp.textContent=r.tip?`Tip: ${r.tip}`:"";
+    res.append(v,mac,rs,tp);
+  }catch(err){
+    res.hidden=false; res.className="note";
+    res.textContent = err?.code==="bad_key" ? "That API key was rejected. Check it in Settings."
+      : err?.code==="rate_limited" ? "Too many scans right now. Wait a minute, or type the calories yourself."
+      : err?.code==="bad_request" ? "Couldn't send that photo. Try another shot or describe the meal instead."
+      : "Cinder couldn't read that one. Describe the meal or type the calories yourself.";
+  }finally{ btn.disabled=false; btn.textContent="Ask Cinder"; }
+};
+
+$("logBtn").onclick = async ()=>{
+  const food=$("food").value.trim()||$("desc").value.trim();
+  const kcal=Math.round(+$("kcal").value);
+  if(!food || !(kcal>0)){ toast("Add a food name and calories to log it."); return; }
+  const ts=Date.now(), day=dayKey(new Date(ts));
+  const iw = inWindow(ts);
+  const loggedToday = mealsOn(day).length;
+  const m={id:`m${ts}${Math.random().toString(36).slice(2,6)}`, food:food.slice(0,80), kcal, ts, day, inWindow:iw};
+  const btn=$("logBtn"); btn.disabled=true;
+  try{
+    await store.addMeal(m);
+    if(store.kind==="cloud"){ meals=[m,...meals.filter(x=>x.id!==m.id)]; }
+    let gain = loggedToday<4 ? 10 : 0; if(iw && loggedToday<4) gain+=5;
+    if(gain){ addXP(gain, iw?"meal logged in window":"meal logged"); await save(); }
+    else { toast("Logged"); render(); }
+    if(!iw) setTimeout(()=>toast("Logged outside your window. Tomorrow, hold it until the window opens."),2600);
+    closePanel();
+  }catch(e){ toast("Couldn't log that meal. Try again."); }
+  finally{ btn.disabled=false; }
+};
+
+$("saveSettings").onclick = async ()=>{
+  const g=Math.round(+$("goal").value);
+  if(!(g>=1200)){ toast("Set at least 1200 calories a day."); return; }
+  try{ const k=$("apiKey").value.trim(); if(k) localStorage.setItem(KEY_K,k); else localStorage.removeItem(KEY_K); }catch(e){}
+  profile.goal=g; profile.winStart=$("winStart").value||"12:00"; profile.winEnd=$("winEnd").value||"20:00";
+  await save(); toast("Settings saved");
+};
+
+let tt; function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),2400); }
+
+// ---------- boot ----------
+async function boot(){
+  drawDragon(0); render();
+  store = localStore();
+  try{ navigator.storage?.persist?.(); }catch(e){}
+  $("apiKey").value=getKey();
+  try{ const p = await store.loadProfile(); if(p) profile={...DEFAULT_PROFILE,...p}; }catch(e){}
+  $("goal").value=profile.goal; $("winStart").value=profile.winStart; $("winEnd").value=profile.winEnd;
+  let first=true;
+  store.watchMeals(list=>{ meals=list; render(); if(first){ first=false; dailyCheckIn(); } });
+}
+// ---------- backup ----------
+$("exportBtn").onclick=()=>{
+  let raw="{}"; try{ raw=localStorage.getItem("emberkeep.v1")||"{}"; }catch(e){}
+  const blob=new Blob([raw],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`emberkeep-backup-${dayKey(new Date())}.json`;
+  document.body.append(a); a.click(); a.remove(); toast("Backup saved");
+};
+$("importFile").addEventListener("change", async ev=>{
+  const f=ev.target.files?.[0]; if(!f) return;
+  try{ const d=JSON.parse(await f.text()); if(!d||typeof d!=="object"||(!d.profile&&!d.meals)) throw 0;
+    localStorage.setItem("emberkeep.v1",JSON.stringify(d)); toast("Backup restored"); setTimeout(()=>location.reload(),900);
+  }catch(e){ toast("That file isn't an Emberkeep backup."); }
+  ev.target.value="";
+});
+
+boot();
+setInterval(render, 30000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ checkedIn=false; dailyCheckIn(); render(); } });
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
