@@ -180,7 +180,7 @@ h2{font-size:1.05rem}
 
 /* tabs */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--ink) 92%,transparent);border-top:1px solid var(--ash);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.tabs nav{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tabs nav{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 .tabs button{background:none;border:0;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.66rem;font-weight:700;color:var(--dim)}
 .tabs button svg{width:22px;height:22px}
 .tabs button[aria-current="page"]{color:var(--bone)}
@@ -339,6 +339,47 @@ button,[data-act],.tabs button{touch-action:manipulation}
 @keyframes waveA{from{transform:rotate(-20deg)}to{transform:rotate(12deg)}}
 @keyframes dance{from{transform:rotate(-7deg)}to{transform:rotate(7deg) translateY(-3px)}}
 @keyframes breath{50%{transform:scaleY(1.015)}}
+
+/* ===== v5: baby dragon ===== */
+.dgscene{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,#ff7a52 18%,var(--smoke)),var(--smoke) 72%)}
+.dgstage{position:relative;height:220px;display:grid;place-items:center}
+.dgtap{background:none;border:0;padding:0;width:210px;height:210px}
+.dragonart{width:100%;height:100%;overflow:visible}
+.nestmini{position:absolute;right:-4px;bottom:0;width:72px;height:72px}
+.dgsay{background:var(--bone);color:var(--ink);border-radius:14px;padding:9px 12px;font-weight:500;font-size:.88rem;margin-top:6px}
+.dgcard{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;color:inherit}
+.dgcard .art{width:64px;height:64px}
+.talk{display:flex;flex-direction:column;gap:10px;max-height:46dvh;overflow:auto;padding-bottom:4px}
+.tl-row{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;align-items:end}
+.tl-row.c{grid-template-columns:minmax(0,1fr) 52px}.tl-row.c .av{order:2}
+.tl-row .av{width:52px;height:56px}
+.tl-row .tb{background:var(--smoke-2);border:1px solid var(--ash);border-radius:14px;padding:9px 12px;font-size:.9rem;animation:viewIn .25s ease-out}
+.tl-row.d .tb{border-color:color-mix(in srgb,#ff7a52 55%,var(--ash))}
+.tl-row.c .tb{border-color:color-mix(in srgb,var(--blood) 45%,var(--ash))}
+.quiz{margin-top:12px}
+.qopt{display:block;width:100%;text-align:left;background:var(--ink);border:1px solid var(--ash);border-radius:12px;padding:11px 12px;margin-bottom:8px;font-weight:600;font-size:.9rem;color:var(--bone)}
+.qopt.right{border-color:var(--jade);background:color-mix(in srgb,var(--jade) 18%,var(--ink))}
+.qopt.wrong{border-color:var(--blood);background:color-mix(in srgb,var(--blood) 18%,var(--ink))}
+.qopt.dim{opacity:.5}
+.qwhy{font-size:.86rem;color:var(--dim)}.qwhy b{color:var(--bone)}
+#pet{position:fixed;left:0;top:0;z-index:44;width:56px;height:56px;pointer-events:none}
+#pet .pb{width:100%;height:100%;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+#pet .say{position:absolute;bottom:calc(100% + 4px);left:-50px;width:max-content;max-width:min(210px,60vw);background:#ffd9b8;color:var(--ink);font-size:.8rem;font-weight:600;padding:7px 10px;border-radius:12px;opacity:0;transition:opacity .2s;pointer-events:none}
+#pet .say.on{opacity:1}
+.dg-hop{animation:hop .45s ease-out}
+@media (prefers-reduced-motion:no-preference){
+ .dg-shake{transform-origin:100px 170px;animation:dgShake 1.2s ease-in-out infinite}
+ .dg-wl{animation:dgFlapL 1.8s ease-in-out infinite}.dg-wr{animation:dgFlapR 1.8s ease-in-out infinite}
+ #pet .dg-wl{animation-duration:.35s}#pet .dg-wr{animation-duration:.35s}
+ .dg-tail{animation:dgTail 2.4s ease-in-out infinite}
+ .dg-flame{transform-origin:162px 118px;animation:cvFlame .35s ease-in-out infinite alternate}
+ .dg-head{animation:dgHead 4s ease-in-out infinite}
+}
+@keyframes dgShake{0%,100%{transform:rotate(0)}10%{transform:rotate(-5deg)}20%{transform:rotate(5deg)}30%{transform:rotate(-3deg)}40%{transform:rotate(0)}}
+@keyframes dgFlapL{50%{transform:rotate(12deg)}}
+@keyframes dgFlapR{50%{transform:rotate(-12deg)}}
+@keyframes dgTail{50%{transform:rotate(-7deg)}}
+@keyframes dgHead{0%,100%{transform:rotate(0)}50%{transform:rotate(-3deg)}}
 </style>
 </head>
 <body>
@@ -517,7 +558,7 @@ function boot(){setTimeout(()=>{const sp=$("#splash");if(sp){sp.classList.add("o
 }
 function normalize(s){
   const d={v:1,currency:"$",bank:0,savings:0,trading:{balance:0,basis:0,limit:0,history:[]},sources:[],bills:[],tx:[],goals:[],split:{save:10,trade:10},grocery:{weekly:0},subCheck:"",lastBackup:"",checkins:[],lessons:[],created:today()};
-  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"bank"},s.prefs||{});s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
+  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"bank"},s.prefs||{});s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});s.dragon=Object.assign({name:"Ember",heat:0,hatched:null,xp:0,claims:{},lastFed:null,talks:{},talkDay:null,quiz:{right:0,wrong:0}},s.dragon||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
   return s;
 }
 
@@ -599,7 +640,7 @@ function wireDonuts(){
 
 /* ---------- tabs ---------- */
 let tab="home";try{tab=localStorage.getItem(LS+"-tab")||"home"}catch(e){}
-const TABS=[["home","Home",I.home],["in","Money in",I.in],["bills","Bills",I.bills],["hist","History",I.hist],["sensei","Sensei",I.sensei]];
+const TABS=[["home","Home",I.home],["in","Money in",I.in],["bills","Bills",I.bills],["dragon","Dragon",I.dragon],["hist","History",I.hist],["sensei","Sensei",I.sensei]];
 function renderTabs(){$("#tabs").innerHTML=TABS.map(([k,l,ic])=>`<button type="button" data-tab="${k}" ${tab===k?'aria-current="page"':""}>${ic}<span>${l}</span></button>`).join("")}
 $("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;tab=b.dataset.tab;try{localStorage.setItem(LS+"-tab",tab)}catch(e){}renderTabs();render();animView();scrollTo({top:0});Buddy.onTab(tab)});
 
@@ -607,8 +648,8 @@ $("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");i
 function render(){
   const v=$("#view");const fb=$("#fab");if(fb)fb.hidden=!S;
   if(!S){v.innerHTML=setupView();return}
-  v.innerHTML=({home:homeView,in:inView,bills:billsView,hist:histView,sensei:senseiView}[tab]||homeView)();
-  wireDonuts();checkCrow();
+  v.innerHTML=({home:homeView,in:inView,bills:billsView,dragon:dragonView,hist:histView,sensei:senseiView}[tab]||homeView)();
+  wireDonuts();checkCrow();Pet.draw();
   if(tab==="home"||tab==="sensei")maybeLesson();
 }
 
@@ -681,7 +722,7 @@ function homeView(){
   ${(!S.lastBackup&&S.tx.length>=5)||(S.lastBackup&&daysBetween(S.lastBackup,t)>14)?`<div class="panel" style="margin-top:12px"><div class="row between"><div><b>${S.lastBackup?"Backup is "+daysBetween(S.lastBackup,t)+" days old":"Back up your vault"}</b><div class="muted" style="font-size:.82rem">Your data lives only on this phone.</div></div><button class="btn sm red" data-act="backup">Back up</button></div></div>`:""}
   ${subsDue?subCheckCard():""}
 
-  ${nestCard()}${offDayCard()}${todayCard()}
+  ${nestCard()}${dragonHomeCard()}${offDayCard()}${todayCard()}
   <div class="section"><div class="section-head"><h2>Due soon</h2><span class="muted" style="font-size:.8rem">next 10 days</span></div>
     <div class="panel">${soon.length?`<div class="list">${soon.map(billRow).join("")}</div>`:`<div class="empty">Nothing due in the next 10 days.</div>`}</div></div>
 
@@ -846,6 +887,194 @@ document.addEventListener("submit",e=>{if(e.target.id==="sheetForm"){e.preventDe
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheetSubmit)closeSheet()});
 
 function addTx(t){S.tx.push({id:uid(),d:t.d||today(),...t})}
+
+/* ---------- v5: the baby dragon (original design) ---------- */
+const DG_DEFS=`<defs>
+<radialGradient id="dgBody" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#7a6584"/><stop offset=".55" stop-color="#4f3f5a"/><stop offset="1" stop-color="#2c2233"/></radialGradient>
+<radialGradient id="dgBelly" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#ffd2a1"/><stop offset=".6" stop-color="#ff9a5a"/><stop offset="1" stop-color="#e0502f"/></radialGradient>
+<linearGradient id="dgWing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5d4a69"/><stop offset="1" stop-color="#2a2031"/></linearGradient>
+<linearGradient id="dgHorn" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#8f1c24"/><stop offset="1" stop-color="#ff5a4a"/></linearGradient>
+<radialGradient id="dgEye" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#ffe08a"/><stop offset=".6" stop-color="#ff9a3c"/><stop offset="1" stop-color="#d4561c"/></radialGradient>
+<radialGradient id="dgEgg" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#8a7494"/><stop offset=".5" stop-color="#4a3a55"/><stop offset="1" stop-color="#231a29"/></radialGradient>
+<radialGradient id="dgHeat"><stop offset="0" stop-color="#ff7a52" stop-opacity=".65"/><stop offset="1" stop-color="#ff7a52" stop-opacity="0"/></radialGradient>
+<filter id="dgGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>`;
+function dgEggArt(heat){const h=Math.max(0,Math.min(100,heat));
+  return `<ellipse cx="100" cy="116" rx="${50+h*.4}" ry="${46+h*.35}" fill="url(#dgHeat)" opacity="${.25+h/140}" class="cv-pulse"/>
+  <ellipse cx="100" cy="176" rx="50" ry="8" fill="#000" opacity=".5"/>
+  <path d="M50 168Q60 150 74 160Q84 146 100 158Q116 146 126 160Q140 150 150 168Q130 180 100 180Q70 180 50 168Z" fill="#3b2a22"/><path d="M58 166l14-6M90 170l18-4M128 164l12 4" stroke="#5a4232" stroke-width="3" stroke-linecap="round"/>
+  <g class="${h>=60?"dg-shake":"cv-wobble"}"><path d="M100 46C130 46 148 92 148 122C148 152 128 170 100 170C72 170 52 152 52 122C52 92 70 46 100 46Z" fill="url(#dgEgg)" stroke="#1a131f" stroke-width="2"/>
+  <g fill="#ff8a4c" opacity=".75"><circle cx="78" cy="96" r="4"/><circle cx="118" cy="84" r="3"/><circle cx="126" cy="128" r="5"/><circle cx="84" cy="140" r="3.4"/><circle cx="104" cy="112" r="2.4"/><circle cx="70" cy="122" r="2.2"/></g>
+  <path d="M80 70Q70 88 68 110" stroke="#c9b6d4" stroke-width="5" stroke-linecap="round" opacity=".3" fill="none"/>
+  ${h>=35?`<g filter="url(#dgGlow)" stroke="#ffb067" stroke-width="2.4" fill="none" stroke-linejoin="round"><path d="M58 112l12 3-2 9 12 3"/></g>`:""}
+  ${h>=70?`<g filter="url(#dgGlow)" stroke="#ffb067" stroke-width="2.4" fill="none" stroke-linejoin="round"><path d="M142 100l-12 6 6 7-12 5"/><path d="M98 48l4 10-7 5 8 7"/></g>`:""}</g>`}
+function dgBody(stage,mood){
+  const S_=stage==="grown"?1:stage==="young"?.9:.8,horn=stage==="grown"?1.6:stage==="young"?1.25:1,wing=stage==="grown"?1.45:stage==="young"?1.2:1;
+  const eyes={happy:`<path d="M72 80q10-10 20 0M108 80q10-10 20 0" stroke="#1d1420" stroke-width="3.6" fill="none" stroke-linecap="round"/>`,
+    sleepy:`<path d="M72 82q10 5 20 0M108 82q10 5 20 0" stroke="#1d1420" stroke-width="3.4" fill="none" stroke-linecap="round"/>`}[mood]
+    ||`<ellipse cx="82" cy="80" rx="10" ry="11.5" fill="url(#dgEye)" stroke="#1d1420" stroke-width="2"/><ellipse cx="${mood==="curious"?84:82}" cy="81" rx="2.6" ry="8" fill="#140c10"/><circle cx="85.5" cy="75" r="2.6" fill="#fff"/>
+      <ellipse cx="118" cy="80" rx="10" ry="11.5" fill="url(#dgEye)" stroke="#1d1420" stroke-width="2"/><ellipse cx="${mood==="curious"?120:118}" cy="81" rx="2.6" ry="8" fill="#140c10"/><circle cx="121.5" cy="75" r="2.6" fill="#fff"/>
+      ${mood==="hungry"?`<path d="M72 69l18-5M128 69l-18-5" stroke="#1d1420" stroke-width="2.6" stroke-linecap="round"/>`:""}`;
+  const mouth={happy:`<path d="M90 103Q100 114 110 103Z" fill="#5a1c20"/><path d="M95 104l2 4 2-4" fill="#fff"/><path d="M96 109q4 3 8 0" stroke="#ff7a7a" stroke-width="2" fill="none"/>`,
+    hungry:`<ellipse cx="100" cy="107" rx="5" ry="4" fill="#5a1c20"/>`,sleepy:`<path d="M96 106q4 2 8 0" stroke="#1d1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>`}[mood]
+    ||`<path d="M92 104Q100 110 108 104" stroke="#1d1420" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M97 105l1.6 3.4 1.6-3.4" fill="#fff"/>`;
+  const W='M84 108C70 92 50 70 26 56C30 70 22 78 14 82C30 86 28 98 20 106C36 106 40 116 36 126C52 120 64 122 74 128Z';
+  return `<g transform="translate(100 178) scale(${S_}) translate(-100 -178)">
+  <ellipse cx="100" cy="178" rx="52" ry="8" fill="#000" opacity=".5"/>
+  <g class="dg-wl" style="transform-origin:84px 112px"><g transform="translate(84 112) scale(${wing}) translate(-84 -112)"><path d="${W}" fill="url(#dgWing)" stroke="#231a29" stroke-width="2" stroke-linejoin="round"/><path d="M84 108L26 56M80 112L14 82M76 118L20 106M74 124L36 126" stroke="#2a2031" stroke-width="2.4" stroke-linecap="round"/></g></g>
+  <g class="dg-wr" style="transform-origin:116px 112px"><g transform="translate(200 0) scale(-1 1)"><g transform="translate(84 112) scale(${wing}) translate(-84 -112)"><path d="${W}" fill="url(#dgWing)" stroke="#231a29" stroke-width="2" stroke-linejoin="round"/><path d="M84 108L26 56M80 112L14 82M76 118L20 106M74 124L36 126" stroke="#2a2031" stroke-width="2.4" stroke-linecap="round"/></g></g></g>
+  <g class="dg-tail" style="transform-origin:136px 160px"><path d="M132 162Q170 162 174 138Q176 120 162 116" stroke="#4f3f5a" stroke-width="15" fill="none" stroke-linecap="round"/><path d="M146 160l4-8 4 8M160 152l6-6 2 9" fill="#b3262c"/>
+  <path class="dg-flame" d="M162 118C150 112 152 96 160 88C160 98 166 98 166 92C172 98 174 110 166 118Z" fill="#ff7a52" filter="url(#dgGlow)"/><path d="M162 116C158 110 160 104 163 100C164 106 168 108 166 114Z" fill="#ffd27a"/></g>
+  <path d="M100 96C132 96 148 122 146 150C144 172 126 180 100 180C74 180 56 172 54 150C52 122 68 96 100 96Z" fill="url(#dgBody)"/>
+  <ellipse cx="100" cy="148" rx="24" ry="28" fill="url(#dgBelly)" ${stage==="grown"?'filter="url(#dgGlow)"':""}/><path d="M82 136q18 6 36 0M80 148q20 6 40 0M84 160q16 5 32 0" stroke="#c4502c" stroke-width="1.6" fill="none" opacity=".7"/>
+  <ellipse cx="74" cy="140" rx="9" ry="13" transform="rotate(20 74 140)" fill="#4f3f5a"/><ellipse cx="126" cy="140" rx="9" ry="13" transform="rotate(-20 126 140)" fill="#4f3f5a"/>
+  <path d="M78 150l2 5M83 151l1 5M117 151l-1 5M122 150l-2 5" stroke="#f3e6d6" stroke-width="2.2" stroke-linecap="round"/>
+  <ellipse cx="78" cy="176" rx="14" ry="7" fill="#43354d"/><ellipse cx="122" cy="176" rx="14" ry="7" fill="#43354d"/><path d="M68 180l2 3M75 181l1 3M82 181l0 3M118 181l0 3M125 181l-1 3M132 180l-2 3" stroke="#f3e6d6" stroke-width="2.2" stroke-linecap="round"/>
+  <g class="dg-head" style="transform-origin:100px 110px">
+  <path d="M74 54Q${70-6*horn} ${36-14*horn} ${66-4*horn} ${22-14*horn}Q${80+2*horn} ${36-6*horn} 88 48Z" fill="url(#dgHorn)"/><path d="M126 54Q${130+6*horn} ${36-14*horn} ${134+4*horn} ${22-14*horn}Q${120-2*horn} ${36-6*horn} 112 48Z" fill="url(#dgHorn)"/>
+  <path d="M94 42l6-10 6 10M88 46l3-6 4 5M106 45l4-5 3 6" fill="#b3262c"/>
+  <path d="M100 42C134 42 152 62 150 88C148 110 128 120 100 120C72 120 52 110 50 88C48 62 66 42 100 42Z" fill="url(#dgBody)"/>
+  <g fill="#3a2d44" opacity=".8"><circle cx="70" cy="62" r="3"/><circle cx="64" cy="70" r="2"/><circle cx="132" cy="60" r="3"/><circle cx="138" cy="69" r="2"/></g>
+  <ellipse cx="100" cy="102" rx="24" ry="14" fill="#6b5876"/><circle cx="93" cy="97" r="1.8" fill="#2a1f2f"/><circle cx="107" cy="97" r="1.8" fill="#2a1f2f"/>
+  <ellipse cx="66" cy="96" rx="6" ry="3.4" fill="#ff7a52" opacity=".45"/><ellipse cx="134" cy="96" rx="6" ry="3.4" fill="#ff7a52" opacity=".45"/>
+  ${eyes}${mouth}${mood==="curious"?`<text x="150" y="44" font-family="sans-serif" font-weight="700" font-size="22" fill="#ffd27a">?</text>`:""}${mood==="sleepy"?`<text x="146" y="46" font-family="sans-serif" font-weight="700" font-size="16" fill="#eee7dc">z</text>`:""}
+  </g>
+  ${stage==="grown"?`<g fill="#ff7a52" class="cv-embers"><circle cx="60" cy="170" r="2"/><circle cx="140" cy="172" r="1.8"/><circle cx="100" cy="176" r="2.2"/></g>`:""}
+  </g>`}
+function dragonSvg(d,mood,cls){const st=dgStage(d);return `<svg class="dragonart ${cls||""}" viewBox="0 0 200 200" aria-hidden="true">${DG_DEFS}${st==="egg"?dgEggArt(d.heat):dgBody(st,mood||dgMood(d))}</svg>`}
+const DG_STAGES=[["baby",0,"Baby"],["young",400,"Young"],["grown",1200,"Grown"]];
+function dgStage(d){if(!d.hatched)return"egg";let s="baby";DG_STAGES.forEach(([k,m])=>{if(d.xp>=m)s=k});return s}
+function dgMood(d){if(!d.hatched)return"calm";const h=new Date().getHours();if(h>=3&&h<7)return"sleepy";const fed=d.lastFed?(Date.now()-d.lastFed)/36e5:99;if(fed>24)return"hungry";const t=today();if(S.checkins.includes(t)||S.tx.some(x=>x.d===t))return"happy";return"curious"}
+const DG_MOODWORD={happy:"happy",curious:"curious",hungry:"hungry",sleepy:"sleepy",calm:"warm"};
+
+/* talks: the dragon asks, the chibi teaches, you get quizzed */
+const TALKS=[
+ {id:"impulse",skill:"Impulse Guard",lines:[["d","Chibi, why do you wait before you buy stuff? Shiny things are RIGHT THERE."],["c","Because wanting something and needing it feel the same in the moment."],["c","If I wait ten minutes, the want usually fades. The need stays."],["d","So the wait is like a filter? Only real needs get through?"],["c","Exactly. Impulse buys are where most money leaks out."]],q:{q:"You see something you want for $40. What's the move?",o:["Buy it now before it's gone","Wait at least 10 minutes and ask: need or want?","Buy two so you don't want it later"],a:1,why:"The wait lets the impulse fade. If you still need it later, you can still buy it."}},
+ {id:"payday",skill:"Payday Claw",lines:[["d","When money comes in, why do you move some away right away?"],["c","Pay yourself first. Savings goes out before the spending starts."],["c","If I wait to save what's left, there's never anything left."],["d","So you grab it with your claws before it can escape!"],["c","Ha, exactly. Even 10% builds up fast."]],q:{q:"Payday hits. What comes first?",o:["Fun money","Moving your savings cut","Checking what's on sale"],a:1,why:"Saving first means it actually happens. Spending expands to fill whatever's left."}},
+ {id:"vault",skill:"Stash Keeper",lines:[["d","What's the cash vault for? Is it treasure?"],["c","Kind of. It's emergency money at home for when the bank isn't an option."],["c","But too much cash at home can get lost, stolen, or quietly spent."],["d","So the vault should be big enough to help, but not hold everything."],["c","Right. The rest is safer in the bank."]],q:{q:"What's the smartest way to use a cash vault?",o:["Keep every dollar you earn in it","Keep a set emergency amount, bank the rest","Spend from it first because it's cash"],a:1,why:"A set amount covers emergencies. Big piles of cash at home are easy to lose or spend."}},
+ {id:"bills",skill:"Bill Watcher",lines:[["d","Why do you keep staring at those due dates?"],["c","Because a bill that surprises you costs more. Late fees, stress, scrambling."],["c","If I see it coming, I can set the money aside early."],["d","So bills are like monsters, and you can see them coming from far away!"],["c","And when you see them coming, they're not scary anymore."]],q:{q:"Rent is due in 5 days. When should you set the money aside?",o:["The day it's due","Now, so it's not spent by accident","After the weekend"],a:1,why:"Setting it aside early means it can't get spent on something else first."}},
+ {id:"leaks",skill:"Leak Sniffer",lines:[["d","I smell something. Money is dripping out somewhere!"],["c","Probably subscriptions. Small monthly charges you forget about."],["c","Ten dollars a month doesn't feel like much. That's 120 a year."],["d","So small drips make big puddles?"],["c","Yep. Check them every month. Cancel what you don't use."]],q:{q:"A $15/month subscription you never use costs how much a year?",o:["$15","$90","$180"],a:2,why:"$15 × 12 months = $180 a year for something you don't even use."}},
+ {id:"shield",skill:"Shield Scale",lines:[["d","What happens if something breaks and you need money fast?"],["c","That's what an emergency fund is for. A shield."],["c","The goal is enough to cover a month or more of bills."],["d","So a shield scale protects the whole hoard!"],["c","Right. Without one, one bad day can wipe out months of saving."]],q:{q:"What is an emergency fund for?",o:["Vacations","Unexpected must-pay costs like repairs or a sick day","Trading when the market looks good"],a:1,why:"It's for surprises you can't avoid, so they don't push you into debt."}},
+ {id:"coolhead",skill:"Cool Head",lines:[["d","You looked angry when that trade went down. Do you want to win it back fast?"],["c","That feeling is the trap. It's called revenge trading."],["c","Only trade money you can afford to lose, and keep a monthly limit."],["d","So when my fire gets too hot, I should breathe instead of attack?"],["c","Exactly. Cool head, every time."]],q:{q:"You just lost on a trade. What's the move?",o:["Double the next trade to win it back","Stick to your plan and your monthly limit","Move rent money in"],a:1,why:"Chasing losses makes them bigger. The limit protects your living money."}},
+ {id:"hearth",skill:"Hearth Fire",lines:[["d","Why do you cook instead of buying food? Buying is faster!"],["c","Faster, but way more expensive. One meal out can buy a few home meals."],["c","Cooking a batch on my off day saves me all week."],["d","My fire can help cook!"],["c","Ha. Then we'll never order out again."]],q:{q:"Why batch-cook on your day off?",o:["It's more fun","It saves money all week on food out","Restaurants are closed"],a:1,why:"Ready meals at home make it easy to skip buying food during busy shifts."}},
+ {id:"hoard",skill:"Hoard Sense",lines:[["d","How do dragons get such big hoards?"],["c","Not from one big score. From adding a little, over and over."],["c","$25 a week is $1,300 a year. And it keeps stacking."],["d","So time is the secret ingredient?"],["c","Time and consistency. That's why your streak matters."]],q:{q:"Saving $25 every week adds up to about how much in a year?",o:["$300","$1,300","$2,500"],a:1,why:"There are 52 weeks in a year: 52 × $25 = $1,300."}},
+ {id:"patience",skill:"Patience Flame",lines:[["d","There's a big thing I want. Like REALLY want."],["c","For anything big that's not on your list, sleep on it."],["c","If you still want it in 24 hours, plan for it. Save up, then buy it guilt-free."],["d","So my flame burns slow but long, instead of all at once?"],["c","That's the spirit."]],q:{q:"You want a $200 item that's not in your plan. What do you do?",o:["Buy it today","Wait 24 hours, then save up for it if you still want it","Put it on credit"],a:1,why:"The 24-hour rule filters out hype. Saving first means no regret."}}
+];
+const talkById=id=>TALKS.find(t=>t.id===id);
+const learned=()=>Object.keys(S.dragon.talks||{}).filter(k=>S.dragon.talks[k]);
+const hasSkill=id=>!!(S.dragon&&S.dragon.talks&&S.dragon.talks[id]);
+function nextTalk(){return TALKS.find(t=>!hasSkill(t.id))||null}
+
+/* daily tasks */
+function dgClaimed(k){return(S.dragon.claims[today()]||[]).includes(k)}
+function dgClaim(k,xp){const t=today();S.dragon.claims[t]=S.dragon.claims[t]||[];if(S.dragon.claims[t].includes(k))return false;S.dragon.claims[t].push(k);
+  Object.keys(S.dragon.claims).forEach(d=>{if(d<addDays(t,-7))delete S.dragon.claims[d]});
+  const d=S.dragon;if(!d.hatched){d.heat=Math.min(100,d.heat+xp)}else{const before=dgStage(d);d.xp+=xp;const after=dgStage(d);if(after!==before)setTimeout(()=>dgGrowFX(after),400)}return true}
+function dgTasks(){const t=today(),logged=S.checkins.includes(t)||S.tx.some(x=>x.d===t),{spent,cap}=todayNums(),late=new Date().getHours()>=18,d=S.dragon,egg=!d.hatched;
+  const list=[{k:"log",t:"Log something or check in today",xp:egg?25:20,ready:logged,hint:"Any entry counts."},
+    {k:"safe",t:"Stay under today's safe spend",xp:15,ready:late&&spent<=cap,hint:late?(spent<=cap?"You did it.":"Over today's safe spend."):"Claim after 6 pm."}];
+  if(egg)list.push({k:"pet",t:"Keep the egg warm (tap it)",xp:10,ready:true,hint:"Tap the egg."});
+  else{list.push({k:"talk",t:nextTalk()?"Today's lesson with your chibi":"Review a lesson with your chibi",xp:30,ready:true,hint:"Tap Talk."},{k:"quiz",t:"Answer the dragon's question",xp:15,ready:learned().length>0,hint:learned().length?"Tap Quiz.":"Do a lesson first."},{k:"feed",t:"Feed your dragon",xp:5,ready:true,hint:"Tap Feed."})}
+  return list}
+
+/* what the dragon tells you, using the skills it learned */
+function dgAdvice(){if(!S.dragon.hatched)return[];const out=[],t=today(),f=freeToSpend(),{spent,cap}=todayNums();
+  if(hasSkill("impulse"))out.push(["Impulse Guard",`Safe spend left today: ${moneyR(Math.max(0,cap-spent))}. Anything over ${moneyR(Math.max(10,cap*.3))}, wait 10 minutes first.`]);
+  if(hasSkill("bills")){const b=S.bills.filter(b=>b.next&&b.amount>0&&daysBetween(t,b.next)<=7&&daysBetween(t,b.next)>=0).sort((a,b)=>a.next<b.next?-1:1)[0];out.push(["Bill Watcher",b?`${b.name} (${moneyR(b.amount)}) is due ${fdShort(b.next)}. Set it aside now.`:"No bills in the next 7 days. Nice and quiet."])}
+  if(hasSkill("payday")){const p=nextPayday();if(p)out.push(["Payday Claw",`Next payday ${fdShort(p)}. Move your ${S.split.save}% savings cut before you spend anything.`])}
+  if(hasSkill("vault"))out.push(["Stash Keeper",S.cash.target?(S.cash.balance>=S.cash.target?`Vault is at its ${moneyR(S.cash.target)} goal. Bank anything extra.`:`Vault needs ${moneyR(S.cash.target-S.cash.balance)} more to hit its goal.`):`Vault holds ${moneyR(S.cash.balance)}. Set a vault goal so I know when it's enough.`]);
+  if(hasSkill("leaks")){const subs=S.bills.filter(b=>b.cat==="Subscriptions"&&b.amount>0).map(b=>({n:b.name,y:perMonth(b.amount,b.freq)*12})).sort((a,b)=>b.y-a.y);out.push(["Leak Sniffer",subs.length?`Biggest drip: ${subs[0].n} at ${moneyR(subs[0].y)} a year. Still using it?`:"No subscriptions found. No leaks, nice."])}
+  if(hasSkill("shield")){const mo=S.bills.reduce((a,b)=>a+perMonth(b.amount,b.freq),0),saved=S.goals.reduce((a,g)=>a+(g.saved||0),0)+S.cash.balance;out.push(["Shield Scale",mo?`Your savings plus vault cover about ${(saved/mo).toFixed(1)} months of bills.`:"Add your bills so I can measure your shield."])}
+  if(hasSkill("coolhead")&&S.trading.limit){const dep=tradingMonthDeposits();out.push(["Cool Head",`${moneyR(dep)} of your ${moneyR(S.trading.limit)} trading limit used this month.`])}
+  if(hasSkill("hearth")&&S.grocery.weekly)out.push(["Hearth Fire",`${moneyR(Math.max(0,S.grocery.weekly-groceryWeek()))} left for groceries this week. Cook a batch on your off day.`]);
+  if(hasSkill("hoard")){const w=Math.max(10,Math.round(f.amount*.05/5)*5);out.push(["Hoard Sense",`Setting aside ${moneyR(w)} a week becomes ${moneyR(w*52)} in a year.`])}
+  if(hasSkill("patience"))out.push(["Patience Flame","Anything big that's not on your list: sleep on it for 24 hours."]);
+  return out}
+
+/* ---------- dragon tab ---------- */
+function dragonView(){const d=S.dragon,st=dgStage(d),egg=st==="egg",mood=dgMood(d),tasks=dgTasks();
+  const nx=DG_STAGES.find(([k,m])=>m>d.xp),cur=[...DG_STAGES].reverse().find(([k,m])=>d.xp>=m);
+  const adv=dgAdvice(),L_=learned().length;
+  return `<div class="section" style="margin-top:12px"><div class="panel dgscene">
+    <div class="dgstage"><button type="button" class="dgtap" data-act="dgTap" aria-label="${egg?"Warm the egg":"Pet your dragon"}">${dragonSvg(d,mood,"big")}</button>
+    <div class="nestmini">${crowSvg(Math.max(0,crowIdx(streak())))}</div></div>
+    <div class="dgsay" id="dgsay">${egg?(d.heat>=70?"It's moving! Almost there.":d.heat>=35?"You can hear something tapping inside.":"A warm egg. Keep it warm with your daily habits."):dgLine(mood)}</div>
+    <div class="row between" style="flex-wrap:wrap;margin-top:6px"><div><div class="eyebrow">${egg?"Dragon egg":esc(DG_STAGES.find(x=>x[0]===st)[2])+" dragon · "+DG_MOODWORD[mood]}</div><div class="nm" style="font-family:var(--display);font-size:1.3rem">${egg?"Unhatched":esc(d.name)}</div></div>
+    ${egg?`<span class="chip amber">${d.heat}/100 warmth</span>`:`<span class="chip red">${L_}/${TALKS.length} skills</span>`}</div>
+    <div class="meter" style="margin-top:8px"><i style="width:${egg?d.heat:nx?Math.max(4,(d.xp-cur[1])/(nx[1]-cur[1])*100):100}%;background:linear-gradient(90deg,#ff9a5a,var(--blood))"></i></div>
+    <div class="muted" style="font-size:.78rem;margin-top:4px">${egg?"At 100 warmth it hatches.":nx?`${nx[1]-d.xp} XP until it grows into a ${nx[2]} dragon.`:"Fully grown."}</div>
+    ${egg?"":`<div class="row" style="flex-wrap:wrap;margin-top:12px"><button class="btn sm red" data-act="dgTalk">Talk</button><button class="btn sm" data-act="dgQuiz" ${L_?"":"disabled"}>Quiz</button><button class="btn sm" data-act="dgFeed">Feed</button><button class="btn sm ghost" data-act="dgRename">Rename</button></div>`}
+  </div></div>
+  <div class="section"><div class="section-head"><h2>${egg?"Warm the egg":"Daily training"}</h2><span class="muted" style="font-size:.8rem">resets daily</span></div>
+  <div class="panel"><div class="list">${tasks.map(k=>{const done=dgClaimed(k.k);return `<div class="item"><div style="min-width:0"><div class="name">${esc(k.t)}</div><div class="sub">${done?'<span class="chip jade">done</span>':`<span>${esc(k.hint)}</span>`}</div></div>
+    ${done?`<span class="chip">+${k.xp}</span>`:(k.k==="log"||k.k==="safe")?`<button class="btn sm ${k.ready?"red":""}" data-act="dgClaim" data-k="${k.k}" ${k.ready?"":"disabled"}>+${k.xp} ${egg?"warmth":"XP"}</button>`:`<span class="chip">+${k.xp}</span>`}</div>`}).join("")}</div></div></div>
+  ${egg?`<div class="section"><div class="panel"><p class="muted" style="margin:0;font-size:.86rem">Once it hatches, your chibi teaches it about money. It asks questions, you answer quizzes, and every lesson becomes a skill it uses to help you save.</p></div></div>`:`
+  <div class="section"><div class="section-head"><h2>${esc(d.name)}'s watch</h2><span class="muted" style="font-size:.8rem">from its skills</span></div>
+  <div class="panel">${adv.length?`<div class="list">${adv.map(([k,v])=>`<div class="item"><div style="min-width:0"><div class="name">${esc(k)}</div><div class="sub" style="display:block">${esc(v)}</div></div></div>`).join("")}</div>`:`<div class="empty">No skills yet. Tap Talk so your chibi can teach it its first one.</div>`}</div></div>
+  <div class="section"><h2>Lessons</h2><div class="panel"><div class="list">${TALKS.map((t,i)=>{const got=hasSkill(t.id),isNext=nextTalk()&&nextTalk().id===t.id;return `<div class="item"><div style="min-width:0"><div class="name">${got?esc(t.skill):isNext?"Next lesson":"Locked"}</div><div class="sub">${got?esc(t.lines[0][1]):isNext?(d.talkDay===today()?"Unlocks tomorrow":"Ready now"):"Keep training"}</div></div>${got?`<button class="btn sm ghost" data-act="dgReplay" data-id="${t.id}">Replay</button>`:""}</div>`}).join("")}</div>
+  <p class="muted" style="font-size:.76rem;margin:8px 0 0">One new lesson a day. Quiz stats: ${d.quiz.right} right, ${d.quiz.wrong} missed.</p></div></div>`}`}
+function dgLine(m){return{happy:"I watched you log today. My scales feel stronger!",curious:"Hey! What are we saving for today?",hungry:"Is it snack time? I'm SO hungry...",sleepy:"*yawn* Five more minutes..."}[m]||"Hi!"}
+
+/* talk scene */
+let talkQ=[],talkI=0,talkCur=null,talkNew=false;
+const miniChibi=()=>chibi("happy").replace('class="chibi"','class="chibi" style="width:100%;height:100%"');
+function talkSheet(t,isNew){talkCur=t;talkNew=isNew;talkI=0;
+  openSheet(isNew?"Lesson: "+t.skill:"Replay: "+t.skill,`<div class="talk" id="talk"></div><div id="talkQ"></div>`,()=>{if(talkI<t.lines.length){talkStep();return false}if(!$("#talkQ").dataset.done){return false}},{submitLabel:"Next"});
+  talkStep()}
+function talkStep(){const t=talkCur,box=$("#talk");if(!box)return;
+  if(talkI<t.lines.length){const[w,txt_]=t.lines[talkI++];box.insertAdjacentHTML("beforeend",`<div class="tl-row ${w}"><div class="av">${w==="d"?dragonSvg(S.dragon,"curious"):miniChibi()}</div><div class="tb">${esc(txt_)}</div></div>`);box.lastElementChild.scrollIntoView({block:"nearest",behavior:"smooth"});
+    if(talkI>=t.lines.length){$("#sheetOk").textContent="Done";showQuiz(t.q,"talkQ",ok=>{if(talkNew){S.dragon.talks[t.id]=1;S.dragon.talkDay=today();dgClaim("talk",30)}if(ok&&!dgClaimed("quiz"))dgClaim("quiz",15);commit();
+      if(talkNew){say(`${esc(S.dragon.name)} learned <b>${esc(t.skill)}</b>! Check its watch list.`,"laugh",true);window.__strike?.()}})}}}
+function showQuiz(q,hostId,onAnswer){const h=document.getElementById(hostId);if(!h)return;
+  h.innerHTML=`<div class="quiz"><div class="qlabel">Your turn</div><div class="name" style="margin-bottom:8px">${esc(q.q)}</div>${q.o.map((o,i)=>`<button type="button" class="qopt" data-act="qAns" data-i="${i}">${esc(o)}</button>`).join("")}<div class="qwhy"></div></div>`;
+  h.querySelector(".quiz")._q={q,onAnswer};h.scrollIntoView({block:"nearest",behavior:"smooth"})}
+function quizSheet(){const ids=learned();if(!ids.length)return;const t=talkById(ids[Math.random()*ids.length|0]);
+  openSheet(`${S.dragon.name} asks you`,`<div class="tl-row d"><div class="av">${dragonSvg(S.dragon,"curious")}</div><div class="tb">Quiz time! Chibi taught me this one. Do you know it?</div></div><div id="quizHost"></div>`,()=>{},{submitLabel:"Close"});
+  showQuiz(t.q,"quizHost",ok=>{if(!dgClaimed("quiz"))dgClaim("quiz",ok?15:5);commit()})}
+
+/* hatch + grow scenes */
+function dgHatchFX(){const h=document.createElement("div");h.className="evo";h.innerHTML=`<div class="evo-in"><div class="evo-t">Something is happening</div><div class="evo-art">${dragonSvg(S.dragon)}</div><div class="evo-name"></div><div class="evo-line"></div><div class="field" style="width:100%;display:none" id="hatchName"><input id="f-dn" type="text" maxlength="16" placeholder="Name your dragon" value="Ember" aria-label="Dragon name"></div><button type="button" class="btn red" data-act="dgHatchDone">Welcome it</button></div>`;
+  document.body.appendChild(h);const art=h.querySelector(".evo-art");
+  setTimeout(()=>art.classList.add("charge"),300);
+  setTimeout(()=>{S.dragon.hatched=today();S.dragon.xp=0;save();window.__strike?.();art.innerHTML=dragonSvg(S.dragon,"happy");art.classList.remove("charge");void art.offsetWidth;art.classList.add("reveal");
+    h.querySelector(".evo-name").textContent="It hatched!";h.querySelector(".evo-line").textContent="A baby dragon. It's curious about everything, especially money. Give it a name.";
+    h.querySelector("#hatchName").style.display="";h.querySelector(".btn").classList.add("on");vibe();say("IT HATCHED! I'm gonna teach it everything I know.","laugh",true)},1800)}
+function dgGrowFX(st){const name=DG_STAGES.find(x=>x[0]===st)[2];const h=document.createElement("div");h.className="evo";h.innerHTML=`<div class="evo-in"><div class="evo-t">${esc(S.dragon.name)} is growing</div><div class="evo-art">${dragonSvg(S.dragon,"happy")}</div><div class="evo-name">${esc(name)} dragon!</div><div class="evo-line">${st==="grown"?"Fully grown. Its belly glows like a forge and it guards your hoard.":"Bigger wings, longer horns, and a lot more opinions about your spending."}</div><button type="button" class="btn red on" data-act="evoClose">Let's go</button></div>`;document.body.appendChild(h);window.__strike?.();say(`${esc(S.dragon.name)} grew! Look at those wings.`,"laugh",true)}
+
+const A4={
+ dgTap:()=>{const d=S.dragon,box=$("#dgsay");const art=document.querySelector(".dgtap .dragonart");if(art){art.classList.remove("dg-hop");void art.getBoundingClientRect();art.classList.add("dg-hop")}vibe();
+   if(!d.hatched){if(dgClaim("pet",10)){commit();if(d.heat>=100)setTimeout(dgHatchFX,300);else say("Warm egg, warm heart.","happy")}else if(box)box.textContent=["It's toasty in there.","Something kicked!","*tap tap*"][Math.random()*3|0];if(d.heat>=100&&!d.hatched&&!document.querySelector(".evo"))dgHatchFX();return}
+   const tips=dgAdvice();if(box)box.textContent=tips.length&&Math.random()<.6?tips[Math.random()*tips.length|0][1]:["Rawr! (that means hi)","Chibi says I'm getting smarter.","Can I have a coin? Just to look at.","My tail flame is extra warm today."][Math.random()*4|0]},
+ dgClaim:el=>{const k=el.dataset.k;const tk=dgTasks().find(x=>x.k===k);if(!tk||!tk.ready)return;if(dgClaim(k,tk.xp)){commit();const d=S.dragon;if(!d.hatched){say(`+${tk.xp} warmth for the egg.`,"happy");if(d.heat>=100)setTimeout(dgHatchFX,400)}else say(`+${tk.xp} XP for ${esc(d.name)}.`,"happy")}},
+ dgTalk:()=>{const t=nextTalk(),d=S.dragon;if(t&&d.talkDay!==today())talkSheet(t,true);else{const ids=learned();if(!ids.length)return;toast(t?"New lesson unlocks tomorrow. Here's a replay.":"All lessons learned. Here's a replay.");talkSheet(talkById(ids[Math.random()*ids.length|0]),false)}},
+ dgReplay:el=>talkSheet(talkById(el.dataset.id),false),
+ dgQuiz:()=>quizSheet(),
+ qAns:el=>{const box=el.closest(".quiz"),{q,onAnswer}=box._q||{};if(!q||box.dataset.done)return;const i=+el.dataset.i,ok=i===q.a;box.dataset.done=1;const host=box.parentElement;host.dataset.done=1;
+   box.querySelectorAll(".qopt").forEach((b,k)=>{b.classList.add(k===q.a?"right":k===i?"wrong":"dim");b.disabled=true});
+   box.querySelector(".qwhy").innerHTML=`<b>${ok?"Correct!":"Not quite."}</b> ${esc(q.why)}`;if(ok){S.dragon.quiz.right++}else S.dragon.quiz.wrong++;vibe();onAnswer&&onAnswer(ok);
+   say(ok?`${esc(S.dragon.name)}: "You got it! We're both learning."`:`${esc(S.dragon.name)}: "Hmm, Chibi said it differently. Read the why!"`,ok?"happy":"think")},
+ dgFeed:()=>{const d=S.dragon,h=d.lastFed?(Date.now()-d.lastFed)/36e5:99;if(h<6){toast(`${d.name} is still full. Try again in ${Math.ceil(6-h)}h.`);return}d.lastFed=Date.now();dgClaim("feed",5);commit();const box=$("#dgsay");if(box)box.textContent=["Nom nom! Thank you!","Spicy! My flame got bigger.","Best snack ever. Can we save for more?"][Math.random()*3|0]},
+ dgRename:()=>openSheet("Rename your dragon",txt("f-dn2","Name",S.dragon.name,"Ember"),()=>{S.dragon.name=V("f-dn2").trim().slice(0,16)||"Ember";commit()}),
+ dgHatchDone:el=>{const v=($("#f-dn")?.value||"").trim();S.dragon.name=v.slice(0,16)||"Ember";commit();el.closest(".evo")?.remove();if(tab!=="dragon"){tab="dragon";renderTabs();render()}}
+};
+
+/* ---------- mini dragon that flies with your chibi ---------- */
+const Pet=(()=>{const el=document.createElement("div");el.id="pet";el.innerHTML=`<div class="pb"></div><div class="say"></div>`;document.body.appendChild(el);
+  const pb=el.querySelector(".pb"),bub=el.querySelector(".say");let x=-100,y=-100,on=false,last=performance.now(),sayT=null,lastArt="",nextChat=performance.now()+45000;
+  function draw(){if(!S||!S.dragon||!S.dragon.hatched){el.style.display="none";on=false;return}el.style.display="";on=true;const m=dgMood(S.dragon),key=dgStage(S.dragon)+m;if(key!==lastArt){lastArt=key;pb.innerHTML=dragonSvg(S.dragon,m)}}
+  function say_(t){bub.innerHTML=t;bub.classList.add("on");clearTimeout(sayT);sayT=setTimeout(()=>bub.classList.remove("on"),Math.max(3000,t.length*55))}
+  function chat(){const ids=learned();if(!ids.length){say_("Chibi! Teach me something!");return}const t=talkById(ids[Math.random()*ids.length|0]);say_(t.lines[0][1].replace(/^Chibi, /,""));setTimeout(()=>{try{say(t.lines[1][1],"happy")}catch(e){}},2600)}
+  el.addEventListener("click",e=>{e.stopPropagation();vibe();const tips=dgAdvice();say_(tips.length&&Math.random()<.65?tips[Math.random()*tips.length|0][1]:"Rawr! Did you log today?")});
+  function frame(t){const dt=Math.min(40,t-last)/16.67;last=t;if(on&&window.__bp){const side=window.__bp.x>innerWidth/2?-1:1;const tx=window.__bp.x+(side>0?78:-50),ty=window.__bp.y-16+Math.sin(t/380)*6;x+=(tx-x)*.05*dt;y+=(ty-y)*.05*dt;
+      el.style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) scaleX(${side>0?1:-1})`;bub.style.transform=`scaleX(${side>0?1:-1})`;
+      if(t>nextChat&&!document.hidden&&!document.querySelector(".sheet")){chat();nextChat=t+90000+Math.random()*90000}}
+    requestAnimationFrame(frame)}
+  requestAnimationFrame(frame);return{draw,say:say_}})();
+
+I.dragon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20c0-6 3-10 8-10 3 0 6 2 6 5s-2 4-4 4h-2"/><path d="M9 11 7 5l4 4M14 10l2-6 1 6"/><path d="M5 14 2 12l1 4"/><circle cx="15" cy="14" r=".7" fill="currentColor"/></svg>';
+(TABS.find(t=>t[0]==="dragon")||[])[2]=I.dragon;
+function dragonHomeCard(){const d=S.dragon,egg=!d.hatched,adv=dgAdvice();
+  return `<div class="section"><button type="button" class="panel dgcard" data-act="goTab" data-tab="dragon"><div class="art">${dragonSvg(d)}</div><div style="min-width:0"><div class="eyebrow">${egg?"Dragon egg":esc(d.name)}</div><div style="font-size:.86rem">${egg?`Warmth ${d.heat}/100. ${d.heat>=70?"It's about to hatch!":"Keep your habits going to hatch it."}`:esc(adv.length?adv[0][1]:"Teach me something! Tap Talk on my tab.")}</div></div><span class="chip red">Open</span></button></div>`}
 
 /* ---------- v3: the crow that evolves with your streak ---------- */
 const CV_DEFS=`<defs>
@@ -1214,7 +1443,7 @@ const Buddy=(()=>{
       if(x<0){x=0;vx=Math.abs(vx)*.5}if(x>W-BW){x=W-BW;vx=-Math.abs(vx)*.5}if(y<30){y=30;vy=Math.abs(vy)*.5}if(y>H-BH-60){y=H-BH-60;vy=-Math.abs(vy)*.5}if(sheet&&mode==="perch"){const st=sheetTop();if(st!==null&&y>st-BH+20&&ty<y)vy=Math.min(vy,-6)}
     }
     updatePose(t);const bob=reduce||pose==='meditate'?0:Math.sin(t/520)*4,lean=clamp(vx*1.8,-16,16);
-    el.style.transform=`translate3d(${x.toFixed(1)}px,${(y+bob).toFixed(1)}px,0)`;bb.style.transform=`rotate(${lean.toFixed(1)}deg)`;
+    el.style.transform=`translate3d(${x.toFixed(1)}px,${(y+bob).toFixed(1)}px,0)`;window.__bp={x,y:y+bob};bb.style.transform=`rotate(${lean.toFixed(1)}deg)`;
     if(bub.classList.contains("on"))place();
     if(!document.hidden&&t-lastTalk>idleGap&&t-lastInteract>8000){idleTalk();idleGap=35000+Math.random()*40000}
     requestAnimationFrame(frame)}
@@ -1229,7 +1458,7 @@ const Buddy=(()=>{
 
 /* ---------- actions ---------- */
 const A={
- ...A2,...A3,
+ ...A2,...A3,...A4,
  closeSheet,
  sheetDanger:()=>{if(!sheetDanger)return;const b=document.querySelector('[data-act="sheetDanger"]');if(!b.dataset.armed){b.dataset.armed=1;b.textContent="Tap again to confirm";b.style.color="var(--blood)";return}sheetDanger.run();closeSheet()},
  goTab:el=>{tab=el.dataset.tab;renderTabs();render();animView();scrollTo({top:0});Buddy.onTab(tab)},
