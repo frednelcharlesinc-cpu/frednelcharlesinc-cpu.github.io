@@ -1,5 +1,5 @@
 /* Crow Vault service worker: works offline after the first visit. Bump VERSION to ship updates. */
-const VERSION = "crow-vault-v5";
+const VERSION = "crow-vault-v6";
 const SHELL = ["./", "index.html", "lessons.js", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -13,7 +13,7 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
   // App files: network first so updates arrive, cache as fallback when offline.
   if (url.origin === location.origin) {
-    e.respondWith(fetch(req).then(res => {
+    e.respondWith(fetch(req, { cache: "no-store" }).then(res => {
       const copy = res.clone();
       caches.open(VERSION).then(c => c.put(req, copy));
       return res;
