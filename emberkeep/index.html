@@ -135,6 +135,55 @@ ul.hist li:last-child{border-bottom:0}
 .hx{font-family:var(--data);font-weight:600;color:var(--flame);font-variant-numeric:tabular-nums}
 .empty{color:var(--muted);font-size:.9rem}
 
+/* lair scene */
+.scene{position:relative;height:230px;margin:-6px -6px 14px;border-radius:14px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 40' preserveAspectRatio='none'%3E%3Cpath d='M0 0h400v8l-14 18-10-14-12 22-16-20-10 10-14-16-18 26-12-18-16 12-10-20-14 14-12-8-16 24-12-20-14 10-16-18-10 22-14-16-12 12-18-22-12 16-14-10-16 20-10-14-14 18-12-12-16 16-10-20-14 12V0z' fill='%23080506'/%3E%3C/svg%3E") top/100% 34px no-repeat,
+    radial-gradient(70% 60% at 50% 100%,rgba(255,74,43,calc(.16 + var(--heat)*.35)),transparent 70%),
+    linear-gradient(180deg,#120a0c 0%,#1d1013 60%,#2a1416 100%)}
+.scene::after{content:"";position:absolute;left:0;right:0;bottom:0;height:20px;background:linear-gradient(180deg,#2c1517,#120809);border-top:1px solid #3d2326;pointer-events:none}
+.lair-info{position:relative}
+.dragon{position:absolute;left:0;top:0;will-change:transform;cursor:pointer;touch-action:manipulation;z-index:2}
+.dragon.is-egg{cursor:default}
+.dsvg{width:100%;height:100%;display:block;overflow:visible;transform-origin:52.2% 50%}
+.dsvg .pulse{animation:glow 2.6s ease-in-out infinite}
+.dshadow{position:absolute;left:0;top:0;height:9px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.6),transparent);pointer-events:none;z-index:1}
+.bubble{position:absolute;left:50%;bottom:92%;transform:translateX(-50%);background:#f1e6e2;color:#1a0d0f;font:600 .85rem var(--data);letter-spacing:.02em;padding:4px 9px;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
+.bubble.on{opacity:1}
+.bubble::after{content:"";position:absolute;left:50%;top:100%;border:5px solid transparent;border-top-color:#f1e6e2;transform:translateX(-50%)}
+.ember{position:absolute;left:0;top:0;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle,#fff3c4,#ffb347 45%,#ff4a2b 70%,transparent 72%);box-shadow:0 0 12px 4px rgba(255,120,40,.55);pointer-events:none;z-index:3}
+.pt{position:absolute;left:0;top:0;pointer-events:none;font:700 15px var(--data);color:var(--flame);z-index:4}
+.pt.heart{color:#ff5a6a}
+.pt.zz{color:var(--muted)}
+.pt.fire{width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:radial-gradient(circle,#fff1b8,#ffb347 35%,#ff4a2b 60%,rgba(179,19,27,0) 72%)}
+.pt.spark{width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;background:#ffd27a;box-shadow:0 0 6px #ff7a2b}
+.free-layer{position:fixed;inset:0;pointer-events:none;z-index:15;overflow:hidden}
+.free-layer .dragon{pointer-events:auto}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts button{flex:1;padding:9px 6px;font-size:.85rem;min-width:0}
+.hint{margin-top:8px}
+.evo-path{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.evo-path .m{display:flex;flex-direction:column;align-items:center;gap:3px;font:600 .62rem var(--data);letter-spacing:.03em;color:var(--muted);text-align:center;line-height:1.1;min-width:0}
+.evo-path .m div{width:100%;max-width:48px;aspect-ratio:230/170}
+.evo-path .m svg{width:100%;height:100%}
+.evo-path .lock div{filter:brightness(0) opacity(.6)}
+.evo-path .got{color:var(--fg)}
+.evo-path .cur{color:var(--flame)}
+.evo-path .cur div{filter:drop-shadow(0 0 6px rgba(255,74,43,.85))}
+.evo{position:fixed;inset:0;z-index:30;background:rgba(8,5,6,.98);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.evo .flash{position:fixed;inset:0;background:#fff3d6;opacity:0;pointer-events:none}
+.evo-box{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:340px;position:relative}
+.evo-box .art{width:260px;max-width:80vw;aspect-ratio:230/170}
+.evo-box .art .dsvg{width:100%;height:100%}
+.evo-box .art.shake{animation:evshake .1s infinite}
+.evo-box .art.float{animation:evfloat 3s ease-in-out infinite}
+@keyframes evshake{0%{transform:translate(2px,0) rotate(1.5deg)}50%{transform:translate(-2px,1px) rotate(-1.5deg)}100%{transform:translate(1px,-1px) rotate(0)}}
+@keyframes evfloat{50%{transform:translateY(-8px)}}
+.evo h3{font-family:var(--display);font-weight:400;font-size:2.1rem;margin:0;color:var(--flame);line-height:1.05}
+.evo .ab{margin:0;color:var(--fg);font-size:.95rem}
+.evo .primary{min-width:180px}
+@media (prefers-reduced-motion:reduce){.evo-box .art.shake,.evo-box .art.float{animation:none}}
+
 /* hour by hour */
 .hnow{border-left:3px solid var(--flame);padding:2px 0 2px 12px;display:flex;flex-direction:column;gap:4px}
 .hnow .hh{font-family:var(--data);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:.78rem;color:var(--flame)}
@@ -197,21 +246,26 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
   </header>
 
   <section class="lair" aria-label="Your dragon">
-    <div class="lair-row">
-      <svg id="dragon" viewBox="0 0 200 200" role="img" aria-label="Cinder the dragon"></svg>
-      <div>
-        <div class="dname">Cinder · Stage <span id="stageNum">1</span>/7</div>
-        <p class="stage" id="stageName">Ember Egg</p>
-        <div class="mood" id="mood"></div>
-        <div class="xpbar"><i id="xpFill"></i></div>
-        <div class="xpmeta"><span id="xpText">0 XP</span><span id="xpNext"></span></div>
-        <div class="chips">
-          <span class="chip">🔥 Streak <b id="streak">0</b></span>
-          <span class="chip">Hours <b id="hoursTotal">0</b></span>
-          <span class="chip">Fasts <b id="fastCount">0</b></span>
-        </div>
+    <div class="scene" id="scene" aria-label="Cinder's lair"></div>
+    <div class="lair-info">
+      <div class="dname">Cinder · Stage <span id="stageNum">1</span>/7</div>
+      <p class="stage" id="stageName">Ember Egg</p>
+      <div class="mood" id="mood"></div>
+      <div class="xpbar"><i id="xpFill"></i></div>
+      <div class="xpmeta"><span id="xpText">0 XP</span><span id="xpNext"></span></div>
+      <div class="chips">
+        <span class="chip">🔥 Streak <b id="streak">0</b></span>
+        <span class="chip">Hours <b id="hoursTotal">0</b></span>
+        <span class="chip">Fasts <b id="fastCount">0</b></span>
       </div>
     </div>
+    <div class="acts" id="acts">
+      <button id="petBtn" type="button">Pet</button>
+      <button id="emberBtn" type="button">Toss ember</button>
+      <button id="flyBtn" type="button">Let it fly</button>
+    </div>
+    <p class="note hint" id="lairHint"></p>
+    <div class="evo-path" id="evoPath" aria-label="Evolution path"></div>
   </section>
 
   <section class="panel timer" aria-label="Fast timer">
@@ -330,6 +384,7 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 
+<script src="dragon.js"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -400,7 +455,7 @@ function addXP(n){
   S.xp += n;
   const after = stageFor(S.xp);
   if(after>before){
-    setTimeout(()=>{ toast(`Cinder evolved into a ${STAGES[after].name}!`); const d=$("dragon"); d.classList.add("hatch"); setTimeout(()=>d.classList.remove("hatch"),1300); }, 900);
+    cinder.evolve(before, after, ()=>{ lastStage=-1; render(); });
   }
 }
 function liveStreak(){
@@ -477,62 +532,23 @@ function showResult(dur, hit, goalH, lines){
   r.scrollIntoView({behavior:"smooth",block:"center"});
 }
 
-// ---------- dragon art (original design) ----------
-function drawDragon(stage){
-  const S2 = $("dragon");
-  const defs = `<defs>
-    <radialGradient id="eg" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#4a1d20"/><stop offset=".7" stop-color="#1c0d0f"/><stop offset="1" stop-color="#0c0607"/></radialGradient>
-    <linearGradient id="bd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e1f22"/><stop offset="1" stop-color="#3a0d10"/></linearGradient>
-    <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5c1417"/><stop offset="1" stop-color="#1e080a"/></linearGradient>
-    <radialGradient id="gl" r=".5"><stop offset="0" stop-color="#ff4a2b" stop-opacity=".55"/><stop offset="1" stop-color="#ff4a2b" stop-opacity="0"/></radialGradient>
-  </defs>`;
-  const glow = `<ellipse cx="100" cy="170" rx="80" ry="22" fill="url(#gl)"/>`;
-  let art="";
-  if(stage<=1){
-    const cracks = stage===1 ? `<path d="M78 70 l10 14 -8 10 12 12 -6 12" stroke="#ffb347" stroke-width="3" fill="none" class="egg-glow"/><path d="M120 92 l-9 10 7 9 -8 11" stroke="#ff4a2b" stroke-width="2.5" fill="none" class="egg-glow"/>` : "";
-    art = `<g class="breathe"><ellipse cx="100" cy="105" rx="48" ry="62" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
-      <g fill="none" stroke="#ff4a2b" stroke-width="1.6" class="egg-glow" opacity=".8">
-        <path d="M70 80 q15 8 30 0 q15 -8 30 0"/><path d="M62 108 q19 9 38 0 q19 -9 38 0"/><path d="M66 136 q17 8 34 0 q17 -8 34 0"/></g>
-      ${cracks}<ellipse cx="84" cy="78" rx="10" ry="16" fill="#fff" opacity=".07"/></g>`;
-  } else if(stage===2){
-    art = `<path d="M60 110 q-2 50 40 54 q42 -4 40 -54 l-10 10 -8 -12 -9 12 -8 -13 -8 12 -9 -12 -8 12 z" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
-      <g transform="translate(100 98)"><g class="breathe">
-        <path d="M-22 -18 l-10 -22 18 14z M22 -18 l10 -22 -18 14z" fill="#d9b48a"/>
-        <ellipse cx="0" cy="0" rx="30" ry="24" fill="url(#bd)"/>
-        <ellipse cx="0" cy="12" rx="14" ry="8" fill="#6e171b"/>
-        <circle cx="-11" cy="-3" r="6" fill="#ffb347"/><circle cx="11" cy="-3" r="6" fill="#ffb347"/>
-        <ellipse cx="-11" cy="-3" rx="1.6" ry="4.5" fill="#1a0507"/><ellipse cx="11" cy="-3" rx="1.6" ry="4.5" fill="#1a0507"/>
-        <circle cx="-5" cy="12" r="1.4" fill="#2a0709"/><circle cx="5" cy="12" r="1.4" fill="#2a0709"/>
-      </g></g>`;
-  } else {
-    const w = [0,0,0,0.7,0.95,1.1,1.25][stage];
-    const crown = stage===6 ? `<path d="M88 44 l4 -14 4 10 4 -16 4 16 4 -10 4 14z" fill="#ffb347" class="egg-glow"/>` : "";
-    const fire = stage>=5 ? `<path d="M100 98 q-6 10 0 18 q6 -8 0 -18z" fill="#ffb347" opacity=".8" class="egg-glow"/>` : "";
-    const spines = Array.from({length:stage+1},(_,i)=>`<path d="M${120+i*8} ${118+i*4.5} l6 -9 2 11z" fill="#d9b48a"/>`).join("");
-    art = `<g class="breathe">
-      <g transform="translate(100 110) scale(${w}) translate(-100 -110)">
-        <path d="M95 95 C60 40 25 45 12 60 C30 62 34 72 30 84 C42 80 50 86 50 96 C62 92 70 98 74 108 Z" fill="url(#wg)" stroke="#2a090b"/>
-        <path d="M105 95 C140 40 175 45 188 60 C170 62 166 72 170 84 C158 80 150 86 150 96 C138 92 130 98 126 108 Z" fill="url(#wg)" stroke="#2a090b"/>
-      </g>
-      <path d="M118 140 C150 150 170 140 178 120 C172 150 150 168 116 156 Z" fill="url(#bd)"/>
-      <path d="M178 120 l8 -14 -2 18z" fill="#ffb347"/>
-      ${spines}
-      <ellipse cx="100" cy="130" rx="30" ry="34" fill="url(#bd)"/>
-      <ellipse cx="100" cy="138" rx="17" ry="22" fill="#c9733f" opacity=".55"/>
-      <path d="M100 140 m-14 -6 h28 M86 146 h28 M88 152 h24" stroke="#7a2a17" stroke-width="1.2"/>
-      <path d="M82 160 l-6 12 h12z M118 160 l6 12 h-12z" fill="#3a0d10"/>
-      <g transform="translate(100 74)">
-        <path d="M-16 -14 C-24 -30 -30 -36 -36 -38 C-28 -28 -24 -20 -22 -8z M16 -14 C24 -30 30 -36 36 -38 C28 -28 24 -20 22 -8z" fill="#d9b48a"/>
-        <path d="M-24 -6 C-24 -24 24 -24 24 -6 C24 8 14 22 0 24 C-14 22 -24 8 -24 -6z" fill="url(#bd)"/>
-        <path d="M-10 14 C-6 20 6 20 10 14" stroke="#2a0709" stroke-width="1.5" fill="none"/>
-        <path d="M-15 -4 l9 2 -9 4z M15 -4 l-9 2 9 4z" fill="#ffb347"/>
-        <circle cx="-4" cy="10" r="1.3" fill="#2a0709"/><circle cx="4" cy="10" r="1.3" fill="#2a0709"/>
-      </g>${fire}${crown}</g>`;
-  }
-  S2.innerHTML = defs + glow + art;
-}
-
 // ---------- render ----------
+const cinder = new Dragon.Creature();
+cinder.mount($("scene"));
+function renderLair(st){
+  const hatched = st>=2, canFly = st>=4;
+  $("acts").hidden = !hatched;
+  $("flyBtn").textContent = canFly ? "Let it fly" : "🔒 Fly";
+  $("lairHint").textContent = hatched ? "Tap the cave to toss an ember. Tap Cinder to play, hold to pet." :
+    `Keep fasting to warm the egg. Cinder hatches at ${STAGES[2].xp} XP.`;
+  const ep=$("evoPath"); ep.textContent="";
+  STAGES.forEach((x,i)=>{
+    const m=document.createElement("div"); m.className="m "+(i<st?"got":i===st?"cur":"lock");
+    const art=document.createElement("div"); art.innerHTML=Dragon.artFor(i);
+    const lab=document.createElement("span"); lab.textContent = i<=st ? x.name : `${x.xp} XP`;
+    m.append(art,lab); ep.append(m);
+  });
+}
 const CIRC = 2*Math.PI*88;
 $("ring").style.strokeDasharray = CIRC;
 let lastStage = -1;
@@ -577,6 +593,8 @@ function renderTimer(){
   ring.style.strokeDashoffset = CIRC*(1-frac);
   document.documentElement.style.setProperty("--heat", heat.toFixed(2));
   renderHour();
+  const el2 = S.current ? Date.now()-S.current.start : 0;
+  cinder.setContext({fasting:!!S.current, hour:Math.floor(el2/HOUR), goalHit:!!S.current && el2>=S.current.goalH*HOUR});
   // mood
   const st = liveStreak();
   $("mood").textContent = S.current ? (heat>=1 ? "Blazing. Cinder feels your discipline." : "Cinder is gathering fire.") :
@@ -587,7 +605,7 @@ function render(){
   const now = new Date();
   $("today").textContent = now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
   const st = stageFor(S.xp);
-  if(st!==lastStage){ drawDragon(st); lastStage=st; }
+  if(st!==lastStage){ cinder.setStage(st); lastStage=st; renderLair(st); }
   $("stageNum").textContent = st+1;
   $("stageName").textContent = STAGES[st].name;
   const next = STAGES[st+1];
@@ -833,6 +851,10 @@ $("wDone").onclick = ()=>{
   S.wordDay = today; addXP(5); save(); render(); renderWordXP();
   toast(WORD[wIdx].k==="scripture" ? "+5 XP · Word received" : "+5 XP · Locked in");
 };
+
+$("petBtn").onclick=()=>cinder.pet();
+$("emberBtn").onclick=()=>cinder.tossEmber();
+$("flyBtn").onclick=()=>{ if(stageFor(S.xp)<4){ toast(`Cinder learns to fly as a Drake (${STAGES[4].xp} XP).`); return; } if(!cinder.flyFree()) toast("Cinder is already out flying!"); };
 
 // ---------- boot ----------
 pickWord();

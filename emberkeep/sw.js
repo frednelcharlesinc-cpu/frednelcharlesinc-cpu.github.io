@@ -1,6 +1,6 @@
 /* Emberkeep service worker: works offline after the first visit. Bump VERSION to ship updates. */
-const VERSION = "emberkeep-v3";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
+const VERSION = "emberkeep-v4";
+const SHELL = ["./", "index.html", "dragon.js", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
