@@ -380,6 +380,7 @@ button,[data-act],.tabs button{touch-action:manipulation}
 @keyframes dgFlapR{50%{transform:rotate(-12deg)}}
 @keyframes dgTail{50%{transform:rotate(-7deg)}}
 @keyframes dgHead{0%,100%{transform:rotate(0)}50%{transform:rotate(-3deg)}}
+.totsplit{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px}.totsplit button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--smoke-2);border:1px solid var(--ash);border-radius:10px;padding:8px 12px;text-align:left;min-width:0}.totsplit button:active{transform:scale(.96)}.totsplit .num{font-weight:700;font-size:1.05rem}.totsplit .plus{color:var(--dim);font-weight:700}
 </style>
 </head>
 <body>
@@ -700,8 +701,10 @@ function homeView(){
 
   ${standalone()?"":`<div class="panel row between" style="margin-top:12px"><div style="min-width:0"><b>Make it a real app</b><div class="muted" style="font-size:.82rem">Put Crow Vault on your home screen. Full screen, works offline, same data.</div></div><button class="btn sm red" data-act="installHelp">Install</button></div>`}
   <div class="panel bal">
-    <div class="eyebrow">Bank balance</div>
-    <button type="button" class="big num" data-act="editBank" aria-label="Update bank balance">${money(S.bank)}</button>
+    <div class="eyebrow">Total you have · bank + cash</div>
+    <div class="big num" style="color:var(--bone)">${money(S.bank+S.cash.balance)}</div>
+    <div class="totsplit"><button type="button" data-act="editBank" aria-label="Update bank balance"><span class="eyebrow">Bank</span><span class="num">${money(S.bank)}</span></button><span class="plus">+</span><button type="button" data-act="cashVault" aria-label="Open cash vault"><span class="eyebrow">Cash vault</span><span class="num">${money(S.cash.balance)}</span></button></div>
+    ${(S.trading.balance||S.goals.some(g=>g.saved))?`<div class="muted" style="font-size:.78rem;margin-top:6px">With trading and savings goals: <b class="num" style="color:var(--bone)">${money(S.bank+S.cash.balance+S.trading.balance+S.goals.reduce((a,g)=>a+(g.saved||0),0))}</b></div>`:""}
     <div class="free"><span class="muted" style="font-size:.85rem">Free to spend until ${f.hasPay?"payday, ":""}${fd(f.until)}</span><span class="v ${f.amount<0?"neg":"pos"}">${money(f.amount)}</span>
     <span class="muted" style="font-size:.75rem">${moneyR(f.due)} is set aside for bills${gb?" and groceries":""} before then</span><span></span></div>
     <div class="pots">
