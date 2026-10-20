@@ -135,6 +135,36 @@ ul.hist li:last-child{border-bottom:0}
 .hx{font-family:var(--data);font-weight:600;color:var(--flame);font-variant-numeric:tabular-nums}
 .empty{color:var(--muted);font-size:.9rem}
 
+/* hour by hour */
+.hnow{border-left:3px solid var(--flame);padding:2px 0 2px 12px;display:flex;flex-direction:column;gap:4px}
+.hnow .hh{font-family:var(--data);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:.78rem;color:var(--flame)}
+.hnow .ht{font-family:var(--display);font-size:1.3rem;line-height:1.1}
+.hnow p{margin:0;font-size:.92rem}
+.do{font-size:.88rem;color:var(--fg);background:#1f1416;border-radius:10px;padding:8px 10px}
+.do b{font-family:var(--data);letter-spacing:.08em;text-transform:uppercase;font-size:.75rem;color:var(--ok);margin-right:6px}
+.hnext{font-size:.85rem;color:var(--muted)}
+.hnext b{color:var(--fg);font-weight:600}
+ol.tl{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
+ol.tl li{display:grid;grid-template-columns:62px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem;color:var(--muted)}
+ol.tl li:last-child{border-bottom:0}
+ol.tl li span:first-child{font-family:var(--data);font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums}
+ol.tl li b{color:var(--fg);font-weight:600;display:block}
+ol.tl li.cur{color:var(--fg)}
+ol.tl li.cur span:first-child{color:var(--flame)}
+
+/* word card */
+.word{border:1px solid rgba(255,179,71,.35);background:radial-gradient(120% 80% at 100% 0%,#2c1613,transparent 60%),var(--panel)}
+.wtabs{display:flex;flex-wrap:wrap;gap:6px}
+.wtab{font:600 .82rem var(--data);letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#1f1416;color:var(--muted);cursor:pointer}
+.wtab[aria-pressed="true"]{color:var(--fg);border-color:var(--flame)}
+.wkind{font-family:var(--data);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.75rem;color:var(--flame)}
+.wtext{font-family:Georgia,"Times New Roman",serif;font-size:1.12rem;line-height:1.5;margin:0;text-wrap:pretty}
+.wref{font-family:var(--data);font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.wnote{font-size:.9rem;margin:0}
+.wact{display:flex;gap:10px}
+.wact button{flex:1;padding:11px}
+button:disabled{opacity:.45;cursor:default;box-shadow:none}
+
 /* result */
 .result{border:1px solid rgba(255,179,71,.5);background:linear-gradient(180deg,#2a1714,#160f10)}
 .result .big{font-family:var(--display);font-size:2rem;line-height:1;color:var(--flame)}
@@ -225,6 +255,35 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
   </section>
 
   <section class="panel result" id="result" hidden></section>
+
+  <section class="panel" id="hourPanel" aria-label="Hour by hour">
+    <h2>Hour by hour</h2>
+    <div class="hnow">
+      <span class="hh" id="hHour">Hour 0</span>
+      <span class="ht" id="hTitle"></span>
+      <p id="hText"></p>
+    </div>
+    <div class="do" id="hDo"></div>
+    <div class="hnext" id="hNext"></div>
+    <details>
+      <summary>Full 24-hour map</summary>
+      <ol class="tl" id="timeline"></ol>
+    </details>
+  </section>
+
+  <section class="panel word" aria-label="Daily fire">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+      <h2>Fuel for the fast</h2>
+      <span class="sub" id="wordXP"></span>
+    </div>
+    <div class="wtabs" id="wtabs" role="group" aria-label="Type"></div>
+    <span class="wkind" id="wKind"></span>
+    <p class="wtext" id="wText"></p>
+    <span class="wref" id="wRef"></span>
+    <p class="wnote" id="wNote"></p>
+    <div class="do" id="wDo"></div>
+    <div class="wact"><button id="wNew" type="button">Another one</button><button class="primary" id="wDone" type="button">Amen</button></div>
+  </section>
 
   <section class="panel">
     <h2>This week</h2>
@@ -517,6 +576,7 @@ function renderTimer(){
   }
   ring.style.strokeDashoffset = CIRC*(1-frac);
   document.documentElement.style.setProperty("--heat", heat.toFixed(2));
+  renderHour();
   // mood
   const st = liveStreak();
   $("mood").textContent = S.current ? (heat>=1 ? "Blazing. Cinder feels your discipline." : "Cinder is gathering fire.") :
@@ -635,7 +695,147 @@ $("importFile").addEventListener("change", async ev=>{
 
 let tt; function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),2800); }
 
+// ---------- hour by hour ----------
+const HOURS = [
+  {from:0,  to:2,  title:"Digesting your meal", text:"Blood sugar and insulin rise as your body takes in your last meal.", tip:"Start a big glass of water now. It sets up the whole fast."},
+  {from:2,  to:4,  title:"Coming back down", text:"Blood sugar drifts back toward normal. Your body is putting away what you ate.", tip:"If you're at work, keep your hands busy. No grazing."},
+  {from:4,  to:8,  title:"Using stored sugar", text:"Insulin drops and your body starts drawing on glycogen, the sugar stored in your liver.", tip:"Sleep through as much of this as you can. Sleep is free fasting."},
+  {from:8,  to:10, title:"First hunger wave", text:"Hunger often shows up around the times you usually eat. It's a habit signal, not an emergency.", tip:"Drink water, wait 15 minutes. Watch the wave pass."},
+  {from:10, to:12, title:"Stores running low", text:"Your liver's sugar stores are getting used up, so your body starts leaning on fat.", tip:"Black coffee or plain tea helps here, and doesn't break the fast."},
+  {from:12, to:14, title:"Fat burning picks up", text:"With less sugar to use, fat becomes a bigger share of your fuel. Ketones start to rise a little.", tip:"Go for a 10-minute walk. Light movement helps the switch."},
+  {from:14, to:16, title:"The last stretch", text:"This is where most people quit. The hunger is real but it comes and goes, and you're almost there.", tip:"Plan your first meal now: protein and vegetables. Having a plan stops panic eating."},
+  {from:16, to:18, title:"16:8 zone reached", text:"Goal territory. Fat burning is running steadily and you've trained your body to wait.", tip:"Break the fast slowly: eggs, chicken, soup. Then a normal plate after 20 minutes."},
+  {from:18, to:20, title:"Deep fast", text:"Ketones keep rising. Many people say their head feels clear and calm here.", tip:"Add a pinch of salt to a glass of water to head off headaches."},
+  {from:20, to:24, title:"Into the long fast", text:"Research suggests cell clean-up processes (autophagy) increase with longer fasts, though in humans the exact timing isn't known.", tip:"Take it easy. No hard workouts. Stop and eat if you feel dizzy or shaky."},
+  {from:24, to:99, title:"A full day", text:"You did a full 24 hours. More isn't better from here without a doctor's guidance.", tip:"End the fast now with something small and gentle. You earned it."}
+];
+let lastHourKey = "";
+function renderHour(){
+  const el = S.current ? Date.now()-S.current.start : null;
+  const h = el==null ? null : Math.floor(el/HOUR);
+  const key = h==null ? "idle" : `${S.current.start}:${h}`;
+  if(key===lastHourKey) return; lastHourKey = key;
+  const tl = $("timeline");
+  if(!tl.children.length){
+    HOURS.forEach(x=>{ const li=document.createElement("li"); const a=document.createElement("span"); a.textContent = x.to>24 ? "24h+" : `${x.from}–${x.to}h`;
+      const b=document.createElement("span"); const t=document.createElement("b"); t.textContent=x.title; b.append(t, document.createTextNode(x.text)); li.append(a,b); tl.append(li); });
+  }
+  if(h==null){
+    $("hHour").textContent = "Not fasting";
+    $("hTitle").textContent = "Ready when you are";
+    $("hText").textContent = "Start a fast and this card will tell you what's happening in your body, hour by hour.";
+    $("hDo").innerHTML = "<b>Do now</b>"; $("hDo").append("Eat a filling meal with protein so the first hours are easy.");
+    $("hNext").textContent = "";
+    [...tl.children].forEach(li=>li.className="");
+    return;
+  }
+  const i = HOURS.findIndex(x=>h>=x.from && h<x.to);
+  const cur = HOURS[i];
+  $("hHour").textContent = `Hour ${h} · right now`;
+  $("hTitle").textContent = cur.title;
+  $("hText").textContent = cur.text;
+  $("hDo").innerHTML = "<b>Do now</b>"; $("hDo").append(cur.tip);
+  const nx = HOURS[i+1];
+  $("hNext").textContent = "";
+  if(nx && nx.from<=24){ const b=document.createElement("b"); b.textContent = nx.title; $("hNext").append(`Next, at hour ${nx.from} (${clockTime(S.current.start+nx.from*HOUR)}): `, b); }
+  [...tl.children].forEach((li,k)=>li.className = k===i ? "cur" : "");
+}
+
+// ---------- fuel cards ----------
+const WORD = [
+  // scripture (KJV)
+  {k:"scripture", t:"Moreover when ye fast, be not, as the hypocrites, of a sad countenance… But thou, when thou fastest, anoint thine head, and wash thy face.", r:"Matthew 6:16-17", n:"Jesus said \"when\" you fast, not \"if\". Fasting was expected. And do it quietly, with your head up.", d:"Don't announce your fast today. Keep it between you and God."},
+  {k:"scripture", t:"…thy Father, which seeth in secret, shall reward thee openly.", r:"Matthew 6:18", n:"Nobody at work sees you push through hour 14. God does, and it counts.", d:"When the hunger hits, say a short prayer instead of reaching for food."},
+  {k:"scripture", t:"Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.", r:"Matthew 4:4", n:"Jesus said this while hungry, after fasting forty days. Hunger is where this verse gets real.", d:"Each time you feel hungry today, repeat this verse once."},
+  {k:"scripture", t:"I have meat to eat that ye know not of.", r:"John 4:32", n:"Purpose can feed you. When you know why you're doing this, the hunger gets quieter.", d:"Write down your one reason for fasting and look at it when it's hard."},
+  {k:"scripture", t:"Is not this the fast that I have chosen? to loose the bands of wickedness, to undo the heavy burdens… and that ye break every yoke?", r:"Isaiah 58:6", n:"Fasting is about breaking chains. Food habits are a small one. Impulse is a bigger one.", d:"Pick one other habit to fast from today too, like scrolling or spending."},
+  {k:"scripture", t:"Then shall thy light break forth as the morning, and thine health shall spring forth speedily.", r:"Isaiah 58:8", n:"In Isaiah, a true fast comes with a promise of light and health.", d:"Notice one way you feel better today than when you started fasting."},
+  {k:"scripture", t:"And the LORD shall guide thee continually, and satisfy thy soul in drought.", r:"Isaiah 58:11", n:"Your stomach is in a drought for a few hours. Your soul doesn't have to be.", d:"Use your hungriest hour for five minutes of prayer or quiet."},
+  {k:"scripture", t:"Turn ye even to me with all your heart, and with fasting.", r:"Joel 2:12", n:"Fasting is a way of turning toward God with your whole self, body included.", d:"Start this fast with one sentence telling God what you want to change."},
+  {k:"scripture", t:"And when he had fasted forty days and forty nights, he was afterward an hungred.", r:"Matthew 4:2", n:"Even Jesus felt hungry. Feeling it doesn't mean you're failing. It means you're fasting.", d:"Next hunger wave: name it (\"this is hunger\") and keep going."},
+  {k:"scripture", t:"So we fasted and besought our God for this: and he was intreated of us.", r:"Ezra 8:23", n:"Ezra fasted before a dangerous journey and asked for protection. Fasting backed up the prayer.", d:"Bring one real request to God during this fast."},
+  {k:"scripture", t:"Prove thy servants, I beseech thee, ten days; and let them give us pulse to eat, and water to drink.", r:"Daniel 1:12", n:"Daniel chose simple food, and after ten days he looked healthier than the men eating the king's food.", d:"Make your first meal simple and clean today, the Daniel way."},
+  {k:"scripture", t:"…and fast ye for me, and neither eat nor drink three days, night or day: I also and my maidens will fast likewise.", r:"Esther 4:16", n:"Esther fasted before the hardest moment of her life. Fasting prepares you for big moves.", d:"Think of one hard thing coming up, and dedicate this fast to it."},
+  {k:"scripture", t:"And when they had fasted and prayed, and laid their hands on them, they sent them away.", r:"Acts 13:3", n:"The early church fasted before big decisions and new beginnings.", d:"Fast before your next big decision, like a job or money move."},
+  {k:"scripture", t:"…which departed not from the temple, but served God with fastings and prayers night and day.", r:"Luke 2:37", n:"Anna made fasting a lifelong habit, and she was there to see Jesus. Consistency gets rewarded.", d:"Protect your streak today. Long-term beats intense."},
+  {k:"scripture", t:"But I keep under my body, and bring it into subjection.", r:"1 Corinthians 9:27", n:"Paul trained his body like an athlete. Your body serves you, not the other way around.", d:"Say no to one craving today, out loud if you have to."},
+  {k:"scripture", t:"What? know ye not that your body is the temple of the Holy Ghost which is in you…", r:"1 Corinthians 6:19", n:"Taking care of your body is a spiritual act, not just a looks thing.", d:"Break your fast with food you'd be proud to put in a temple."},
+  {k:"scripture", t:"He that hath no rule over his own spirit is like a city that is broken down, and without walls.", r:"Proverbs 25:28", n:"Self-control is your wall. Every finished fast adds a brick.", d:"Count your finished fasts in Emberkeep. That's your wall going up."},
+  {k:"scripture", t:"…God is faithful, who will not suffer you to be tempted above that ye are able; but will with the temptation also make a way to escape.", r:"1 Corinthians 10:13", n:"No craving is bigger than you. There's always a way out: water, a walk, a prayer.", d:"Pick your escape plan now, before the craving comes."},
+  {k:"scripture", t:"But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles.", r:"Isaiah 40:31", n:"Waiting is the whole skill of fasting. Strength comes to people who wait.", d:"When you want to quit early, wait 30 more minutes first."},
+  {k:"scripture", t:"Now no chastening for the present seemeth to be joyous, but grievous: nevertheless afterward it yieldeth the peaceable fruit of righteousness.", r:"Hebrews 12:11", n:"Discipline feels bad in the moment and good afterward. Every time.", d:"Remember how good you felt after your last finished fast."},
+  {k:"scripture", t:"And let us not be weary in well doing: for in due season we shall reap, if we faint not.", r:"Galatians 6:9", n:"Results come in their season, not overnight. Keep sowing.", d:"Don't weigh yourself daily. Look at the weekly trend."},
+  {k:"scripture", t:"Watch and pray, that ye enter not into temptation: the spirit indeed is willing, but the flesh is weak.", r:"Matthew 26:41", n:"Jesus knew the flesh is weak. So plan for it. Don't rely on willpower alone.", d:"Don't keep junk food at home. Remove the temptation."},
+  {k:"scripture", t:"For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.", r:"2 Timothy 1:7", n:"A sound mind is self-control. You already have it. Fasting is practice.", d:"Do one hard thing today you've been putting off."},
+  {k:"scripture", t:"I can do all things through Christ which strengtheneth me.", r:"Philippians 4:13", n:"Paul said this about being content when he had little and when he had plenty, hungry or full.", d:"Say it at hour 14 when it gets hard."},
+  {k:"scripture", t:"But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, meekness, temperance.", r:"Galatians 5:22-23", n:"Temperance means self-control. It grows like fruit, slowly, from what you feed.", d:"Practice temperance with one other thing today: words, money, or your phone."},
+
+  // benefits
+  {k:"benefit", t:"Fewer eating hours usually means fewer calories without counting anything.", r:"Weight", n:"That's the main reason fasting helps with weight loss. It's simple, not magic.", d:"Keep the window and eat normal portions inside it."},
+  {k:"benefit", t:"Your body gets better at handling sugar.", r:"Blood sugar", n:"Studies show time-restricted eating can improve insulin sensitivity in many people.", d:"Cut sugary drinks inside your window to boost this."},
+  {k:"benefit", t:"Cravings get weaker after the first 2 weeks.", r:"Appetite", n:"Your hunger signals adjust to your new schedule. The hard part is temporary.", d:"Push through to day 14. It gets easier."},
+  {k:"benefit", t:"You save money on snacks and late-night food.", r:"Wallet", n:"No drive-through after your shift adds up fast.", d:"Put the money you'd have spent on snacks into savings this week."},
+  {k:"benefit", t:"You stop feeling heavy and sleepy after meals.", r:"Energy", n:"Fewer meals means fewer sugar spikes and crashes.", d:"Notice how you feel at work during a fast versus after a big meal."},
+  {k:"benefit", t:"Better sleep when you don't go to bed stuffed.", r:"Sleep", n:"A light stomach lets your body rest instead of digesting all night.", d:"Keep 2–3 hours between your last bite and bed."},
+  {k:"benefit", t:"Fasting trains you to feel a want without obeying it.", r:"Self-control", n:"That skill carries over to spending, temper, and impulses.", d:"Next impulse buy: wait 24 hours, like a fast."},
+  {k:"benefit", t:"Less time thinking about food.", r:"Focus", n:"Fewer meals means fewer decisions, so your attention is freer for other things.", d:"Use your fasting hours for one focused task."},
+  {k:"benefit", t:"Lower blood pressure in some people.", r:"Heart", n:"Some studies of time-restricted eating show modest drops, especially alongside weight loss.", d:"Pair fasting with a daily walk for a bigger effect."},
+  {k:"benefit", t:"Your gut gets a long break between meals.", r:"Digestion", n:"Many people report less bloating once they stop eating all day.", d:"Drink water through the fast to keep things moving."},
+  {k:"benefit", t:"A simple routine is easier to keep than a strict diet.", r:"Habit", n:"Fasting has one rule: when. That's why people stick with it.", d:"Same window every day, days off included."},
+  {k:"benefit", t:"Longer fasts may boost cell clean-up (autophagy).", r:"Cells", n:"It's well shown in animals. In humans, the timing is still being studied.", d:"You don't need extreme fasts for this. Consistency matters more."},
+
+  // motivation
+  {k:"motivation", t:"Hunger is a wave, not a wall. It peaks and passes in about 15 minutes.", r:"Cinder", n:"", d:"Set a 15-minute timer next time and prove it."},
+  {k:"motivation", t:"You're not starving. You're choosing. That's power.", r:"Cinder", n:"", d:"Say \"I'm choosing this\" next time hunger hits."},
+  {k:"motivation", t:"Every hour you fast feeds the dragon.", r:"Cinder", n:"", d:"Check Cinder's XP bar. You're closer to the next stage than you think."},
+  {k:"motivation", t:"The man who controls his plate can control his wallet, his temper and his future.", r:"Cinder", n:"", d:"Win the fast today. It's practice for everything else."},
+  {k:"motivation", t:"Suffer the small discomfort now, or the bigger regret later.", r:"Cinder", n:"", d:"Picture yourself 3 months from now, 10 to 15 pounds lighter."},
+  {k:"motivation", t:"You don't have to feel motivated. You just have to not eat yet.", r:"Cinder", n:"", d:"Get through the next hour. Just one."},
+  {k:"motivation", t:"Streaks are built one boring day at a time.", r:"Cinder", n:"", d:"Protect today's streak like it's money in the bank."},
+  {k:"motivation", t:"Your future self is watching what you do at hour 14.", r:"Cinder", n:"", d:"Make them proud. Water, then wait."},
+  {k:"motivation", t:"Discipline is choosing what you want most over what you want now.", r:"Cinder", n:"", d:"Write down what you want most and keep it on your phone's lock screen."},
+  {k:"motivation", t:"You deal cards all night under pressure. A few hours without food is nothing.", r:"Cinder", n:"", d:"Bring the same calm you have at the table to your hunger."},
+  {k:"motivation", t:"Missed a day? A dragon doesn't stop flying because of one storm.", r:"Cinder", n:"", d:"Start your next fast on time. No guilt, no binge."},
+  {k:"motivation", t:"Strong people aren't never-hungry people. They're hungry and steady.", r:"Cinder", n:"", d:"Next hunger wave: breathe slow, drink water, stay steady."}
+];
+const KINDS = [["all","All"],["scripture","Scripture"],["benefit","Benefits"],["motivation","Motivation"]];
+const KIND_LABEL = {scripture:"Scripture · KJV", benefit:"Benefit", motivation:"Motivation"};
+let wKind = "all", wIdx = -1;
+function pickWord(){
+  const pool = WORD.map((w,i)=>i).filter(i=>wKind==="all" || WORD[i].k===wKind);
+  let n = pool[Math.floor(Math.random()*pool.length)];
+  if(pool.length>1) while(n===wIdx) n = pool[Math.floor(Math.random()*pool.length)];
+  wIdx = n; showWord();
+}
+function showWord(){
+  const w = WORD[wIdx];
+  $("wKind").textContent = KIND_LABEL[w.k];
+  $("wText").textContent = w.k==="scripture" ? `“${w.t}”` : w.t;
+  $("wRef").textContent = w.k==="motivation" ? "" : `— ${w.r}`;
+  $("wRef").hidden = w.k==="motivation";
+  $("wNote").textContent = w.n; $("wNote").hidden = !w.n;
+  $("wDo").innerHTML = "<b>Apply it</b>"; $("wDo").append(w.d);
+  $("wDone").textContent = w.k==="scripture" ? "Amen" : "Got it";
+  renderWordXP();
+}
+function renderWordXP(){
+  const done = S.wordDay === dayKey(new Date());
+  $("wordXP").textContent = done ? "Today's +5 XP earned" : "+5 XP today";
+  $("wDone").disabled = done;
+}
+const wt = $("wtabs");
+KINDS.forEach(([k,l])=>{ const b=document.createElement("button"); b.type="button"; b.className="wtab"; b.textContent=l; b.setAttribute("aria-pressed",String(k===wKind));
+  b.onclick=()=>{ wKind=k; [...wt.children].forEach(x=>x.setAttribute("aria-pressed",String(x===b))); pickWord(); }; wt.append(b); });
+$("wNew").onclick = pickWord;
+$("wDone").onclick = ()=>{
+  const today = dayKey(new Date());
+  if(S.wordDay===today) return;
+  S.wordDay = today; addXP(5); save(); render(); renderWordXP();
+  toast(WORD[wIdx].k==="scripture" ? "+5 XP · Word received" : "+5 XP · Locked in");
+};
+
 // ---------- boot ----------
+pickWord();
 render();
 setTimeout(checkIn, 600);
 setInterval(renderTimer, 1000);
