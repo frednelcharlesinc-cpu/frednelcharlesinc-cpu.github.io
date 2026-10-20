@@ -15,104 +15,151 @@
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <title>Emberkeep</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
 <style>
-/* Layout: one phone column — dragon lair up top, fast clock + calorie bar, scan button, today's log, settings at the foot */
+/* Layout: one phone column. Dragon lair, then the fast ring (the heart of the app), then the week, quest, badges, history. Single dark look by design. */
 :root{
-  --bg:#0c0a0b; --cloud:#1d1416; --panel:#171113; --line:#3a2427;
-  --fg:#f1e6e2; --muted:#a8918c; --ember:#ff4a2b; --flame:#ffb347; --blood:#b3131b; --ok:#5fd18a; --warn:#ffb347; --bad:#ff4a5a;
+  --bg:#0c0a0b; --panel:#171113; --raised:#22171a; --line:#3a2427;
+  --fg:#f1e6e2; --muted:#a8918c; --ember:#ff4a2b; --flame:#ffb347; --blood:#b3131b; --ok:#5fd18a; --bad:#ff4a5a;
   --display:"Pirata One","Georgia",serif; --body:"Barlow",system-ui,sans-serif; --data:"Barlow Condensed","Arial Narrow",sans-serif;
+  --heat:0;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{background:var(--bg)}
-body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;min-height:100%;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));margin:0;
-  background:
-    radial-gradient(120% 40% at 20% -5%,#2a1518 0%,transparent 60%),
-    radial-gradient(90% 35% at 90% 0%,#241016 0%,transparent 55%),
-    var(--bg);
-  overflow-x:hidden}
+[hidden]{display:none!important}
+img{max-width:100%}
+html{background:var(--bg)}
+body{margin:0;color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(120% 40% at 20% -5%,#2a1518 0%,transparent 60%),radial-gradient(90% 35% at 90% 0%,#241016 0%,transparent 55%),var(--bg);
+  overflow-x:hidden;-webkit-tap-highlight-color:transparent}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(60% 30% at 70% 5%,rgba(255,74,43,.35),transparent 70%);opacity:0;animation:flash 9s infinite}
 @keyframes flash{0%,88%,100%{opacity:0}89%{opacity:.9}90%{opacity:.1}91.5%{opacity:.7}93%{opacity:0}}
-@media (prefers-reduced-motion:reduce){body::after{animation:none}.egg-glow,.pulse{animation:none!important}}
 main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-h1{font-family:var(--display);font-weight:400;font-size:2.4rem;margin:0;letter-spacing:.5px;line-height:1;
+h1{font-family:var(--display);font-weight:400;font-size:2.4rem;margin:0;line-height:1;
   background:linear-gradient(180deg,var(--flame),var(--ember) 60%,var(--blood));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{font-family:var(--data);text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:1.4rem;margin:0;line-height:1.1}
+.sub,.label{font-family:var(--data);text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;color:var(--muted)}
+.panel{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.note{font-size:.82rem;color:var(--muted);margin:0}
+
+/* lair */
 .lair{position:relative;border:1px solid var(--line);border-radius:18px;padding:16px;background:linear-gradient(180deg,#1a1012,#0f0b0c);overflow:hidden}
-.lair::before{content:"";position:absolute;inset:auto -20% -40% -20%;height:70%;background:radial-gradient(closest-side,rgba(255,74,43,.22),transparent);pointer-events:none}
-.lair-row{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center;position:relative}
+.lair::before{content:"";position:absolute;inset:auto -20% -40% -20%;height:75%;background:radial-gradient(closest-side,rgba(255,74,43,calc(.15 + var(--heat)*.4)),transparent);pointer-events:none;transition:background 1s}
+.lair-row{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:center;position:relative}
 @media (max-width:360px){.lair-row{grid-template-columns:1fr}}
-#dragon{width:150px;height:150px;max-width:100%}
+#dragon{width:140px;height:140px;max-width:100%}
 .stage{font-family:var(--display);font-size:1.7rem;line-height:1.05;margin:0}
 .dname{font-family:var(--data);letter-spacing:.1em;text-transform:uppercase;color:var(--flame);font-size:.8rem}
+.mood{font-size:.85rem;color:var(--muted);margin-top:2px}
 .xpbar{height:10px;border-radius:6px;background:#2a1a1c;overflow:hidden;margin-top:8px}
-.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blood),var(--ember),var(--flame));width:0;transition:width .6s}
-.xpmeta{display:flex;justify-content:space-between;font-family:var(--data);font-size:.85rem;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blood),var(--ember),var(--flame));width:0;transition:width .8s}
+.xpmeta{display:flex;justify-content:space-between;gap:8px;font-family:var(--data);font-size:.85rem;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{font-family:var(--data);font-size:.82rem;letter-spacing:.04em;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--fg);background:#1f1416}
-.chip b{color:var(--flame);font-weight:600}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media (max-width:380px){.grid2{grid-template-columns:1fr}}
-.card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);min-width:0}
-.label{font-family:var(--data);text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--muted)}
-.big{font-family:var(--data);font-weight:700;font-size:2rem;line-height:1.05;font-variant-numeric:tabular-nums}
-.state{display:inline-block;font-family:var(--data);font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:6px;margin-top:6px}
-.state.fast{background:rgba(255,74,43,.15);color:var(--ember)}
-.state.eat{background:rgba(95,209,138,.14);color:var(--ok)}
-.calbar{height:12px;border-radius:7px;background:#2a1a1c;overflow:hidden;margin-top:10px;position:relative}
-.calbar i{display:block;height:100%;width:0;background:var(--ok);transition:width .5s,background .3s}
-.small{font-size:.85rem;color:var(--muted)}
-.cta{display:flex;gap:10px}
-button,.btn{font:600 1rem var(--data);letter-spacing:.06em;text-transform:uppercase;border-radius:12px;border:1px solid var(--line);background:#22171a;color:var(--fg);padding:12px 14px;cursor:pointer}
-button:focus-visible,input:focus-visible,.btn:focus-within{outline:2px solid var(--flame);outline-offset:2px}
+.chip{font-family:var(--data);font-size:.85rem;letter-spacing:.04em;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:#1f1416}
+.chip b{color:var(--flame);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* timer */
+.timer{align-items:center;text-align:center;gap:12px;padding-block:18px}
+.ringwrap{position:relative;width:min(280px,78vw);aspect-ratio:1;max-width:100%}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:#2a1a1c;stroke-width:14}
+.ring-fg{fill:none;stroke:url(#rg);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .9s linear}
+.ring-fg.eat{stroke:var(--ok)}
+.ring-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:30px}
+.mode{font-family:var(--data);font-weight:600;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;padding:2px 9px;border-radius:6px}
+.mode.fast{background:rgba(255,74,43,.15);color:var(--ember)}
+.mode.eat{background:rgba(95,209,138,.14);color:var(--ok)}
+.mode.idle{background:#2a1a1c;color:var(--muted)}
+.clock{font-family:var(--data);font-weight:700;font-size:clamp(2.4rem,12vw,3.4rem);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.clocksub{font-family:var(--data);font-size:.95rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.phase{max-width:34ch}
+.phase b{font-family:var(--display);font-weight:400;font-size:1.25rem;color:var(--flame);display:block}
+.phase span{font-size:.88rem;color:var(--muted)}
+.goals{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.goal{font:600 .95rem var(--data);letter-spacing:.04em;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#1f1416;color:var(--fg);cursor:pointer}
+.goal[aria-pressed="true"]{background:linear-gradient(180deg,var(--ember),var(--blood));border-color:transparent;color:#fff}
+.actions{display:flex;gap:10px;width:100%}
+button{font:600 1rem var(--data);letter-spacing:.06em;text-transform:uppercase;border-radius:12px;border:1px solid var(--line);background:var(--raised);color:var(--fg);padding:13px 14px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--flame);outline-offset:2px}
 .primary{flex:1;background:linear-gradient(180deg,var(--ember),var(--blood));border-color:transparent;color:#fff;box-shadow:0 6px 24px -8px rgba(255,74,43,.7)}
-.btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex:1}
-.btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
-button:disabled{opacity:.5;cursor:default}
-.panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:10px}
-.panel h2{font-family:var(--display);font-weight:400;font-size:1.4rem;margin:0}
-input[type=text],input[type=number],input[type=time],textarea{width:100%;font:500 1rem var(--body);color:var(--fg);background:#0f0b0c;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-textarea{resize:vertical;min-height:56px}
-.row{display:flex;gap:10px;align-items:end}
+.ghost{background:none;border:0;color:var(--muted);text-transform:none;letter-spacing:0;font:500 .9rem var(--body);text-decoration:underline;text-underline-offset:3px;padding:4px}
+.inline{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#120d0e;display:flex;flex-direction:column;gap:10px;text-align:left}
+input[type=datetime-local]{width:100%;font:500 1rem var(--body);color:var(--fg);background:#0f0b0c;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.row{display:flex;gap:10px}
 .row>*{flex:1;min-width:0}
-#preview{border-radius:12px;max-height:220px;object-fit:cover;width:100%}
-.verdict{border-radius:12px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
-.verdict .v{font-family:var(--display);font-size:1.6rem;line-height:1}
-.verdict.eat{border-color:rgba(95,209,138,.5);background:rgba(95,209,138,.07)}.verdict.eat .v{color:var(--ok)}
-.verdict.half{border-color:rgba(255,179,71,.5);background:rgba(255,179,71,.07)}.verdict.half .v{color:var(--warn)}
-.verdict.skip{border-color:rgba(255,74,90,.5);background:rgba(255,74,90,.07)}.verdict.skip .v{color:var(--bad)}
-.macros{display:flex;gap:12px;font-family:var(--data);font-size:.95rem;color:var(--muted);flex-wrap:wrap}
-.macros b{color:var(--fg)}
-ul.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-ul.log li{display:grid;grid-template-columns:52px 1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-ul.log li:last-child{border-bottom:0}
-.t{font-family:var(--data);color:var(--muted);font-variant-numeric:tabular-nums}
-.f{min-width:0;overflow-wrap:anywhere}
-.k{font-family:var(--data);font-weight:600;font-variant-numeric:tabular-nums}
-.oow{font-size:.72rem;color:var(--ember);font-family:var(--data);letter-spacing:.05em;text-transform:uppercase}
-.x{background:none;border:0;color:var(--muted);padding:4px 8px;font-size:1.1rem}
-.empty{color:var(--muted);font-size:.9rem;padding:6px 0}
+
+/* zones */
+.zones{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.zones li{height:8px;border-radius:4px;background:#2a1a1c}
+.zones li.done{background:var(--ember)}
+.zones li.now{background:var(--flame);box-shadow:0 0 10px var(--flame)}
+.zlabels{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;font-family:var(--data);font-size:.72rem;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+
+/* week + quest */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.day{display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--data);font-size:.8rem;color:var(--muted)}
+.dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:.9rem;background:#140f10}
+.dot.hit{background:radial-gradient(circle at 40% 35%,var(--flame),var(--ember) 55%,var(--blood));border-color:transparent;box-shadow:0 0 12px -2px var(--ember)}
+.dot.part{border-color:var(--ember);color:var(--ember)}
+.day.today{color:var(--fg)}
+.day.today .dot{outline:2px solid var(--muted);outline-offset:2px}
+.quest{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.qbar{height:10px;border-radius:6px;background:#2a1a1c;overflow:hidden}
+.qbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blood),var(--flame));width:0;transition:width .6s}
+.qxp{font-family:var(--data);font-weight:600;color:var(--flame);white-space:nowrap}
+
+/* badges */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.badge{border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;background:#140f10;display:flex;flex-direction:column;align-items:center;gap:4px}
+.badge .ic{font-size:1.5rem;line-height:1;filter:grayscale(1) brightness(.5)}
+.badge .bn{font-family:var(--data);font-weight:600;font-size:.85rem;line-height:1.1}
+.badge .bd{font-size:.72rem;color:var(--muted);line-height:1.2}
+.badge.got{border-color:rgba(255,179,71,.45);background:linear-gradient(180deg,#2a1714,#160f10)}
+.badge.got .ic{filter:none}
+.badge:not(.got) .bn{color:var(--muted)}
+
+/* history */
+ul.hist{list-style:none;margin:0;padding:0}
+ul.hist li{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+ul.hist li:last-child{border-bottom:0}
+.hd{min-width:0}
+.hd b{font-family:var(--data);font-size:1.1rem;font-variant-numeric:tabular-nums}
+.hd small{display:block;color:var(--muted);font-size:.8rem}
+.tag{font-family:var(--data);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:6px}
+.tag.hit{background:rgba(255,179,71,.14);color:var(--flame)}
+.tag.miss{background:#2a1a1c;color:var(--muted)}
+.hx{font-family:var(--data);font-weight:600;color:var(--flame);font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);font-size:.9rem}
+
+/* result */
+.result{border:1px solid rgba(255,179,71,.5);background:linear-gradient(180deg,#2a1714,#160f10)}
+.result .big{font-family:var(--display);font-size:2rem;line-height:1;color:var(--flame)}
+.lines{display:flex;flex-direction:column;gap:4px;font-family:var(--data);font-size:1rem}
+.lines div{display:flex;justify-content:space-between;gap:10px}
+.lines div span:last-child{color:var(--flame);font-weight:600}
+
 details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-size:.8rem}
-.howxp{font-size:.88rem;color:var(--muted);margin:0;padding-left:18px}
+.howxp{font-size:.88rem;color:var(--muted);margin:8px 0 0;padding-left:18px}
 .howxp b{color:var(--flame)}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(140%);background:#2a1518;border:1px solid var(--ember);color:var(--fg);padding:10px 16px;border-radius:12px;font-family:var(--data);letter-spacing:.04em;transition:transform .35s;max-width:calc(100% - 32px);z-index:20;text-align:center}
+.btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex:1;font:600 1rem var(--data);letter-spacing:.06em;text-transform:uppercase;border-radius:12px;border:1px solid var(--line);background:var(--raised);padding:13px 14px;cursor:pointer}
+.btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(160%);background:#2a1518;border:1px solid var(--ember);color:var(--fg);padding:10px 16px;border-radius:12px;font-family:var(--data);letter-spacing:.04em;transition:transform .35s;max-width:calc(100% - 32px);z-index:20;text-align:center}
 #toast.on{transform:translateX(-50%) translateY(0)}
 .hatch{animation:shake .6s 2}
 @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
 .egg-glow{animation:glow 2.6s ease-in-out infinite}
 @keyframes glow{50%{opacity:.35}}
-.note{font-size:.78rem;color:var(--muted)}
-[hidden]{display:none!important}
-img{max-width:100%}
-.keyrow{display:flex;gap:8px}
-.keyrow input{flex:1}
+.breathe{animation:breathe 3.2s ease-in-out infinite;transform-origin:50% 70%}
+@keyframes breathe{50%{transform:scale(1.03)}}
+@media (prefers-reduced-motion:reduce){body::after,.egg-glow,.breathe,.hatch{animation:none!important}}
 </style>
 </head>
 <body>
-
 <main>
   <header>
     <h1>Emberkeep</h1>
@@ -121,182 +168,259 @@ img{max-width:100%}
 
   <section class="lair" aria-label="Your dragon">
     <div class="lair-row">
-      <svg id="dragon" viewBox="0 0 200 200" role="img" aria-label="Dragon"></svg>
+      <svg id="dragon" viewBox="0 0 200 200" role="img" aria-label="Cinder the dragon"></svg>
       <div>
-        <div class="dname">Cinder · Stage <span id="stageNum">1</span> of 6</div>
+        <div class="dname">Cinder · Stage <span id="stageNum">1</span>/7</div>
         <p class="stage" id="stageName">Ember Egg</p>
+        <div class="mood" id="mood"></div>
         <div class="xpbar"><i id="xpFill"></i></div>
         <div class="xpmeta"><span id="xpText">0 XP</span><span id="xpNext"></span></div>
         <div class="chips">
           <span class="chip">🔥 Streak <b id="streak">0</b></span>
-          <span class="chip">Today <b id="xpToday">+0</b> XP</span>
+          <span class="chip">Hours <b id="hoursTotal">0</b></span>
+          <span class="chip">Fasts <b id="fastCount">0</b></span>
         </div>
       </div>
     </div>
   </section>
 
-  <div class="grid2">
-    <div class="card">
-      <div class="label">Fast clock</div>
-      <div class="big pulse" id="fastBig">--:--</div>
-      <span class="state" id="fastState">—</span>
-      <div class="small" id="fastSub"></div>
+  <section class="panel timer" aria-label="Fast timer">
+    <div class="ringwrap">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset=".6" stop-color="#ff4a2b"/><stop offset="1" stop-color="#b3131b"/></linearGradient></defs>
+        <circle class="ring-bg" cx="100" cy="100" r="88"/>
+        <circle class="ring-fg" id="ring" cx="100" cy="100" r="88"/>
+      </svg>
+      <div class="ring-in">
+        <span class="mode idle" id="mode">Ready</span>
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="clocksub" id="clocksub">Pick a goal and start</div>
+      </div>
     </div>
-    <div class="card">
-      <div class="label">Calories today</div>
-      <div class="big" id="calBig">0</div>
-      <div class="small" id="calSub">of 2000</div>
-      <div class="calbar"><i id="calFill"></i></div>
-    </div>
-  </div>
 
-  <div class="cta">
-    <label class="btn primary" for="photo">📸 Scan a meal<input id="photo" type="file" accept="image/*" capture="environment"></label>
-    <button id="typeBtn" type="button">Type it</button>
-  </div>
+    <div class="phase" id="phase"></div>
 
-  <section class="panel" id="scanPanel" hidden>
-    <h2 id="scanTitle">Read the plate</h2>
-    <img id="preview" alt="Your meal photo" hidden>
-    <label class="label" for="desc">What is it? (helps the estimate)</label>
-    <textarea id="desc" placeholder="e.g. jerk chicken, rice and peas, small coleslaw"></textarea>
-    <button class="primary" id="askBtn" type="button">Ask Cinder</button>
-    <div id="result" hidden></div>
-    <div class="row">
-      <div><label class="label" for="food">Food</label><input id="food" type="text"></div>
-      <div style="flex:.6"><label class="label" for="kcal">Calories</label><input id="kcal" type="number" min="0" inputmode="numeric"></div>
+    <div style="width:100%" id="zoneWrap">
+      <ul class="zones" id="zones"></ul>
+      <div class="zlabels"><span>0h</span><span>4h</span><span>12h</span><span>16h</span><span>18h</span><span>24h</span></div>
     </div>
-    <div class="row">
-      <button class="primary" id="logBtn" type="button">Log it</button>
-      <button id="cancelBtn" type="button">Cancel</button>
+
+    <div class="goals" id="goals" role="group" aria-label="Fast goal"></div>
+
+    <div class="actions">
+      <button class="primary" id="mainBtn" type="button">Start fast</button>
     </div>
-    <p class="note">Photo estimates are rough. Adjust the number if you know better.</p>
+    <button class="ghost" id="editBtn" type="button">I started earlier</button>
+
+    <div class="inline" id="editPanel" hidden>
+      <label class="label" for="startAt">Fast started at</label>
+      <input id="startAt" type="datetime-local">
+      <div class="row"><button class="primary" id="saveStart" type="button">Save</button><button id="cancelStart" type="button">Cancel</button></div>
+    </div>
+
+    <div class="inline" id="endPanel" hidden>
+      <div id="endMsg"></div>
+      <div class="row"><button class="primary" id="keepGoing" type="button">Keep going</button><button id="endAnyway" type="button">End fast</button></div>
+    </div>
+  </section>
+
+  <section class="panel result" id="result" hidden></section>
+
+  <section class="panel">
+    <h2>This week</h2>
+    <div class="week" id="week"></div>
+    <div class="quest">
+      <div style="flex:1;min-width:0">
+        <div class="label" id="questLabel">Weekly quest · Hit your goal 5 times</div>
+        <div class="qbar" style="margin-top:6px"><i id="questFill"></i></div>
+      </div>
+      <span class="qxp" id="questXP">0/5 · +100 XP</span>
+    </div>
   </section>
 
   <section class="panel">
-    <h2>Today's log</h2>
-    <ul class="log" id="log"></ul>
+    <h2>Trophies <span class="sub" id="badgeCount"></span></h2>
+    <div class="badges" id="badges"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Recent fasts</h2>
+    <ul class="hist" id="hist"></ul>
   </section>
 
   <section class="panel">
     <details>
       <summary>How Cinder grows</summary>
       <ul class="howxp">
-        <li>Open the app each day: <b>+15</b></li>
-        <li>Log a meal: <b>+10</b> (up to 4 a day)</li>
-        <li>Meal inside your eating window: <b>+5</b></li>
-        <li>Finish a day on target and inside the window: <b>+40</b></li>
-        <li>Streak bonus each day: <b>+5 per streak day</b> (max +50)</li>
+        <li>Every hour fasted: <b>+10 XP</b> (counts up to 24 hours)</li>
+        <li>Hit your goal: <b>+50 XP</b></li>
+        <li>Streak bonus: <b>+10 per streak day</b> (max +100)</li>
+        <li>Open the app each day: <b>+10 XP</b></li>
+        <li>Weekly quest done: <b>+100 XP</b></li>
+        <li>Each trophy: <b>+25 XP</b></li>
       </ul>
-      <p class="note">On target means between 70% and 100% of your goal. Eating far under your goal earns nothing extra, so don't starve the dragon.</p>
-    </details>
-    <details>
-      <summary>Settings</summary>
-      <div class="row" style="margin-top:10px">
-        <div><label class="label" for="goal">Daily calories</label><input id="goal" type="number" min="1200" step="50"></div>
-      </div>
-      <div class="row">
-        <div><label class="label" for="winStart">Window opens</label><input id="winStart" type="time"></div>
-        <div><label class="label" for="winEnd">Window closes</label><input id="winEnd" type="time"></div>
-      </div>
-      <div><label class="label" for="apiKey">Anthropic API key (for photo scans)</label>
-        <input id="apiKey" type="password" autocomplete="off" placeholder="sk-ant-..."></div>
-      <p class="note">Stays on this phone only. Each scan costs about a cent. Set a monthly spend limit in your Anthropic console.</p>
-      <button id="saveSettings" type="button">Save settings</button>
+      <p class="note" style="margin-top:8px">Your streak counts days you hit your goal. Miss a full day and it resets. Fasts under 1 hour don't count. XP stops at 24 hours, so going longer earns nothing extra. Keep 24-hour fasts to once a week.</p>
     </details>
     <details>
       <summary>Backup</summary>
-      <p class="note">Your logs and dragon live on this phone. Save a backup now and then so you never lose Cinder.</p>
-      <div class="row"><button id="exportBtn" type="button">Save backup</button>
-      <label class="btn" for="importFile">Restore backup<input id="importFile" type="file" accept="application/json,.json"></label></div>
+      <p class="note" style="margin-top:8px">Cinder lives on this phone. Save a backup now and then so you never lose your dragon.</p>
+      <div class="row" style="margin-top:10px"><button id="exportBtn" type="button">Save backup</button>
+      <label class="btn" for="importFile">Restore<input id="importFile" type="file" accept="application/json,.json"></label></div>
     </details>
   </section>
-  <p class="note" id="storeNote"></p>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
 const $ = id => document.getElementById(id);
+const KEY = "emberkeep.v2", OLD = "emberkeep.v1";
+const HOUR = 3600e3;
+const GOALS = [12,14,16,18,20,24];
 const STAGES = [
   {xp:0, name:"Ember Egg"},
-  {xp:120, name:"Cracking Egg"},
-  {xp:350, name:"Hatchling"},
-  {xp:800, name:"Whelp"},
-  {xp:1600, name:"Drake"},
-  {xp:3000, name:"Elder Wyrm"}
+  {xp:150, name:"Cracking Egg"},
+  {xp:500, name:"Hatchling"},
+  {xp:1200, name:"Whelp"},
+  {xp:2500, name:"Drake"},
+  {xp:4500, name:"Wyvern"},
+  {xp:7500, name:"Elder Wyrm"}
 ];
-const DEFAULT_PROFILE = {xp:0, streak:0, lastCheckIn:null, lastEvaluated:null, goal:2000, winStart:"12:00", winEnd:"20:00", xpLog:{}};
+const ZONES = [
+  {h:0,  name:"Digesting",        text:"Your body is still working through your last meal."},
+  {h:4,  name:"Settling",         text:"Blood sugar evens out and your body starts using stored energy."},
+  {h:12, name:"Switching over",   text:"Fat burning picks up. Hunger comes in waves. Drink water and ride them out."},
+  {h:16, name:"Fat-burning zone", text:"You hit 16. This is where the 16:8 benefits live."},
+  {h:18, name:"Deep fast",        text:"Ketones start rising. Keep drinking water and add a pinch of salt."},
+  {h:24, name:"Full day",         text:"A full day. Break it gently with something small, like eggs or soup."}
+];
+const BADGES = [
+  {id:"first", ic:"🥚", name:"First Flame",   desc:"Finish a fast",        test:s=>s.fasts.length>=1},
+  {id:"goal",  ic:"🎯", name:"Held the Line", desc:"Hit your goal",        test:s=>s.fasts.some(f=>f.hit)},
+  {id:"s3",    ic:"🔥", name:"Kindling",      desc:"3-day streak",         test:s=>s.bestStreak>=3},
+  {id:"s7",    ic:"🌋", name:"Wildfire",      desc:"7-day streak",         test:s=>s.bestStreak>=7},
+  {id:"s30",   ic:"☄️", name:"Eternal Flame", desc:"30-day streak",        test:s=>s.bestStreak>=30},
+  {id:"h18",   ic:"⚔️", name:"Deep Burn",     desc:"Fast 18 hours",        test:s=>s.fasts.some(f=>f.end-f.start>=18*HOUR)},
+  {id:"h24",   ic:"🛡️", name:"Full Day",      desc:"Fast 24 hours",        test:s=>s.fasts.some(f=>f.end-f.start>=24*HOUR)},
+  {id:"f10",   ic:"🪙", name:"Ten Fasts",     desc:"Finish 10 fasts",      test:s=>s.fasts.length>=10},
+  {id:"f50",   ic:"👑", name:"Fifty Fasts",   desc:"Finish 50 fasts",      test:s=>s.fasts.length>=50},
+  {id:"t100",  ic:"⏳", name:"100 Hours",     desc:"100 hours fasted",     test:s=>s.totalH>=100},
+  {id:"t500",  ic:"🏰", name:"500 Hours",     desc:"500 hours fasted",     test:s=>s.totalH>=500},
+  {id:"quest", ic:"📜", name:"Quest Keeper",  desc:"Finish a weekly quest",test:s=>!!s.questWeek}
+];
+const DEFAULT = {xp:0, streak:0, bestStreak:0, lastHitDay:null, lastCheckIn:null, goalH:16, current:null, lastEnd:null, fasts:[], badges:{}, questWeek:null, totalH:0};
 
-let profile = {...DEFAULT_PROFILE};
-let meals = [];
-let store = null;
-let pending = null; // {photoBlob}
-
-// ---------- dates ----------
+// ---------- helpers ----------
 const pad = n => String(n).padStart(2,"0");
-const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const toMin = s => { const [h,m] = (s||"0:0").split(":").map(Number); return h*60+m; };
-const fmtClock = m => { const h=Math.floor(m/60), mm=Math.floor(m%60); return `${h}h ${pad(mm)}m`; };
-const fmtTime = ts => { const d=new Date(ts); let h=d.getHours(); const ap=h>=12?"pm":"am"; h=h%12||12; return `${h}:${pad(d.getMinutes())}${ap}`; };
-function inWindow(ts){ const d=new Date(ts); const m=d.getHours()*60+d.getMinutes(); const s=toMin(profile.winStart), e=toMin(profile.winEnd);
-  return s<=e ? (m>=s && m<e) : (m>=s || m<e); }
-function stageFor(xp){ let i=0; STAGES.forEach((s,k)=>{ if(xp>=s.xp) i=k; }); return i; }
+const dayKey = d => { d=new Date(d); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const hms = ms => { ms=Math.max(0,ms); const s=Math.floor(ms/1000); return `${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`; };
+const hm = ms => { ms=Math.max(0,ms); const m=Math.floor(ms/60000); return `${Math.floor(m/60)}h ${pad(m%60)}m`; };
+const clockTime = t => { const d=new Date(t); let h=d.getHours(); const ap=h>=12?"pm":"am"; h=h%12||12; return `${h}:${pad(d.getMinutes())}${ap}`; };
+const shortDay = t => new Date(t).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+const weekStart = d => { const x=new Date(d); x.setHours(0,0,0,0); const wd=(x.getDay()+6)%7; return addDays(x,-wd); };
+const stageFor = xp => { let i=0; STAGES.forEach((s,k)=>{ if(xp>=s.xp) i=k; }); return i; };
+const toLocalInput = t => { const d=new Date(t); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
 // ---------- storage ----------
-function localStore(){
-  const K="emberkeep.v1";
-  const read=()=>{ try{ return JSON.parse(localStorage.getItem(K))||{}; }catch(e){ return {}; } };
-  const write=d=>{ try{ localStorage.setItem(K,JSON.stringify(d)); }catch(e){} };
-  return {
-    kind:"local",
-    async loadProfile(){ return read().profile||null; },
-    async saveProfile(p){ const d=read(); d.profile=p; write(d); },
-    watchMeals(cb){ cb(read().meals||[]); this._cb=cb; },
-    async addMeal(m){ const d=read(); d.meals=[m,...(d.meals||[])].slice(0,400); write(d); this._cb&&this._cb(d.meals); },
-    async deleteMeal(id){ const d=read(); d.meals=(d.meals||[]).filter(x=>x.id!==id); write(d); this._cb&&this._cb(d.meals); }
-  };
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return {...DEFAULT, ...JSON.parse(raw)};
+    const old = JSON.parse(localStorage.getItem(OLD)||"null");
+    if(old?.profile?.xp) return {...DEFAULT, xp:+old.profile.xp||0};
+  }catch(e){}
+  return {...DEFAULT};
 }
-// ---------- XP ----------
-function addXP(n, why){
-  const before = stageFor(profile.xp);
-  profile.xp += n;
-  const k = dayKey(new Date());
-  profile.xpLog = profile.xpLog||{}; profile.xpLog[k]=(profile.xpLog[k]||0)+n;
-  // keep xpLog short
-  const keys=Object.keys(profile.xpLog).sort(); while(keys.length>14){ delete profile.xpLog[keys.shift()]; }
-  const after = stageFor(profile.xp);
-  if(after>before){ toast(`Cinder grew! Now a ${STAGES[after].name}`); $("dragon").classList.add("hatch"); setTimeout(()=>$("dragon").classList.remove("hatch"),1300); }
-  else if(why) toast(`+${n} XP · ${why}`);
-}
-function mealsOn(k){ return meals.filter(m=>m.day===k); }
-function dayOnTarget(k){
-  const ms = mealsOn(k); if(!ms.length) return false;
-  const tot = ms.reduce((a,m)=>a+(+m.kcal||0),0);
-  return tot>=profile.goal*0.7 && tot<=profile.goal && ms.every(m=>m.inWindow);
-}
-let checkedIn=false;
-async function dailyCheckIn(){
-  if(checkedIn) return; checkedIn=true;
-  const today = dayKey(new Date());
-  if(profile.lastCheckIn===today) return;
-  const y = new Date(); y.setDate(y.getDate()-1);
-  const yk = dayKey(y);
-  // judge the last active day
-  if(profile.lastCheckIn && profile.lastEvaluated!==profile.lastCheckIn){
-    if(dayOnTarget(profile.lastCheckIn)) addXP(40,"on-target day");
-    profile.lastEvaluated = profile.lastCheckIn;
-  }
-  profile.streak = profile.lastCheckIn===yk ? (profile.streak||0)+1 : 1;
-  profile.lastCheckIn = today;
-  addXP(15 + Math.min(50, 5*profile.streak), `daily check-in, ${profile.streak}-day streak`);
-  await save();
-}
-async function save(){ try{ await store.saveProfile(profile); }catch(e){ toast("Couldn't save progress. Try again."); } render(); }
+let S = load();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save. Free up space on your phone."); } }
 
-// ---------- dragon art (original) ----------
+// ---------- XP ----------
+function addXP(n){
+  const before = stageFor(S.xp);
+  S.xp += n;
+  const after = stageFor(S.xp);
+  if(after>before){
+    setTimeout(()=>{ toast(`Cinder evolved into a ${STAGES[after].name}!`); const d=$("dragon"); d.classList.add("hatch"); setTimeout(()=>d.classList.remove("hatch"),1300); }, 900);
+  }
+}
+function liveStreak(){
+  if(!S.lastHitDay) return 0;
+  const today = dayKey(new Date()), yest = dayKey(addDays(new Date(),-1));
+  return (S.lastHitDay===today || S.lastHitDay===yest) ? S.streak : 0;
+}
+function checkBadges(){
+  const got=[];
+  BADGES.forEach(b=>{ if(!S.badges[b.id] && b.test(S)){ S.badges[b.id]=Date.now(); addXP(25); got.push(b); } });
+  return got;
+}
+function checkIn(){
+  const today = dayKey(new Date());
+  if(S.lastCheckIn===today) return;
+  S.lastCheckIn = today; addXP(10); save();
+  toast("+10 XP · Cinder saw you today");
+}
+
+// ---------- fast actions ----------
+function startFast(at){
+  S.current = {start: at||Date.now(), goalH: S.goalH};
+  $("result").hidden = true;
+  save(); render(); toast(`Fast started. Goal: ${S.goalH} hours`);
+}
+function finishFast(){
+  const c = S.current; if(!c) return;
+  const end = Date.now(), dur = end - c.start;
+  S.current = null; S.lastEnd = end;
+  $("endPanel").hidden = true;
+  if(dur < HOUR){ save(); render(); toast("Under 1 hour, so it doesn't count. Start again when you're ready."); return; }
+  const hit = dur >= c.goalH*HOUR;
+  const lines = [];
+  const base = Math.floor(Math.min(dur,24*HOUR)/HOUR*10);
+  lines.push([`${hm(Math.min(dur,24*HOUR))} fasted`, base]);
+  let total = base;
+  if(hit){
+    total += 50; lines.push(["Goal hit", 50]);
+    const today = dayKey(end), yest = dayKey(addDays(end,-1));
+    if(S.lastHitDay !== today){
+      S.streak = (S.lastHitDay===yest) ? S.streak+1 : 1;
+      S.lastHitDay = today;
+      S.bestStreak = Math.max(S.bestStreak||0, S.streak);
+      const sb = Math.min(100, 10*S.streak);
+      total += sb; lines.push([`${S.streak}-day streak`, sb]);
+    }
+  }
+  addXP(total);
+  S.totalH = (S.totalH||0) + dur/HOUR;
+  S.fasts.unshift({start:c.start, end, goalH:c.goalH, hit, xp:total});
+  S.fasts = S.fasts.slice(0,300);
+  // weekly quest
+  const wk = dayKey(weekStart(end));
+  if(S.questWeekDone !== wk && hitsThisWeek() >= 5){ S.questWeekDone = wk; S.questWeek = wk; addXP(100); lines.push(["Weekly quest", 100]); }
+  const newBadges = checkBadges();
+  newBadges.forEach(b=>lines.push([`Trophy: ${b.name}`, 25]));
+  save(); render();
+  showResult(dur, hit, c.goalH, lines);
+}
+function hitsThisWeek(){
+  const ws = weekStart(new Date()).getTime();
+  const days = new Set(S.fasts.filter(f=>f.hit && f.end>=ws).map(f=>dayKey(f.end)));
+  return days.size;
+}
+function showResult(dur, hit, goalH, lines){
+  const r = $("result"); r.hidden=false; r.textContent="";
+  const lab=document.createElement("div"); lab.className="label"; lab.textContent = hit ? "Goal smashed" : `Short of your ${goalH}h goal`;
+  const big=document.createElement("div"); big.className="big"; big.textContent = `+${lines.reduce((a,l)=>a+l[1],0)} XP`;
+  const ls=document.createElement("div"); ls.className="lines";
+  lines.forEach(([a,b])=>{ const d=document.createElement("div"); const x=document.createElement("span"); x.textContent=a; const y=document.createElement("span"); y.textContent=`+${b}`; d.append(x,y); ls.append(d); });
+  const n=document.createElement("p"); n.className="note";
+  n.textContent = hit ? "Break the fast with protein and vegetables, not fast food. Cinder is proud." : "Every hour still counted. Go again tomorrow and lock in the goal.";
+  r.append(lab,big,ls,n);
+  r.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+// ---------- dragon art (original design) ----------
 function drawDragon(stage){
-  const S = $("dragon");
+  const S2 = $("dragon");
   const defs = `<defs>
     <radialGradient id="eg" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#4a1d20"/><stop offset=".7" stop-color="#1c0d0f"/><stop offset="1" stop-color="#0c0607"/></radialGradient>
     <linearGradient id="bd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e1f22"/><stop offset="1" stop-color="#3a0d10"/></linearGradient>
@@ -307,25 +431,26 @@ function drawDragon(stage){
   let art="";
   if(stage<=1){
     const cracks = stage===1 ? `<path d="M78 70 l10 14 -8 10 12 12 -6 12" stroke="#ffb347" stroke-width="3" fill="none" class="egg-glow"/><path d="M120 92 l-9 10 7 9 -8 11" stroke="#ff4a2b" stroke-width="2.5" fill="none" class="egg-glow"/>` : "";
-    art = `<ellipse cx="100" cy="105" rx="48" ry="62" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
+    art = `<g class="breathe"><ellipse cx="100" cy="105" rx="48" ry="62" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
       <g fill="none" stroke="#ff4a2b" stroke-width="1.6" class="egg-glow" opacity=".8">
         <path d="M70 80 q15 8 30 0 q15 -8 30 0"/><path d="M62 108 q19 9 38 0 q19 -9 38 0"/><path d="M66 136 q17 8 34 0 q17 -8 34 0"/></g>
-      ${cracks}<ellipse cx="84" cy="78" rx="10" ry="16" fill="#fff" opacity=".07"/>`;
+      ${cracks}<ellipse cx="84" cy="78" rx="10" ry="16" fill="#fff" opacity=".07"/></g>`;
   } else if(stage===2){
     art = `<path d="M60 110 q-2 50 40 54 q42 -4 40 -54 l-10 10 -8 -12 -9 12 -8 -13 -8 12 -9 -12 -8 12 z" fill="url(#eg)" stroke="#5a2226" stroke-width="2"/>
-      <g transform="translate(100 98)">
+      <g transform="translate(100 98)"><g class="breathe">
         <path d="M-22 -18 l-10 -22 18 14z M22 -18 l10 -22 -18 14z" fill="#d9b48a"/>
         <ellipse cx="0" cy="0" rx="30" ry="24" fill="url(#bd)"/>
         <ellipse cx="0" cy="12" rx="14" ry="8" fill="#6e171b"/>
         <circle cx="-11" cy="-3" r="6" fill="#ffb347"/><circle cx="11" cy="-3" r="6" fill="#ffb347"/>
         <ellipse cx="-11" cy="-3" rx="1.6" ry="4.5" fill="#1a0507"/><ellipse cx="11" cy="-3" rx="1.6" ry="4.5" fill="#1a0507"/>
         <circle cx="-5" cy="12" r="1.4" fill="#2a0709"/><circle cx="5" cy="12" r="1.4" fill="#2a0709"/>
-      </g>`;
+      </g></g>`;
   } else {
-    const w = [0,0,0,0.75,1,1.2][stage];
-    const crown = stage===5 ? `<path d="M88 44 l4 -14 4 10 4 -16 4 16 4 -10 4 14z" fill="#ffb347" class="egg-glow"/>` : "";
-    const spines = Array.from({length:stage+2},(_,i)=>`<path d="M${120+i*9} ${118+i*5} l6 -9 2 11z" fill="#d9b48a"/>`).join("");
-    art = `
+    const w = [0,0,0,0.7,0.95,1.1,1.25][stage];
+    const crown = stage===6 ? `<path d="M88 44 l4 -14 4 10 4 -16 4 16 4 -10 4 14z" fill="#ffb347" class="egg-glow"/>` : "";
+    const fire = stage>=5 ? `<path d="M100 98 q-6 10 0 18 q6 -8 0 -18z" fill="#ffb347" opacity=".8" class="egg-glow"/>` : "";
+    const spines = Array.from({length:stage+1},(_,i)=>`<path d="M${120+i*8} ${118+i*4.5} l6 -9 2 11z" fill="#d9b48a"/>`).join("");
+    art = `<g class="breathe">
       <g transform="translate(100 110) scale(${w}) translate(-100 -110)">
         <path d="M95 95 C60 40 25 45 12 60 C30 62 34 72 30 84 C42 80 50 86 50 96 C62 92 70 98 74 108 Z" fill="url(#wg)" stroke="#2a090b"/>
         <path d="M105 95 C140 40 175 45 188 60 C170 62 166 72 170 84 C158 80 150 86 150 96 C138 92 130 98 126 108 Z" fill="url(#wg)" stroke="#2a090b"/>
@@ -343,223 +468,183 @@ function drawDragon(stage){
         <path d="M-10 14 C-6 20 6 20 10 14" stroke="#2a0709" stroke-width="1.5" fill="none"/>
         <path d="M-15 -4 l9 2 -9 4z M15 -4 l-9 2 9 4z" fill="#ffb347"/>
         <circle cx="-4" cy="10" r="1.3" fill="#2a0709"/><circle cx="4" cy="10" r="1.3" fill="#2a0709"/>
-      </g>${crown}`;
+      </g>${fire}${crown}</g>`;
   }
-  S.innerHTML = defs + glow + art;
+  S2.innerHTML = defs + glow + art;
 }
 
 // ---------- render ----------
-let lastStage=-1;
+const CIRC = 2*Math.PI*88;
+$("ring").style.strokeDasharray = CIRC;
+let lastStage = -1;
+
+function renderTimer(){
+  const now = Date.now();
+  const ring = $("ring"), mode = $("mode");
+  let frac = 0, heat = 0;
+  if(S.current){
+    const el = now - S.current.start, goal = S.current.goalH*HOUR;
+    frac = Math.min(1, el/goal);
+    heat = Math.min(1, el/(16*HOUR));
+    ring.classList.remove("eat");
+    mode.className = "mode fast"; mode.textContent = el>=goal ? "Goal reached" : "Fasting";
+    $("clock").textContent = hms(el);
+    $("clocksub").textContent = el>=goal ? `+${hm(el-goal)} past your ${S.current.goalH}h goal` : `${hm(goal-el)} to ${S.current.goalH}h · ends ${clockTime(S.current.start+goal)}`;
+    const zi = ZONES.reduce((a,z,i)=> el>=z.h*HOUR ? i : a, 0);
+    $("phase").innerHTML = ""; const b=document.createElement("b"); b.textContent=ZONES[zi].name; const sp=document.createElement("span");
+    sp.textContent = el > 36*HOUR ? "That's over 36 hours. Time to end this fast and eat something gentle." : ZONES[zi].text;
+    $("phase").append(b,sp);
+    [...$("zones").children].forEach((li,i)=>{ li.className = i<zi ? "done" : i===zi ? "now" : ""; });
+    $("zoneWrap").hidden = false;
+    if(!S.current.goalNotified && el>=goal){ S.current.goalNotified=true; save(); toast(`Goal reached! End now or keep the fire going.`); }
+  } else {
+    $("zoneWrap").hidden = true;
+    if(S.lastEnd && now - S.lastEnd < 24*HOUR){
+      const win = (24 - S.goalH)*HOUR, since = now - S.lastEnd;
+      frac = Math.min(1, since/win);
+      ring.classList.add("eat");
+      mode.className = "mode eat"; mode.textContent = since < win ? "Eating window" : "Window closed";
+      $("clock").textContent = since < win ? hms(win - since) : hms(since - win);
+      $("clocksub").textContent = since < win ? `left to eat · start your next fast by ${clockTime(S.lastEnd+win)}` : "past your window · start your fast";
+      $("phase").innerHTML = "";
+    } else {
+      ring.classList.remove("eat");
+      mode.className = "mode idle"; mode.textContent = "Ready";
+      $("clock").textContent = "00:00:00";
+      $("clocksub").textContent = `Goal: ${S.goalH} hours`;
+      $("phase").innerHTML = "";
+    }
+  }
+  ring.style.strokeDashoffset = CIRC*(1-frac);
+  document.documentElement.style.setProperty("--heat", heat.toFixed(2));
+  // mood
+  const st = liveStreak();
+  $("mood").textContent = S.current ? (heat>=1 ? "Blazing. Cinder feels your discipline." : "Cinder is gathering fire.") :
+    st>=3 ? "Fed by your streak. Don't break it." : st>=1 ? "Cinder is warm. Keep it going." : "Cinder is waiting for your next fast.";
+}
+
 function render(){
-  const now = new Date(), today = dayKey(now);
+  const now = new Date();
   $("today").textContent = now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
-  const st = stageFor(profile.xp);
+  const st = stageFor(S.xp);
   if(st!==lastStage){ drawDragon(st); lastStage=st; }
   $("stageNum").textContent = st+1;
   $("stageName").textContent = STAGES[st].name;
-  const nextXP = STAGES[st+1]?.xp;
-  const base = STAGES[st].xp;
-  $("xpFill").style.width = nextXP ? `${Math.min(100,(profile.xp-base)/(nextXP-base)*100)}%` : "100%";
-  $("xpText").textContent = `${profile.xp} XP`;
-  $("xpNext").textContent = nextXP ? `${nextXP-profile.xp} to ${STAGES[st+1].name}` : "Fully grown";
-  $("streak").textContent = profile.streak||0;
-  $("xpToday").textContent = `+${(profile.xpLog||{})[today]||0}`;
+  const next = STAGES[st+1];
+  $("xpFill").style.width = next ? `${Math.min(100,(S.xp-STAGES[st].xp)/(next.xp-STAGES[st].xp)*100)}%` : "100%";
+  $("xpText").textContent = `${S.xp} XP`;
+  $("xpNext").textContent = next ? `${next.xp-S.xp} to ${next.name}` : "Fully grown";
+  $("streak").textContent = liveStreak();
+  $("hoursTotal").textContent = Math.floor(S.totalH||0);
+  $("fastCount").textContent = S.fasts.length;
 
-  // fast clock
-  const m = now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
-  const s=toMin(profile.winStart), e=toMin(profile.winEnd);
-  const eating = inWindow(now.getTime());
-  if(eating){
-    const left = ((e - m) + 1440) % 1440;
-    $("fastBig").textContent = fmtClock(left);
-    $("fastState").className="state eat"; $("fastState").textContent="Eating window";
-    $("fastSub").textContent = `left · closes ${fmtTime(new Date().setHours(Math.floor(e/60),e%60,0))}`;
-  } else {
-    const since = ((m - e) + 1440) % 1440;
-    const until = ((s - m) + 1440) % 1440;
-    $("fastBig").textContent = fmtClock(since);
-    $("fastState").className="state fast"; $("fastState").textContent="Fasting";
-    $("fastSub").textContent = `fasted · eat in ${fmtClock(until)}`;
+  // goals
+  const g = $("goals"); g.textContent="";
+  const activeGoal = S.current ? S.current.goalH : S.goalH;
+  GOALS.forEach(h=>{ const b=document.createElement("button"); b.type="button"; b.className="goal"; b.textContent=`${h}h`; b.setAttribute("aria-pressed", String(h===activeGoal));
+    b.onclick=()=>{ S.goalH=h; if(S.current){ S.current.goalH=h; S.current.goalNotified=false; } save(); render(); }; g.append(b); });
+  $("mainBtn").textContent = S.current ? "End fast" : "Start fast";
+  $("editBtn").textContent = S.current ? "Edit start time" : "I started earlier";
+
+  // week
+  const ws = weekStart(now), wEl = $("week"); wEl.textContent="";
+  const hitDays = new Set(S.fasts.filter(f=>f.hit).map(f=>dayKey(f.end)));
+  const anyDays = new Set(S.fasts.map(f=>dayKey(f.end)));
+  for(let i=0;i<7;i++){
+    const d = addDays(ws,i), k = dayKey(d);
+    const wrap=document.createElement("div"); wrap.className = "day" + (k===dayKey(now)?" today":"");
+    const dot=document.createElement("div"); dot.className = "dot" + (hitDays.has(k)?" hit": anyDays.has(k)?" part":"");
+    dot.textContent = hitDays.has(k) ? "" : anyDays.has(k) ? "·" : "";
+    const lab=document.createElement("span"); lab.textContent = d.toLocaleDateString(undefined,{weekday:"narrow"});
+    wrap.append(lab,dot); wEl.append(wrap);
   }
+  const hits = hitsThisWeek(), wk = dayKey(ws);
+  $("questFill").style.width = `${Math.min(100,hits/5*100)}%`;
+  $("questXP").textContent = S.questWeekDone===wk ? "Done · +100 XP" : `${Math.min(hits,5)}/5 · +100 XP`;
 
-  // calories
-  const todays = mealsOn(today);
-  const tot = todays.reduce((a,x)=>a+(+x.kcal||0),0);
-  $("calBig").textContent = tot;
-  $("calSub").textContent = `of ${profile.goal} · ${Math.max(0,profile.goal-tot)} left`;
-  const pct = tot/profile.goal;
-  const f=$("calFill"); f.style.width = `${Math.min(100,pct*100)}%`;
-  f.style.background = pct>1 ? "var(--bad)" : pct>0.9 ? "var(--warn)" : "var(--ok)";
+  // badges
+  const bEl=$("badges"); bEl.textContent="";
+  BADGES.forEach(b=>{ const d=document.createElement("div"); d.className="badge"+(S.badges[b.id]?" got":"");
+    d.innerHTML=`<span class="ic"></span><span class="bn"></span><span class="bd"></span>`;
+    d.children[0].textContent=b.ic; d.children[1].textContent=b.name; d.children[2].textContent=b.desc; bEl.append(d); });
+  $("badgeCount").textContent = `${Object.keys(S.badges).length}/${BADGES.length}`;
 
-  // log
-  const ul=$("log"); ul.textContent="";
-  if(!todays.length){ const li=document.createElement("li"); li.className="empty"; li.style.display="block"; li.textContent="Nothing logged yet. Scan your first meal when the window opens."; ul.append(li); }
-  todays.slice().sort((a,b)=>a.ts-b.ts).forEach(x=>{
+  // history
+  const h=$("hist"); h.textContent="";
+  if(!S.fasts.length){ const li=document.createElement("li"); li.className="empty"; li.style.display="block"; li.textContent="No fasts yet. Start your first one and Cinder's egg begins to warm."; h.append(li); }
+  S.fasts.slice(0,10).forEach(f=>{
     const li=document.createElement("li");
-    const t=document.createElement("span"); t.className="t"; t.textContent=fmtTime(x.ts);
-    const fd=document.createElement("span"); fd.className="f"; fd.textContent=x.food;
-    if(!x.inWindow){ const o=document.createElement("div"); o.className="oow"; o.textContent="Outside window"; fd.append(o); }
-    const k=document.createElement("span"); k.className="k"; k.textContent=`${x.kcal}`;
-    const del=document.createElement("button"); del.className="x"; del.type="button"; del.setAttribute("aria-label",`Remove ${x.food}`); del.textContent="×";
-    del.onclick=async()=>{ try{ await store.deleteMeal(x.id); }catch(err){ toast("Couldn't remove that entry."); } };
-    li.append(t,fd,k,del); ul.append(li);
+    const d=document.createElement("div"); d.className="hd"; const b=document.createElement("b"); b.textContent=hm(f.end-f.start);
+    const sm=document.createElement("small"); sm.textContent=`${shortDay(f.start)} · ${clockTime(f.start)} to ${clockTime(f.end)}`; d.append(b,sm);
+    const t=document.createElement("span"); t.className="tag "+(f.hit?"hit":"miss"); t.textContent = f.hit ? `${f.goalH}h hit` : `${f.goalH}h goal`;
+    const x=document.createElement("span"); x.className="hx"; x.textContent=`+${f.xp}`;
+    li.append(d,t,x); h.append(li);
   });
+  renderTimer();
 }
 
-// ---------- scan flow ----------
-function openPanel(withPhoto){
-  $("scanPanel").hidden=false; $("result").hidden=true; $("result").textContent="";
-  $("food").value=""; $("kcal").value=""; $("desc").value="";
-  $("scanTitle").textContent = withPhoto ? "Read the plate" : "Describe the meal";
-  $("scanPanel").scrollIntoView({behavior:"smooth",block:"start"});
-}
-function closePanel(){ $("scanPanel").hidden=true; $("preview").hidden=true; pending=null; $("photo").value=""; }
-
-async function shrink(file){
-  try{
-    const bmp = await createImageBitmap(file);
-    const sc = Math.min(1, 1024/Math.max(bmp.width,bmp.height));
-    const c=document.createElement("canvas"); c.width=Math.round(bmp.width*sc); c.height=Math.round(bmp.height*sc);
-    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
-    return await new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",0.82));
-  }catch(e){ return file; }
-}
-
-$("photo").addEventListener("change", async ev=>{
-  const file = ev.target.files?.[0]; if(!file) return;
-  openPanel(true);
-  const blob = await shrink(file);
-  pending = {photoBlob:blob};
-  const p=$("preview"); p.src=URL.createObjectURL(blob); p.hidden=false;
-});
-$("typeBtn").onclick=()=>{ pending={}; $("preview").hidden=true; openPanel(false); $("desc").focus(); };
-$("cancelBtn").onclick=closePanel;
-
-const KEY_K="emberkeep.apikey";
-const getKey=()=>{ try{ return localStorage.getItem(KEY_K)||""; }catch(e){ return ""; } };
-const blobToB64=b=>new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(b); });
-async function askClaude(prompt, blob){
-  const key=getKey(); if(!key) throw {code:"no_key"};
-  const content=[];
-  if(blob) content.push({type:"image",source:{type:"base64",media_type:"image/jpeg",data:await blobToB64(blob)}});
-  content.push({type:"text",text:prompt});
-  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
-    "content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-haiku-5-5",max_tokens:500,messages:[{role:"user",content}]})});
-  if(!r.ok){ throw {code: r.status===401?"bad_key": r.status===429?"rate_limited": r.status===400?"bad_request":"api_error"}; }
-  const j=await r.json();
-  const txt=(j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
-  const m=txt.match(/\{[\s\S]*\}/); if(!m) throw {code:"parse"};
-  return JSON.parse(m[0]);
-}
-
-function localVerdict(kcal){
-  const today=dayKey(new Date());
-  const left = profile.goal - mealsOn(today).reduce((a,x)=>a+(+x.kcal||0),0);
-  if(!inWindow(Date.now())) return {verdict:"skip",reason:"You're fasting right now. Save it for when your window opens."};
-  if(kcal>left) return {verdict:"half",reason:`This is more than the ${Math.max(0,left)} calories you have left today. Eat half and save the rest.`};
-  return {verdict:"eat",reason:"Fits your budget and you're inside your eating window."};
-}
-
-$("askBtn").onclick = async ()=>{
-  const btn=$("askBtn"); const res=$("result");
-  const desc = $("desc").value.trim();
-  if(!pending?.photoBlob && !desc){ toast("Add a photo or describe the meal first."); return; }
-  if(!getKey()){ res.hidden=false; res.className="note"; res.textContent="Add your API key in Settings to scan meals. Until then, type the calories yourself and log it."; return; }
-  if(!navigator.onLine){ res.hidden=false; res.className="note"; res.textContent="You're offline. Type the calories yourself and log it."; return; }
-  const today=dayKey(new Date());
-  const eaten = mealsOn(today).reduce((a,x)=>a+(+x.kcal||0),0);
-  const now=new Date();
-  const prompt = `You are Cinder, a fierce but supportive dragon coach inside a calorie tracker. The user is a casino dealer doing 16:8 intermittent fasting for weight loss.
-Estimate the meal ${pending?.photoBlob?"in the attached photo":"described below"}${desc?` (user's description: "${desc}")`:""}.
-Context: current local time ${now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}; eating window ${profile.winStart}-${profile.winEnd}; currently ${inWindow(now.getTime())?"INSIDE":"OUTSIDE"} the window; daily goal ${profile.goal} kcal; already eaten today ${eaten} kcal; remaining ${profile.goal-eaten} kcal.
-Decide a verdict: "eat" (fits), "half" (eat a smaller portion), or "skip" (outside the window, or a poor choice that blows the budget). Never encourage eating far below the goal or skipping a proper meal when the user has plenty of budget left. Give one short, punchy reason (max 25 words) and one tip to make it better.
-Reply ONLY with JSON: {"food":string (short name),"calories":number,"protein_g":number,"carbs_g":number,"fat_g":number,"confidence":"low"|"medium"|"high","verdict":"eat"|"half"|"skip","reason":string,"tip":string}`;
-  btn.disabled=true; btn.textContent="Cinder is sniffing…";
-  try{
-    const r = await askClaude(prompt, pending?.photoBlob||null);
-    const kc = Math.round(+r.calories||0);
-    $("food").value = r.food||desc||"Meal"; $("kcal").value = kc;
-    res.hidden=false; res.className=`verdict ${["eat","half","skip"].includes(r.verdict)?r.verdict:"eat"}`;
-    res.textContent="";
-    const v=document.createElement("div"); v.className="v"; v.textContent={eat:"Eat it",half:"Half it",skip:"Skip it"}[r.verdict]||"Eat it";
-    const mac=document.createElement("div"); mac.className="macros";
-    mac.innerHTML=`<span><b></b> kcal</span><span>P <b></b>g</span><span>C <b></b>g</span><span>F <b></b>g</span><span></span>`;
-    const bs=mac.querySelectorAll("b"); bs[0].textContent=kc; bs[1].textContent=Math.round(+r.protein_g||0); bs[2].textContent=Math.round(+r.carbs_g||0); bs[3].textContent=Math.round(+r.fat_g||0);
-    mac.lastElementChild.textContent = `${r.confidence||"medium"} confidence`;
-    const rs=document.createElement("div"); rs.textContent=r.reason||"";
-    const tp=document.createElement("div"); tp.className="small"; tp.textContent=r.tip?`Tip: ${r.tip}`:"";
-    res.append(v,mac,rs,tp);
-  }catch(err){
-    res.hidden=false; res.className="note";
-    res.textContent = err?.code==="bad_key" ? "That API key was rejected. Check it in Settings."
-      : err?.code==="rate_limited" ? "Too many scans right now. Wait a minute, or type the calories yourself."
-      : err?.code==="bad_request" ? "Couldn't send that photo. Try another shot or describe the meal instead."
-      : "Cinder couldn't read that one. Describe the meal or type the calories yourself.";
-  }finally{ btn.disabled=false; btn.textContent="Ask Cinder"; }
+// ---------- controls ----------
+$("zones").innerHTML = ZONES.map(()=>"<li></li>").join("");
+$("mainBtn").onclick = ()=>{
+  if(!S.current){ startFast(); return; }
+  const el = Date.now()-S.current.start, goal=S.current.goalH*HOUR;
+  if(el >= goal){ finishFast(); return; }
+  $("editPanel").hidden = true;
+  $("endMsg").textContent = el < HOUR ? "You're under 1 hour, so this fast won't count. End it anyway?" : `You're ${hm(goal-el)} short of your ${S.current.goalH}h goal. You'll still get XP for the hours, but no goal bonus or streak.`;
+  $("endPanel").hidden = false;
+};
+$("keepGoing").onclick = ()=>{ $("endPanel").hidden=true; toast("That's the spirit. Drink some water."); };
+$("endAnyway").onclick = finishFast;
+$("editBtn").onclick = ()=>{
+  $("endPanel").hidden = true;
+  const p=$("editPanel"); p.hidden = !p.hidden;
+  const inp=$("startAt"); const now=Date.now();
+  inp.max = toLocalInput(now); inp.min = toLocalInput(now-48*HOUR);
+  inp.value = toLocalInput(S.current ? S.current.start : (S.lastEnd && now-S.lastEnd<24*HOUR ? S.lastEnd : now-HOUR));
+};
+$("cancelStart").onclick = ()=>{ $("editPanel").hidden=true; };
+$("saveStart").onclick = ()=>{
+  const t = new Date($("startAt").value).getTime();
+  const now = Date.now();
+  if(!t || t>now){ toast("Pick a time that's already passed."); return; }
+  if(now-t > 48*HOUR){ toast("Pick a time within the last 48 hours."); return; }
+  const lastFastEnd = S.fasts[0]?.end || 0;
+  if(t < lastFastEnd){ toast("That overlaps your last fast. Pick a later time."); return; }
+  $("editPanel").hidden = true;
+  if(S.current){ S.current.start=t; S.current.goalNotified=false; save(); render(); toast("Start time updated"); }
+  else startFast(t);
 };
 
-$("logBtn").onclick = async ()=>{
-  const food=$("food").value.trim()||$("desc").value.trim();
-  const kcal=Math.round(+$("kcal").value);
-  if(!food || !(kcal>0)){ toast("Add a food name and calories to log it."); return; }
-  const ts=Date.now(), day=dayKey(new Date(ts));
-  const iw = inWindow(ts);
-  const loggedToday = mealsOn(day).length;
-  const m={id:`m${ts}${Math.random().toString(36).slice(2,6)}`, food:food.slice(0,80), kcal, ts, day, inWindow:iw};
-  const btn=$("logBtn"); btn.disabled=true;
-  try{
-    await store.addMeal(m);
-    if(store.kind==="cloud"){ meals=[m,...meals.filter(x=>x.id!==m.id)]; }
-    let gain = loggedToday<4 ? 10 : 0; if(iw && loggedToday<4) gain+=5;
-    if(gain){ addXP(gain, iw?"meal logged in window":"meal logged"); await save(); }
-    else { toast("Logged"); render(); }
-    if(!iw) setTimeout(()=>toast("Logged outside your window. Tomorrow, hold it until the window opens."),2600);
-    closePanel();
-  }catch(e){ toast("Couldn't log that meal. Try again."); }
-  finally{ btn.disabled=false; }
-};
-
-$("saveSettings").onclick = async ()=>{
-  const g=Math.round(+$("goal").value);
-  if(!(g>=1200)){ toast("Set at least 1200 calories a day."); return; }
-  try{ const k=$("apiKey").value.trim(); if(k) localStorage.setItem(KEY_K,k); else localStorage.removeItem(KEY_K); }catch(e){}
-  profile.goal=g; profile.winStart=$("winStart").value||"12:00"; profile.winEnd=$("winEnd").value||"20:00";
-  await save(); toast("Settings saved");
-};
-
-let tt; function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),2400); }
-
-// ---------- boot ----------
-async function boot(){
-  drawDragon(0); render();
-  store = localStore();
-  try{ navigator.storage?.persist?.(); }catch(e){}
-  $("apiKey").value=getKey();
-  try{ const p = await store.loadProfile(); if(p) profile={...DEFAULT_PROFILE,...p}; }catch(e){}
-  $("goal").value=profile.goal; $("winStart").value=profile.winStart; $("winEnd").value=profile.winEnd;
-  let first=true;
-  store.watchMeals(list=>{ meals=list; render(); if(first){ first=false; dailyCheckIn(); } });
-}
 // ---------- backup ----------
-$("exportBtn").onclick=()=>{
-  let raw="{}"; try{ raw=localStorage.getItem("emberkeep.v1")||"{}"; }catch(e){}
-  const blob=new Blob([raw],{type:"application/json"});
+$("exportBtn").onclick = ()=>{
+  const blob=new Blob([JSON.stringify(S)],{type:"application/json"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`emberkeep-backup-${dayKey(new Date())}.json`;
   document.body.append(a); a.click(); a.remove(); toast("Backup saved");
 };
 $("importFile").addEventListener("change", async ev=>{
   const f=ev.target.files?.[0]; if(!f) return;
-  try{ const d=JSON.parse(await f.text()); if(!d||typeof d!=="object"||(!d.profile&&!d.meals)) throw 0;
-    localStorage.setItem("emberkeep.v1",JSON.stringify(d)); toast("Backup restored"); setTimeout(()=>location.reload(),900);
+  try{
+    const d=JSON.parse(await f.text());
+    if(d && typeof d.xp==="number" && Array.isArray(d.fasts)) S={...DEFAULT,...d};
+    else if(d?.profile?.xp!=null) S={...DEFAULT, xp:+d.profile.xp||0};
+    else throw 0;
+    save(); lastStage=-1; render(); toast("Backup restored");
   }catch(e){ toast("That file isn't an Emberkeep backup."); }
   ev.target.value="";
 });
 
-boot();
-setInterval(render, 30000);
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ checkedIn=false; dailyCheckIn(); render(); } });
-if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+let tt; function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),2800); }
+
+// ---------- boot ----------
+render();
+setTimeout(checkIn, 600);
+setInterval(renderTimer, 1000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ S=load(); render(); checkIn(); } });
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{ r.update().catch(()=>{}); document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") r.update().catch(()=>{}); }); }).catch(()=>{});
+  let hadCtl=!!navigator.serviceWorker.controller, reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(hadCtl && !reloaded && $("editPanel").hidden && $("endPanel").hidden){ reloaded=true; location.reload(); } hadCtl=true; });
+}
 })();
 </script>
 </body>
