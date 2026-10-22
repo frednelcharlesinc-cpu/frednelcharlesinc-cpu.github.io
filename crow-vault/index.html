@@ -245,11 +245,11 @@ button,[data-act],.tabs button{touch-action:manipulation}
 .plan .step.done .t{text-decoration:line-through;color:var(--dim)}
 .plan .t{font-weight:700}
 .plan .w{font-size:.83rem;color:var(--dim)}
-#buddy{position:fixed;left:0;top:0;z-index:45;width:84px;height:98px;pointer-events:none;will-change:transform}
+#buddy{position:fixed;left:0;top:0;z-index:45;width:84px;height:112px;pointer-events:none;will-change:transform}
 #buddy .bb{position:absolute;inset:0;pointer-events:auto;touch-action:none;cursor:grab;transform-origin:50% 90%}
 #buddy .body{position:absolute;inset:0;z-index:2}
 #buddy .body svg.chibi{width:100%;height:100%;filter:drop-shadow(0 8px 10px rgba(0,0,0,.65))}
-#buddy .aura{position:absolute;left:-30px;top:-26px;width:144px;height:134px;z-index:1;pointer-events:none}
+#buddy .aura{position:absolute;left:-30px;top:-20px;width:144px;height:150px;z-index:1;pointer-events:none}
 #buddy .aura path{fill:none;stroke:var(--blood);stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px var(--blood)) drop-shadow(0 0 2px #fff);opacity:0}
 #buddy .say{position:absolute;left:0;bottom:calc(100% + 8px);width:max-content;max-width:min(240px,72vw);background:var(--bone);color:var(--ink);font-weight:500;font-size:.86rem;line-height:1.35;padding:9px 12px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.55);opacity:0;transform:translateY(6px) scale(.92);transition:opacity .2s,transform .2s;pointer-events:none}
 #buddy .say.on{opacity:1;transform:none}
@@ -381,6 +381,40 @@ button,[data-act],.tabs button{touch-action:manipulation}
 @keyframes dgTail{50%{transform:rotate(-7deg)}}
 @keyframes dgHead{0%,100%{transform:rotate(0)}50%{transform:rotate(-3deg)}}
 .totsplit{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px}.totsplit button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--smoke-2);border:1px solid var(--ash);border-radius:10px;padding:8px 12px;text-align:left;min-width:0}.totsplit button:active{transform:scale(.96)}.totsplit .num{font-weight:700;font-size:1.05rem}.totsplit .plus{color:var(--dim);font-weight:700}
+
+/* ===== v9: hero + crow eyes ===== */
+.hero .lid{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(0)}
+.eyebig{width:100%;max-width:280px;margin:0 auto}
+.eyeart{width:100%;height:auto;display:block;overflow:visible}
+.eyemini{width:54px;flex:none}
+.eyerow.lock .eyemini{filter:brightness(0) drop-shadow(0 0 1px #5a4f66);opacity:.55}
+.evo-art.eyeevo{width:280px;height:160px;display:grid;place-items:center}
+.evo-ab{font-size:.86rem;color:var(--dim);display:flex;flex-direction:column;gap:4px}.evo-ab b{color:var(--bone)}
+#buddy.sov .body{filter:drop-shadow(0 0 9px rgba(224,48,47,.75))}
+#buddy.guard .sp-orbit{display:block;left:-26px;top:-18px;width:136px;height:140px}
+@media (prefers-reduced-motion:no-preference){
+ .hero .lid{animation:hblink 5.5s infinite}
+ .hero .locs{transform-origin:60px 26px;animation:hlocs 3.2s ease-in-out infinite alternate}
+ .hero .chest{transform-origin:60px 102px;animation:breath 3.4s ease-in-out infinite}
+ .hero .wg-f{transform-origin:60px 64px;animation:hrustle 4.2s ease-in-out infinite}
+ .hero .pz-fly .wl,.hero .pz-power .wl{transform-origin:48px 68px;animation:flapL .3s ease-in-out infinite alternate}
+ .hero .pz-fly .wr,.hero .pz-power .wr{transform-origin:72px 68px;animation:flapR .3s ease-in-out infinite alternate}
+ .hero .pz-power .wl,.hero .pz-power .wr{animation-duration:1.1s}
+ .hero .pz-power .flame{transform-origin:60px 150px;animation:cvFlame .22s ease-in-out infinite alternate}
+ .hero .pz-dance{transform-origin:60px 150px;animation:dance .5s ease-in-out infinite alternate}
+ .hero .pz-stand{transform-origin:60px 150px;animation:none}
+ .hero .wave-arm{transform-origin:77px 66px;animation:waveA .42s ease-in-out infinite alternate}
+ .hero .pz-walk .lg-l{transform-origin:50px 101px;animation:hstep .42s ease-in-out infinite alternate}
+ .hero .pz-walk .lg-r{transform-origin:70px 101px;animation:hstep .42s ease-in-out infinite alternate-reverse}
+ .hero .pz-walk .arm-l{transform-origin:43px 66px;animation:hstep .42s ease-in-out infinite alternate-reverse}
+ .hero .pz-walk .arm-r{transform-origin:77px 66px;animation:hstep .42s ease-in-out infinite alternate}
+ .hero .pz-fly .lg-l{transform-origin:50px 101px;transform:rotate(9deg)}
+ .hero .pz-fly .lg-r{transform-origin:70px 101px;transform:rotate(16deg)}
+}
+@keyframes hblink{0%,91%,97%,100%{transform:scaleY(0)}94%{transform:scaleY(1)}}
+@keyframes hlocs{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
+@keyframes hrustle{0%,80%,100%{transform:scale(1)}88%{transform:scale(1.04,1.02)}}
+@keyframes hstep{from{transform:rotate(-13deg)}to{transform:rotate(13deg)}}
 </style>
 </head>
 <body>
@@ -444,7 +478,7 @@ const I={
 };
 
 /* ---------- chibi (original drawing of the owner's character) ---------- */
-function chibi(mood){
+function chibiOld(mood){
   const eyes={
     calm:'<path d="M45 58q6-4 12 0q-6 3-12 0z" fill="#fff"/><circle cx="51" cy="58" r="2.6" fill="#2a160d"/><path d="M63 58q6-4 12 0q-6 3-12 0z" fill="#fff"/><circle cx="69" cy="58" r="2.6" fill="#2a160d"/><path d="M44 55.5q7-4 13 .5M63 56q6-4.5 13-.5" stroke="#1a0d08" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
     happy:'<path d="M45 59q6-6 12 0M63 59q6-6 12 0" stroke="#1a0d08" stroke-width="2.6" fill="none" stroke-linecap="round"/><ellipse cx="44" cy="66" rx="4" ry="2" fill="#e0302f" opacity=".35"/><ellipse cx="76" cy="66" rx="4" ry="2" fill="#e0302f" opacity=".35"/>',
@@ -559,7 +593,7 @@ function boot(){setTimeout(()=>{const sp=$("#splash");if(sp){sp.classList.add("o
 }
 function normalize(s){
   const d={v:1,currency:"$",bank:0,savings:0,trading:{balance:0,basis:0,limit:0,history:[]},sources:[],bills:[],tx:[],goals:[],split:{save:10,trade:10},grocery:{weekly:0},subCheck:"",lastBackup:"",checkins:[],lessons:[],created:today()};
-  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"cash"},s.prefs||{});if(!s.prefs.tipsCashV1){s.prefs.tipsTo="cash";s.prefs.tipsCashV1=1}s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});s.dragon=Object.assign({name:"Ember",heat:0,hatched:null,xp:0,claims:{},lastFed:null,talks:{},talkDay:null,quiz:{right:0,wrong:0}},s.dragon||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
+  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"cash"},s.prefs||{});if(!s.prefs.tipsCashV1){s.prefs.tipsTo="cash";s.prefs.tipsCashV1=1}s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});s.eyes=Object.assign({lv:-1,best:0},s.eyes||{});s.dragon=Object.assign({name:"Ember",heat:0,hatched:null,xp:0,claims:{},lastFed:null,talks:{},talkDay:null,quiz:{right:0,wrong:0}},s.dragon||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
   return s;
 }
 
@@ -650,7 +684,7 @@ function render(){
   const v=$("#view");const fb=$("#fab");if(fb)fb.hidden=!S;
   if(!S){v.innerHTML=setupView();return}
   v.innerHTML=({home:homeView,in:inView,bills:billsView,dragon:dragonView,hist:histView,sensei:senseiView}[tab]||homeView)();
-  wireDonuts();checkCrow();Pet.draw();
+  wireDonuts();checkCrow();checkEyes();Pet.draw();
   if(tab==="home"||tab==="sensei")maybeLesson();
 }
 
@@ -697,7 +731,7 @@ function homeView(){
   return `
   <div class="msgcard">
     <div style="min-width:0"><div class="bubble" id="bubble">${g.t}</div>
-    <div class="rank"><span class="chip red">${esc(rk.name)}</span><span class="chip">${esc(S.buddy.name)}: ${joyWord()}</span><span class="chip">${st}-day streak</span>${rk.next?`<span class="chip">${rk.next[0]-st} to ${esc(rk.next[1])}</span>`:""}</div></div></div>
+    <div class="rank"><span class="chip red">${esc(rk.name)}</span><span class="chip">${esc(S.buddy.name)}: ${joyWord()}</span>${curEye()?`<span class="chip red" data-act="goTab" data-tab="sensei" style="cursor:pointer">${esc(EYES[curEye()].name)}</span>`:""}<span class="chip">${st}-day streak</span>${rk.next?`<span class="chip">${rk.next[0]-st} to ${esc(rk.next[1])}</span>`:""}</div></div></div>
 
   ${standalone()?"":`<div class="panel row between" style="margin-top:12px"><div style="min-width:0"><b>Make it a real app</b><div class="muted" style="font-size:.82rem">Put Crow Vault on your home screen. Full screen, works offline, same data.</div></div><button class="btn sm red" data-act="installHelp">Install</button></div>`}
   <div class="panel bal">
@@ -824,6 +858,7 @@ function histView(){
 function senseiView(){
   const st=streak(),rk=rank(st);
   return `<div class="msgcard"><div class="bubble" id="bubble">Money is a mind game first. One lesson a day.</div></div>
+  ${eyesSection()}
   <div class="section"><div class="section-head"><h2>Today's lesson</h2><button class="btn sm ghost" data-act="newLesson">New one</button></div><div class="panel lesson">${lessonBody(false)}</div></div>
 
   <div class="section"><div class="section-head"><h2>Savings goals</h2><button class="btn sm red" data-act="addGoal">+ Goal</button></div>
@@ -1079,6 +1114,141 @@ I.dragon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-widt
 function dragonHomeCard(){const d=S.dragon,egg=!d.hatched,adv=dgAdvice();
   return `<div class="section"><button type="button" class="panel dgcard" data-act="goTab" data-tab="dragon"><div class="art">${dragonSvg(d)}</div><div style="min-width:0"><div class="eyebrow">${egg?"Dragon egg":esc(d.name)}</div><div style="font-size:.86rem">${egg?`Warmth ${d.heat}/100. ${d.heat>=70?"It's about to hatch!":"Keep your habits going to hatch it."}`:esc(adv.length?adv[0][1]:"Teach me something! Tap Talk on my tab.")}</div></div><span class="chip red">Open</span></button></div>`}
 
+/* ---------- v9: Crow Eyes + redrawn hero with crow wings ---------- */
+const EYES=[
+ {name:"Plain Sight",min:0,line:"His eyes haven't awakened yet. Keep logging and they will.",abil:[]},
+ {name:"Ember Eye",min:30,line:"A red glow wakes up behind his eyes. He can feel money moving now.",abil:[["Spend Sense","Warns you when today's spending passes 80% of your safe spend."]]},
+ {name:"Slit Eye",min:90,line:"A predator's focus. Nothing slips past him.",abil:[["Wing Glide","His crow wings carry him across the screen on his own."],["Bill Foresight","Calls out your next bill before it sneaks up."]]},
+ {name:"Feather Eye",min:180,line:"Crow feathers ring the iris. The flock answers him.",abil:[["Leak Read","Spots your biggest spending category this week."],["Feather Guard","Spirit crows circle him on days you stay under safe spend."]]},
+ {name:"Storm Eye",min:300,line:"Red lightning lives in his pupils now.",abil:[["Lightning Call","Press and hold him to call down red lightning."],["Payday Read","Forecasts your bank balance on payday after bills."]]},
+ {name:"Vault Eye",min:480,line:"He sees straight through to the vault.",abil:[["Vault Sight","Sees how many months your money can cover your bills."],["Murder of Crows","Double-tap him to release a flock of crows."]]},
+ {name:"Sovereign Eye",min:750,line:"Final awakening. A crown of black feathers. The vault answers to you.",abil:[["Sovereign Aura","A permanent crimson aura and a feather crown."],["Future Read","Projects what you'll have by the end of the year at your pace."]]}
+];
+function eyePts(){if(!S)return 0;const days=new Set([...S.checkins,...S.tx.map(t=>t.d)]).size;const best=Math.max(S.eyes?.best||0,streak());
+  const skills=S.dragon?learned().length:0,quiz=S.dragon?.quiz?.right||0;return days*10+best*5+skills*20+quiz*5}
+function eyeLv(){const p=eyePts();let l=0;EYES.forEach((e,i)=>{if(p>=e.min)l=i});return l}
+const curEye=()=>S&&S.eyes&&S.eyes.lv>0?S.eyes.lv:0;
+const f2=n=>(+n).toFixed(2);
+const HERO_DEFS=`<defs>
+<radialGradient id="irRed"><stop offset="0" stop-color="#ff7a5a"/><stop offset=".55" stop-color="#e0302f"/><stop offset="1" stop-color="#6a0810"/></radialGradient>
+<radialGradient id="irStorm"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".38" stop-color="#ff9a3c"/><stop offset=".72" stop-color="#e0302f"/><stop offset="1" stop-color="#4a060c"/></radialGradient>
+<radialGradient id="irSov"><stop offset="0" stop-color="#fff4e6"/><stop offset=".3" stop-color="#ff5a4a"/><stop offset=".7" stop-color="#b80e18"/><stop offset="1" stop-color="#22030a"/></radialGradient>
+<radialGradient id="irBrown"><stop offset="0" stop-color="#7a4a2a"/><stop offset="1" stop-color="#2a160d"/></radialGradient>
+<clipPath id="hcL"><path d="M48.5 36.5Q53.5 30 58.5 36.5Q53.5 42.5 48.5 36.5Z"/></clipPath>
+<clipPath id="hcR"><path d="M61.5 36.5Q66.5 30 71.5 36.5Q66.5 42.5 61.5 36.5Z"/></clipPath>
+<clipPath id="hcLs"><path d="M48 36.5Q53.5 28.5 59 36.5Q53.5 44 48 36.5Z"/></clipPath>
+<clipPath id="hcRs"><path d="M61 36.5Q66.5 28.5 72 36.5Q66.5 44 61 36.5Z"/></clipPath>
+<filter id="heroGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation=".7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="heroGlowBig" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>`;
+/* original eye patterns */
+function irisG(cx,cy,r,lv){let g="";const P=(x,y)=>f2(x*r)+" "+f2(y*r);
+  if(lv<=0){g=`<circle r="${f2(r)}" fill="url(#irBrown)"/><circle r="${f2(r*.45)}" fill="#0b0605"/>`}
+  else{const fill=lv===4?"url(#irStorm)":lv>=6?"url(#irSov)":"url(#irRed)";g=`<circle r="${f2(r)}" fill="${fill}"/>`;
+    if(lv===1)g+=`<circle r="${f2(r*.6)}" fill="none" stroke="#ffb067" stroke-width="${f2(r*.08)}" opacity=".85"/><circle r="${f2(r*.34)}" fill="#0b0305"/>`;
+    if(lv===2)g+=`<circle r="${f2(r*.62)}" fill="none" stroke="#ff9a7a" stroke-width="${f2(r*.05)}" opacity=".6"/><ellipse rx="${f2(r*.14)}" ry="${f2(r*.66)}" fill="#0b0305"/>`;
+    if(lv===3){for(let i=0;i<8;i++){const a=i*Math.PI/4,c=Math.cos,s=Math.sin;const tip=[c(a)*.9,s(a)*.9],l=[c(a-.16)*.62,s(a-.16)*.62],rr=[c(a+.16)*.62,s(a+.16)*.62];g+=`<path d="M${P(...l)}L${P(...tip)}L${P(...rr)}" fill="none" stroke="#170507" stroke-width="${f2(r*.09)}" stroke-linejoin="round"/>`}g+=`<ellipse rx="${f2(r*.13)}" ry="${f2(r*.55)}" fill="#0b0305"/>`}
+    if(lv===4){g+=`<path d="M${P(-.08,-.78)}L${P(.24,-.1)}L${P(.04,-.06)}L${P(.16,.78)}L${P(-.24,.06)}L${P(-.03,.02)}Z" fill="#0b0305"/>`;for(let i=0;i<6;i++){const a=i*Math.PI/3+.3;g+=`<path d="M${P(Math.cos(a)*.5,Math.sin(a)*.5)}L${P(Math.cos(a+.15)*.68,Math.sin(a+.15)*.68)}L${P(Math.cos(a-.05)*.86,Math.sin(a-.05)*.86)}" fill="none" stroke="#fff2c0" stroke-width="${f2(r*.04)}" opacity=".7"/>`}}
+    if(lv===5){for(let i=0;i<24;i++){const a=i*Math.PI/12;g+=`<path d="M${P(Math.cos(a)*.76,Math.sin(a)*.76)}L${P(Math.cos(a)*(i%3?.88:.95),Math.sin(a)*(i%3?.88:.95))}" stroke="#170507" stroke-width="${f2(r*.05)}"/>`}g+=`<circle cx="0" cy="${f2(-r*.16)}" r="${f2(r*.21)}" fill="#0b0305"/><path d="M${P(-.1,-.06)}L${P(.1,-.06)}L${P(.18,.46)}L${P(-.18,.46)}Z" fill="#0b0305"/>`}
+    if(lv>=6){for(let i=0;i<12;i++){const a=i*Math.PI/6;g+=`<path d="M${P(Math.cos(a)*.46,Math.sin(a)*.46)}L${P(Math.cos(a)*.86,Math.sin(a)*.86)}" stroke="#2a0306" stroke-width="${f2(r*.04)}" opacity=".75"/>`}
+      g+=`<path d="M${P(-.62,0)}Q${P(-.3,-.38)} ${P(0,-.06)}Q${P(.3,-.38)} ${P(.62,0)}Q${P(.3,-.12)} ${P(.09,.12)}L${P(0,.36)}L${P(-.09,.12)}Q${P(-.3,-.12)} ${P(-.62,0)}Z" fill="#0b0305"/>`}
+    g+=`<circle r="${f2(r)}" fill="none" stroke="#120406" stroke-width="${f2(r*.11)}"/>`}
+  g+=`<circle cx="${f2(-r*.36)}" cy="${f2(-r*.4)}" r="${f2(r*.17)}" fill="#fff" opacity=".9"/>`;
+  return `<g transform="translate(${f2(cx)} ${f2(cy)})" ${lv>=1?'filter="url(#heroGlow)"':""}>${g}</g>`}
+function heroFace(m,lv){const sk="#8a5636",sc=lv>=6?"#1a0c10":"#fbf7f2";
+  const closed=m==="laugh"||m==="sleepy";let eyes="";
+  if(closed){eyes=m==="laugh"?`<path d="M49 36.5L53.5 33.5L58 36.5M62 36.5L66.5 33.5L71 36.5" stroke="#120a08" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+      :`<path d="M49 36.5Q53.5 38.6 58 36.5M62 36.5Q66.5 38.6 71 36.5" stroke="#120a08" stroke-width="1.6" fill="none" stroke-linecap="round"/>`}
+  else{const sh=m==="shock",L=sh?"M48 36.5Q53.5 28.5 59 36.5Q53.5 44 48 36.5Z":"M48.5 36.5Q53.5 30 58.5 36.5Q53.5 42.5 48.5 36.5Z",R=sh?"M61 36.5Q66.5 28.5 72 36.5Q66.5 44 61 36.5Z":"M61.5 36.5Q66.5 30 71.5 36.5Q66.5 42.5 61.5 36.5Z";
+    const ir=sh?2.3:2.85,dx=m==="think"?1:0;
+    eyes=`<path d="${L}" fill="${sc}"/><path d="${R}" fill="${sc}"/>
+    <g clip-path="url(#hcL${sh?"s":""})">${irisG(53.5+dx,36.4,ir,lv)}</g><g clip-path="url(#hcR${sh?"s":""})">${irisG(66.5+dx,36.4,ir,lv)}</g>
+    <path d="M58.8 36.3Q53.5 ${sh?27.8:29.3} 47.6 36.9L46.3 35.2M61.2 36.3Q66.5 ${sh?27.8:29.3} 72.4 36.9L73.7 35.2" stroke="#120a08" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+    <path d="M50 39.6Q53.5 41.2 57 39.6M63 39.6Q66.5 41.2 70 39.6" stroke="#4a2a18" stroke-width=".6" fill="none" opacity=".7"/>
+    <g class="lid"><path d="${L}" fill="${sk}"/><path d="${R}" fill="${sk}"/></g>`}
+  const brow={fierce:"M48 29.5L58.5 32.8M72 29.5L61.5 32.8",sad:"M48.5 32.5L58 30M71.5 32.5L62 30",shock:"M48.5 28.5Q53.5 26 58 28M62 28Q66.5 26 71.5 28.5",think:"M48.5 31Q53.5 28.8 58 30.6M62 32Q66.5 31.2 71.5 32"}[m]||"M48.5 31.2Q53.5 29 58 30.6M62 30.6Q66.5 29 71.5 31.2";
+  const mouth={happy:'<path d="M55 46.5Q60 51.5 65 46.5Z" fill="#3b1c12"/>',laugh:'<path d="M54 46Q60 54 66 46Z" fill="#3b1c12"/><path d="M55.5 46.6h9" stroke="#fff" stroke-width="1.1"/>',shock:'<ellipse cx="60" cy="48.2" rx="2.3" ry="3" fill="#3b1c12"/>',sad:'<path d="M56 49.4Q60 46.6 64 49.4" stroke="#3b1c12" stroke-width="1.5" fill="none" stroke-linecap="round"/>',fierce:'<path d="M55.5 47.6Q60 49.6 65 46.4" stroke="#3b1c12" stroke-width="1.6" fill="none" stroke-linecap="round"/>',sleepy:'<ellipse cx="60" cy="48" rx="1.4" ry="1.7" fill="#3b1c12"/>'}[m]||'<path d="M56.5 47.6Q60 48.9 63.5 47.6" stroke="#3b1c12" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+  return `${eyes}<path d="${brow}" stroke="#120a08" stroke-width="2" fill="none" stroke-linecap="round"/>${mouth}
+  ${m==="happy"||m==="laugh"?'<ellipse cx="48.5" cy="42" rx="3" ry="1.4" fill="#e0302f" opacity=".3"/><ellipse cx="71.5" cy="42" rx="3" ry="1.4" fill="#e0302f" opacity=".3"/>':""}
+  ${m==="sad"?'<path d="M49.5 40.5q-1.6 3 0 4.2q1.6-1.2 0-4.2z" fill="#58b8ff"/>':""}`}
+const WING_F='M48 63C38 64 31 74 29 92L25 122L31 114L31 130L36 117L38 131L41 114L44 121C45 104 46 86 52 70Z';
+const WING_S='M47 66C34 50 16 42 0 44L9 50L0 56L11 60L2 68L14 70L5 80L19 80L12 90L27 86L22 96L36 88C42 82 46 76 50 72Z';
+function hero(m,p,lv){lv=lv==null?curEye():lv;m=m||"calm";p=p||"stand";if(p==="sleep")m="sleepy";if(p==="power"&&m!=="sad")m="fierce";
+  const sitting=p==="sit"||p==="meditate"||p==="sleep",spread=p==="fly"||p==="power",dy=sitting?18:0;
+  const red=lv>=1?"#e0302f":"#5a2a34";
+  const wingF=`<g class="wg-f"><path d="${WING_F}" fill="#0d0b0e" stroke="${red}" stroke-width="1"/><path d="M46 70L33 112M48 74L37 122M50 80L41 116" stroke="#2a2236" stroke-width="1"/></g>`;
+  const wingS=`<path d="${WING_S}" fill="#0d0b0e" stroke="${red}" stroke-width="1.1" stroke-linejoin="round"/><path d="M46 68L6 50M46 71L6 64M47 74L10 79M48 77L18 90" stroke="#2a2236" stroke-width="1.1"/>`;
+  const wings=spread?`<g class="wl">${wingS}</g><g class="wr"><g transform="translate(120 0) scale(-1 1)">${wingS}</g></g>`:`<g transform="translate(0 ${dy})">${wingF}<g transform="translate(120 0) scale(-1 1)">${wingF}</g></g>`;
+  const flame=p==="power"?`<g class="flame"><path d="M28 150C14 110 30 80 42 60C42 82 52 88 54 70C56 50 60 30 60 14C60 30 64 50 66 70C68 88 78 82 78 60C90 80 106 110 92 150Z" fill="#e0302f" opacity=".5"/><path d="M40 150C34 122 42 102 50 90C52 106 58 106 60 92C62 106 66 108 68 92C74 102 84 122 76 150Z" fill="#ff7a52" opacity=".45"/></g>`:"";
+  const shadow=p==="fly"?"":`<ellipse cx="60" cy="${sitting?146:151}" rx="${sitting?34:24}" ry="4" fill="#000" opacity=".5"/>`;
+  const locsB=`<g class="locs" fill="#141015"><rect x="39" y="26" width="6" height="42" rx="3" transform="rotate(10 42 26)"/><rect x="44" y="28" width="6" height="40" rx="3" transform="rotate(4 47 28)"/><rect x="70" y="28" width="6" height="40" rx="3" transform="rotate(-4 73 28)"/><rect x="75" y="26" width="6" height="42" rx="3" transform="rotate(-10 78 26)"/></g>`;
+  const torso=`<g class="chest"><path d="M41 70Q42 61 53 59L67 59Q78 61 79 70L81 102L39 102Z" fill="#121014"/><path d="M53 59Q60 64 67 59" stroke="#2c2830" stroke-width="1.4" fill="none"/><path d="M46 92Q60 95 74 92" stroke="#1d1a21" stroke-width="1.2" fill="none"/></g><rect x="39" y="99" width="42" height="5" rx="2.5" fill="#0a0a0a"/>
+   <path d="M52 60Q60 76 68 60" stroke="#d8dde3" stroke-width="1.6" fill="none" stroke-dasharray="1.8 1.2"/><path d="M60 72.5v8M57.6 75h4.8" stroke="#eef2f6" stroke-width="2" stroke-linecap="round"/>`;
+  const legsStand=`<g class="lg-l"><path d="M41 101L59 101L57 145L46 145Z" fill="#7b2230"/><path d="M50.5 108L51.5 140" stroke="#4d1420" stroke-width="1.1"/><ellipse cx="51.5" cy="147.5" rx="8" ry="3.6" fill="#0b0b0b"/><path d="M44.5 149.3h14" stroke="#eee7dc" stroke-width=".9" opacity=".55"/></g>
+   <g class="lg-r"><path d="M61 101L79 101L74 145L63 145Z" fill="#7b2230"/><path d="M69.5 108L68.5 140" stroke="#4d1420" stroke-width="1.1"/><ellipse cx="68.5" cy="147.5" rx="8" ry="3.6" fill="#0b0b0b"/><path d="M61.5 149.3h14" stroke="#eee7dc" stroke-width=".9" opacity=".55"/></g>`;
+  const legsSit=`<path d="M30 130C30 119 44 115 60 115C76 115 90 119 90 130C90 138 78 141 60 141C42 141 30 138 30 130Z" fill="#7b2230"/><path d="M40 128q12-6 20-3M80 128q-12-6-20-3" stroke="#4d1420" stroke-width="1.4" fill="none"/><ellipse cx="36" cy="138" rx="7" ry="3.4" fill="#0b0b0b"/><ellipse cx="84" cy="138" rx="7" ry="3.4" fill="#0b0b0b"/>`;
+  const A=(d,cls)=>`<path ${cls?`class="${cls}"`:""} d="${d}" stroke="#121014" stroke-width="8" fill="none" stroke-linecap="round"/>`,Hd=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r||3.5}" fill="#8a5636"/>`;
+  const mug=(x,y)=>`<rect x="${x}" y="${y}" width="9" height="9" rx="1.6" fill="#e9e1d6"/><path d="M${x+9} ${y+2.4}q3.4 0 3.4 2.4t-3.4 2.4" stroke="#e9e1d6" stroke-width="1.6" fill="none"/><ellipse cx="${x+4.5}" cy="${y+.8}" rx="3.6" ry=".9" fill="#3a2016"/>`;
+  let arms="",front="";
+  if(p==="stand")arms=A("M43 66Q36 82 38 98")+Hd(38,100)+A("M77 66Q85 78 80 88")+mug(76,84)+Hd(77,89);
+  else if(p==="walk")arms=`<g class="arm-l">${A("M43 66Q36 82 38 98")+Hd(38,100)}</g><g class="arm-r">${A("M77 66Q84 82 82 98")+Hd(82,100)}</g>`;
+  else if(p==="wave"){arms=A("M43 66Q36 82 38 98")+Hd(38,100);front=`<g class="wave-arm">${A("M77 66Q90 58 93 42")+Hd(93,40,3.7)}</g>`}
+  else if(p==="dance")front=A("M43 66Q30 54 27 38")+Hd(27,36,3.7)+A("M77 66Q90 54 93 38")+Hd(93,36,3.7);
+  else if(p==="power")arms=A("M43 66Q34 82 33 96")+Hd(33,98,4.3)+A("M77 66Q86 82 87 96")+Hd(87,98,4.3);
+  else if(p==="fly")arms=A("M43 66Q30 74 21 72")+Hd(20,72)+A("M77 66Q90 74 99 72")+Hd(100,72);
+  else if(p==="meditate")arms=A("M43 66Q32 86 34 108")+Hd(34,110)+A("M77 66Q88 86 86 108")+Hd(86,110);
+  else arms=A("M43 66Q38 84 52 92")+A("M77 66Q82 84 68 92")+mug(55.5,84)+Hd(54,91)+Hd(66,91);
+  const crown=lv>=6?`<path d="M49 16L51.5 6L56 12L60 1.5L64 12L68.5 6L71 16Z" fill="#0b090e" stroke="#e0302f" stroke-width="1" filter="url(#heroGlow)"/>`:"";
+  const head=`<g class="head" ${p==="sleep"?'transform="rotate(9 60 52)"':""}>
+   <rect x="55.5" y="49" width="9" height="12" rx="3" fill="#7a4a2e"/>
+   <ellipse cx="45" cy="37.5" rx="2.6" ry="4" fill="#7a4a2e"/><ellipse cx="75" cy="37.5" rx="2.6" ry="4" fill="#7a4a2e"/>
+   <path d="M45 33C45 22 52 17 60 17C68 17 75 22 75 33C75 44 70 52 60 56C50 52 45 44 45 33Z" fill="#8a5636"/>
+   <path d="M47 41C49 49 54 54 60 56.5C66 54 71 49 73 41C70 47 66 51.5 60 51.5C54 51.5 50 47 47 41Z" fill="#1d120c" opacity=".88"/><path d="M55.5 45.6Q60 43.8 64.5 45.6" stroke="#1d120c" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+   <path d="M58.6 40.5Q60 43 61.4 40.5" stroke="#6a3c22" stroke-width="1" fill="none"/>
+   ${heroFace(m,lv)}
+   <path d="M44 31C44 18 52 12.5 60 12.5C68 12.5 76 18 76 31Q73 26.5 66 25.6Q60 24.8 54 25.6Q47 26.5 44 31Z" fill="#0d0b0e"/><path d="M46 27.2Q60 22 74 27.2" stroke="#2b262e" stroke-width="1.4" fill="none"/><path d="M75 27q10 4 13 14q-6-2-10-8z" fill="#0d0b0e"/>
+   <g fill="#141015"><rect x="42.5" y="28" width="5" height="26" rx="2.5"/><rect x="72.5" y="28" width="5" height="26" rx="2.5"/></g>${crown}</g>`;
+  const upper=sitting?`<g transform="translate(0 ${dy})">${locsB}${torso}${head}</g>${legsSit}<g transform="translate(0 ${dy})">${arms}${front}</g>`
+    :`${locsB}${legsStand}${torso}${arms}${head}${front}`;
+  return `<svg class="chibi" viewBox="0 0 120 160" aria-hidden="true">${HERO_DEFS}<g class="hero hv${lv}"><g class="pz pz-${p}">${shadow}${flame}${wings}${upper}</g></g></svg>`}
+function chibi(m){return hero(m,"stand")}
+function buddyArt(m,p){return hero(m,p)}
+/* close-up for the Eyes panel and awakening scene */
+function eyeArt(lv,cls){const sc=lv>=6?"#1a0c10":"#fbf7f2";
+  return `<svg class="eyeart ${cls||""}" viewBox="0 0 200 110" aria-hidden="true">${HERO_DEFS}<defs><clipPath id="ceye"><path d="M14 58Q100 -8 186 58Q100 118 14 58Z"/></clipPath></defs>
+  <path d="M8 60Q100 -18 192 60Q100 126 8 60Z" fill="#8a5636"/><path d="M14 58Q100 -8 186 58Q100 118 14 58Z" fill="${sc}"/>
+  <g clip-path="url(#ceye)" class="eyepulse">${irisG(100,56,34,lv).replace('filter="url(#heroGlow)"',lv>=1?'filter="url(#heroGlowBig)"':"")}</g>
+  <path d="M10 60Q100 -12 190 56L198 46" stroke="#120a08" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M30 76Q100 108 170 76" stroke="#4a2a18" stroke-width="2" fill="none" opacity=".6"/></svg>`}
+function eyesSection(){const lv=curEye(),pts=eyePts(),nx=EYES[lv+1],e=EYES[lv];
+  return `<div class="section"><div class="section-head"><h2>Crow Eyes</h2><span class="chip red">${esc(e.name)}</span></div><div class="panel stack">
+  <div class="eyebig">${eyeArt(lv)}</div><p style="margin:0">${esc(e.line)}</p>
+  ${nx?`<div><div class="row between"><span class="eyebrow">Power to ${esc(nx.name)}</span><span class="num" style="font-size:.82rem">${pts} / ${nx.min}</span></div><div class="meter" style="margin-top:6px"><i style="width:${Math.min(100,Math.max(3,(pts-e.min)/(nx.min-e.min)*100))}%;background:linear-gradient(90deg,var(--maroon),var(--blood))"></i></div></div>`:`<div class="chip jade">Final awakening reached</div>`}
+  <p class="muted" style="margin:0;font-size:.78rem">Power up: +10 every day you log or check in, +5 for each day of your best streak, +20 for each skill your dragon learns, +5 for each quiz you get right.</p>
+  <div class="list">${EYES.slice(1).map((x,k)=>{const i=k+1,got=i<=lv;return `<div class="item eyerow ${got?"":"lock"}"><div class="row" style="align-items:flex-start;min-width:0"><div class="eyemini">${eyeArt(i)}</div><div style="min-width:0"><div class="name">${got?esc(x.name):"???"} <span class="muted" style="font-weight:500;font-size:.75rem">${x.min} power</span></div>${x.abil.map(([n,d])=>`<div class="sub" style="display:block"><b style="color:${got?"var(--bone)":"inherit"}">${got?esc(n):"Locked ability"}</b>${got?" · "+esc(d):""}</div>`).join("")}</div></div></div>`}).join("")}</div>
+  </div></div>`}
+function eyeLines(){const lv=curEye(),o=[];if(!S||!lv)return o;const t=today(),{spent,cap}=todayNums();
+  if(lv>=1&&cap>0)o.push([`<b>Spend Sense:</b> ${Math.round(spent/cap*100)}% of today's safe spend used.`,spent>cap*.8?"think":"happy"]);
+  if(lv>=2){const b=S.bills.filter(b=>b.next&&b.amount>0&&b.next>=t).sort((a,b)=>a.next<b.next?-1:1)[0];if(b)o.push([`<b>Bill Foresight:</b> ${esc(b.name)} (${moneyR(b.amount)}) is due ${fdShort(b.next)}.`,"think"])}
+  if(lv>=3){const ws=weekStart(t),c={};S.tx.filter(x=>x.type==="out"&&x.d>=ws).forEach(x=>c[x.cat]=(c[x.cat]||0)+x.amount);const top=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];if(top)o.push([`<b>Leak Read:</b> ${esc(top[0])} is your biggest spend this week at ${moneyR(top[1])}.`,"think"])}
+  if(lv>=4){const p=nextPayday();if(p){const ev=project(45).filter(e=>e.d<p);const bal=ev.length?ev.at(-1).run:S.bank;o.push([`<b>Payday Read:</b> about ${moneyR(bal)} in the bank right before ${fdShort(p)}, after bills.`,bal<0?"sad":"happy"])}}
+  if(lv>=5){const mo=S.bills.reduce((a,b)=>a+perMonth(b.amount,b.freq),0);if(mo)o.push([`<b>Vault Sight:</b> bank plus cash covers ${((S.bank+S.cash.balance)/mo).toFixed(1)} months of bills.`,"happy"])}
+  if(lv>=6){const from=addDays(t,-60),r=S.tx.filter(x=>x.d>=from);const net=(r.filter(x=>x.type==="in").reduce((a,x)=>a+x.amount,0)-r.filter(x=>x.type==="out").reduce((a,x)=>a+x.amount,0))/2;const ml=11-new Date().getMonth()+(1-new Date().getDate()/31);o.push([`<b>Future Read:</b> at this pace you'll have about ${moneyR(S.bank+S.cash.balance+net*ml)} by the end of the year.`,net>=0?"happy":"sad"])}
+  return o}
+function murderOfCrows(){const b=$("#buddy");if(!b||matchMedia("(prefers-reduced-motion: reduce)").matches)return;const r=b.getBoundingClientRect();
+  for(let i=0;i<14;i++){const d=document.createElement("div");d.className="spcrow";d.innerHTML=SPCROW;d.style.left=(r.left+r.width/2-14)+"px";d.style.top=(r.top+r.height/3)+"px";const a=Math.random()*Math.PI*2,dist=200+Math.random()*260;d.style.setProperty("--dx",Math.cos(a)*dist+"px");d.style.setProperty("--dy",Math.sin(a)*dist+"px");d.style.animationDelay=i*50+"ms";document.body.appendChild(d);setTimeout(()=>d.remove(),2700)}}
+let eyeBusy=false;
+function eyeAwakenFX(from,to){if(eyeBusy)return;eyeBusy=true;const e=EYES[to];const h=document.createElement("div");h.className="evo";h.setAttribute("role","dialog");
+  h.innerHTML=`<div class="evo-in"><div class="evo-t">His eyes are awakening</div><div class="evo-art eyeevo">${eyeArt(from)}</div><div class="evo-name"></div><div class="evo-line"></div><div class="evo-ab"></div><button type="button" class="btn red" data-act="eyeClose">Let's go</button></div>`;
+  document.body.appendChild(h);const art=h.querySelector(".evo-art");
+  const reveal=()=>{window.__strike?.();art.innerHTML=eyeArt(to);art.classList.remove("charge");void art.offsetWidth;art.classList.add("reveal");
+    h.querySelector(".evo-name").textContent=e.name+"!";h.querySelector(".evo-line").textContent=e.line;
+    h.querySelector(".evo-ab").innerHTML=e.abil.map(([n,d])=>`<div><b>${esc(n)}</b> · ${esc(d)}</div>`).join("");h.querySelector(".btn").classList.add("on");vibe();say(`My <b>${esc(e.name)}</b> awakened! New abilities unlocked.`,"fierce",true)};
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)setTimeout(reveal,300);else{setTimeout(()=>art.classList.add("charge"),400);setTimeout(reveal,1900)}}
+function checkEyes(){if(!S)return;const st=streak();if(st>(S.eyes.best||0))S.eyes.best=st;const lv=eyeLv(),prev=S.eyes.lv;
+  if(lv>prev){S.eyes.lv=lv;try{save()}catch(e){}try{Buddy.refresh()}catch(e){}if(lv>0)setTimeout(()=>eyeAwakenFX(Math.max(0,prev),lv),prev<0?1400:600)}
+  try{Buddy.sov(curEye()>=6);const n=todayNums();Buddy.guard(curEye()>=3&&n.spent<=n.cap)}catch(e){}}
+const A5={eyeClose:el=>{el.closest(".evo")?.remove();eyeBusy=false}};
+
 /* ---------- v3: the crow that evolves with your streak ---------- */
 const CV_DEFS=`<defs>
 <radialGradient id="cvGlow"><stop offset="0" stop-color="#e0302f" stop-opacity=".6"/><stop offset=".6" stop-color="#e0302f" stop-opacity=".12"/><stop offset="1" stop-color="#e0302f" stop-opacity="0"/></radialGradient>
@@ -1184,7 +1354,7 @@ function evolveFX(from,to){if(evoBusy)return;evoBusy=true;const h=document.creat
 const A3={crowSheet:()=>crowSheet(),evoClose:el=>{el.closest(".evo")?.remove();evoBusy=false}};
 
 /* ---------- v3: chibi poses + spirits ---------- */
-function chibiParts(m){const s=chibi(m),a=s.indexOf("<!-- locs behind -->"),b=s.indexOf("<!-- pants"),c=s.indexOf("<!-- head -->"),e=s.lastIndexOf("</g></svg>");return{locs:s.slice(a,b),head:s.slice(c,e)}}
+function chibiParts(m){const s=chibiOld(m),a=s.indexOf("<!-- locs behind -->"),b=s.indexOf("<!-- pants"),c=s.indexOf("<!-- head -->"),e=s.lastIndexOf("</g></svg>");return{locs:s.slice(a,b),head:s.slice(c,e)}}
 const CB={
  shadow:'<ellipse cx="60" cy="135" rx="26" ry="4" fill="#000" opacity=".5"/>',
  torso:'<path d="M38 104c0-18 8-26 22-26s22 8 22 26z" fill="#121014"/><path d="M48 92q12 5 24 0" stroke="#2c2830" stroke-width="1.5" fill="none"/><path d="M49 80q11 14 22 0" stroke="#d8dde3" stroke-width="2" fill="none" stroke-dasharray="2 1.4"/><path d="M60 92v9M57 95h6" stroke="#eef2f6" stroke-width="2.4" stroke-linecap="round"/>',
@@ -1195,7 +1365,7 @@ const CB={
 };
 const cArm=d=>`<path d="${d}" stroke="#121014" stroke-width="9" fill="none" stroke-linecap="round"/>`,cHand=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r||4}" fill="#8a5636"/>`;
 const cMug=(x,y)=>`<rect x="${x}" y="${y}" width="11" height="10" rx="2" fill="#e9e1d6"/><path d="M${x+11} ${y+3}q4 0 4 3t-4 3" stroke="#e9e1d6" stroke-width="2" fill="none"/>`;
-function buddyArt(m,p){
+function buddyArtOld(m,p){
   if(p==="sit"||p==="meditate")return chibi(m);
   if(p==="sleep")return chibi("sleepy");
   const{locs,head}=chibiParts(p==="power"&&m!=="sad"?"shock":m);let back="",legs=CB.legs,arms="",front="",sh=CB.shadow;
@@ -1268,6 +1438,7 @@ function reactSpend(x){const{spent,cap,f}=todayNums();const same=S.tx.filter(y=>
   if(x.d!==today())say(`Logged for ${fdShort(x.d)}.`,"calm");
   else if(f.amount<0)say(pickL("broke").replace("{n}",moneyR(-f.amount)),"sad",true);
   else if(spent>cap)say(`Over today's safe spend by <b>${moneyR(spent-cap)}</b>. ${pickL("disappointed")}`,"sad");
+  else if(curEye()>=1&&cap>0&&spent>cap*.8)say(`<b>Spend Sense:</b> ${Math.round(spent/cap*100)}% of today's safe spend used. Slow down.`,"think");
   else if(same>=3)say(`That's ${same} times on <b>${esc(x.cat)}</b> today. Just saying.`,"think");
   else say(`Logged. <b>${moneyR(cap-spent)}</b> left of today's safe spend. ${pickL("goodSpend")}`,"happy")}
 
@@ -1370,7 +1541,7 @@ const Buddy=(()=>{
   el.innerHTML=`<div class="bb" role="button" tabindex="0" aria-label="Your chibi. Tap to talk, drag to move."><div class="body">${chibi("happy")}</div>${BAURA}<div class="sp sp-orbit"><svg viewBox="0 0 136 128"><ellipse cx="68" cy="122" rx="38" ry="6" fill="none" stroke="#e0302f" stroke-width="1.5" opacity=".7"/><g class="orb"><g transform="translate(4 66)">${SPCROW.replace(/<\/?svg[^>]*>/g,"")}</g><g transform="translate(112 50) scale(.8)">${SPCROW.replace(/<\/?svg[^>]*>/g,"")}</g><g transform="translate(58 4) scale(.7)">${SPCROW.replace(/<\/?svg[^>]*>/g,"")}</g></g></svg></div><div class="sp sp-zz"><span>z</span><span>z</span><span>Z</span></div></div><div class="say" role="status" aria-live="polite"></div>`;
   document.body.appendChild(el);
   const bb=el.querySelector(".bb"),body=el.querySelector(".body"),bub=el.querySelector(".say");
-  const BW=84,BH=98;const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.random()*a.length|0];
+  const BW=84,BH=112;const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.random()*a.length|0];
   let W=innerWidth,H=innerHeight,x=W-BW-14,y=H*.3,vx=0,vy=0,tx=x,ty=y,mode="wander",modeUntil=0,nextWander=0,face="",lastTalk=0,lastInteract=performance.now(),idleGap=22000,sayT=null,taps=[],sheet=false,drag=null,saveT=null,started=false;
   const EMO={happy:"emo-hop",laugh:"emo-spin",shock:"emo-shake",sad:"emo-droop"};let pose="sit",tempPose=null,tempUntil=0,act="sit",actUntil=0,flying=false,lastFollow=0;
   const joy=()=>S?.buddy?.joy??60;
@@ -1381,7 +1552,7 @@ const Buddy=(()=>{
   function pickAct(t){const h=new Date().getHours(),idle=t-lastInteract;if((h>=3&&h<7)||idle>90000)return"sleep";const j=joy(),o=["sit","sit","stand","stand","meditate","meditate","power"];if(j>=55)o.push("dance","wave");if(j<30)o.push("sit","sit");return pick(o)}
   function setPose(p){if(p===pose)return;pose=p;el.dataset.pose=p;body.innerHTML=buddyArt(face||"happy",p);if(p==="power")spiritBurst()}
   function updatePose(t){const sp=Math.hypot(vx,vy);if(drag&&drag.moved)flying=true;else if(flying&&sp<.7)flying=false;else if(!flying&&sp>2.4)flying=true;
-    let p;if(flying)p="fly";else if(tempPose&&t<tempUntil)p=tempPose;else{tempPose=null;if(t>actUntil){act=pickAct(t);actUntil=t+8000+Math.random()*9000}p=act}setPose(p)}
+    let p;if(flying)p="fly";else if(sp>.9&&!drag)p="walk";else if(tempPose&&t<tempUntil)p=tempPose;else{tempPose=null;if(t>actUntil){act=pickAct(t);actUntil=t+8000+Math.random()*9000}p=act}setPose(p)}
   function emote(c){body.classList.remove("emo-hop","emo-shake","emo-spin","emo-droop");void body.offsetWidth;body.classList.add(c)}
   function place(){el.classList.toggle("below",y<(sheet?60:170));const w=bub.offsetWidth;let l=BW/2-w/2;if(x+l<8)l=8-x;if(x+l+w>W-8)l=W-8-w-x;bub.style.left=l+"px"}
   function speak(html,m,o){o=o||{};if(m){setFace(m);if(EMO[m])emote(EMO[m]);if(m==="happy"||m==="laugh")temp(Math.random()<.5?"dance":"wave",2600);else if(m==="shock")temp("power",2200);else if(m==="sad")temp("sit",5000)}if(o.surge)spiritBurst();bub.innerHTML=html;bub.classList.add("on");place();lastTalk=performance.now();clearTimeout(sayT);
@@ -1389,7 +1560,7 @@ const Buddy=(()=>{
     if(o.surge){el.classList.add("surge");setTimeout(()=>el.classList.remove("surge"),1600)}}
   function sheetTop(){const s=document.querySelector(".sheet");return s?s.offsetTop:null}
   function setTarget(nx,ny,m,ms){const st=sheetTop();const minY=48;let maxY=st!==null?st-BH+16:H-BH-150;maxY=Math.max(minY,maxY);tx=clamp(nx,6,W-BW-6);ty=clamp(ny,minY,maxY);mode=m||"wander";modeUntil=performance.now()+(ms||0)}
-  function wander(){const st=sheetTop();if(st!==null){setTarget(16+Math.random()*(W-BW-32),st-BH+16,"perch");return}
+  function wander(){const st=sheetTop();if(st!==null){setTarget(16+Math.random()*(W-BW-32),st-BH+16,"perch");return}if(curEye()>=2&&Math.random()<.3){setTarget(x<W/2?W-BW-10:10,60+Math.random()*(H-BH-230),"flee",2600);return}
     const edge=Math.random()<.5?6+Math.random()*30:W-BW-6-Math.random()*30;setTarget(Math.random()<.7?edge:Math.random()*W,60+Math.random()*(H-BH-230),"wander")}
   function contextLine(){if(!S)return["Set up the vault and I'll guard it with my life.","happy"];
     const f=freeToSpend(),{spent}=todayNums(),st=streak(),j=joy(),o=[];
@@ -1398,8 +1569,10 @@ const Buddy=(()=>{
     if(S.cash.balance>0)o.push(["Cash vault's at <b>"+moneyR(S.cash.balance)+"</b>. Nobody touches it but you.","happy"]);
     o.push(st>=3?[st+"-day streak. Don't break my heart.","happy"]:["Streak's at "+st+". Log something today and I'll feel better.","think"]);
     o.push([j>=70?"I'm in a great mood. You're handling business.":j>=40?"I'm good. Better if you skip the next impulse buy.":"Honestly? I'm a little down. Let's have a disciplined day.",restFace()]);
-    return pick(o)}
-  function tap(){const now=performance.now();actUntil=0;taps=taps.filter(t=>now-t<2500);taps.push(now);vibe();lastInteract=now;
+    o.push(...eyeLines());return pick(o)}
+  function lightningCall(){temp("power",2600);speak("<b>Lightning Call!</b>","fierce",{surge:true});let n=0;const go=()=>{window.__strike?.();if(++n<3)setTimeout(go,280)};go();vibe()}
+  function murder(){temp("power",2000);speak("<b>Murder of Crows!</b>","fierce",{surge:true});murderOfCrows();window.__strike?.()}
+  function tap(){const now=performance.now();actUntil=0;taps=taps.filter(t=>now-t<2500);taps.push(now);vibe();lastInteract=now;if(curEye()>=5&&taps.length===2&&now-taps[0]<400){taps=[];murder();return}
     if(taps.length>=6){taps=[];speak(pickL("annoyed"),"shock");bump(-2);setTarget(x<W/2?W-BW-10:10,y+(Math.random()-.5)*160,"flee",3000);return}
     if(taps.length>=3){speak(pickL("tickle"),"laugh");bump(1);return}
     bump(1);const r=Math.random();
@@ -1410,11 +1583,11 @@ const Buddy=(()=>{
   function greet(){const h=new Date().getHours(),j=joy();const g=h<5?"Yo, night owl. Shift done?":h<12?"Morning! Ready to stack?":h<17?"Afternoon. Let's keep it tight today.":"Evening. Let's see how today went.";
     speak(g+(j<30?" I've been a little worried about us.":""),j<30?"sad":"happy",{surge:true});temp("wave",3500)}
   // dragging + tapping the chibi
-  bb.addEventListener("pointerdown",e=>{e.stopPropagation();try{bb.setPointerCapture(e.pointerId)}catch(_){}const n=performance.now();drag={sx:e.clientX,sy:e.clientY,ox:x,oy:y,moved:false,lx:e.clientX,ly:e.clientY,lt:n,vx:0,vy:0}});
+  bb.addEventListener("pointerdown",e=>{e.stopPropagation();try{bb.setPointerCapture(e.pointerId)}catch(_){}const n=performance.now();drag={sx:e.clientX,sy:e.clientY,ox:x,oy:y,moved:false,lx:e.clientX,ly:e.clientY,lt:n,vx:0,vy:0};drag.hold=setTimeout(()=>{if(drag&&!drag.moved&&curEye()>=4){drag.held=true;lightningCall()}},650)});
   bb.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
     if(!drag.moved&&Math.hypot(dx,dy)>8){drag.moved=true;mode="drag";speak(pickL("drag"),"shock")}
     if(drag.moved){const n=performance.now(),dt=Math.max(1,n-drag.lt);drag.vx=(e.clientX-drag.lx)/dt*16;drag.vy=(e.clientY-drag.ly)/dt*16;drag.lx=e.clientX;drag.ly=e.clientY;drag.lt=n;x=clamp(drag.ox+dx,0,W-BW);y=clamp(drag.oy+dy,30,H-BH);tx=x;ty=y;vx=vy=0}});
-  bb.addEventListener("pointerup",e=>{if(!drag)return;const d=drag;drag=null;lastInteract=performance.now();if(!d.moved){tap();return}
+  bb.addEventListener("pointerup",e=>{if(!drag)return;const d=drag;drag=null;clearTimeout(d.hold);lastInteract=performance.now();if(d.held)return;if(!d.moved){tap();return}
     if(Math.hypot(d.vx,d.vy)>22){vx=d.vx;vy=d.vy;mode="fling";modeUntil=performance.now()+900;speak(pickL("fling"),"shock");bump(-1)}
     else{setTarget(x,y,"rest",9000);speak(pickL("placed"),"calm")}});
   bb.addEventListener("pointercancel",()=>{drag=null;mode="wander"});
@@ -1440,7 +1613,7 @@ const Buddy=(()=>{
         if((mode==="wander"||mode==="perch")&&t>nextWander&&!reduce){wander();nextWander=t+10000+Math.random()*12000}
         const fast=mode==="flee"||(mode==="perch"&&Math.abs(ty-y)>40);const k=mode==="follow"?.012:fast?.02:.006,damp=mode==="follow"?.86:.9;
         vx+=(tx-x)*k*dt;vy+=(ty-y)*k*dt;vx*=Math.pow(damp,dt);vy*=Math.pow(damp,dt);
-        const sp=Math.hypot(vx,vy),mx=mode==="follow"?14:fast?18:4.5;if(sp>mx){vx*=mx/sp;vy*=mx/sp}
+        const sp=Math.hypot(vx,vy),mx=mode==="follow"?14:fast?18:(curEye()>=2?4.5:2.2);if(sp>mx){vx*=mx/sp;vy*=mx/sp}
       }
       x+=vx*dt;y+=vy*dt;
       if(x<0){x=0;vx=Math.abs(vx)*.5}if(x>W-BW){x=W-BW;vx=-Math.abs(vx)*.5}if(y<30){y=30;vy=Math.abs(vy)*.5}if(y>H-BH-60){y=H-BH-60;vy=-Math.abs(vy)*.5}if(sheet&&mode==="perch"){const st=sheetTop();if(st!==null&&y>st-BH+20&&ty<y)vy=Math.min(vy,-6)}
@@ -1451,6 +1624,7 @@ const Buddy=(()=>{
     if(!document.hidden&&t-lastTalk>idleGap&&t-lastInteract>8000){idleTalk();idleGap=35000+Math.random()*40000}
     requestAnimationFrame(frame)}
   return{
+    refresh(){face="";setFace(restFace())},guard(on){el.classList.toggle("guard",!!on)},sov(on){el.classList.toggle("sov",!!on)},
     start(){if(started)return;started=true;el.dataset.pose="sit";setFace(restFace());requestAnimationFrame(frame);setTimeout(greet,1300)},
     say(text,m,surge){bump({happy:3,laugh:2,think:-1,shock:-3,sad:-5}[m]||0);speak(text,m,{surge})},
     tap,
@@ -1461,7 +1635,7 @@ const Buddy=(()=>{
 
 /* ---------- actions ---------- */
 const A={
- ...A2,...A3,...A4,
+ ...A2,...A3,...A4,...A5,
  closeSheet,
  sheetDanger:()=>{if(!sheetDanger)return;const b=document.querySelector('[data-act="sheetDanger"]');if(!b.dataset.armed){b.dataset.armed=1;b.textContent="Tap again to confirm";b.style.color="var(--blood)";return}sheetDanger.run();closeSheet()},
  goTab:el=>{tab=el.dataset.tab;renderTabs();render();animView();scrollTo({top:0});Buddy.onTab(tab)},
