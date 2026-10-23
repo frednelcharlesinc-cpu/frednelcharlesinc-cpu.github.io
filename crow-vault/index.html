@@ -415,6 +415,24 @@ button,[data-act],.tabs button{touch-action:manipulation}
 @keyframes hlocs{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
 @keyframes hrustle{0%,80%,100%{transform:scale(1)}88%{transform:scale(1.04,1.02)}}
 @keyframes hstep{from{transform:rotate(-13deg)}to{transform:rotate(13deg)}}
+
+/* ===== v11 ===== */
+.alertcard{border-color:var(--blood);background:color-mix(in srgb,var(--blood) 12%,var(--smoke))}
+.btn.afford{width:100%;margin-top:12px;padding:11px 14px;font-size:.92rem}
+details.more{margin-top:18px}
+details.more>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 16px;border:1px solid var(--ash);border-radius:var(--r);background:color-mix(in srgb,var(--smoke) 88%,transparent);font-family:var(--display);font-size:1rem}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:"▾";color:var(--blood);font-family:var(--body)}
+details.more[open]>summary::after{content:"▴"}
+.verdict{margin-top:12px;border-radius:12px;padding:12px;border:1px solid var(--ash);background:var(--ink);display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.verdict b{font-size:1.05rem}
+.verdict.jade{border-color:var(--jade)}.verdict.jade b{color:var(--jade)}
+.verdict.amber{border-color:var(--amber)}.verdict.amber b{color:var(--amber)}
+.verdict.red{border-color:var(--blood)}.verdict.red b{color:var(--blood)}
+.verdict .hrs{color:var(--dim);font-size:.84rem}.verdict .hrs b{font-size:inherit;color:var(--bone)}
+.fixrow{border:1px solid var(--ash);border-radius:12px;padding:10px 12px 0;margin-bottom:10px}
+#buddy.napping .bb{transform:scale(.62)!important;transform-origin:0 100%;opacity:.9}
+#napBtn{color:var(--bone);background:var(--smoke-2);border-color:var(--ash)}
 </style>
 </head>
 <body>
@@ -424,7 +442,7 @@ button,[data-act],.tabs button{touch-action:manipulation}
 <div class="app" id="app">
   <div class="top">
     <div class="brand"><span class="kanji">鴉</span><h1>Crow Vault</h1></div>
-    <span class="chip sync" id="sync">Connecting…</span>
+    <div class="row" style="gap:6px"><button type="button" class="chip" id="napBtn" data-act="nap" aria-label="Let your chibi nap in the corner">Nap</button><span class="chip sync" id="sync">Connecting…</span></div>
   </div>
   <div id="view"><div class="panel" style="margin-top:20px"><p class="muted">Opening your vault. Your balances, bills and income will appear here.</p></div></div>
 </div>
@@ -582,7 +600,7 @@ function save(){
   try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast("Couldn't save. Your phone storage may be full.")}
   backupChip();
 }
-function commit(){render();save()}
+function commit(){if(S&&S.cash&&S.cash.protect>S.cash.balance)S.cash.protect=Math.max(0,S.cash.balance);render();save()}
 function boot(){setTimeout(()=>{const sp=$("#splash");if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),500)}},700);
   storm();renderTabs();
   let local=null;try{local=JSON.parse(localStorage.getItem(LS)||"null")}catch(e){}
@@ -593,7 +611,7 @@ function boot(){setTimeout(()=>{const sp=$("#splash");if(sp){sp.classList.add("o
 }
 function normalize(s){
   const d={v:1,currency:"$",bank:0,savings:0,trading:{balance:0,basis:0,limit:0,history:[]},sources:[],bills:[],tx:[],goals:[],split:{save:10,trade:10},grocery:{weekly:0},subCheck:"",lastBackup:"",checkins:[],lessons:[],created:today()};
-  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"cash"},s.prefs||{});if(!s.prefs.tipsCashV1){s.prefs.tipsTo="cash";s.prefs.tipsCashV1=1}s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});s.eyes=Object.assign({lv:-1,best:0},s.eyes||{});s.dragon=Object.assign({name:"Ember",heat:0,hatched:null,xp:0,claims:{},lastFed:null,talks:{},talkDay:null,quiz:{right:0,wrong:0}},s.dragon||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
+  s=Object.assign(d,s||{});s.trading=Object.assign(d.trading,s.trading||{});s.split=Object.assign({save:10,trade:10},s.split||{});s.grocery=Object.assign({weekly:0},s.grocery||{});s.cash=Object.assign({balance:0,target:0},s.cash||{});s.prefs=Object.assign({spendFrom:"bank",tipsTo:"cash"},s.prefs||{});if(!s.prefs.tipsCashV1){s.prefs.tipsTo="cash";s.prefs.tipsCashV1=1}s.buddy=Object.assign({joy:60,name:"Lil Crow"},s.buddy||{});s.crow=Object.assign({stage:-1,best:0},s.crow||{});s.eyes=Object.assign({lv:-1,best:0},s.eyes||{});if(s.cash.protect===undefined){s.cash.protect=s.cash.balance||0;s.cash.protectAsked=s.cash.balance>0?0:1}s.weekly=Object.assign({last:null,limit:0},s.weekly||{});if(!Array.isArray(s.wish))s.wish=[];s.skipped=s.skipped||0;s.dragon=Object.assign({name:"Ember",heat:0,hatched:null,xp:0,claims:{},lastFed:null,talks:{},talkDay:null,quiz:{right:0,wrong:0}},s.dragon||{});if(!s.fixStash){(s.tx||[]).forEach(x=>{if(x.type==="in"&&x.cat==="Tips"&&x.dest==="cash"&&!x.shift){x.type="move";x.cat="Cash stash";x.note="Added to cash vault (saved tips)"}});s.fixStash=1}if(!Array.isArray(s.offDays))s.offDays=[];s.offDays=s.offDays.filter(d=>d>=addDays(today(),-60));if(!Array.isArray(s.quick)||!s.quick.length)s.quick=DEFAULT_QUICK.map(q=>({...q}));
   return s;
 }
 
@@ -610,19 +628,20 @@ function project(days=30){
   for(const s of S.sources){if(!s.next||s.freq==="variable"||!(s.amount>0))continue;let d=s.next,late=d<t;if(late)ev.push({d:t,name:s.name,amt:s.amount,type:"in",note:"expected, not logged yet"}),d=advance(d,s.freq);let g=0;while(d&&d<=end&&g++<60){ev.push({d,name:s.name,amt:s.amount,type:"in"});if(s.freq==="once")break;d=advance(d,s.freq)}}
   for(const b of S.bills){if(!b.next||!(b.amount>0))continue;let d=b.next;if(d<t){ev.push({d:t,name:b.name,amt:b.amount,type:"out",overdue:true});d=advance(d,b.freq)}let g=0;while(d&&d<=end&&g++<60){ev.push({d,name:b.name,amt:b.amount,type:"out"});if(b.freq==="once")break;d=advance(d,b.freq)}}
   if(S.grocery.weekly>0){const left=Math.max(0,S.grocery.weekly-groceryWeek());if(left>0)ev.push({d:t,name:"Groceries left this week",amt:left,type:"out",budget:true});let d=addDays(weekStart(t),7);while(d<=end){ev.push({d,name:"Groceries (weekly budget)",amt:S.grocery.weekly,type:"out",budget:true});d=addDays(d,7)}}
+  if(S.prefs.tipsForecast!==false){const w=tipForecast();if(w>0){let d=addDays(weekStart(t),7);while(d<=end){ev.push({d,name:"Tips (low estimate)",amt:w,type:"in",tipsEst:true});d=addDays(d,7)}}}
   ev.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:(a.type==="out"?-1:1));
-  let run=S.bank;for(const e of ev){run+=e.type==="in"?e.amt:-e.amt;e.run=run}
+  let run=S.bank+spendableCash();for(const e of ev){run+=e.type==="in"?e.amt:-e.amt;e.run=run}
   return ev;
 }
 function freeToSpend(){
   const p=nextPayday();const t=today();const lim=p&&p>t?p:addDays(t,14);
   const due=project(45).filter(e=>e.type==="out"&&e.d<lim).reduce((a,e)=>a+e.amt,0);
-  return{amount:S.bank-due,until:lim,due,hasPay:!!(p&&p>t)};
+  return{amount:S.bank+spendableCash()-due,until:lim,due,hasPay:!!(p&&p>t)};
 }
 function streak(){
   const days=new Set([...S.checkins,...S.tx.map(t=>t.d)]);let n=0,d=today();if(!days.has(d))d=addDays(d,-1);while(days.has(d)){n++;d=addDays(d,-1)}return n;
 }
-const RANKS=[[0,"Fledgling Crow"],[3,"Shadow Runner"],[7,"Storm Walker"],[14,"Crimson Eye"],[30,"Sovereign of the Vault"],[60,"Abyss Wing"],[100,"Beast of the Vault"]];
+const RANKS=[[0,"Fledgling Crow"],[3,"Shadow Runner"],[7,"Storm Walker"],[14,"Crimson Talon"],[30,"Sovereign of the Vault"],[60,"Abyss Wing"],[100,"Beast of the Vault"]];
 function rank(n){let r=RANKS[0],nx=null;for(let i=0;i<RANKS.length;i++){if(n>=RANKS[i][0]){r=RANKS[i];nx=RANKS[i+1]||null}}return{name:r[1],next:nx}}
 function tradingMonthDeposits(){const m=monthKey(today());return S.tx.filter(t=>t.type==="move"&&t.cat==="To trading"&&monthKey(t.d)===m).reduce((a,t)=>a+t.amount,0)}
 
@@ -683,7 +702,7 @@ $("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");i
 function render(){
   const v=$("#view");const fb=$("#fab");if(fb)fb.hidden=!S;
   if(!S){v.innerHTML=setupView();return}
-  v.innerHTML=({home:homeView,in:inView,bills:billsView,dragon:dragonView,hist:histView,sensei:senseiView}[tab]||homeView)();
+  v.innerHTML=({home:homeView2,in:inView,bills:billsView,dragon:dragonView,hist:histView,sensei:senseiView}[tab]||homeView)();
   wireDonuts();checkCrow();checkEyes();Pet.draw();
   if(tab==="home"||tab==="sensei")maybeLesson();
 }
@@ -1281,6 +1300,143 @@ function vaultLines(){if(!S)return[];const v=vaultSuggest(),b=S.cash.balance,o=[
   else if(b<v*.5)o.push([`Cash vault is low. Aim for about <b>${moneyR(v)}</b> for quick needs.`,"think"]);
   return o}
 
+/* ---------- v11: accurate money + better daily flow ---------- */
+/* cash vault: protected savings vs spendable cash */
+const spendableCash=()=>S?Math.max(0,S.cash.balance-(S.cash.protect||0)):0;
+/* tips forecast (low estimate) */
+function avgWeeklyTips(){if(!S)return 0;const t=today(),from=addDays(t,-28);const tips=S.tx.filter(x=>x.type==="in"&&x.cat==="Tips"&&x.d>=from&&x.d<=t);
+  if(tips.length<3)return 0;const first=tips.reduce((a,x)=>x.d<a?x.d:a,t);const days=Math.max(14,Math.min(28,daysBetween(first,t)+1));return tips.reduce((a,x)=>a+x.amount,0)/days*7}
+const tipForecast=()=>Math.floor(avgWeeklyTips()*.8/10)*10;
+/* earnings per hour (base pay + tips) */
+function perHour(){if(!S)return 0;const pay=S.sources.filter(s=>s.kind==="pay"&&s.amount>0&&s.freq!=="variable").reduce((a,s)=>a+perMonth(s.amount,s.freq),0);
+  const tipsMo=avgWeeklyTips()*52/12;const hrs=S.prefs.hours||88;return(pay+tipsMo)/hrs}
+/* setup gaps */
+function setupGaps(){return{bills:S.bills.filter(b=>!b.next||!(b.amount>0)),srcs:S.sources.filter(s=>s.freq!=="variable"&&(!(s.amount>0)||!s.next))}}
+function setupCard(){const{bills,srcs}=setupGaps(),n=bills.length+srcs.length;if(!n)return"";const rent=bills.find(b=>b.cat==="Rent");
+  return `<div class="panel ${rent?"alertcard":""}" style="margin-top:12px"><div class="row between"><div style="min-width:0"><b>${rent?"Rent has no amount yet":`${n} item${n>1?"s need":" needs"} an amount or date`}</b><div class="muted" style="font-size:.82rem">${rent?"Your safe-to-spend and forecast are too high until it's in.":"Forecasts skip them until they're filled in."}</div></div><button class="btn sm red" data-act="fixSetup">Fix now</button></div></div>`}
+function fixSetupSheet(){const{bills,srcs}=setupGaps();
+  const row=(x,k)=>`<div class="fixrow" data-k="${k}" data-id="${x.id}"><div class="row between"><b>${esc(x.name)}</b><label class="muted" style="font-size:.78rem;display:flex;gap:6px;align-items:center"><input type="checkbox" class="fx-del"> Don't have this</label></div><div class="two">${amt("fx-a-"+x.id,k==="b"?"Amount":"Usual amount",x.amount||"")}${dte("fx-d-"+x.id,k==="b"?"Next due date":"Next date",x.next||"")}</div></div>`;
+  openSheet("Finish setup",`<p class="muted" style="margin:0 0 10px;font-size:.85rem">Fill in what you know. Leave a box empty to skip it for now.</p>${bills.map(b=>row(b,"b")).join("")}${srcs.map(s=>row(s,"s")).join("")}`,()=>{
+    document.querySelectorAll(".fixrow").forEach(r=>{const id=r.dataset.id,isB=r.dataset.k==="b",list=isB?S.bills:S.sources,x=list.find(y=>y.id===id);if(!x)return;
+      if(r.querySelector(".fx-del").checked){if(isB)S.bills=S.bills.filter(y=>y!==x);else S.sources=S.sources.filter(y=>y!==x);return}
+      const a=N("fx-a-"+id),d=V("fx-d-"+id);if(a>0)x.amount=a;if(d)x.next=d});
+    commit();const left=setupGaps();say(left.bills.length+left.srcs.length?"Saved. A few still need numbers, but the forecast is sharper now.":"All set. Every number in the vault is real now.","happy",true)},{submitLabel:"Save"})}
+/* protected cash prompt (one time) */
+function protectCard(){if(S.cash.protectAsked||S.cash.balance<=0)return"";
+  return `<div class="panel" style="margin-top:12px"><b>How much of your ${moneyR(S.cash.balance)} cash is savings?</b><div class="muted" style="font-size:.82rem;margin:2px 0 8px">Savings stays protected. Only cash above it counts toward free to spend. Right now all of it is protected.</div><div class="row" style="flex-wrap:wrap"><button class="btn sm red" data-act="setProtect">Choose amount</button><button class="btn sm ghost" data-act="protectAll">Keep all of it protected</button></div></div>`}
+function protectSheet(){openSheet("Protected cash",amt("f-p","Cash savings you don't want to spend",S.cash.protect||0,`Vault has ${money(S.cash.balance)}. Anything above this counts as spendable. New tips add to the spendable part.`),()=>{S.cash.protect=Math.min(S.cash.balance,N("f-p"));S.cash.protectAsked=1;commit();say(`Protected <b>${moneyR(S.cash.protect)}</b>. ${moneyR(spendableCash())} of the vault is spendable.`,"happy")})}
+/* backup */
+const backupOld=()=>!S.lastBackup?S.tx.length>=5:daysBetween(S.lastBackup,today())>7;
+function backupCard(){if(!backupOld())return"";const d=S.lastBackup?daysBetween(S.lastBackup,today()):null;
+  return `<div class="panel" style="margin-top:12px"><div class="row between"><div style="min-width:0"><b>${d?`Backup is ${d} days old`:"Back up your vault"}</b><div class="muted" style="font-size:.82rem">Your data only lives on this phone. Tap Back up, then <b>Save to Files → iCloud Drive</b>.</div></div><button class="btn sm red" data-act="backup">Back up</button></div></div>`}
+/* can I afford this */
+let afName="",afAmt=0;
+function affordVerdict(a){const f=freeToSpend(),{spent,cap}=todayNums(),left=Math.max(0,cap-spent),days=Math.max(1,daysBetween(today(),f.until));
+  if(!(a>0))return"";const hr=perHour(),hrs=hr>0?a/hr:0;let cls,head,body;
+  if(a<=left){cls="jade";head="Yes, it fits today";body=`It fits inside today's safe spend. You'd still have ${moneyR(left-a)} left today.`}
+  else if(a<=f.amount){const after=f.amount-a;cls="amber";head="Yes, but it costs your week";body=`It's more than today's safe spend. After it you'd have ${moneyR(after)} until ${fdShort(f.until)}, about ${moneyR(after/days)} a day for ${days} day${days>1?"s":""}.`}
+  else{cls="red";head="Not right now";body=`You'd be ${moneyR(a-f.amount)} short on bills before ${fdShort(f.until)}. Wait for payday or save up for it.`}
+  return `<div class="verdict ${cls}"><b>${head}</b><div>${body}</div>${hrs?`<div class="hrs">That's <b>${hrs<1?Math.round(hrs*60)+" minutes":(Math.round(hrs*10)/10)+" hours"}</b> at the table${hr?` (you earn about ${moneyR(hr)}/hr with tips)`:""}.</div>`:""}${a>=100&&cls!=="jade"?`<div class="hrs">Big buy rule: sleep on it. If you still want it tomorrow, it's a real want.</div>`:""}</div>`}
+function affordSheet(){afName="";afAmt=0;
+  openSheet("Can I afford this?",`<input class="amtbig" id="af-amt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" aria-label="Price"><div class="field" style="margin-top:10px"><input id="af-name" type="text" maxlength="40" placeholder="What is it? (optional)" aria-label="What it is"></div><div id="af-out"></div>
+   <div class="row" style="flex-wrap:wrap;margin-top:10px"><button type="button" class="btn sm" data-act="afBuy">I bought it</button><button type="button" class="btn sm ghost" data-act="afWait">Sleep on it (24h)</button></div>
+   <div class="field" style="margin-top:12px"><label for="af-h">Hours you work per month</label><input id="af-h" type="number" min="1" max="400" value="${S.prefs.hours||88}"></div>`,()=>{},{submitLabel:"Done"});
+  const up=()=>{afAmt=N("af-amt");afName=V("af-name").trim();const h=+V("af-h");if(h>0)S.prefs.hours=h;$("#af-out").innerHTML=affordVerdict(afAmt)};
+  ["af-amt","af-name","af-h"].forEach(id=>document.getElementById(id).addEventListener("input",up))}
+/* wishlist (24h rule) */
+function wishDue(){return(S.wish||[]).filter(w=>w.d<today())}
+function wishCard(){const w=wishDue()[0];if(!w)return"";
+  return `<div class="panel" style="margin-top:12px"><div class="eyebrow">You slept on it</div><b>Still want ${esc(w.name)} (${money(w.amount)})?</b><div class="muted" style="font-size:.8rem;margin:2px 0 8px">${affordVerdict(w.amount).replace(/<[^>]+>/g," ").replace(/\s+/g," ").slice(0,140)}</div><div class="row" style="flex-wrap:wrap"><button class="btn sm red" data-act="wishSkip" data-id="${w.id}">Skip it, save ${moneyR(w.amount)}</button><button class="btn sm ghost" data-act="wishBuy" data-id="${w.id}">Buy it</button></div></div>`}
+/* weekly check-in */
+const weeklyDue=()=>!S.weekly.last||daysBetween(S.weekly.last,today())>=7;
+function weeklyCard(){if(!weeklyDue())return"";return `<div class="panel" style="margin-top:12px"><div class="row between"><div style="min-width:0"><b>Weekly check-in</b><div class="muted" style="font-size:.82rem">5 minutes: count the vault, check the bank, set next week's limit. +40 for your dragon.</div></div><button class="btn sm red" data-act="weekly">Start</button></div></div>`}
+function weekSpent(ws){const we=addDays(ws,7);return S.tx.filter(x=>x.type==="out"&&x.d>=ws&&x.d<we&&!["Rent","Utilities","Subscriptions"].includes(x.cat)).reduce((a,x)=>a+x.amount,0)}
+function weekLine(){if(!S.weekly.limit)return"";const ws=weekStart(today()),sp=weekSpent(ws),l=S.weekly.limit,p=sp/l;
+  return `<div><div class="row between"><span class="eyebrow">This week</span><span class="num" style="font-size:.82rem">${money(sp)} / ${money(l)}</span></div><div class="meter ${p>1?"over":p>.8?"warn":""}" style="margin-top:4px"><i style="width:${Math.min(100,p*100)}%"></i></div></div>`}
+function weeklyStep1(){openSheet("Check-in 1/3 · Balances",amt("w-bank","Bank balance right now",S.bank,"Match your banking app.").replace('min="0"',"")+amt("w-cash","Count the cash vault",S.cash.balance,"Count the real cash at home."),()=>{
+  S.bank=N("w-bank");const c=N("w-cash");S.cash.balance=c;commit();setTimeout(weeklyStep2,250)},{submitLabel:"Next"})}
+function weeklyStep2(){const ws=weekStart(today()),last=addDays(ws,-7),a=weekSpent(last),b=weekSpent(addDays(last,-7));
+  const c={};S.tx.filter(x=>x.type==="out"&&x.d>=last&&x.d<ws).forEach(x=>c[x.cat]=(c[x.cat]||0)+x.amount);const top=Object.entries(c).sort((x,y)=>y[1]-x[1])[0];
+  const tips=S.tx.filter(x=>x.type==="in"&&x.cat==="Tips"&&x.d>=last&&x.d<ws).reduce((s,x)=>s+x.amount,0);
+  openSheet("Check-in 2/3 · Last week",`<div class="list">
+   <div class="item"><div class="name">Everyday spending</div><span class="amt">${money(a)}</span></div>
+   <div class="item"><div class="name">Week before</div><span class="amt muted">${money(b)}</span></div>
+   ${top?`<div class="item"><div class="name">Biggest category</div><span class="amt">${esc(top[0])} · ${moneyR(top[1])}</span></div>`:""}
+   <div class="item"><div class="name">Tips logged</div><span class="amt inc">${money(tips)}</span></div></div>
+   <p style="margin:10px 0 0">${a===0?"No everyday spending logged last week. If you did spend, log it with the red + so the numbers stay real.":b&&a<b?`You spent ${moneyR(b-a)} less than the week before. That's control.`:b&&a>b?`You spent ${moneyR(a-b)} more than the week before. ${top?esc(top[0])+" is where to look first.":""}`:"Good start. Next week we'll compare."}</p>`,()=>{setTimeout(weeklyStep3,250)},{submitLabel:"Next"})}
+function weeklyStep3(){const f=freeToSpend(),weeks=Math.max(1,daysBetween(today(),f.until)/7),sug=Math.max(0,Math.floor(f.amount/weeks/10)*10);
+  openSheet("Check-in 3/3 · Next week",amt("w-lim","Everyday spending limit for the next 7 days",S.weekly.limit||sug,`Suggested: ${moneyR(sug)} (free to spend split across the weeks until ${fdShort(f.until)}). Bills not included.`),()=>{
+   S.weekly.limit=N("w-lim");S.weekly.last=today();dgClaim("weekly",40);commit();window.__strike?.();
+   say(`Check-in done. Limit set to <b>${moneyR(S.weekly.limit)}</b> this week. ${backupOld()?"Last thing: tap <b>Back up</b> on Home.":"Vault's in order."}`,"laugh",true)},{submitLabel:"Finish"})}
+/* emergency shield */
+function shieldCard(){const mo=S.bills.reduce((a,b)=>a+perMonth(b.amount,b.freq),0)+(S.grocery.weekly||0)*52/12,have=S.bank+S.cash.balance+S.goals.reduce((a,g)=>a+(g.saved||0),0);
+  if(!mo)return `<div class="section"><h2>Emergency shield</h2><div class="panel"><div class="empty">Add your bill amounts so I can measure how many months your money covers.</div></div></div>`;
+  const steps=[["Starter",1000],["1 month",mo],["3 months",mo*3],["6 months",mo*6]];const nx=steps.find(s=>have<s[1]);const months=have/mo;
+  return `<div class="section"><div class="section-head"><h2>Emergency shield</h2><span class="chip ${months>=3?"jade":months>=1?"amber":"red"}">${months.toFixed(1)} months</span></div><div class="panel stack">
+   <div class="muted" style="font-size:.85rem">Bank + cash + savings goals (${moneyR(have)}) against about ${moneyR(mo)} a month in bills${S.grocery.weekly?" and groceries":""}. Trading isn't counted.</div>
+   ${nx?`<div><div class="row between"><span class="eyebrow">Next: ${nx[0]} · ${moneyR(nx[1])}</span><span class="num" style="font-size:.82rem">${moneyR(nx[1]-have)} to go</span></div><div class="meter" style="margin-top:6px"><i style="width:${Math.min(100,have/nx[1]*100)}%"></i></div></div>`:`<div class="chip jade">6 months covered</div>`}
+   <div class="row" style="gap:6px;flex-wrap:wrap">${steps.map(s=>`<span class="chip ${have>=s[1]?"jade":""}">${s[0]}</span>`).join("")}</div></div></div>`}
+/* compact home */
+let moreOpen=false;try{moreOpen=localStorage.getItem(LS+"-more")==="1"}catch(e){}
+function homeView2(){
+  const f=freeToSpend(),g=line?{t:line,m:mood}:greet();line=null;mood=g.m;
+  const st=streak(),rk=rank(st),t=today(),m=monthKey(t),mt=monthTx(m);
+  const soon=S.bills.filter(b=>b.next&&b.amount>0&&daysBetween(t,b.next)<=10).sort((a,b)=>a.next<b.next?-1:1);
+  const ev=project(30),firstShort=ev.find(e=>e.run<0);
+  const inc=mt.filter(x=>x.type==="in").reduce((a,x)=>a+x.amount,0),out=mt.filter(x=>x.type==="out").reduce((a,x)=>a+x.amount,0);
+  const cats={};mt.filter(x=>x.type==="out").forEach(x=>cats[x.cat]=(cats[x.cat]||0)+x.amount);
+  const gw=groceryWeek(),gb=S.grocery.weekly,tradePL=S.trading.balance-S.trading.basis,savedTotal=S.goals.reduce((a,x)=>a+(x.saved||0),0);
+  const subsDue=S.subCheck!==m&&S.bills.some(b=>b.cat==="Subscriptions"&&b.amount>0);const sc=spendableCash();const off=isOff(t);
+  return `
+  <div class="msgcard"><div style="min-width:0"><div class="bubble" id="bubble">${g.t}</div>
+    <div class="rank"><span class="chip red">${esc(rk.name)}</span>${curEye()?`<span class="chip red" data-act="goTab" data-tab="sensei" style="cursor:pointer">${esc(EYES[curEye()].name)}</span>`:""}<span class="chip">${st}-day streak</span></div></div></div>
+  ${standalone()?"":`<div class="panel row between" style="margin-top:12px"><div style="min-width:0"><b>Make it a real app</b><div class="muted" style="font-size:.82rem">Put Crow Vault on your home screen. Full screen, works offline, same data.</div></div><button class="btn sm red" data-act="installHelp">Install</button></div>`}
+  <div class="panel bal">
+    <div class="eyebrow">Total you have · bank + cash</div>
+    <div class="big num" style="color:var(--bone)">${money(S.bank+S.cash.balance)}</div>
+    <div class="totsplit"><button type="button" data-act="editBank" aria-label="Update bank balance"><span class="eyebrow">Bank</span><span class="num">${money(S.bank)}</span></button><span class="plus">+</span><button type="button" data-act="cashVault" aria-label="Open cash vault"><span class="eyebrow">Cash vault</span><span class="num">${money(S.cash.balance)}</span></button></div>
+    <div class="free"><span class="muted" style="font-size:.85rem">Free to spend until ${f.hasPay?"payday, ":""}${fd(f.until)}</span><span class="v ${f.amount<0?"neg":"pos"}">${money(f.amount)}</span>
+    <span class="muted" style="font-size:.75rem">Bank${sc?` + ${moneyR(sc)} spendable cash`:""}, minus ${moneyR(f.due)} for bills${gb?" and groceries":""}${S.cash.protect?`. ${moneyR(Math.min(S.cash.protect,S.cash.balance))} cash savings protected`:""}.</span><span></span></div>
+    <button type="button" class="btn red afford" data-act="afford">Can I afford this?</button>
+    <div class="quick">
+      <button type="button" data-act="logIncome">${I.in}Income</button><button type="button" data-act="logTips">${I.tip}Tips</button><button type="button" data-act="logSpend">${I.spend}Spent</button><button type="button" data-act="logGrocery">${I.cart}Groceries</button>
+    </div>
+  </div>
+  ${setupCard()}${protectCard()}${wishCard()}${weeklyCard()}${backupCard()}
+  ${off?offDayCard():""}${todayCard()}
+  <div class="section"><div class="section-head"><h2>Due soon</h2><button class="btn sm ghost" data-act="goTab" data-tab="bills">All bills</button></div>
+    <div class="panel">${soon.length?`<div class="list">${soon.slice(0,3).map(billRow).join("")}</div>`:`<div class="empty">Nothing due in the next 10 days.</div>`}</div></div>
+  <details class="more" ${moreOpen?"open":""}><summary><span>More</span><span class="muted" style="font-size:.78rem">pets · forecast · shield · this month · lesson</span></summary>
+  ${subsDue?subCheckCard():""}
+  ${nestCard()}${dragonHomeCard()}${off?"":offDayCard()}
+  ${shieldCard()}
+  <div class="section"><div class="section-head"><h2>Next 30 days</h2>${firstShort?`<span class="chip red">Short on ${fdShort(firstShort.d)}</span>`:`<span class="chip jade">Covered</span>`}</div>
+    <div class="panel">${tipForecast()?`<p class="muted" style="margin:0 0 6px;font-size:.78rem">Includes about ${moneyR(tipForecast())}/week in tips (a low estimate from your last 4 weeks).</p>`:""}${ev.length?`<div class="tl">${ev.slice(0,24).map(e=>`<div class="ev ${e.run<0?"short":""}"><span class="d">${fdShort(e.d)}</span><span class="lbl">${esc(e.name)}${e.overdue?' <span class="chip red">overdue</span>':""}${e.note?` <span class="muted" style="font-size:.72rem">${esc(e.note)}</span>`:""}</span><span class="run"><span class="${e.type==="in"?"inc":""}">${e.type==="in"?"+":"−"}${moneyR(e.amt)}</span><br><span class="${e.run<0?"neg":"muted"}">${moneyR(e.run)}</span></span></div>`).join("")}</div>`:`<div class="empty">Add amounts and dates to your bills and pay to see your balance day by day.</div>`}</div></div>
+  <div class="section"><div class="section-head"><h2>Groceries this week</h2><button class="btn sm ghost" data-act="groceryBudget">${gb?"Edit budget":"Set budget"}</button></div>
+    <div class="panel">${gb?`<div class="row between"><span class="num"><b>${money(gw)}</b> <span class="muted">of ${money(gb)}</span></span><span class="chip ${gw>gb?"red":gw>gb*.8?"amber":"jade"}">${gw>gb?"Over by "+moneyR(gw-gb):moneyR(gb-gw)+" left"}</span></div><div class="meter ${gw>gb?"over":gw>gb*.8?"warn":""}" style="margin-top:8px"><i style="width:${Math.min(100,gw/gb*100)}%"></i></div>`:`<div class="empty">Set a weekly grocery budget and log each shop. The bar fills as you spend.</div>`}</div></div>
+  <div class="section"><div class="section-head"><h2>${MON[+m.slice(5)-1]} so far</h2><span class="num" style="font-size:.85rem"><span class="inc">+${moneyR(inc)}</span> · <span class="neg">−${moneyR(out)}</span></span></div>
+    <div class="panel">${donut("spend",Object.entries(cats).map(([n,v])=>({n,v})),"spent this month")}</div></div>
+  <div class="pots" style="margin-top:14px">
+    <button type="button" class="pot" data-act="trading"><div class="eyebrow">Trading</div><div class="v">${money(S.trading.balance)}</div><div style="font-size:.75rem" class="${tradePL>=0?"pos":"neg"} num">${money(tradePL,true)} P/L</div></button>
+    <button type="button" class="pot" data-act="goTab" data-tab="sensei"><div class="eyebrow">Savings goals</div><div class="v">${money(savedTotal)}</div><div style="font-size:.75rem" class="muted">${S.goals.length} goal${S.goals.length===1?"":"s"}${S.skipped?` · ${moneyR(S.skipped)} saved by skipping`:""}</div></button></div>
+  <div class="section"><div class="section-head"><h2>Today's lesson</h2><button class="btn sm ghost" data-act="goTab" data-tab="sensei">Open</button></div><div class="panel lesson">${lessonBody(true)}</div></div>
+  </details>
+  <div style="margin-top:14px;text-align:center"><button class="btn sm ghost" data-act="checkin" ${S.checkins.includes(t)||S.tx.some(x=>x.d===t)?"disabled":""}>${S.checkins.includes(t)||S.tx.some(x=>x.d===t)?"Today counted for your streak":"No spending today? Check in"}</button></div>`}
+document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("more")){moreOpen=e.target.open;try{localStorage.setItem(LS+"-more",moreOpen?"1":"0")}catch(_){}}},true);
+const A7={
+ fixSetup:()=>fixSetupSheet(),
+ setProtect:()=>protectSheet(),
+ protectAll:()=>{S.cash.protect=S.cash.balance;S.cash.protectAsked=1;commit();toast("All vault cash protected")},
+ afford:()=>affordSheet(),
+ afBuy:()=>{if(!(afAmt>0)){toast("Enter a price first");return}const a=afAmt,n=afName||"Purchase";closeSheet();logOut({amount:a,cat:"Personal",note:n,src:S.prefs.spendFrom||"bank",d:today()})},
+ afWait:()=>{if(!(afAmt>0)){toast("Enter a price first");return}S.wish=S.wish||[];S.wish.push({id:uid(),name:afName||"that",amount:afAmt,d:today()});closeSheet();commit();say(`Smart. I'll ask you about <b>${esc(afName||"it")}</b> tomorrow.`,"happy",true)},
+ wishSkip:el=>{const w=S.wish.find(x=>x.id===el.dataset.id);if(!w)return;S.wish=S.wish.filter(x=>x!==w);S.skipped=(S.skipped||0)+w.amount;dgClaim("skip",20);commit();window.__strike?.();say(`You just kept <b>${moneyR(w.amount)}</b>. Total saved by skipping: <b>${moneyR(S.skipped)}</b>.`,"laugh",true)},
+ wishBuy:el=>{const w=S.wish.find(x=>x.id===el.dataset.id);if(!w)return;S.wish=S.wish.filter(x=>x!==w);commit();logOut({amount:w.amount,cat:"Personal",note:w.name,src:S.prefs.spendFrom||"bank",d:today()});say("You waited and still wanted it. That's a real want. Enjoy it.","happy")},
+ weekly:()=>weeklyStep1(),
+ protectEdit:()=>protectSheet(),
+ nap:()=>{S.prefs.nap=!S.prefs.nap;try{save()}catch(e){}Buddy.nap(!!S.prefs.nap);const b=$("#napBtn");if(b)b.textContent=S.prefs.nap?"Wake":"Nap"}
+};
+
 /* ---------- v3: the crow that evolves with your streak ---------- */
 const CV_DEFS=`<defs>
 <radialGradient id="cvGlow"><stop offset="0" stop-color="#e0302f" stop-opacity=".6"/><stop offset=".6" stop-color="#e0302f" stop-opacity=".12"/><stop offset="1" stop-color="#e0302f" stop-opacity="0"/></radialGradient>
@@ -1441,7 +1597,7 @@ function todayCard(){const{list,spent,cap}=todayNums();const p=cap?spent/cap:spe
   <div class="row between" style="flex-wrap:wrap"><span class="num"><b>${money(spent)}</b> <span class="muted">of ${money(cap)} safe today</span></span><span class="chip ${p>1?"red":p>.8?"amber":"jade"}">${p>1?"Over by "+moneyR(spent-cap):moneyR(cap-spent)+" left"}</span></div>
   <div class="meter ${p>1?"over":p>.8?"warn":""}"><i style="width:${Math.min(100,p*100)}%"></i></div>
   ${list.length?`<div class="list">${list.slice().reverse().map(x=>`<div class="item"><div style="min-width:0"><div class="name">${esc(x.note||x.cat)}</div><div class="sub"><span>${esc(x.cat)}</span>${x.src==="cash"?'<span class="chip red">cash</span>':""}</div></div><span class="amt">−${money(x.amount)}</span></div>`).join("")}</div>`:`<div class="muted" style="font-size:.84rem">Nothing spent yet today. Tap the red + anytime you buy something.</div>`}
-  <div class="muted" style="font-size:.74rem">"Safe today" is your free money split evenly across the days until ${fdShort(freeToSpend().until)}.</div>
+  ${weekLine()}<div class="muted" style="font-size:.74rem">"Safe today" is your free money split evenly across the days until ${fdShort(freeToSpend().until)}.</div>
   </div></div>`}
 
 /* ---------- quick spend ---------- */
@@ -1462,6 +1618,7 @@ function quickSpend(){
 }
 function logOut(o){const cash=o.src==="cash";
   if(cash&&o.amount>S.cash.balance+.001){toast(`Cash vault only has ${money(S.cash.balance)}. Put cash in first or pay from bank.`);say("The vault doesn't have that much cash. Count it?","shock");return false}
+  const dip=cash?Math.max(0,o.amount-spendableCash()):0;if(dip>.009)setTimeout(()=>say(`That dipped <b>${moneyR(dip)}</b> into your protected cash savings.`,"sad"),1800);
   if(cash)S.cash.balance-=o.amount;else S.bank-=o.amount;
   const x={id:uid(),type:"out",cat:o.cat,amount:o.amount,note:o.note,d:o.d||today()};if(cash)x.src="cash";S.tx.push(x);commit();vibe();reactSpend(x);
   toastUndo(`Logged ${money(o.amount)} · ${o.note}`,()=>{reverseTx(x);S.tx=S.tx.filter(t=>t!==x);commit();say("Undone. Like it never happened.","calm")});
@@ -1479,7 +1636,7 @@ function cashRecent(){const l=S.tx.filter(x=>x.src==="cash"||x.dest==="cash"||/c
   return l.length?`<div class="list">${l.map(x=>{const inn=x.dest==="cash"||x.cat==="To cash vault";return `<div class="item"><div style="min-width:0"><div class="name">${esc(x.note||x.cat)}</div><div class="sub">${fdShort(x.d)}</div></div><span class="amt ${inn?"inc":""}">${inn?"+":"−"}${money(x.amount)}</span></div>`}).join("")}</div>`:`<div class="empty">No cash moves yet. Put cash in when you add to the stash at home.</div>`}
 function cashVaultSheet(){openSheet("Cash vault",`<div class="row between" style="margin-bottom:12px;flex-wrap:wrap"><div><div class="eyebrow">Cash at home</div><div class="num" style="font-size:2rem;font-weight:700">${money(S.cash.balance)}</div></div>${S.cash.target?`<span class="chip">${Math.round(S.cash.balance/S.cash.target*100)}% of ${moneyR(S.cash.target)} goal</span>`:""}</div>
   <div class="quick" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0"><button type="button" data-act="cashIn">${I.in}Put cash in</button><button type="button" data-act="cashOut">${I.spend}Take cash out</button><button type="button" data-act="cashCount">${I.hist}Count it</button><button type="button" data-act="cashTarget">${I.chart}Vault goal</button></div>
-  ${vaultAdviceHtml()}<div class="qlabel">Recent</div>${cashRecent()}`,()=>{},{submitLabel:"Done"})}
+  <div class="panel" style="margin:0 0 12px;padding:12px"><div class="row between"><div><div class="eyebrow">Protected savings</div><b class="num">${money(Math.min(S.cash.protect||0,S.cash.balance))}</b><div class="muted" style="font-size:.78rem">Spendable cash: ${money(spendableCash())}. Only this part counts toward free to spend.</div></div><button type="button" class="btn sm" data-act="protectEdit">Change</button></div></div>${vaultAdviceHtml()}<div class="qlabel">Recent</div>${cashRecent()}`,()=>{},{submitLabel:"Done"})}
 
 /* ---------- off days ---------- */
 const isOff=d=>S.offDays.includes(d);
@@ -1526,7 +1683,7 @@ const A2={
  cashIn:()=>openSheet("Put cash in",amt("f-amt","Amount","")+sel("f-from","Where's it from",[["stash","Money I already had / saved tips (not new income)"],["tips","New cash tips from a shift"],["bank","Took it out of the bank (ATM)"],["other","Other new cash (side work, gift, sold something)"]],"stash")+txt("f-note","Note (optional)","",""),()=>{
    const a=N("f-amt");if(!(a>0)){toast("Enter an amount above zero");return false}const fr=V("f-from"),note=V("f-note").trim();
    if(fr==="bank"){S.bank-=a;addTx({type:"move",cat:"To cash vault",amount:a,note:note||"Bank → Cash vault"})}
-   else if(fr==="stash"){addTx({type:"move",cat:"Cash stash",amount:a,note:note||"Added to cash vault (savings)",dest:"cash"})}
+   else if(fr==="stash"){addTx({type:"move",cat:"Cash stash",amount:a,note:note||"Added to cash vault (savings)",dest:"cash"});S.cash.protect=(S.cash.protect||0)+a}
    else{addTx({type:"in",cat:fr==="tips"?"Tips":"Cash in",amount:a,note:note||(fr==="tips"?"Tips · cash":"Cash in"),dest:"cash"})}
    S.cash.balance+=a;commit();vibe();say(`<b>${money(a)}</b> in the vault. ${pickL("vault")}`,"happy",true);window.__strike?.()}),
  cashOut:()=>openSheet("Take cash out",amt("f-amt","Amount","")+sel("f-for","What for",[["spend","Spent it on something"],["bank","Deposited it to the bank"]],"spend")+sel("f-cat","Category (if spent)",EXP_CATS,"Food out")+txt("f-note","What was it? (optional)","",""),()=>{
@@ -1583,7 +1740,8 @@ const Buddy=(()=>{
   function temp(p,ms){tempPose=p;tempUntil=performance.now()+ms}
   function pickAct(t){const h=new Date().getHours(),idle=t-lastInteract;if((h>=3&&h<7)||idle>90000)return"sleep";const j=joy(),o=["sit","sit","stand","stand","meditate","meditate","power"];if(j>=55)o.push("dance","wave");if(j<30)o.push("sit","sit");return pick(o)}
   function setPose(p){if(p===pose)return;pose=p;el.dataset.pose=p;body.innerHTML=buddyArt(face||"happy",p);if(p==="power")spiritBurst()}
-  function updatePose(t){const sp=Math.hypot(vx,vy);if(drag&&drag.moved)flying=true;else if(flying&&sp<.7)flying=false;else if(!flying&&sp>2.4)flying=true;
+  let napping=false;
+  function updatePose(t){if(napping&&!(drag&&drag.moved)){setPose("sleep");return}const sp=Math.hypot(vx,vy);if(drag&&drag.moved)flying=true;else if(flying&&sp<.7)flying=false;else if(!flying&&sp>2.4)flying=true;
     let p;if(flying)p="fly";else if(sp>.9&&!drag)p="walk";else if(tempPose&&t<tempUntil)p=tempPose;else{tempPose=null;if(t>actUntil){act=pickAct(t);actUntil=t+8000+Math.random()*9000}p=act}setPose(p)}
   function emote(c){body.classList.remove("emo-hop","emo-shake","emo-spin","emo-droop");void body.offsetWidth;body.classList.add(c)}
   function place(){el.classList.toggle("below",y<(sheet?60:170));const w=bub.offsetWidth;let l=BW/2-w/2;if(x+l<8)l=8-x;if(x+l+w>W-8)l=W-8-w-x;bub.style.left=l+"px"}
@@ -1613,7 +1771,7 @@ const Buddy=(()=>{
   function idleTalk(){const h=new Date().getHours(),since=performance.now()-lastInteract;
     if(h>=3&&h<7)speak(pickL("night"),"sleepy");else if(since>180000)speak(pickL("bored"),"think");else if(Math.random()<.5)speak(pickL("jokes"),"laugh");else{const[c,m]=contextLine();speak(c,m)}}
   function greet(){const h=new Date().getHours(),j=joy();const g=h<5?"Yo, night owl. Shift done?":h<12?"Morning! Ready to stack?":h<17?"Afternoon. Let's keep it tight today.":"Evening. Let's see how today went.";
-    speak(g+(j<30?" I've been a little worried about us.":""),j<30?"sad":"happy",{surge:true});temp("wave",3500)}
+    speak(g+(j<30?" I've been a little worried about us.":""),j<30?"sad":"happy",{surge:true});temp("wave",3500);if(S&&backupOld())setTimeout(()=>speak("Your backup is old. Tap <b>Back up</b> on Home so we never lose the vault.","think"),7000)}
   // dragging + tapping the chibi
   bb.addEventListener("pointerdown",e=>{e.stopPropagation();try{bb.setPointerCapture(e.pointerId)}catch(_){}const n=performance.now();drag={sx:e.clientX,sy:e.clientY,ox:x,oy:y,moved:false,lx:e.clientX,ly:e.clientY,lt:n,vx:0,vy:0};drag.hold=setTimeout(()=>{if(drag&&!drag.moved&&curEye()>=4){drag.held=true;lightningCall()}},650)});
   bb.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
@@ -1627,7 +1785,7 @@ const Buddy=(()=>{
   bb.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tap()}});
   // he follows you around the screen
   const near=(cx,cy)=>{const ox=cx<W/2?36:-36-BW;return[cx+ox,cy-BH-26]};
-  document.addEventListener("pointerdown",e=>{if(drag||e.target.closest("#buddy"))return;const n=performance.now();lastInteract=n;if(sheet||n-lastFollow<20000||Math.random()>.18)return;lastFollow=n;const[nx,ny]=near(e.clientX,e.clientY);setTarget(nx,ny,"follow",2600)},{passive:true});
+  document.addEventListener("pointerdown",e=>{if(drag||e.target.closest("#buddy"))return;const n=performance.now();lastInteract=n;if(napping||sheet||n-lastFollow<20000||Math.random()>.18)return;lastFollow=n;const[nx,ny]=near(e.clientX,e.clientY);setTarget(nx,ny,"follow",2600)},{passive:true});
   let lastSY=scrollY;addEventListener("scroll",()=>{const d=scrollY-lastSY;lastSY=scrollY;if(mode!=="drag")vy-=clamp(d*.06,-4,4)},{passive:true});
   addEventListener("resize",()=>{W=innerWidth;H=innerHeight;x=clamp(x,0,W-BW);y=clamp(y,30,H-BH)});
   // swipe a sheet down to close it
@@ -1642,7 +1800,7 @@ const Buddy=(()=>{
       else{
         if((mode==="follow"||mode==="rest"||mode==="flee")&&t>modeUntil)mode="wander";if(mode==="perch"&&sheet){const st=sheetTop();if(st!==null)ty=Math.max(48,st-BH+16)}
         if(mode==="perch"&&!sheet)mode="wander";
-        if((mode==="wander"||mode==="perch")&&t>nextWander&&!reduce){wander();nextWander=t+10000+Math.random()*12000}
+        if((mode==="wander"||mode==="perch")&&t>nextWander&&!reduce&&!napping){wander();nextWander=t+10000+Math.random()*12000}
         const fast=mode==="flee"||(mode==="perch"&&Math.abs(ty-y)>40);const k=mode==="follow"?.012:fast?.02:.006,damp=mode==="follow"?.86:.9;
         vx+=(tx-x)*k*dt;vy+=(ty-y)*k*dt;vx*=Math.pow(damp,dt);vy*=Math.pow(damp,dt);
         const sp=Math.hypot(vx,vy),mx=mode==="follow"?14:fast?18:(curEye()>=2?4.5:2.2);if(sp>mx){vx*=mx/sp;vy*=mx/sp}
@@ -1653,21 +1811,22 @@ const Buddy=(()=>{
     updatePose(t);const bob=reduce||pose==='meditate'?0:Math.sin(t/520)*4,lean=clamp(vx*1.8,-16,16);
     el.style.transform=`translate3d(${x.toFixed(1)}px,${(y+bob).toFixed(1)}px,0)`;window.__bp={x,y:y+bob};bb.style.transform=`rotate(${lean.toFixed(1)}deg)`;
     if(bub.classList.contains("on"))place();
-    if(!document.hidden&&t-lastTalk>idleGap&&t-lastInteract>8000){idleTalk();idleGap=35000+Math.random()*40000}
+    if(!napping&&!document.hidden&&t-lastTalk>idleGap&&t-lastInteract>8000){idleTalk();idleGap=35000+Math.random()*40000}
     requestAnimationFrame(frame)}
   return{
+    nap(on){napping=!!on;el.classList.toggle("napping",napping);if(napping)(tx=0,ty=H-BH-62,mode="rest",modeUntil=1e12);else{mode="wander";nextWander=0;actUntil=0}},
     refresh(){face="";setFace(restFace())},guard(on){el.classList.toggle("guard",!!on)},sov(on){el.classList.toggle("sov",!!on)},
     start(){if(started)return;started=true;el.dataset.pose="sit";setFace(restFace());requestAnimationFrame(frame);setTimeout(greet,1300)},
     say(text,m,surge){bump({happy:3,laugh:2,think:-1,shock:-3,sad:-5}[m]||0);speak(text,m,{surge})},
     tap,
     onTab(t){if(!reduce){setTarget(20+Math.random()*(W-BW-40),80+Math.random()*(H-BH-260),"rest",2500)}if(Math.random()<.6&&L.tabs[t])speak(pick(L.tabs[t]),t==="bills"?"think":"happy")},
-    onSheet(open){sheet=open;if(open){setTimeout(()=>{const st=sheetTop();if(st!==null)setTarget(x,st-BH+16,"perch");nextWander=performance.now()+4000;if(Math.random()<.3)speak(pickL("sheet"),"happy")},80)}else{mode="wander";nextWander=0}}
+    onSheet(open){sheet=open;if(open){setTimeout(()=>{const st=sheetTop();if(st!==null)setTarget(x,st-BH+16,"perch");nextWander=performance.now()+4000;if(Math.random()<.3)speak(pickL("sheet"),"happy")},80)}else if(napping){(tx=0,ty=H-BH-62,mode="rest",modeUntil=1e12)}else{mode="wander";nextWander=0}}
   };
 })();
 
 /* ---------- actions ---------- */
 const A={
- ...A2,...A3,...A4,...A5,...A6,
+ ...A2,...A3,...A4,...A5,...A6,...A7,
  closeSheet,
  sheetDanger:()=>{if(!sheetDanger)return;const b=document.querySelector('[data-act="sheetDanger"]');if(!b.dataset.armed){b.dataset.armed=1;b.textContent="Tap again to confirm";b.style.color="var(--blood)";return}sheetDanger.run();closeSheet()},
  goTab:el=>{tab=el.dataset.tab;renderTabs();render();animView();scrollTo({top:0});Buddy.onTab(tab)},
@@ -1782,7 +1941,7 @@ async function doBackup(){
   catch(e){if(e&&e.name==="AbortError")return}
   const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);markBackup();
 }
-function markBackup(){if(!S)return;S.lastBackup=today();commit();say("Backed up. Save that file in Files or iCloud Drive so it's safe.","happy");toast("Backup created")}
+function markBackup(){if(!S)return;S.lastBackup=today();commit();say("Backed up. If you picked Save to Files, choose iCloud Drive so it survives losing the phone.","happy");toast("Backup created")}
 document.getElementById("restoreFile").addEventListener("change",async e=>{
   const f=e.target.files&&e.target.files[0];if(!f)return;
   let obj=null;try{obj=JSON.parse(await f.text())}catch(err){}
@@ -1790,7 +1949,7 @@ document.getElementById("restoreFile").addEventListener("change",async e=>{
   const when=obj.exported?fd(obj.exported.slice(0,10)):"an unknown date";
   openSheet("Restore backup",`<p style="margin-top:0">Replace everything on this phone with the backup from <b>${esc(when)}</b>?</p>`,()=>{S=normalize(obj.state);S.lastBackup=today();commit();say("Vault restored. Everything's back.","happy",true);window.__strike&&window.__strike()},{submitLabel:"Restore"});
 });
-boot();Buddy.start();
+boot();Buddy.start();if(S&&S.prefs.nap){Buddy.nap(true);const nb=$("#napBtn");if(nb)nb.textContent="Wake"}
 })();
 </script>
 
