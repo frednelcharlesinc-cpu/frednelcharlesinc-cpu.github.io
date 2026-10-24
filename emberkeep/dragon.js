@@ -98,6 +98,10 @@ function creatureSVG(c, p){
     </g></g>
   </g></svg>`;
 }
+function spriteURL(stage){
+  const svg = artFor(stage).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="460" height="340" ');
+  return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
 function artFor(stage){
   const c = STAGES[stage], p = "d"+(uid++);
   return c.egg ? eggSVG(!!c.crack, p) : creatureSVG(c, p);
@@ -247,6 +251,7 @@ class Creature {
   frame(dt){
     this.t+=dt;
     if(!this.cfg) return;
+    if(!this.free && this.scene.clientWidth===0) return;
     if(this.cfg.egg){ this.x=this.W/2; this.y=this.ground; this.place(0); return; }
     const c=this.cfg, t=this.t;
     let walking=false, flap=0;
@@ -335,6 +340,7 @@ class Creature {
     }
     if(walking) this.walkPh+=dt*(c.speed/5.5);
     if(this.jawT>0) this.jawT-=dt;
+    if(!this.free){ this.x=Math.max(this.w*.5,Math.min(this.W-this.w*.5,this.x)); this.y=Math.min(this.y,this.ground); }
     this.pose(t, walking, flap);
     this.place(walking && c.hop ? -Math.abs(Math.sin(this.walkPh))*c.size*c.hop : 0);
   }
@@ -425,5 +431,5 @@ class Creature {
   setContext(ctx){ this.ctx=ctx; }
 }
 
-window.Dragon = { Creature, STAGES, artFor };
+window.Dragon = { Creature, STAGES, artFor, spriteURL };
 })();

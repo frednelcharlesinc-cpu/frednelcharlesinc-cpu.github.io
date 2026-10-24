@@ -216,6 +216,76 @@ ul.hist li:last-child{border-bottom:0}
 .evo .primary{min-width:180px}
 @media (prefers-reduced-motion:reduce){.evo-box .art.shake,.evo-box .art.float{animation:none}}
 
+/* tabs */
+main:not([data-view="fast"]) [data-tab="fast"],main:not([data-view="cinder"]) [data-tab="cinder"],
+main:not([data-view="games"]) [data-tab="games"],main:not([data-view="progress"]) [data-tab="progress"]{display:none!important}
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:12;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));
+  background:var(--panel);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.tab{position:relative;background:none;border:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;font:600 .72rem var(--data);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:7px 0 5px}
+.tab .ti{font-size:1.3rem;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .2s,transform .2s}
+.tab[aria-selected="true"]{color:var(--flame);background:var(--chip)}
+.tab[aria-selected="true"] .ti{filter:none;transform:translateY(-1px)}
+.live{position:absolute;top:6px;right:calc(50% - 20px);width:8px;height:8px;border-radius:50%;background:var(--ember);box-shadow:0 0 8px var(--ember);animation:glow 1.6s ease-in-out infinite}
+#toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}
+#toast:not(.on){opacity:0;visibility:hidden}
+#toast{transition:transform .35s,opacity .35s,visibility .35s}
+.strip{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;padding:8px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);text-transform:none;letter-spacing:0;font:500 .9rem var(--body);color:var(--fg);text-align:left}
+.smini{width:44px;aspect-ratio:230/170;display:block}
+.smini svg{width:100%;height:100%;display:block}
+.sinfo{display:flex;flex-direction:column;gap:5px;min-width:0}
+.sname{display:flex;gap:8px;align-items:baseline;min-width:0;white-space:nowrap;overflow:hidden}
+.sname b{font-family:var(--data);font-weight:700;font-size:1rem;letter-spacing:.04em}
+#sStatus{font-family:var(--data);font-size:.85rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+#sStatus.on{color:var(--ember)}
+.sbar{height:6px;border-radius:4px;background:var(--track);overflow:hidden}
+.sbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blood),var(--ember),var(--flame));transition:width .6s}
+.sem{font-family:var(--data);font-weight:600;font-size:.95rem;padding:4px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);white-space:nowrap}
+.sem b,.embal b{color:var(--flame);font-variant-numeric:tabular-nums}
+
+/* arcade */
+.arc-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.embal{font-family:var(--data);font-weight:600;padding:5px 12px;border-radius:999px;background:var(--chip);border:1px solid var(--line);white-space:nowrap}
+.games{display:flex;flex-direction:column;gap:10px}
+.gcard{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--sunk)}
+.gcard.open{border-color:rgba(255,174,66,.35);background:radial-gradient(120% 90% at 0% 0%,var(--warm),transparent 70%),var(--sunk)}
+.gicon{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;font-size:2rem;background:var(--chip);border:1px solid var(--line)}
+.gcard:not(.open) .gicon{filter:grayscale(1) brightness(.6)}
+.gbody{display:flex;flex-direction:column;gap:6px;min-width:0}
+.gtop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.gname{font-family:var(--display);font-size:1.35rem;line-height:1}
+.gskill{font-family:var(--data);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--flame);padding:2px 7px;border-radius:6px;background:var(--chip);white-space:nowrap}
+.gdesc{font-size:.86rem;color:var(--muted);margin:0}
+.gfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px}
+.gbest{font-family:var(--data);color:var(--muted);font-variant-numeric:tabular-nums}
+.gfoot button{padding:9px 14px;font-size:.9rem;white-space:nowrap;flex:none}
+.gneed{font-size:.8rem;color:var(--muted)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--sunk)}
+.stat b{display:block;font-family:var(--data);font-weight:700;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted)}
+.emline{font-family:var(--data);font-weight:600;color:var(--flame);margin:0;font-size:1.05rem}
+
+/* game overlay */
+body.gaming{overflow:hidden}
+.gwrap{position:fixed;inset:0;z-index:25;background:#050508;touch-action:none;user-select:none;-webkit-user-select:none}
+.gwrap canvas{position:absolute;inset:0;display:block}
+.ghud{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 10px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));pointer-events:none}
+.gx{pointer-events:auto;width:40px;height:40px;padding:0;border-radius:50%;font-size:1rem;background:rgba(20,18,25,.7)}
+.gsc{text-align:center;display:flex;flex-direction:column;align-items:center}
+.gscore{font-family:var(--data);font-weight:700;font-size:2.6rem;line-height:1;color:#fff;text-shadow:0 2px 12px rgba(255,90,36,.6);font-variant-numeric:tabular-nums}
+.gwrap .gbest{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase}
+.gmsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100% - 32px));text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;padding:22px 18px;border-radius:18px;background:rgba(14,12,18,.88);border:1px solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.gmsg h3{font-family:var(--display);font-weight:400;font-size:2.1rem;margin:0;color:var(--flame);line-height:1.05}
+.gmsg p{margin:0}
+.gtext{color:var(--fg);font-size:.95rem}
+.ghow{font-family:var(--data);letter-spacing:.08em;text-transform:uppercase;font-size:.8rem;color:var(--muted)}
+.gbtns{display:flex;gap:10px;width:100%;margin-top:6px}
+.gbtns button{flex:1}
+
 /* hour by hour */
 .hnow{border-left:3px solid var(--flame);padding:2px 0 2px 12px;display:flex;flex-direction:column;gap:4px}
 .hnow .hh{font-family:var(--data);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:.78rem;color:var(--flame)}
@@ -271,13 +341,19 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
 </style>
 </head>
 <body>
-<main>
+<main id="main" data-view="fast">
   <header>
     <h1>Emberkeep</h1>
     <div class="hright"><button class="themebtn" id="themeBtn" type="button" aria-label="Theme"></button><span class="sub" id="today"></span></div>
   </header>
 
-  <section class="lair" aria-label="Your dragon">
+  <button class="strip" id="strip" type="button" aria-label="Open Cinder">
+    <span class="smini" id="sMini"></span>
+    <span class="sinfo"><span class="sname"><b id="sName">Ember Egg</b><span id="sStatus"></span></span><span class="sbar"><i id="sFill"></i></span></span>
+    <span class="sem" title="Embers">🔥 <b id="sEm">0</b></span>
+  </button>
+
+  <section class="lair" data-tab="cinder" aria-label="Your dragon">
     <div class="scene" id="scene" aria-label="Cinder's lair"><div class="sky"></div></div>
     <div class="lair-info">
       <div class="dname">Cinder · Stage <span id="stageNum">1</span>/7</div>
@@ -300,7 +376,7 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
     <div class="evo-path" id="evoPath" aria-label="Evolution path"></div>
   </section>
 
-  <section class="panel timer" aria-label="Fast timer">
+  <section class="panel timer" data-tab="fast" aria-label="Fast timer">
     <div class="ringwrap">
       <svg viewBox="0 0 200 200" aria-hidden="true">
         <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset=".6" stop-color="#ff4a2b"/><stop offset="1" stop-color="#b3131b"/></linearGradient></defs>
@@ -338,11 +414,18 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
       <div id="endMsg"></div>
       <div class="row"><button class="primary" id="keepGoing" type="button">Keep going</button><button id="endAnyway" type="button">End fast</button></div>
     </div>
+
+    <button class="ghost" id="forgotBtn" type="button" hidden>Forgot to end it? Set when you ate</button>
+    <div class="inline" id="ateAtPanel" hidden>
+      <label class="label" for="ateAt">I ate at</label>
+      <input id="ateAt" type="datetime-local">
+      <div class="row"><button class="primary" id="saveAte" type="button">End fast then</button><button id="cancelAte" type="button">Cancel</button></div>
+    </div>
   </section>
 
-  <section class="panel result" id="result" hidden></section>
+  <section class="panel result" data-tab="fast" id="result" hidden></section>
 
-  <section class="panel" id="hourPanel" aria-label="Hour by hour">
+  <section class="panel" data-tab="fast" id="hourPanel" aria-label="Hour by hour">
     <h2>Hour by hour</h2>
     <div class="hnow">
       <span class="hh" id="hHour">Hour 0</span>
@@ -357,7 +440,7 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
     </details>
   </section>
 
-  <section class="panel word" aria-label="Daily fire">
+  <section class="panel word" data-tab="fast" aria-label="Daily fire">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
       <h2>Fuel for the fast</h2>
       <span class="sub" id="wordXP"></span>
@@ -371,7 +454,18 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
     <div class="wact"><button id="wNew" type="button">Another one</button><button class="primary" id="wDone" type="button">Amen</button></div>
   </section>
 
-  <section class="panel">
+  <section class="panel arcade" data-tab="games" aria-label="Ember Arcade">
+    <div class="arc-head"><h2>Ember Arcade</h2><span class="embal">🔥 <b id="emberBal">0</b> embers</span></div>
+    <p class="note">Fasting earns embers: 1 for every 10 XP from a finished fast. Spend them to unlock games. Once unlocked, a game is yours to play forever.</p>
+    <div class="games" id="gameList"></div>
+  </section>
+
+  <section class="panel" data-tab="progress">
+    <h2>Your numbers</h2>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="panel" data-tab="progress">
     <h2>This week</h2>
     <div class="week" id="week"></div>
     <div class="quest">
@@ -383,17 +477,17 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" data-tab="progress">
     <h2>Trophies <span class="sub" id="badgeCount"></span></h2>
     <div class="badges" id="badges"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" data-tab="progress">
     <h2>Recent fasts</h2>
     <ul class="hist" id="hist"></ul>
   </section>
 
-  <section class="panel">
+  <section class="panel" data-tab="progress">
     <details>
       <summary>How Cinder grows</summary>
       <ul class="howxp">
@@ -414,9 +508,16 @@ details summary{cursor:pointer;font-family:var(--data);letter-spacing:.1em;text-
     </details>
   </section>
 </main>
+<nav class="tabbar" id="tabbar" aria-label="Sections">
+  <button class="tab" data-go="fast" type="button"><span class="ti">⏳</span>Fast<i class="live" id="liveDot" hidden></i></button>
+  <button class="tab" data-go="cinder" type="button"><span class="ti">🐉</span>Cinder</button>
+  <button class="tab" data-go="games" type="button"><span class="ti">🎮</span>Arcade</button>
+  <button class="tab" data-go="progress" type="button"><span class="ti">📈</span>Progress</button>
+</nav>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="dragon.js"></script>
+<script src="games.js"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -452,9 +553,13 @@ const BADGES = [
   {id:"f50",   ic:"👑", name:"Fifty Fasts",   desc:"Finish 50 fasts",      test:s=>s.fasts.length>=50},
   {id:"t100",  ic:"⏳", name:"100 Hours",     desc:"100 hours fasted",     test:s=>s.totalH>=100},
   {id:"t500",  ic:"🏰", name:"500 Hours",     desc:"500 hours fasted",     test:s=>s.totalH>=500},
-  {id:"quest", ic:"📜", name:"Quest Keeper",  desc:"Finish a weekly quest",test:s=>!!s.questWeek}
+  {id:"quest", ic:"📜", name:"Quest Keeper",  desc:"Finish a weekly quest",test:s=>!!s.questWeek},
+  {id:"arcade",ic:"🎮", name:"Arcade Dragon", desc:"Unlock a game",        test:s=>Object.keys(s.games?.unlocked||{}).length>=1},
+  {id:"ace",   ic:"🪽", name:"Sky Ace",       desc:"25 in Ember Flight",   test:s=>(s.games?.best?.flight||0)>=25},
+  {id:"will",  ic:"🧱", name:"Iron Will",     desc:"60 in Craving Storm",  test:s=>(s.games?.best?.storm||0)>=60},
+  {id:"center",ic:"🎯", name:"Dead Center",   desc:"40 in Ember Pulse",    test:s=>(s.games?.best?.pulse||0)>=40}
 ];
-const DEFAULT = {xp:0, streak:0, bestStreak:0, lastHitDay:null, lastCheckIn:null, goalH:16, current:null, lastEnd:null, fasts:[], badges:{}, questWeek:null, totalH:0};
+const DEFAULT = {xp:0, streak:0, bestStreak:0, lastHitDay:null, lastCheckIn:null, goalH:16, current:null, lastEnd:null, fasts:[], badges:{}, questWeek:null, totalH:0, embers:0, games:{unlocked:{},best:{},plays:0}};
 
 // ---------- helpers ----------
 const pad = n => String(n).padStart(2,"0");
@@ -469,10 +574,16 @@ const stageFor = xp => { let i=0; STAGES.forEach((s,k)=>{ if(xp>=s.xp) i=k; }); 
 const toLocalInput = t => { const d=new Date(t); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
 // ---------- storage ----------
+function normalize(o){
+  const s = {...DEFAULT, ...o};
+  if(o.embers==null) s.embers = Math.floor((o.xp||0)/10);   // starter embers from past fasting
+  s.games = {unlocked:{}, best:{}, plays:0, ...(o.games||{})};
+  return s;
+}
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(raw) return {...DEFAULT, ...JSON.parse(raw)};
+    if(raw) return normalize(JSON.parse(raw));
     const old = JSON.parse(localStorage.getItem(OLD)||"null");
     if(old?.profile?.xp) return {...DEFAULT, xp:+old.profile.xp||0};
   }catch(e){}
@@ -513,11 +624,11 @@ function startFast(at){
   $("result").hidden = true;
   save(); render(); toast(`Fast started. Goal: ${S.goalH} hours`);
 }
-function finishFast(){
+function finishFast(endAt){
   const c = S.current; if(!c) return;
-  const end = Date.now(), dur = end - c.start;
+  const end = endAt || Date.now(), dur = end - c.start;
   S.current = null; S.lastEnd = end;
-  $("endPanel").hidden = true;
+  $("endPanel").hidden = true; $("ateAtPanel").hidden = true;
   if(dur < HOUR){ save(); render(); toast("Under 1 hour, so it doesn't count. Start again when you're ready."); return; }
   const hit = dur >= c.goalH*HOUR;
   const lines = [];
@@ -544,15 +655,17 @@ function finishFast(){
   if(S.questWeekDone !== wk && hitsThisWeek() >= 5){ S.questWeekDone = wk; S.questWeek = wk; addXP(100); lines.push(["Weekly quest", 100]); }
   const newBadges = checkBadges();
   newBadges.forEach(b=>lines.push([`Trophy: ${b.name}`, 25]));
+  const em = Math.max(1, Math.floor(lines.reduce((a,l)=>a+l[1],0)/10));
+  S.embers = (S.embers||0) + em;
   save(); render();
-  showResult(dur, hit, c.goalH, lines);
+  showResult(dur, hit, c.goalH, lines, em);
 }
 function hitsThisWeek(){
   const ws = weekStart(new Date()).getTime();
   const days = new Set(S.fasts.filter(f=>f.hit && f.end>=ws).map(f=>dayKey(f.end)));
   return days.size;
 }
-function showResult(dur, hit, goalH, lines){
+function showResult(dur, hit, goalH, lines, em){
   const r = $("result"); r.hidden=false; r.textContent="";
   const lab=document.createElement("div"); lab.className="label"; lab.textContent = hit ? "Goal smashed" : `Short of your ${goalH}h goal`;
   const big=document.createElement("div"); big.className="big"; big.textContent = `+${lines.reduce((a,l)=>a+l[1],0)} XP`;
@@ -560,7 +673,8 @@ function showResult(dur, hit, goalH, lines){
   lines.forEach(([a,b])=>{ const d=document.createElement("div"); const x=document.createElement("span"); x.textContent=a; const y=document.createElement("span"); y.textContent=`+${b}`; d.append(x,y); ls.append(d); });
   const n=document.createElement("p"); n.className="note";
   n.textContent = hit ? "Break the fast with protein and vegetables, not fast food. Cinder is proud." : "Every hour still counted. Go again tomorrow and lock in the goal.";
-  r.append(lab,big,ls,n);
+  const e=document.createElement("p"); e.className="emline"; e.textContent=`+${em||0} embers for the Arcade`;
+  r.append(lab,big,e,ls,n);
   r.scrollIntoView({behavior:"smooth",block:"center"});
 }
 
@@ -626,6 +740,10 @@ function renderTimer(){
   document.documentElement.style.setProperty("--heat", heat.toFixed(2));
   renderHour();
   const el2 = S.current ? Date.now()-S.current.start : 0;
+  const ss=$("sStatus");
+  if(S.current){ ss.textContent=`· Fasting ${hm(el2)}`; ss.className="on"; } else { ss.textContent = S.lastEnd && Date.now()-S.lastEnd < (24-S.goalH)*HOUR ? "· Eating window" : "· Ready to fast"; ss.className=""; }
+  $("liveDot").hidden = !S.current;
+  $("forgotBtn").hidden = !S.current;
   cinder.setContext({fasting:!!S.current, hour:Math.floor(el2/HOUR), goalHit:!!S.current && el2>=S.current.goalH*HOUR});
   // mood
   const st = liveStreak();
@@ -637,7 +755,8 @@ function render(){
   const now = new Date();
   $("today").textContent = now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
   const st = stageFor(S.xp);
-  if(st!==lastStage){ cinder.setStage(st); lastStage=st; renderLair(st); }
+  if(st!==lastStage){ cinder.setStage(st); lastStage=st; renderLair(st); $("sMini").innerHTML=Dragon.artFor(st); }
+  renderStrip(); renderArcade(); renderStats();
   $("stageNum").textContent = st+1;
   $("stageName").textContent = STAGES[st].name;
   const next = STAGES[st+1];
@@ -735,7 +854,7 @@ $("importFile").addEventListener("change", async ev=>{
   const f=ev.target.files?.[0]; if(!f) return;
   try{
     const d=JSON.parse(await f.text());
-    if(d && typeof d.xp==="number" && Array.isArray(d.fasts)) S={...DEFAULT,...d};
+    if(d && typeof d.xp==="number" && Array.isArray(d.fasts)) S=normalize(d);
     else if(d?.profile?.xp!=null) S={...DEFAULT, xp:+d.profile.xp||0};
     else throw 0;
     save(); lastStage=-1; render(); toast("Backup restored");
@@ -888,6 +1007,84 @@ $("petBtn").onclick=()=>cinder.pet();
 $("emberBtn").onclick=()=>cinder.tossEmber();
 $("flyBtn").onclick=()=>{ if(stageFor(S.xp)<4){ toast(`Cinder learns to fly as a Drake (${STAGES[4].xp} XP).`); return; } if(!cinder.flyFree()) toast("Cinder is already out flying!"); };
 
+// ---------- strip, arcade, stats ----------
+function renderStrip(){
+  const st=stageFor(S.xp), next=STAGES[st+1];
+  $("sName").textContent = STAGES[st].name;
+  $("sFill").style.width = next ? `${Math.min(100,(S.xp-STAGES[st].xp)/(next.xp-STAGES[st].xp)*100)}%` : "100%";
+  $("sEm").textContent = S.embers||0;
+}
+const GICON = {flight:"🌋", storm:"🍔", pulse:"🎯"};
+function renderArcade(){
+  $("emberBal").textContent = S.embers||0;
+  const list=$("gameList"); list.textContent="";
+  Arcade.GAMES.forEach(g=>{
+    const open=!!S.games.unlocked[g.id], best=S.games.best[g.id]||0, need=g.cost-(S.embers||0);
+    const c=document.createElement("div"); c.className="gcard"+(open?" open":"");
+    c.innerHTML=`<div class="gicon"></div><div class="gbody"><div class="gtop"><span class="gname"></span><span class="gskill"></span></div><p class="gdesc"></p><div class="gfoot"><span class="gbest"></span><button type="button"></button></div></div>`;
+    c.querySelector(".gicon").textContent = open ? GICON[g.id] : "🔒";
+    c.querySelector(".gname").textContent=g.name; c.querySelector(".gskill").textContent=g.skill;
+    c.querySelector(".gdesc").textContent=g.desc;
+    const b=c.querySelector("button"), info=c.querySelector(".gbest");
+    if(open){ info.textContent = best ? `Best ${best} ${g.unit}` : "No score yet"; b.textContent="Play"; b.className="primary"; b.onclick=()=>playGame(g.id); }
+    else { b.textContent=`Unlock 🔥${g.cost}`; info.textContent = need>0 ? `${need} more embers` : "Ready to unlock"; info.className="gneed";
+      b.disabled = need>0; b.onclick=()=>unlockGame(g); }
+    list.append(c);
+  });
+}
+function unlockGame(g){
+  if((S.embers||0) < g.cost) return;
+  S.embers -= g.cost; S.games.unlocked[g.id]=Date.now();
+  const got=checkBadges(); save(); render();
+  toast(`${g.name} unlocked!` + (got.length?` Trophy: ${got[0].name}`:""));
+}
+function playGame(id){
+  const prev=S.games.best[id]||0;
+  Arcade.open(id, {sprite:Dragon.spriteURL(Math.max(2,stageFor(S.xp))), best:prev,
+    onEnd(score){ S.games.plays=(S.games.plays||0)+1; if(score>(S.games.best[id]||0)) S.games.best[id]=score; const got=checkBadges(); save(); render(); if(got.length) setTimeout(()=>toast(`Trophy: ${got[0].name} · +25 XP`),700); },
+    onClose(){ render(); }
+  });
+}
+function renderStats(){
+  const f=S.fasts, last10=f.slice(0,10), dur=x=>x.end-x.start;
+  const longest = f.length ? Math.max(...f.map(dur)) : 0;
+  const avg = last10.length ? last10.reduce((a,x)=>a+dur(x),0)/last10.length : 0;
+  const ws = weekStart(new Date()).getTime();
+  const weekH = f.filter(x=>x.end>=ws).reduce((a,x)=>a+dur(x),0);
+  const rate = last10.length ? Math.round(last10.filter(x=>x.hit).length/last10.length*100) : 0;
+  const items=[[hm(longest),"Longest fast"],[hm(avg),"Average, last 10"],[hm(weekH),"Fasted this week"],[`${rate}%`,"Goal hit rate, last 10"]];
+  const el=$("stats"); el.textContent="";
+  items.forEach(([v,l])=>{ const d=document.createElement("div"); d.className="stat"; const b=document.createElement("b"); b.textContent=v; const sp=document.createElement("span"); sp.textContent=l; d.append(b,sp); el.append(d); });
+}
+
+// ---------- tabs ----------
+const TAB_K="emberkeep.tab";
+function setTab(name, scroll){
+  $("main").dataset.view=name;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", String(t.dataset.go===name)));
+  try{ localStorage.setItem(TAB_K,name); }catch(e){}
+  if(scroll!==false) window.scrollTo({top:0,behavior:"instant"});
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>setTab(t.dataset.go));
+$("strip").onclick=()=>setTab("cinder");
+{ let t="fast"; try{ t=localStorage.getItem(TAB_K)||"fast"; }catch(e){} setTab(["fast","cinder","games","progress"].includes(t)?t:"fast", false); }
+
+// ---------- forgot to end ----------
+$("forgotBtn").onclick=()=>{
+  if(!S.current) return;
+  $("endPanel").hidden=true; $("editPanel").hidden=true;
+  const p=$("ateAtPanel"); p.hidden=!p.hidden;
+  const inp=$("ateAt"), now=Date.now();
+  inp.min=toLocalInput(S.current.start+60000); inp.max=toLocalInput(now); inp.value=toLocalInput(now);
+};
+$("cancelAte").onclick=()=>{ $("ateAtPanel").hidden=true; };
+$("saveAte").onclick=()=>{
+  const t=new Date($("ateAt").value).getTime();
+  if(!t || t>Date.now()){ toast("Pick a time that's already passed."); return; }
+  if(t<=S.current.start){ toast("That's before your fast started."); return; }
+  finishFast(t);
+};
+
 // ---------- day / night ----------
 const THEME_K="emberkeep.theme";
 let themeMode="auto"; try{ themeMode=localStorage.getItem(THEME_K)||"auto"; }catch(e){}
@@ -906,6 +1103,7 @@ $("themeBtn").onclick=()=>{
 applyTime(); setInterval(applyTime, 60000);
 
 // ---------- boot ----------
+try{ if(!localStorage.getItem("emberkeep.new.arcade")){ localStorage.setItem("emberkeep.new.arcade","1"); setTimeout(()=>toast(`New: Ember Arcade! You have ${S.embers} embers to spend.`),2600); } }catch(e){}
 pickWord();
 render();
 setTimeout(checkIn, 600);
