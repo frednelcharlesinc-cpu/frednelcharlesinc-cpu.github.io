@@ -139,12 +139,8 @@ const UI = {
     await this.creator();
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Forging your Drag…'; $('#loadBar').style.width = '60%';
     await wait(30); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
-    await this.intro([
-      'Four hundred years ago, the demon dragon Fratenaptor nearly ended the world. Even the dragons curse his name.',
-      'The people say the Drags worshipped him. That his fire lives in their blood. That you can always know a Drag by their eyes — green, and glowing.',
-      'They say a lot of things.',
-      'High in the hills, in a valley no map remembers, the last free Drags still live in hiding.'
-    ]);
+    $('#fade').classList.add('on');
+    await Cine.play(CINE.legend(), { music: 'sad' }); Music.stop();
     G.mode = 'world'; await World.load('thornvale', 9, 14, 'down'); this.controls(true); this.hud();
     Story.run(SCENES.thornvale.onEnter);
     await fadeIn(700); banner('PROLOGUE', 'Thornvale'); save();

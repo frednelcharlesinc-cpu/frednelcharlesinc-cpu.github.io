@@ -387,6 +387,11 @@ function paintDread(x, fill, stroke, expr) {
   fill(K[3]); P(x, [[0, PH], [4, 84, 30, 78], [70, 78], [96, 84, 100, PH]]); x.fill();
   fill(M[3]); E(x, 18, 88, 22, 12, -.2); x.fill(); E(x, 82, 88, 22, 12, .2); x.fill(); fill(M[4]); E(x, 22, 85, 12, 5, -.2); x.fill();
   fill(K[2]); x.fillRect(38, 66, 24, 16);
+  // Gravecleaver's hilt and blade rising behind the shoulder
+  x.save(); x.translate(78, 70); x.rotate(-1.25);
+  fill('#121218'); P(x, [[8, -7], [70, -6], [76, -1], [70, 6], [64, 4], [58, 6], [52, 4], [46, 6], [40, 4], [34, 6], [28, 4], [22, 6], [8, 7]]); x.fill();
+  fill('#2a1e18'); x.fillRect(-12, -3, 18, 6); fill('#24242c'); P(x, [[4, -14], [9, -6], [9, 6], [4, 14], [1, 8], [2, 0], [1, -8]]); x.fill();
+  fill('#3cff8a'); x.fillRect(12, -1, 50, 2); x.restore();
   // horns
   fill('#2a2622'); P(x, [[34, 34], [20, 18, 14, -2], [26, 14, 40, 28]]); x.fill(); P(x, [[66, 34], [80, 18, 86, -2], [74, 14, 60, 28]]); x.fill();
   fill('#4a443c'); P(x, [[30, 26], [22, 14, 18, 4], [24, 14, 33, 24]]); x.fill();

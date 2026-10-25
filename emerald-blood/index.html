@@ -195,6 +195,12 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 #loading{position:fixed;inset:0;z-index:100;background:#050806;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:16px;color:var(--muted)}
 #loading .bar{width:220px;height:8px;border:2px solid var(--line);border-radius:6px;overflow:hidden}
 #loading .bar b{display:block;height:100%;width:0;background:var(--green);transition:width .2s}
+
+#cine{z-index:70 !important}#cine .cbar{position:absolute;left:0;right:0;height:9%;background:#000;z-index:2}#cine .cbar.top{top:0}#cine .cbar.bot{bottom:0}
+#cineCap{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);width:min(86%,760px);z-index:3;text-align:center;opacity:0;transition:opacity .25s;
+  font-size:clamp(14px,2.3vw,19px);line-height:1.4;color:#f4f1e8;text-shadow:0 2px 4px #000,0 0 10px #000;background:linear-gradient(transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent);padding:8px 16px}
+#cineCap.on{opacity:1}#cineCap b{display:block;font-family:'Press Start 2P';font-size:clamp(9px,1.5vw,12px);margin-bottom:4px;letter-spacing:1px}#cineCap.narr span{font-style:italic;color:#e0e6dc}
+#cineSkip{position:absolute;top:max(8px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:4;background:rgba(0,0,0,.55);color:#cfe;border:1px solid #46ff9566;border-radius:8px;padding:6px 12px;font-size:13px;font-family:inherit}
 </style>
 </head>
 <body>
@@ -267,6 +273,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/world.js"></script>
 <script src="js/dialog.js"></script>
 <script src="js/portraits.js"></script>
+<script src="js/cine.js"></script>
 <script src="js/battle.js"></script>
 <script src="js/realm.js"></script>
 <script src="js/story.js"></script>

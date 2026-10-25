@@ -40,7 +40,7 @@ const ENEMY = {
     skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'slash', m: 1.4, w: 340 }] },
       { name: 'Shard Flare', w: .25, hits: [{ anim: 'spellcast', m: 2, w: 1000, unp: 1 }] }] },
   dread: { name: 'Dread', drag: 1, hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
-    skills: [{ name: 'Cleave', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Wingbeat', w: .25, hits: [{ anim: 'spellcast', m: 1.6, w: 1000, unp: 1 }] }] },
+    skills: [{ name: 'Gravecleaver', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Black Sun Arc', w: .25, hits: [{ anim: 'slash', m: 1.6, w: 1000, unp: 1 }] }] },
   rime_lupine: { name: 'Rime Lupine', hp: 46, atk: 12, def: 3, spd: 13, dodge: .22, parry: 0, brk: 44, xp: 18, gold: 4,
     skills: [{ name: 'Frost Claw', hits: [{ anim: 'slash', m: 1, w: 520 }] }, { name: 'Whiteout Frenzy', w: .45, hits: [{ anim: 'slash', m: .55, w: 440 }, { anim: 'halfslash', m: .55, w: 280 }, { anim: 'slash', m: .7, w: 360 }] }] },
   rime_alpha: { name: 'Rime Alpha', hp: 120, atk: 15, def: 4, spd: 13, dodge: .25, parry: .05, brk: 70, xp: 50, gold: 12, size: 1.3,
@@ -61,7 +61,7 @@ const TIER_COL = { E: '#9aa3a0', D: '#7fc97f', C: '#6ab4ff', B: '#c58cff', A: '#
 const ELEM = { fire: ['Fire', '#ff7a3a'], water: ['Water', '#4aa8ff'], ice: ['Ice', '#9fe4ff'], lightning: ['Lightning', '#ffe14a'], earth: ['Earth', '#c79a5a'], wind: ['Wind', '#bfe8d0'], light: ['Light', '#fff3b0'], mana: ['Raw Mana', '#46ff95'] };
 // which enemy techniques carry an element (everyone uses elements — except Drags, who move raw mana)
 const SKILL_EL = { 'Ember Verdict': 'fire', 'Radiant Lance': 'light', 'Purging Light': 'light', 'Shield Rush': 'earth', 'Dirt in the Eyes': 'earth', 'Frost Claw': 'ice', 'Whiteout Frenzy': 'ice',
-  'Avalanche Pounce': 'ice', 'Glacier Rend': 'ice', 'Mana Breath': 'lightning', 'Snow Sever': 'wind', 'Thousand Flakes': 'wind', 'Shard Flare': 'mana', 'Wingbeat': 'mana', 'Howl Pounce': 'wind' };
+  'Avalanche Pounce': 'ice', 'Glacier Rend': 'ice', 'Mana Breath': 'lightning', 'Snow Sever': 'wind', 'Thousand Flakes': 'wind', 'Shard Flare': 'mana', 'Black Sun Arc': 'mana', 'Howl Pounce': 'wind' };
 const elOf = sk => SKILL_EL[sk.name];
 const ALLY = {
   oren: { name: 'Oren', drag: 1, sprite: 'oren', color: '#a8592a', hp: 70, mp: 14, atk: 12, def: 5, spd: 9, arts: ['cleave'] },
@@ -75,6 +75,28 @@ function tinted(img, col) {
   const c2 = document.createElement('canvas'); c2.width = img.width; c2.height = img.height; const x = c2.getContext('2d');
   x.drawImage(img, 0, 0); x.globalCompositeOperation = 'source-atop'; x.fillStyle = col; x.fillRect(0, 0, c2.width, c2.height);
   return (img._t[col] = c2);
+}
+// Gravecleaver: Dread's greatsword — longer than a man is tall, a jagged dragon-tooth edge, a vein of Drag stone down the middle
+function paintGreatsword(c, px, py, ang, s, t) {
+  c.save(); c.translate(px, py); c.rotate(ang); c.scale(s, s);
+  const L = 74;
+  c.fillStyle = '#2a1e18'; c.fillRect(-15, -1.6, 15, 3.2); c.fillStyle = '#5a4434'; for (let i = -14; i < 0; i += 3) c.fillRect(i, -1.6, 1, 3.2);
+  c.strokeStyle = '#3a3a44'; c.lineWidth = 1.4; c.beginPath(); c.arc(-17, 0, 2.4, 0, 7); c.stroke();
+  c.fillStyle = '#24242c'; c.beginPath(); c.moveTo(0, -10); c.lineTo(3, -4); c.lineTo(3, 4); c.lineTo(0, 10); c.lineTo(-2, 7); c.lineTo(-1, 0); c.lineTo(-2, -7); c.closePath(); c.fill();
+  c.fillStyle = '#121218'; c.beginPath(); c.moveTo(3, -6); c.lineTo(L - 8, -5.2); c.lineTo(L, -1.5);
+  for (let x = L - 6; x > 4; x -= 6) { c.lineTo(x, 5.6); c.lineTo(x - 3, 3.8); }
+  c.lineTo(3, 6); c.closePath(); c.fill();
+  c.strokeStyle = '#8a92a8'; c.lineWidth = .8; c.beginPath(); c.moveTo(3, -6); c.lineTo(L - 8, -5.2); c.lineTo(L, -1.5); c.stroke();
+  c.save(); c.globalCompositeOperation = 'lighter'; const pulse = .55 + Math.sin((t || 0) / 260) * .25;
+  c.strokeStyle = `rgba(80,255,150,${pulse})`; c.lineWidth = 1.4; c.beginPath(); c.moveTo(6, 0); c.lineTo(L - 14, -.6); c.stroke();
+  c.strokeStyle = `rgba(80,255,150,${pulse * .3})`; c.lineWidth = 4; c.stroke();
+  c.fillStyle = '#3cff8a'; c.beginPath(); c.arc(1, 0, 1.6, 0, 7); c.fill(); c.restore();
+  c.restore();
+}
+function dreadSwordAngle(anim, fr) {
+  if (anim === 'slash' || anim === 'halfslash' || anim === 'backslash') return -2.5 + fr / 5 * 3.3;
+  if (anim === 'thrust') return .05; if (anim === 'spellcast') return -1.57 - Math.sin(fr) * .1; if (anim === 'hurt') return 1.3; if (anim === 'run' || anim === 'walk') return .35;
+  return -2.15;
 }
 const SRC_NAME = s => s === 'attack' ? 'Attack' : s === 'link' ? 'Link Arts' : s === 'counter' ? 'Counters' : (ARTS[s] ? ARTS[s].name : s);
 const Battle = {
@@ -596,6 +618,12 @@ const Battle = {
         for (let i = 0; i < 8; i++) { const an = a.wheelAng + i * Math.PI / 4, px = cx + Math.cos(an) * 15, py = cy + Math.sin(an) * 4.5, h = 7 + (Math.sin(an) > 0 ? 3 : 0);
           c.fillStyle = Math.sin(an) > 0 ? '#ffb050' : '#7a1a0a'; c.beginPath(); c.moveTo(px - 3, py); c.lineTo(px + 3, py); c.lineTo(px, py - h); c.fill(); }
         c.restore();
+      } else if (a.key === 'dread') {
+        const ang = dreadSwordAngle(a.anim, fr), px = a.x + 9 * s, py = a.y - 36 * s, behind = a.anim === 'combat' || a.anim === 'hurt';
+        if (behind) paintGreatsword(c, px, py, ang, s * .95, t);
+        drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
+        if (!behind) paintGreatsword(c, px, py, ang, s * .95, t);
+        c.save(); c.globalCompositeOperation = 'lighter'; const gx = a.x + 3 * s, gy = a.y - 43 * s, g = c.createRadialGradient(gx, gy, 0, gx, gy, 5 * s); g.addColorStop(0, 'rgba(90,255,150,.9)'); g.addColorStop(1, 'rgba(90,255,150,0)'); c.fillStyle = g; c.fillRect(gx - 7 * s, gy - 7 * s, 14 * s, 14 * s); c.restore();
       } else drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
       c.globalAlpha = 1;
       if (a.side === 'e' && !a.ko) {

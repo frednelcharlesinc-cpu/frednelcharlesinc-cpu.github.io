@@ -231,10 +231,8 @@ async function kairoIntro() {
   Story.heal(true);
   if (r === 'win') { f.sparWon = true; await say('kairo', 'shock', "…Huh. You got better. When did you get better?"); await me('happy', "While you were busy keeping a list."); }
   else { await say('kairo', 'happy', "Forty-two. I'll need a bigger wall."); await me('anger', "Next time."); await say('kairo', 'happy', "There's always a next time with us. That's the best part."); }
-  await narr('Later. The two of you sit on the old wall at the edge of the village, legs dangling, looking east.');
-  await narr('The mountains ring the valley like the walls of a bowl. Nobody climbs them. Nana — the Elder — forbids it.');
-  await say('kairo', 'neutral', "You ever wonder what's past them? Really past them?");
-  await say('kairo', 'neutral', "The grown-ups get it. 'Hide. Stay small. The mountains keep us safe.' But I don't want to be safe, {name}. I want to be free.");
+  await Cine.play(CINE.ridgeDream(), { music: 'sad' });
+  Music.play('village');
   const c2 = await ask('kairo', 'neutral', "Don't you?", ["Every single day.", "Safe is how we're still alive.", "I want both."]);
   if (c2 === 0) await say('kairo', 'happy', "Ha! I knew it. Then one day we climb them. You, me, and Ilya. And we don't stop walking until nobody looks at our eyes.");
   else if (c2 === 1) await say('kairo', 'sad', "…You sound like the Elder. Alive isn't the same as living. You'll see.");
@@ -243,13 +241,7 @@ async function kairoIntro() {
   await say('kairo', 'neutral', "Found it up on the slope. Feel that? It's warm. It hums. The Elder nearly took my head off when she saw one last year.");
   await say('kairo', 'neutral', "'Never take a stone from the mountain. Never speak of them outside the valley.' …Why would rocks be a secret?");
   await me('neutral', "Maybe because someone out there would want them.");
-  await narr('Footsteps on the wall. Tamsin, Bo, Lark and Nix climb up and squeeze in beside you.');
-  await say('tamsinK', null, "Are you two talking about the mountains AGAIN?");
-  await say('larkK', null, "Ooh, ooh, is it the secret plan? Is it the climbing plan? I want in! I'm small, I can fit in cracks!");
-  await say('boK', null, "…Can Frog come?");
-  await say('nixK', null, "If we climb, we climb together. All of us. Or nobody.");
-  await say('kairo', 'happy', "Then swear it. Hands in. One day, all of us, over the top — and nobody ever makes us hide again.");
-  await narr('Six small hands stack on the old stone. Below you, the village bells start ringing for the festival.');
+  await Cine.play(CINE.oath());
   f.oath = true;
   await say('kairo', 'happy', "Sworn. Come on. If Ilya catches me missing her dance, I'm dead.");
   f.kairo = true; W.remove('kairo');
@@ -273,7 +265,7 @@ async function festival() {
   else await say('ilya', null, "That's okay. You can not-know with me. We'll figure it out together.");
   await say('nana', 'sad', "Fratenaptor nearly ended the world four hundred years ago. And people decided our eyes meant we'd finish the job.");
   await say('nana', 'neutral', "One day I'll tell you all what these mountains really are. When you're older.");
-  await narr('Far off, from the ridge road, a horn sounds. Then another. Then bells.');
+  await Cine.play(CINE.horns(), { music: 'night' });
   await say('asha', 'shock', "INQUISITION! White cloaks on the ridge — and soldiers. Imperial soldiers! They came straight to the bridge!");
   World.shake = 400; sfx('alarm');
   await say('nana', 'shock', "Straight to the bridge… someone gave them the way in.");
@@ -292,25 +284,19 @@ async function festival() {
   await say('oren', 'happy', "Ha! You were listening after all.");
   // ---- DREAD ----
   World.shake = 600; sfx('break');
-  await narr('The bridge groans. Something enormous walks out of the smoke.');
   const d = await World.addNpc({ id: 'dread', x: 37, y: 15, dir: 'left', size: 1.45 });
-  await narr('It is taller than the doorframes. Black scales gleam where the armor ends. Wings, folded like a cloak. The fire bends away from it.');
+  await Cine.play(CINE.dread(), { music: 'boss' });
   await say('oren', 'shock', "…No. No, it can't be. The Dread General. The Crown sent DREAD for us?");
-  await say('dread', null, "…");
-  await say('dread', null, "KNEEL.");
-  await narr('The voice doesn\'t come from a throat. It comes from the ground, the bones, the air in your lungs.');
   await say('oren', 'anger', "{name}! Don't let it touch you — fight, and look for a way out!");
   await Battle.start({ enemies: ['dread'], allies: ['oren'], noFlee: true, bd: 'dusk', boss: true, intro: 'DREAD, the Crown\'s General',
     onTurn: async (B, Bt) => { if (B.turn >= 6) { await Bt.msg('Dread raises his blade.', 900); B.flash = 1.5; sfx('break'); await wait(500); B.actors.filter(a => a.side === 'p').forEach(a => { a.hp = 0; a.ko = true; a.anim = 'hurt'; a.frame = 5; }); Bt.hud(); await Bt.msg('BLACK SUN', 1400); return 'scripted'; } } });
   await narr('You\'re on the ground. Oren is on the ground. He isn\'t moving.');
   const il = await World.addNpc({ id: 'ilya', x: 29, y: 15, dir: 'right' });
   await say('ilya', null, "{SIB}!! Get up — please get up—");
-  await narr('Ilya throws herself over you. Dread looks down at the two of you for a long moment. Then he reaches out one black, clawed hand.');
+  await narr('Ilya throws herself over you. Dread looks down at the two of you for a long moment. Then he reaches out one black, gauntleted hand.');
   // ---- KAIRO ----
   const k = await World.addNpc({ id: 'kairo', sprite: 'kairo_kid', x: 31, y: 17, dir: 'up' });
-  await say('kairo', 'anger', "GET AWAY FROM THEM!");
-  await narr('Kairo comes out of a burning house with his sleeves on fire. Something green blazes in his fist — the stone from the mountain.');
-  await narr('He drives it into Dread\'s arm. The light is blinding. For the first time, the giant takes a step BACK.');
+  await Cine.play(CINE.kairoSaves());
   await narr('For one heartbeat Kairo\'s burning arm is wrong — swollen, black-scaled, hooked claws where his fingers should be. The flames on his sleeve stop hurting him. Then it\'s just a boy\'s arm again.');
   await say('dread', null, "…");
   await narr('Behind the visor, something green flickers. Dread is looking at Kairo\'s arm. Not at the stone.');
@@ -343,9 +329,7 @@ async function festival() {
         me.hp = 1; me.anim = 'hurt'; me.frame = 5; Bt.hud(); await Bt.msg('PURGING LIGHT', 1400);
         await Bt.msg('Through the white, Ilya is screaming your name. Getting further away.', 1900);
         B.dim = .85; B.dimCol = '0,0,0'; Music.stop(); sfx('break');
-        await Bt.msg('Something behind your eyes cracks open.', 1700);
-        B.dimCol = '0,24,20';
-        await Bt.msg('The world goes slow. You can SEE it — threads of green light in the air, in the stones, running through Halvard like veins.', 2600);
+        await Cine.play(CINE.awaken());
         await Bt.msg('Every thread is a current. And every current can be pulled… or thrown.', 2100);
         B.flash = 1.3; sfx('art'); G.S.f.eye = true;
         await Bt.msg('VERDANT EYE — AWAKENED', 1800);
@@ -414,8 +398,7 @@ async function talkNanaAfter() {
   await say('mei', 'sad', "{name} is coming with me. South, to the coast, where no one knows our faces. Kairo — you're eleven. Come with us. All of you.");
   await say('kairoKB', null, "No.");
   await say('kairoKB', null, "…Forty-two to whatever, {name}. Don't you dare die before I win the next one.");
-  await narr('He turns, and the children turn with him. Tamsin looks back once. Then she doesn\'t.');
-  await narr('That is the last time you see Kairo for seven years.');
+  await Cine.play(CINE.leaving(), { music: 'sad' });
   World.remove('kairo'); f.greenEclipse = true; f.split = true;
   Story.quest('Go with Mei — east across the bridge, then south.');
   UI.hud();
@@ -803,9 +786,7 @@ async function crate() {
 }
 async function talkAlpha() {
   const f = F();
-  await narr('A huge black beast-man rears over a carcass — and between you and it stands a girl with a spear.');
-  await narr('Long white hair, loose to her waist. A crimson cape. Eyes as green as yours — and not hidden at all.');
-  await narr('She is, without any question, the most beautiful person you have ever seen. She is also covered in wolf blood, and she doesn\'t look back at you.');
+  await Cine.play(CINE.liora());
   await say('liora', 'anger', "Move. That one's mine.");
   const c0 = await ask('me', 'blush', '…', ["I'm not moving.", 'Let me help.']);
   await say('liora', 'neutral', c0 === 0 ? "Then don't die where I have to step over you." : "Fine. Keep up."); if (c0 === 1) Story.heart(1);
@@ -904,6 +885,7 @@ async function ending() {
     await narr('At the edge of the clearing, a figure in tinted glasses watches you. When you look up, she nods once — and is gone.');
   }
   f.chapter1Done = true; Story.quest('Chapter I complete. Greyspire Citadel awaits.'); G.S.side = ''; save();
+  await Cine.play(CINE.greyspire(), { music: 'night' });
   Dlg.close(); await UI.endCard();
 }
 
@@ -956,12 +938,12 @@ async function talkScout() {
 }
 async function kairoDuel() {
   const f = F(); const W = World;
-  await narr('Footsteps. Many of them. Torches between the trees — and green eyes behind every one.');
+  await Cine.play(CINE.millEyes(), { music: 'boss' });
   await W.addNpc({ id: 'kairo', sprite: 'kairo_b', x: 17, y: 16, dir: 'up' });
   await W.addNpc({ id: 'reb1', sprite: 'tamsin', x: 16, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb2', sprite: 'bo', x: 18, y: 17, dir: 'up' });
   await W.addNpc({ id: 'reb3', sprite: 'ge_dace', x: 15, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb4', sprite: 'ge_wren', x: 19, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb5', sprite: 'ge_sefa', x: 17, y: 18, dir: 'up' });
   W.player.dir = 'down';
-  await narr('A tall figure steps into the lamplight. Long black hair, hanging in ragged strands across his face. Under it, a burn the colour of raw meat spreads over one eye. Green eyes you would know anywhere.');
+
   await me('shock', "…Kairo.");
   await say('kairoB', 'neutral', "Seven years, {name}. You got tall.");
   await say('kairoB', 'neutral', "Lark said you came out of the Realm of No Return. Nobody comes out of there. …I should've known you'd be the first.");
@@ -1046,8 +1028,7 @@ Story.heart = function (n) {
 async function millRoof() {
   const f = F(); if (f.roofDone) return; f.roofDone = true;
   Music.play('night'); await fadeOut(900); await wait(300); await fadeIn(900);
-  await narr('Later. Green Eclipse\'s fires burn low in the trees. Everyone who can sleep is asleep.');
-  await narr('You can\'t. And when you look up, neither can she — Liora is sitting on the ridge of the mill roof, moonlight caught in her white hair like frost.');
+  await Cine.play(CINE.roof(), { music: 'night' });
   await narr('There\'s a ladder. You climb it before you can talk yourself out of it.');
   await say('liora', 'neutral', "You followed me. Kairo would have too. He'd have brought a speech.");
   const a = await ask('me', 'neutral', '…', ["I couldn't sleep.", "You look… really beautiful up here.", "Are you okay?"]);
@@ -1262,9 +1243,7 @@ SCENES.realm = {
   async onEnter() {
     const f = F(); if (f.realmIn) return; f.realmIn = true;
     Weather.forced = 'blizzard';
-    await narr('Snow. Endless snow. The wagon ruts vanished hours ago, and so did the path back.');
-    await narr('The air tastes like metal. Every breath stings, like breathing in sparks.');
-    await me('sad', "Ilya… I'm coming. I'm coming…");
+    await Cine.play(CINE.realmWalk(), { music: 'night' });
     Story.quest('Find shelter. Anywhere. Keep walking north.');
   }
 };
@@ -1275,7 +1254,7 @@ async function realmAmbush() {
   await me('shock', '…No. No, no, no—');
   await Battle.start({ enemies: ['rime_lupine', 'rime_lupine'], noFlee: true, bd: 'snow', intro: 'Rime Lupines close in!',
     onTurn: async (B, Bt) => { const me = Bt.me(); if (B.turn >= 6 || me.hp < me.maxHp * .35) {
-      await Bt.msg('A shadow steps out of the storm.', 1200); B.flash = 1.4; sfx('crit'); await wait(250);
+      await Cine.play(CINE.vaneArrives()); B.flash = 1.4; sfx('crit'); await wait(250);
       B.actors.filter(a => a.side === 'e').forEach(a => { a.hp = 0; a.ko = true; a.anim = 'hurt'; a.frame = 5; Bt.text(a, 'SEVERED', '#cfe8ff', -10, true); });
       await Bt.msg('SNOW SEVER', 1400); return 'scripted'; } } });
   Weather.forced = null;
@@ -1350,7 +1329,7 @@ async function vaneLesson() {
 async function vaneYears() {
   const f = F();
   await fadeOut(900);
-  await UI.intro([
+  await Cine.play(CINE.years([
     'Days became seasons. Seasons became years.',
     'Every dawn, Tomb Breath between the stones. Every noon, the stick. Every night, the old man\'s questions.',
     '"You want to kill the men who burned Thornvale. They have sons. When the sons grow up, they\'ll come for you. Will you kill them too?"',
@@ -1360,7 +1339,7 @@ async function vaneYears() {
     'One night you asked him if there was anything beyond the gift. He was quiet for a long time. "The Dragonoid," he said finally. "Don\'t say that word outside this Realm. Not ever."',
     'Sometimes, on the trade winds, you heard a name: a burned-faced boy in the mountains, freeing cages, breaking Inquisition outposts, swearing that Drags would never bow again. Green Eclipse. You never answered the wind.',
     'Seven years.'
-  ]);
+  ]), { music: 'sad' });
   await Story.timeSkip();
   f.adultVane = true;
   await World.load('realm', 28, 15, 'right'); await fadeIn(900);
@@ -1381,7 +1360,7 @@ async function vaneFinal() {
   await say('vane', 'sad', '…No. I didn\'t.');
   f.vaneName = true;
   await say('vane', 'neutral', 'Vane. Once they called me the Sword Saint of the West. Forty years, I never lost a duel. Kings paid me to stand behind their thrones and look frightening.');
-  await say('vane', 'sad', 'Then the Crown sent me against a giant in black scales. Dread. They wanted to know which of their weapons was sharper.');
+  await say('vane', 'sad', 'Then the Crown sent me against a giant in black armor, with a sword as long as a door. Dread. They wanted to know which of their weapons was sharper.');
   await say('vane', 'sad', 'One stroke. He took the arm, and the title, and he let me live. The Crown called it shame and threw what was left of me in here.');
   await say('vane', 'neutral', 'But I\'ll tell you something I never told the Crown. He fought like a man who wanted to lose. And behind the visor — I would swear on what\'s left of my sword arm — his eyes were green.');
   await me('shock', '…Green? Dread is… a Drag?');
