@@ -129,10 +129,10 @@ function playerImg() { return G.S.hood ? G.A.pHood : G.A.pHair; }
 /* sprite drawing: OW frames are 64px; BT frames are 128px */
 const BT_ROW = {}; let BT_Y = 512;
 function initBT() { G.man.bt.anims.forEach((a, i) => BT_ROW[a[0]] = i); BT_Y = G.man.bt.y; }
-function drawOW(c, img, anim, dir, f, x, y, alpha) {
-  const row = (anim === 'walk' ? 4 : 0) + DROW[dir];
+function drawOW(c, img, anim, dir, f, x, y, alpha, sz) {
+  const row = (anim === 'walk' ? 4 : 0) + DROW[dir]; sz = sz || 1;
   if (alpha !== undefined) c.globalAlpha = alpha;
-  c.drawImage(img, f * 64, row * 64, 64, 64, Math.round(x - 32), Math.round(y - 58), 64, 64);
+  c.drawImage(img, f * 64, row * 64, 64, 64, Math.round(x - 32 * sz), Math.round(y - 58 * sz), 64 * sz, 64 * sz);
   if (alpha !== undefined) c.globalAlpha = 1;
 }
 function drawBT(c, img, anim, f, x, y, s) {

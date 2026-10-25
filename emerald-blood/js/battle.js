@@ -28,6 +28,13 @@ const ENEMY = {
   halvard: { name: 'Inquisitor Halvard', hp: 280, atk: 14, def: 5, spd: 11, dodge: .08, parry: .25, brk: 90, xp: 90, gold: 60, boss: 1,
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 300 }, { anim: 'thrust', m: 1.1, w: 460 }] },
       { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.4, w: 640 }] }, { name: 'Binding Psalm', psalm: 1 }, { name: 'Purging Light', w: 0, hits: [{ anim: 'spellcast', m: 2.4, w: 1100, unp: 1 }] }] },
+  kairo_spar: { name: 'Kairo', hp: 80, atk: 7, def: 3, spd: 13, dodge: .15, parry: .15, brk: 50, xp: 20, gold: 0, img: 'kairo',
+    skills: [{ name: 'Quick Draw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Twin Cut', w: .45, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'slash', m: .6, w: 320 }] }, { name: 'Show-off Leap', w: .25, hits: [{ anim: 'jump', m: 1.1, w: 760, unp: 1 }] }] },
+  kairo_duel: { name: 'Kairo', hp: 260, atk: 14, def: 5, spd: 15, dodge: .25, parry: .25, brk: 85, xp: 70, gold: 0, img: 'kairo_b', boss: 1,
+    skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'slash', m: 1.4, w: 340 }] },
+      { name: 'Shard Flare', w: .25, hits: [{ anim: 'spellcast', m: 2, w: 1000, unp: 1 }] }] },
+  dread: { name: 'Dread', hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
+    skills: [{ name: 'Cleave', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Wingbeat', w: .25, hits: [{ anim: 'spellcast', m: 1.6, w: 1000, unp: 1 }] }] },
   halvard_pro: { name: 'Inquisitor Halvard', hp: 9999, atk: 16, def: 40, spd: 11, dodge: .5, parry: .5, brk: 9999, xp: 0, gold: 0, img: 'halvard',
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 320 }] }, { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.3, w: 620 }] }] },
 };
@@ -63,7 +70,7 @@ const Battle = {
     cfg.enemies.forEach((k, i) => {
       const E = ENEMY[k]; const sc = cfg.scale || 1;
       B.actors.push(this.mk({ side: 'e', id: k + i, key: k, name: E.name + (cfg.enemies.filter(x => x === k).length > 1 ? ' ' + 'ABCD'[i] : ''), hp: Math.round(E.hp * sc), maxHp: Math.round(E.hp * sc),
-        mp: 0, maxMp: 0, atk: E.atk, def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: eSlots[i], spr: E.img || k }));
+        mp: 0, maxMp: 0, atk: E.atk, def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: eSlots[i], spr: E.img || k, size: E.size || 1 }));
     });
     for (const a of B.actors) if (a.side === 'e') a.img = await npcImg(a.spr);
     B.actors.forEach(a => { a.wait = 100 / a.spd * rnd(0.6, 1.0); });
@@ -131,7 +138,7 @@ const Battle = {
   // ---------------- player turn ----------------
   playerTurn(a) {
     return new Promise(resolve => {
-      const B = this.B; a.mp = Math.min(a.maxMp, a.mp + 1); this.hud();
+      const B = this.B; a.mp = Math.min(a.maxMp, a.mp + 1 + (a.isMe && G.S.f.shard ? 1 : 0)); this.hud();
       const partner = B.actors.find(x => x.side === 'p' && !x.isMe && !x.ko && LINKS[x.id]);
       const menu = () => {
         const L = [['Attack', 'Two timed strikes. Tap as the ring closes for a PERFECT.', () => this.pickTarget(a, t => this.doAttack(a, t).then(done))]];
@@ -454,7 +461,7 @@ const Battle = {
     for (const a of list) {
       if (!a.isMe && !a.img) continue;
       c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(a.x, a.y, 15, 5, 0, 0, 7); c.fill();
-      const s = 1.15;
+      const s = 1.15 * (a.size || 1);
       const fr = Math.min(a.frame, (G.man.bt.anims.find(x => x[0] === a.anim) || [0, 2])[1] - 1);
       c.globalAlpha = a.ko && a.side === 'e' ? Math.max(0, 1 - (a.at / 900)) : (a.alpha ?? 1);
       if (a.hurtT > 0 && Math.floor(a.hurtT / 50) % 2) c.globalAlpha *= .4;

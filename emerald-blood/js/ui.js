@@ -134,7 +134,8 @@ const UI = {
       $('#menuCard').innerHTML = `<h2>CHAPTER I COMPLETE</h2><p>Ilya was moved to <b style="color:var(--green)">Greyspire Citadel</b>.</p>
         <div class="grid2">
           <div class="stat"><h3>Your Drag</h3><p>Level <b>${G.S.lvl}</b> · Suspicion <b>${Math.floor(G.S.sus)}/5</b></p><p>Saw your eyes: <b>${who.length ? who.join(', ') : 'no one'}</b></p></div>
-          <div class="stat"><h3>Choices</h3><p>Halvard: <b>${f.halvardKilled ? 'killed' : 'spared'}</b></p><p>Kess: <b>${f.kessJoined ? 'travels with you' : f.kessRefused ? 'turned you away' : f.kessHelp ? 'helped, then vanished' : 'a stranger'}</b></p>
+          <div class="stat"><h3>Choices</h3><p>Halvard: <b>${f.halvardKilled ? 'killed by you' : f.halvardKilledByKairo ? 'killed by Kairo' : 'spared'}</b></p><p>Kess: <b>${f.kessJoined ? 'travels with you' : f.kessRefused ? 'turned you away' : f.kessHelp ? 'helped, then vanished' : 'a stranger'}</b></p>
+          <p>Kairo: <b>${f.duel === 'won' ? 'duel won · Ashford spared' : 'duel lost'}${f.halvardKilledByKairo ? ' · he executed Halvard' : ''}</b></p>
           <p>Tobb: <b>${f.crateDone ? (f.tobbKnows ? 'prejudiced — but softening' : 'thinks you are a saint') : 'never helped'}</b></p><p>The binding stone: <b>${f.shrineRead ? 'you know the truth' : 'unread'}</b></p></div>
         </div><p class="muted" style="margin-top:10px">These choices carry into Chapter II: Greyspire.</p>
         <div class="btnrow"><button class="btn pri" id="eKeep">Keep exploring</button><button class="btn" id="eTitle">Title screen</button></div>`;
@@ -161,7 +162,7 @@ const UI = {
         `<div class="stat"><h3>How to fight</h3><p>On your attacks, tap when the gold ring closes for a <b>PERFECT</b> hit (×1.5, can't be dodged or parried).</p><p>On enemy attacks: <b>DODGE</b> (wide window) or <b>PARRY</b> (tight window). Perfect timing earns MP. Parry <b>every</b> hit of an attack to COUNTER.</p><p>Red <b>!!</b> attacks can't be parried — dodge them. Fill an enemy's yellow bar to <b>BREAK</b> them.</p></div>`;
     } else if (t === 'items') {
       body = `<div class="grid2"><div class="stat"><h3>Tonic ×${S.items.tonic}</h3><p>Restores 45% HP.</p><button class="btn" id="useT" ${S.items.tonic && s.hp < s.maxHp ? '' : 'disabled'}>Use</button></div><div class="stat"><h3>Ether ×${S.items.ether}</h3><p>Restores 12 MP.</p><button class="btn" id="useE" ${S.items.ether && s.mp < s.maxMp ? '' : 'disabled'}>Use</button></div>
-        <div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
+        ${S.f.shard ? '<div class="stat"><h3>Drag Shard</h3><p>Green stone from Fratenaptor\'s tomb. It drinks mana from the air. +1 MP every turn in battle.</p></div>' : ''}<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
     } else if (t === 'quests') {
       body = `<div class="stat"><h3>Main</h3><p>${esc(S.quest || '—')}</p></div>` + (S.side ? `<div class="stat" style="margin-top:6px"><h3>Side</h3><p>${esc(S.side)}</p></div>` : '') +
         `<div class="stat" style="margin-top:6px"><h3>Suspicion ${Math.floor(S.sus)}/5</h3><p>How sure the Hollow is that a Drag walks among them. Every new person who sees your eyes adds to it. High suspicion closes doors, raises prices — and brings hunters.</p></div>`;

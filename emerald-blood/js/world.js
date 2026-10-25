@@ -305,11 +305,11 @@ class Ent {
     const x = this.px - cx, y = this.py - cy;
     if (x < -40 || y < -10 || x > G.view.w + 40 || y > G.view.h + 70) return;
     c.fillStyle = 'rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(x, y, 10, 4, 0, 0, 7); c.fill();
-    if (this.move) { const f = 1 + Math.floor(this.walkT / (this.move.ms / 3.2)) % 8; drawOW(c, img, 'walk', this.dir, f, x, y, this.alpha); }
-    else drawOW(c, img, 'idle', this.dir, Math.floor((t + (this.x * 97)) / 600) % 2, x, y, this.alpha);
+    if (this.move) { const f = 1 + Math.floor(this.walkT / (this.move.ms / 3.2)) % 8; drawOW(c, img, 'walk', this.dir, f, x, y, this.alpha, this.size); }
+    else drawOW(c, img, 'idle', this.dir, Math.floor((t + (this.x * 97)) / 600) % 2, x, y, this.alpha, this.size);
   }
   drawBubble(c, cx, cy) {
-    const b = this.bubble, x = Math.round(this.px - cx), y = Math.round(this.py - cy - 66);
+    const b = this.bubble, x = Math.round(this.px - cx), y = Math.round(this.py - cy - 66 * (this.size || 1));
     c.font = '600 10px "Pixelify Sans"'; c.textAlign = 'center';
     const tw = Math.min(170, c.measureText(b.text).width + 12), a = Math.min(1, b.t / 300);
     c.globalAlpha = a;
