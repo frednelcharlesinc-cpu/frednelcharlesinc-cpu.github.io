@@ -52,6 +52,7 @@ const Cine = {
       s.t0 = performance.now(); s.__res = res; s.parts = []; s.fired = new Set(); s.flash = 0; s.shake = 0;
       (s.fx || []).forEach(f => this.initFx(s, f));
       s.lines = (s.lines || []).map(l => typeof l === 'string' ? { who: null, text: l } : { who: l[0], text: l[1], col: l[2] });
+      if (s.sceneId && typeof s.bg === 'string' && Art.cut[s.sceneId]) s.parts = s.parts.filter(p => p.k !== 'smoke');
       s.li = -1; this.shot = s; this.nextLine();
     });
   },
@@ -96,12 +97,13 @@ const Cine = {
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const c = this.cx; c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, cv.width, cv.height);
     const k = Math.max(cv.width / VW, cv.height / VH);
-    const cam = s.cam || [[0, 320, 180, 1]], camX = lerpK(cam, t, 1), camY = lerpK(cam, t, 2), z = lerpK(cam, t, 3);
+    const hasArt = s.sceneId && typeof s.bg === 'string' && Art.cut[s.sceneId];
+    const cam = (hasArt && (s.artCam || [[0, 320, 175, 1], [Math.max(4000, s.dur || 0) + 3000, 320, 165, 1.1]])) || s.cam || [[0, 320, 180, 1]], camX = lerpK(cam, t, 1), camY = lerpK(cam, t, 2), z = lerpK(cam, t, 3);
     let sx = 0, sy = 0; if (s.shake > 0) { sx = (Math.random() - .5) * s.shake; sy = (Math.random() - .5) * s.shake; s.shake *= .92; }
     c.setTransform(k * z, 0, 0, k * z, cv.width / 2 - (camX + sx) * k * z, cv.height / 2 - (camY + sy) * k * z);
     c.imageSmoothingEnabled = false;
     const art = s.sceneId && typeof s.bg === 'string' && Art.cut[s.sceneId];
-    if (art) { c.imageSmoothingEnabled = true; const sc = Math.max(760 / art.width, 430 / art.height); c.drawImage(art, 320 - art.width * sc / 2, 180 - art.height * sc / 2, art.width * sc, art.height * sc); c.imageSmoothingEnabled = false; }
+    if (art) { c.imageSmoothingEnabled = true; const sc = Math.max(900 / art.width, 520 / art.height); c.drawImage(art, 320 - art.width * sc / 2, -10, art.width * sc, art.height * sc); c.imageSmoothingEnabled = false; }
     else { const bg = typeof s.bg === 'function' ? s.bg : BG[s.bg]; if (bg) bg(c, t, s); }
     // actors (y-sorted)
     const acts = (s.actors || []).map(a => ({ a, x: lerpK(a.path, t, 1) ?? a.x, y: lerpK(a.path, t, 2) ?? a.y })).sort((p, q) => (p.a.z || p.y) - (q.a.z || q.y));
@@ -119,6 +121,7 @@ const Cine = {
   },
   drawActor(c, a, x, y, t, s) {
     if (a.show && (t < a.show[0] || t > (a.show[1] ?? 1e9))) return;
+    if (a.hideOnArt && s.sceneId && Art.cut[s.sceneId]) return;
     const alpha = a.fade ? Math.max(0, Math.min(1, lerpK(a.fade, t, 1))) : 1; if (alpha <= 0) return;
     c.globalAlpha = alpha;
     if (a.draw) { a.draw(c, x, y, t, s); c.globalAlpha = 1; return; }
@@ -425,14 +428,14 @@ const CINE = {
       lines: ['Far off, from the ridge road, a horn sounds. Then another. Then bells.', 'Torches. Hundreds of them, pouring down the ridge — straight toward the hidden bridge.'] }
   ],
   dread: () => [
-    { bg: 'bridgeSmoke', fx: ['smoke', 'embers'], dur: 2400, cam: [[0, 330, 240, 1.3], [3000, 400, 230, 1.2]], ev: [[200, s => { s.shake = 14; sfx('break'); }], [1600, s => { s.shake = 10; sfx('break'); }]],
+    { bg: 'bridgeSmoke', fx: ['smoke', 'embers'], dur: 2400, cam: [[0, 330, 240, 1.3], [3000, 400, 230, 1.2]], artCam: [[0, 320, 170, 1], [4500, 320, 160, 1.04]], ev: [[200, s => { s.shake = 14; sfx('break'); }], [1600, s => { s.shake = 10; sfx('break'); }]],
       lines: ['The bridge groans. Something enormous walks out of the smoke.'] },
-    { bg: 'bridgeSmoke', fx: ['smoke', 'embers'], dur: 4800, cam: [[0, 430, 210, 1], [5200, 480, 200, 1.15]], vignette: 'rgba(0,0,0,.75)',
+    { bg: 'bridgeSmoke', fx: ['smoke', 'embers'], dur: 4800, cam: [[0, 430, 210, 1], [5200, 480, 200, 1.15]], artCam: [[0, 250, 330, 1.05], [3800, 280, 320, 1.05], [9500, 420, 110, 1.5]], vignette: 'rgba(0,0,0,.75)',
       ev: [[900, s => { s.shake = 12; sfx('hit'); }], [2300, s => { s.shake = 12; sfx('hit'); }], [3700, s => { s.shake = 12; sfx('hit'); }]],
-      actors: [{ spr: 'dread', path: [[0, 600, 300], [4600, 470, 300]], dir: 'left', scale: 3.4, glowEyes: [-2, -38], glowR: 4, greatsword: 'drag' }],
+      actors: [{ spr: 'dread', path: [[0, 600, 300], [4600, 470, 300]], dir: 'left', scale: 3.4, glowEyes: [-2, -38], glowR: 4, greatsword: 'drag', hideOnArt: 1 }],
       lines: ['It is taller than the doorframes. Black armor, layered like the scales of something ancient. A torn cloak.', 'Behind it, a sword longer than a man is tall drags through the dirt, throwing sparks.', 'The fire bends away from it.'] },
     { bg: (c, t) => { c.fillStyle = '#050304'; c.fillRect(-300, -300, 1240, 960); }, fx: ['embers'], dur: 3800, cam: [[0, 320, 190, 1], [3800, 320, 175, 1.3]],
-      actors: [{ port: 'dread', expr: 'neutral', x: 320, y: 380, scale: 3.4 }], vignette: 'rgba(60,0,0,.8)',
+      actors: [{ port: 'dread', expr: 'anger', x: 320, y: 380, scale: 3.4 }], vignette: 'rgba(60,0,0,.55)',
       ev: [[2400, s => { s.shake = 30; s.flash = .4; s.flashCol = '255,40,40'; sfx('crit'); }]], bigText: ['KNEEL.', 2400],
       lines: [['dread', '…'], 'The voice doesn\'t come from a throat. It comes from the ground, the bones, the air in your lungs.'] }
   ],
