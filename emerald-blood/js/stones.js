@@ -72,7 +72,7 @@ function stonesMenuHTML() {
   for (const id of st.inv) {
     const S = STONES[id], where = Stones.slotOf(id); let btns = '';
     if (S.size === 'large') btns = '<span class="muted">It will not answer you.</span>';
-    else if (S.size === 'medium' && !st.bonded[id]) btns = G.S.lvl >= 5 ? `<button class="btn" data-bond="${id}">Face its will</button>` : '<span class="muted">Too strong for you. (Level 5)</span>';
+    else if (S.size === 'medium' && !st.bonded[id]) btns = Power.now().i >= 1 ? `<button class="btn" data-bond="${id}">Face its will</button>` : '<span class="muted">Too strong for you. (Power grade D)</span>';
     else if (where) btns = `<button class="btn" data-uneq="${id}">Remove</button>`;
     else if (S.slot === 'art') btns = G.S.arts.map(k => `<button class="btn" data-eq="${id}" data-w="art:${k}">${ARTS[k].name}</button>`).join('');
     else btns = `<button class="btn" data-eq="${id}" data-w="${S.slot}">Socket into ${S.slot}</button>`;

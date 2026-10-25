@@ -11,6 +11,8 @@ const ARTS = {
   sight: { name: 'Emerald Sight', strain: 20, mp: 8, desc: 'Open your eyes all the way. For 3 turns dodging and parrying become FAR easier, and you see every enemy\'s next move. Drinks a lot of mana.', type: 'sight', blaze: 1 },
   azure: { name: 'Azure Tide', strain: 35, mp: 6, desc: 'The blue aura. For 3 turns you move faster, and an Azure orb holds the field: it strikes alongside your Attacks and SWALLOWS enemy magic and aura attacks (up to 3).', type: 'azure', blaze: 1, brk: 6 },
   crimson: { name: 'Crimson Tide', strain: 55, mp: 9, desc: 'The red aura, unleashed. A devastating crimson burst at one enemy: ×3.2, pierces every defense, hurls them back and delays their turn.', type: 'cast', hits: [{ m: 3.2 }], blaze: 1, brk: 26 },
+  horizon: { name: 'Horizon Draw', sword: 1, strain: 35, mp: 7, desc: 'Vane\'s sheathed style. Stillness — then one horizontal draw-cut that flashes past the WHOLE enemy line. The blade is back in its sheath before the cuts land. ×1.6 to all.', type: 'iai', hits: [{ m: 1.6 }], brk: 14 },
+  mirage: { name: 'Mirage Step', sword: 1, strain: 50, mp: 9, desc: 'Vanish. Reappear behind them. Cut. Vanish again. Three strikes from three directions, faster than they can turn — each one draws and sheathes the blade.', type: 'blink', hits: [{ m: 1 }, { m: 1 }, { m: 1.4 }], brk: 22 },
   veil: { name: 'Smoke Veil', strain: 25, mp: 3, desc: 'Kess melts into shadow: enemies lose track of her for 2 turns.', type: 'veil' }
 };
 const LINKS = {
@@ -111,7 +113,7 @@ const SRC_NAME = s => s === 'attack' ? 'Attack' : s === 'link' ? 'Link Arts' : s
 const Battle = {
   B: null,
   // Drag reflex: Drag bodies move more efficiently — wider timing windows. The Verdant Eye widens them further.
-  reflex(a) { if (!a || a.side !== 'p') return 1; let k = a.blind ? .6 : 1; if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.sight) k *= 1.85; return k; },
+  reflex(a) { if (!a || a.side !== 'p') return 1; let k = (a.blind ? .6 : 1) * Skills.reflex(a.isMe ? 'me' : a.id); if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.sight) k *= 1.85; return k; },
   chooseSkill(e) { const pool = e.E.skills.filter(s => s.hits); let r = Math.random(), sk = pool[0]; for (const s of pool.slice(1)) { if (r < (s.w || .3)) { sk = s; break; } r -= (s.w || .3); } return sk; },
   async start(cfg) {
     if (typeof cfg === 'string') cfg = { enemies: [cfg] };
@@ -131,9 +133,9 @@ const Battle = {
     for (let i = 0; i < allies.length; i++) {
       const id = allies[i], A = ALLY[id], st = G.S.allies[id] || {};
       const lv = G.S.lvl - 1;
-      const maxHp = A.hp + lv * 7, maxMp = A.mp + lv * 2;
+      const maxHp = A.hp + lv * 7 + Skills.allyBonus(id).hp, maxMp = A.mp + lv * 2;
       B.actors.push(this.mk({ side: 'p', id, name: A.name, color: A.color, atkAnim: A.atkAnim, img: await npcImg(A.sprite), hp: st.hp ?? maxHp, maxHp, mp: st.mp ?? maxMp, maxMp,
-        atk: A.atk + lv * 2, def: A.def + lv, spd: A.spd, arts: A.arts, slot: pSlots[i + 1] }));
+        atk: A.atk + lv * 2 + Skills.allyBonus(id).atk, def: A.def + lv + Skills.allyBonus(id).def, spd: A.spd + Skills.allyBonus(id).spd, arts: A.arts, slot: pSlots[i + 1] }));
     }
     cfg.enemies.forEach((k, i) => {
       const E = ENEMY[k]; const sc = cfg.scale || 1;
@@ -211,7 +213,7 @@ const Battle = {
   playerTurn(a) {
     return new Promise(resolve => {
       const B = this.B; a.mp = Math.min(a.maxMp, a.mp + 1 + (a.isMe ? B.sb.mp : 0));
-      a.strain = Math.max(0, a.strain - (12 + (a.isMe ? B.sb.cool : 0)));
+      a.strain = Math.max(0, a.strain - (12 + (a.isMe ? B.sb.cool + (Skills.has('me', 't3') ? 4 : 0) : 0)));
       if (a.sight) { a.sight--; if (!a.sight) this.text(a, 'Sight fades', '#7fbf9a', -30); }
       if (a.azure) { a.azure--; if (!a.azure) { a.spd = a.baseSpd || a.spd; if (B.orb && B.orb.owner === a) { B.orb = null; this.text(a, 'The Azure orb dissolves', '#5fd8ff', -30); } } }
       if (a.fever) { a.fever--; const d = Math.max(1, Math.round(a.maxHp * .06)); a.hp = Math.max(1, a.hp - d); this.text(a, 'BLOOD FEVER -' + d, '#ff5a3a', -20); if (!a.fever) a.strain = Math.min(a.strain, 50); }
@@ -219,8 +221,8 @@ const Battle = {
       const partner = B.actors.find(x => x.side === 'p' && !x.isMe && !x.ko && LINKS[x.id]);
       const menu = () => {
         const L = [['Attack', 'Two timed strikes. Tap as the ring closes for a PERFECT.', () => this.pickTarget(a, t => this.doAttack(a, t).then(done))]];
-        L.push([a.isMe ? 'Drag Arts' : 'Skills', a.isMe ? 'Draw on the dragon\'s blood. Powerful, but your eyes will blaze.' : 'Special techniques.', () => sub()]);
-        if (a.isMe && partner) {
+        L.push([a.isMe ? 'Drag Arts' : 'Skills', a.isMe ? 'Drag Arts and sword techniques. Drag Arts make your eyes blaze; Vane\'s sword techniques don\'t.' : 'Special techniques.', () => sub()]);
+        if (a.isMe && partner && !B.cfg.noArts) {
           const Lk = LINKS[partner.id], ok = a.mp >= Lk.mp[0] && partner.mp >= Lk.mp[1] && !a.fever && !partner.fever && a.strain + 40 <= a.strainMax && partner.strain + 40 <= partner.strainMax;
           L.push(['Link Art', `${Lk.name}: ${Lk.desc} (${G.S.name} ${Lk.mp[0]} MP + ${partner.name} ${Lk.mp[1]} MP · Strain +40 each)`, () => ok ? this.pickTarget(a, t => this.doLink(a, partner, t).then(done)) : toast('Not enough MP — or your blood is running too hot.'), !ok]);
         }
@@ -232,6 +234,7 @@ const Battle = {
       };
       const sub = () => {
         const L = a.arts.map(k => { const A = ARTS[k], cost = this.artCost(a, k), st = this.artStrain(a, k), hot = a.fever || a.strain + st > a.strainMax;
+          if (B.cfg.noArts && a.isMe && !A.sword) return [A.name, 'Proving Bouts rules: no Drag Arts. One blaze of your eyes and the whole Guild sees what you are.', () => {}, true, cost];
           return [A.name, A.desc + `  ⚡ Strain +${st}` + (hot ? (a.fever ? '  — BLOOD FEVER: your arts are locked.' : '  — too hot! Guard or Cultivate to cool down.') : '') + (a.isMe && Stones.artBoost(k) > 1 ? `  ◆ Stone-boosted ×${Stones.artBoost(k).toFixed(2)}` : ''), () => this.useArt(a, k).then(done), a.mp < cost || hot, cost]; });
         if (a.isMe && a.arts.includes('azure') && a.arts.includes('crimson')) L.push(['??? Eclipse Convergence', B.orb ? 'Blue holds the field. Red strains to answer it through the orb — the two currents pull toward each other until your bones ache. Your body cannot bear it. Not yet. (End-game technique)' : 'An ultimate that needs setup: Azure Tide\'s orb must hold the field before Crimson can be called THROUGH it. You can feel its shape. You cannot touch it yet. (End-game technique)', () => {}, true]);
         L.push(['◀ Back', 'Return.', menu]); this.openMenu(L, true);
@@ -286,24 +289,30 @@ const Battle = {
     }
   },
   // ---------------- timed hits (player attacking) ----------------
+  // the timing bar: a line sweeps up and down; land it in the green window (gold core = PERFECT).
+  // Stronger opponents make it sweep faster and shrink the window.
   async qte(target, dur, color, who) {
-    const B = this.B; dur = dur || rnd(470, 640); const rk = this.reflex(who || B.cur);
-    if (B.tutorial && B.tutorial.hit) { B.tutorial.hit = 0; B.timeScale = 0.4; await this.msg('Tap when the ring closes on the center!', 1200, true); }
-    const ring = { x: target.x, y: target.y - 30, t0: performance.now(), dur: dur / B.timeScale, kind: 'hit', color: color || '#ffd34a' }; B.rings.push(ring);
-    $('#hitTap').classList.remove('hide');
-    const T = ring.t0 + ring.dur;
+    const B = this.B; who = who || B.cur;
+    const rk = this.reflex(who) * (who && who.isMe && Skills.has('me', 'b2') ? 1.25 : 1);
+    const ti = Math.max(0, ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'SSSS'].indexOf(TIER[target.key] || 'E'));
+    const tut = B.tutorial && B.tutorial.hit;
+    if (tut) { B.tutorial.hit = 0; await this.msg('Tap when the moving line is inside the GREEN window. The gold core is a PERFECT!', 2000, true); }
+    const speed = (.75 + ti * .2) * (tut ? .55 : 1);
+    const half = Math.min(.3, Math.max(.045, (.15 - ti * .012) * rk)), phalf = half * .34;
+    const center = .25 + Math.random() * .5;
+    const bar = { x: G.view.w * .5, y: Math.min(G.view.h * .42, 150), h: 150, center, half, phalf, t0: performance.now(), speed, color: color || '#ffd34a', done: false };
+    bar.pos = () => { const ph = ((performance.now() - bar.t0) / 1000 * speed) % 2; return ph < 1 ? ph : 2 - ph; };
+    bar.inPerfect = () => Math.abs(bar.pos() - center) < phalf * .7;
+    B.bar = bar; $('#hitTap').classList.remove('hide');
     const res = await new Promise(r => {
-      let done = false;
-      const prevA = Input.handlers.a;
-      const fin = v => { if (done) return; done = true; Input.on('a', prevA); hit.removeEventListener('pointerdown', h); r(v); };
-      const judge = () => { const d = Math.abs(performance.now() - T) * B.timeScale; fin(d <= 75 * rk ? 'perfect' : d <= 170 * rk ? 'good' : 'miss'); };
-      const hit = $('#hitTap'); const h = e => { e.preventDefault(); judge(); };
+      let done = false; const prevA = Input.handlers.a, hit = $('#hitTap');
+      const fin = v => { if (done) return; done = true; bar.done = true; bar.res = v; bar.at = bar.pos(); Input.on('a', prevA); hit.removeEventListener('pointerdown', h); r(v); };
+      const judge = () => { const d = Math.abs(bar.pos() - center); fin(d <= phalf ? 'perfect' : d <= half ? 'good' : 'miss'); };
+      const h = e => { e.preventDefault(); judge(); };
       hit.addEventListener('pointerdown', h); Input.on('a', judge);
-      const ck = () => { if (done) return; if (performance.now() > T + 175 * rk / B.timeScale) fin('miss'); else requestAnimationFrame(ck); }; ck();
+      const maxT = 2.25 / speed * 1000; const ck = () => { if (done) return; if (performance.now() - bar.t0 > maxT) fin('miss'); else requestAnimationFrame(ck); }; ck();
     });
-    // wait until impact moment for sync
-    const left = T - performance.now(); if (left > 0) await wait(left);
-    B.rings = B.rings.filter(x => x !== ring); $('#hitTap').classList.add('hide'); B.timeScale = 1;
+    await wait(170); B.bar = null; $('#hitTap').classList.add('hide'); B.timeScale = 1;
     return res;
   },
   async dash(a, x, y, ms) { const fx = a.x, fy = a.y, t0 = performance.now(); a.anim = 'run'; a.loopAnim = 'run';
@@ -311,10 +320,10 @@ const Battle = {
     while (true) { const k = Math.min(1, (performance.now() - t0) / ms); a.x = lerp(fx, x, k); a.y = lerp(fy, y, k); if (k >= 1) break; await wait(16); }
     a.loopAnim = 'combat'; a.anim = 'combat'; },
   async home(a) { await this.dash(a, a.hx, a.hy, 260); },
-  play(a, anim, n, ms) { a.anim = anim; a.frame = 0; a.at = 0; a.fn = n; a.fms = ms; a.once = true; return wait(n * ms); },
+  play(a, anim, n, ms) { if (a.isMe && !G.S.kid && /slash|thrust/.test(anim)) { anim = 'slash'; n = 6; } a.anim = anim; a.frame = 0; a.at = 0; a.fn = n; a.fms = ms; a.once = true; return wait(n * ms); },
   async strike(a, t, hit, mult, opts) {
     // windup then QTE then impact
-    a.anim = hit.anim; a.frame = 0; a.once = true; a.fn = 99; a.fms = 1e9; a.glow = !!hit.glow;
+    a.anim = a.isMe && !G.S.kid && /slash|thrust/.test(hit.anim) ? 'slash' : hit.anim; a.frame = 0; a.once = true; a.fn = 99; a.fms = 1e9; a.glow = !!hit.glow;
     let g; if (opts.auto) g = 'good'; else if (a.focus) { a.focus = 0; g = await this.qte(t, 0, 0, a); g = 'perfect'; } else g = await this.qte(t, 0, 0, a);
     this.play(a, hit.anim, { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[hit.anim] || 6, hit.anim === 'backslash' ? 45 : 70);
     a.frame = hit.anim === 'backslash' ? 4 : 2;
@@ -339,7 +348,7 @@ const Battle = {
     if (t.side === 'e' && t.stance && opts.src === 'attack') { this.text(t, 'EMPTY SLEEVE', '#cfe8ff', -10, true); sfx('parry'); t.stanceHit = 1; return 'parried'; }
     if (t.side === 'e' && t.stance && opts.src && opts.src !== 'attack') { t.stance = 0; this.text(t, 'STANCE BROKEN', '#ffd34a', -24, true); }
     if (t.side === 'e' && t.frostOn && (opts.src === 'crimson' || t.broken)) { t.frostOn = false; t.def -= 8; this.text(t, 'FROST ARMOR SHATTERED', '#9fe4ff', -34, true); sfx('break'); this.spark(t.x, t.y - 30, '#cfefff', 30); }
-    let dmg = Math.max(1, Math.round((a.atk * m) * (grade === 'perfect' ? 1.5 : grade === 'good' ? 1 : 0.6) * rnd(.9, 1.1) - t.def * (t.broken ? 0 : 1)));
+    let dmg = Math.max(1, Math.round((a.atk * m) * (grade === 'perfect' ? (a.isMe && Skills.has('me', 'b4') ? 1.8 : 1.5) : grade === 'good' ? 1 : 0.6) * rnd(.9, 1.1) - t.def * (t.broken ? 0 : 1)));
     if (t.broken) dmg = Math.round(dmg * 1.5);
     if (t.guard) dmg = Math.ceil(dmg / 2);
     if (t.ward) dmg = Math.ceil(dmg * .4);
@@ -363,7 +372,7 @@ const Battle = {
   hop(t) { const x0 = t.x, d = t.side === 'e' ? -26 : 26; let k = 0; const it = setInterval(() => { k++; t.x = x0 + Math.sin(k / 8 * Math.PI) * d; if (k >= 8) { clearInterval(it); t.x = x0; } }, 22); },
   async doAttack(a, t) {
     const B = this.B; await this.dash(a, t.x + (a.side === 'p' ? 52 : -52), t.y + 2, 260);
-    const seq = a.atkAnim ? [{ anim: a.atkAnim, m: .8 }, { anim: a.atkAnim, m: .9 }] : [{ anim: 'slash', m: .75 }, { anim: a.isMe ? 'backslash' : 'halfslash', m: .85 }];
+    const seq = a.atkAnim ? [{ anim: a.atkAnim, m: .8 }, { anim: a.atkAnim, m: .9 }] : [{ anim: 'slash', m: .75 }, { anim: a.isMe ? 'slash' : 'halfslash', m: .85 }];
     let parried = 0;
     for (const h of seq) { if (t.ko) break; const r = await this.strike(a, t, h, 1, { src: 'attack' }); if (r === 'parried') parried++; await wait(160); }
     a.glow = false;
@@ -373,12 +382,12 @@ const Battle = {
     await this.home(a);
   },
   async useArt(a, k) {
-    const B = this.B, A = ARTS[k], cost = this.artCost(a, k), boost = a.isMe ? Stones.artBoost(k) : 1;
+    const B = this.B, A = ARTS[k], cost = this.artCost(a, k), boost = (a.isMe ? Stones.artBoost(k) : 1) * Skills.artMul(a.isMe ? 'me' : a.id, k);
     this.closeMenu(); a.mp -= cost; a.strain += this.artStrain(a, k);
     if (a.strain >= a.strainMax * .9 && !a.fever) { a.fever = 2; B.flash = .4; this.text(a, 'BLOOD FEVER!', '#ff5a3a', -60, true); sfx('alarm'); }
     if (a.isMe && B.sb.verdict) { const d = Math.max(1, Math.round(a.maxHp * .04)); a.hp = Math.max(1, a.hp - d); this.text(a, 'VERDICT -' + d, '#fff3b0', -70); }
     this.hud();
-    if (A.blaze && a.isMe) { if (!B.blazed) { B.blazed = true; if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
+    if (A.blaze && a.isMe && !A.sword) { if (!B.blazed) { B.blazed = true; if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
     B.dim = .55; B.dimCol = a.isMe ? '10,40,20' : '30,10,40'; sfx('art');
     await this.msg(A.name, 700);
     if (A.type === 'buff') { await this.play(a, 'spellcast', 7, 80); a.ward = 3; this.spark(a.x, a.y - 30, '#46ff95', 26); this.text(a, 'EMERALD FIELD', '#46ff95'); B.fx.push({ field: 1, x: a.x, y: a.y - 30, t: 0, life: 900 }); }
@@ -389,15 +398,43 @@ const Battle = {
         for (const h of A.hits) { if (t.ko) break; await this.strike(a, t, h, boost, { brk: A.brk || 0, pierce: A.pierce, unblockable: a.isMe, src: k }); if (h.glow) this.spark(t.x, t.y - 30, '#46ff95', 30); await wait(140); }
         a.glow = false; await this.home(a);
       });
+    } else if (A.type === 'iai') {
+      // HORIZON DRAW: stillness, one flash across the whole line, sheathe — then the cuts land
+      const es = this.alive('e'), y0 = a.y, x0 = a.x; B.dim = .7; B.dimCol = '0,0,0';
+      a.anim = 'combat'; this.text(a, '…', '#ffffff', -46); await wait(550);
+      const g = await this.qte(es[0], 0, '#ffffff', a);
+      const far = Math.min(...es.map(t => t.x)) - 70, ly = es.reduce((m, t) => m + t.y, 0) / es.length - 34;
+      sfx('swing'); this.play(a, 'slash', 6, 28); B.fx.push({ hline: 1, x1: x0 - 10, x2: far, y: ly, t: 0, life: 650 });
+      for (let i = 1; i <= 4; i++) B.fx.push({ ghost: 1, x: lerp(x0, far, i / 5), y: y0, t: 0, life: 380 + i * 40, img: playerImg(), anim: 'slash', fr: 3, s: 1.15 });
+      await this.slide(a, far, y0, 120); a.flip = true; a.anim = 'combat';
+      await wait(380); sfx('parry'); this.text(a, '— click —', '#cfe8ff', -50);
+      await wait(260);
+      for (const t of es) { B.flash = .35; this.spark(t.x, ly, '#ffffff', 22); this.resolveHit(a, t, A.hits[0].m * boost, g, { brk: A.brk, unblockable: g === 'perfect' ? 1 : 0, src: k }); await wait(110); }
+      await wait(300); await this.dash(a, a.hx, a.hy, 300); a.flip = false;
+    } else if (A.type === 'blink') {
+      // MIRAGE STEP: vanish, strike from behind, vanish, strike from the front, vanish, strike from above
+      const t = await new Promise(r => this.pickTarget(a, r)); B.dim = .55; B.dimCol = '0,20,10';
+      const g = await this.qte(t, 0, '#7dffb0', a);
+      const spots = [[t.x - 52, t.y + 2, true], [t.x + 52, t.y + 4, false], [t.x - 8, t.y - 8, false]];
+      for (let i = 0; i < 3 && !t.ko; i++) {
+        B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 420, img: playerImg(), anim: a.anim, fr: 0, s: 1.15, flip: a.flip });
+        this.spark(a.x, a.y - 30, '#7dffb0', 10); a.alpha = 0; sfx('dodge'); await wait(110);
+        a.x = spots[i][0]; a.y = spots[i][1]; a.flip = spots[i][2]; a.alpha = 1; B.fx.push({ blinkIn: 1, x: a.x, y: a.y - 30, t: 0, life: 260 });
+        this.play(a, 'slash', 6, 32); sfx('swing'); await wait(90);
+        this.resolveHit(a, t, A.hits[i].m * boost, i === 0 ? g : (g === 'miss' ? 'miss' : 'good'), { brk: A.brk / 3, unblockable: g === 'perfect' ? 1 : 0, src: k });
+        this.spark(t.x, t.y - 34, '#ffffff', 14); await wait(230);
+      }
+      B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 400, img: playerImg(), anim: 'combat', fr: 0, s: 1.15, flip: a.flip }); a.alpha = 0; await wait(150);
+      a.x = a.hx; a.y = a.hy; a.flip = false; a.alpha = 1; sfx('parry'); this.text(a, '— click —', '#cfe8ff', -50);
     } else if (A.type === 'sight') {
       if (a.isMe) await Cine.play([{ bg: 'eyes', fx: ['mana'], dur: 1300, fadeIn: 120, tapEnds: true, cam: [[0, 320, 190, 1], [1300, 320, 178, 1.25]], vignette: 'rgba(0,30,10,.7)',
         actors: [{ port: 'me', expr: artHas('me', 'sight') ? 'sight' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[650, s => { s.flash = .9; s.flashCol = '90,255,150'; sfx('art'); }]] }]);
-      await this.play(a, 'spellcast', 7, 70); a.sight = 3; B.flash = .5; sfx('art');
+      await this.play(a, 'spellcast', 7, 70); a.sight = 3 + (Skills.has('me', 'e1') ? 1 : 0); B.flash = .5; sfx('art');
       this.spark(a.x - 4, a.y - 50, '#46ff95', 30); this.text(a, 'EMERALD SIGHT', '#7dffb0', -40, true); await wait(300);
     } else if (A.type === 'azure') {
       await this.play(a, 'spellcast', 7, 80); sfx('chant');
       a.azure = 3; if (!a.baseSpd) a.baseSpd = a.spd; a.spd = a.baseSpd * 1.45; a.wait *= .6;
-      B.orb = { owner: a, x: a.x - 30, y: a.y - 80, charges: 3, born: performance.now() };
+      B.orb = { owner: a, x: a.x - 30, y: a.y - 80, charges: 3 + (Skills.has('me', 't1') ? 1 : 0), born: performance.now() };
       this.text(a, 'AZURE TIDE', '#5fd8ff', -40, true); B.fx.push({ orb: 1, kind: 'draw', x: a.x - 30, y: a.y - 70, t: 0, life: 900 });
     } else if (A.type === 'draw') {
       B.dimCol = '0,20,40'; await this.play(a, 'spellcast', 7, 80);
@@ -436,8 +473,8 @@ const Battle = {
     }
     B.dim = 0; a.alpha = a.veil ? .45 : 1; this.hud();
   },
-  artCost(a, k) { return Math.max(1, ARTS[k].mp + (a.bind ? 2 : 0) - (a.isMe ? Stones.artMp(k) : 0)); },
-  artStrain(a, k) { return Math.max(5, (ARTS[k].strain || 30) - (a.isMe ? this.B.sb.calm : 0)); },
+  artCost(a, k) { return Math.max(1, ARTS[k].mp + (a.bind ? 2 : 0) - (a.isMe ? Stones.artMp(k) + (k === 'sight' && Skills.has('me', 'e2') ? 3 : 0) : 0)); },
+  artStrain(a, k) { return Math.max(5, (ARTS[k].strain || 30) - (a.isMe ? this.B.sb.calm + (Skills.has('me', 't3') ? 8 : 0) : 0)); },
   async summon(key, intro) {
     const B = this.B, E = ENEMY[key], used = B.actors.filter(a => a.side === 'e' && !a.ko).map(a => a.hx);
     const slots = [[150, 210], [96, 262], [196, 152], [70, 160]], sl = slots.find(s2 => !used.includes(s2[0])) || slots[3];
@@ -629,7 +666,7 @@ const Battle = {
     if (es.some(a => a.key === 'mana_wyrm') && !G.S.f.wyrmDrop) { G.S.f.wyrmDrop = 1; setTimeout(() => Stones.give('breath'), 2200); }
     this.me().hp = Math.max(this.me().hp, 1);
     if (ups) { const me = this.me(); me.maxHp = G.S.stats.maxHp; me.maxMp = G.S.stats.maxMp; me.hp = me.maxHp; me.mp = me.maxMp; }
-    await this.msg(`Victory!  +${xp} XP  +${gold} gold${ups ? '  ·  LEVEL UP! Lv ' + G.S.lvl : ''}`, ups ? 2200 : 1600);
+    await this.msg(`Victory!  +${xp} EXP  +${gold} gold${ups ? '  ·  POWER UP — ' + Power.now().grade + ' (' + BAND_NAME[Power.now().band] + ')' : ''}`, ups ? 2200 : 1600);
     return 'win';
   },
   // ---------------- fx ----------------
@@ -670,11 +707,25 @@ const Battle = {
       if (a.afterimg > 0) { a.afterimg -= 16; c.save(); c.globalAlpha = .3; drawBT(c, a.isMe ? playerImg() : a.img, a.anim, fr, a.x + 18, a.y, s); c.restore(); }
       if (a.isMe) {
         const anim = a.anim, glow = a.glow && anim === 'slash';
-        if (!G.S.kid) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, fr, a.x, a.y, s);
+        if (a.flip) { c.save(); c.translate(a.x, 0); c.scale(-1, 1); c.translate(-a.x, 0); }
+        const drawn = anim === 'slash' || G.S.kid;
+        if (!drawn) { // the katana rests in its scabbard at the hip — Vane's way
+          const hx = a.x + 2 * s, hy = a.y - 21 * s; c.save(); c.lineCap = 'round';
+          c.strokeStyle = '#1a120c'; c.lineWidth = 3.4 * s; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx + 19 * s, hy + 7 * s); c.stroke();
+          c.strokeStyle = '#3a2a1c'; c.lineWidth = 1.4 * s; c.beginPath(); c.moveTo(hx + 1, hy - 1); c.lineTo(hx + 18 * s, hy + 6 * s); c.stroke();
+          c.fillStyle = '#b8b0a0'; c.fillRect(hx + 17 * s, hy + 5.4 * s, 2.6 * s, 2.6 * s); c.restore();
+        }
+        const hilt = () => { if (drawn) return; const hx = a.x + 2 * s, hy = a.y - 21 * s; c.save(); c.lineCap = 'round';
+          c.strokeStyle = '#2a2a34'; c.lineWidth = 2.6 * s; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx - 8 * s, hy - 2.2 * s); c.stroke();
+          c.fillStyle = '#e8e4d8'; for (let q = 1; q < 4; q++) c.fillRect(hx - q * 2.1 * s, hy - q * .6 * s - .5, 1.3, 1.3);
+          c.fillStyle = '#c9a24a'; c.beginPath(); c.ellipse(hx + .5, hy, 1.4 * s, 2.6 * s, .4, 0, 7); c.fill(); c.restore(); };
+        if (!G.S.kid && drawn) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, fr, a.x, a.y, s);
         drawBT(c, playerImg(), anim, fr, a.x, a.y, s);
-        if (G.S.kid) {} else if (!glow) drawBT(c, G.A.sword, anim, fr, a.x, a.y, s);
+        hilt();
+        if (G.S.kid || !drawn) {} else if (!glow) drawBT(c, G.A.sword, anim, fr, a.x, a.y, s);
         else { c.save(); c.globalCompositeOperation = 'lighter'; drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); c.restore(); drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); }
         if (!G.S.hood) { const g = c.createRadialGradient(a.x - 4, a.y - 50, 0, a.x - 4, a.y - 50, 8); g.addColorStop(0, 'rgba(70,255,140,.4)'); g.addColorStop(1, 'rgba(70,255,140,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(a.x - 20, a.y - 66, 32, 32); c.restore(); }
+        if (a.flip) c.restore();
         if (a.ward) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.25 + Math.sin(t / 200) * .1})`; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30, 26, 36, 0, 0, 7); c.stroke(); c.restore(); }
       } else if (a.morph > 0) {
         // SCAR BLOOM: a burning outline, a larger shadow-body, darkened scaled skin, horns and a crown of spines
@@ -736,6 +787,16 @@ const Battle = {
         if (a.drawn) { c.strokeStyle = 'rgba(95,216,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y, 20, 7, 0, 0, 7); c.stroke(); }
       }
     }
+    if (B.bar) { const b = B.bar, top = b.y - b.h / 2, X = b.x, w = 20;
+      c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(X - w / 2 - 3, top - 3, w + 6, b.h + 6);
+      c.fillStyle = '#2a2f36'; c.fillRect(X - w / 2, top, w, b.h);
+      const yOf = p => top + (1 - p) * b.h;
+      c.fillStyle = 'rgba(70,224,112,.85)'; c.fillRect(X - w / 2, yOf(b.center + b.half), w, b.half * 2 * b.h);
+      c.fillStyle = '#ffd34a'; c.fillRect(X - w / 2, yOf(b.center + b.phalf), w, b.phalf * 2 * b.h);
+      const py = yOf(b.done ? b.at : b.pos());
+      c.fillStyle = b.done ? (b.res === 'perfect' ? '#ffd34a' : b.res === 'good' ? '#c9f7d6' : '#ff6a6a') : '#ffffff';
+      c.save(); c.shadowColor = c.fillStyle; c.shadowBlur = 10; c.fillRect(X - w / 2 - 6, py - 1.5, w + 12, 3); c.restore();
+      c.fillStyle = '#000'; c.beginPath(); c.moveTo(X + w / 2 + 6, py); c.lineTo(X + w / 2 + 12, py - 4); c.lineTo(X + w / 2 + 12, py + 4); c.fill(); }
     if (B.orb) { const o = B.orb, ow = o.owner; o.x = lerp(o.x, ow.x - 34, .08); o.y = lerp(o.y, ow.y - 82 + Math.sin(t / 300) * 5, .08);
       c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(o.x, o.y, 1, o.x, o.y, 22); g.addColorStop(0, 'rgba(230,250,255,.95)'); g.addColorStop(.35, 'rgba(80,200,255,.75)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.beginPath(); c.arc(o.x, o.y, 22, 0, 7); c.fill();
       c.strokeStyle = 'rgba(120,220,255,.7)'; c.lineWidth = 1.5; for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(o.x, o.y, 12 + i * 4, t / (200 + i * 80) + i, t / (200 + i * 80) + i + 2); c.stroke(); } c.restore();
@@ -764,6 +825,11 @@ const Battle = {
           c.beginPath(); c.arc(p.x, p.y, r2, a0, a0 + 1.8); c.stroke(); }
         c.restore(); continue;
       }
+      if (p.hline) { const u = Math.min(1, k * 3); c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+        c.strokeStyle = `rgba(255,255,255,${1 - k})`; c.lineWidth = 3; c.beginPath(); c.moveTo(p.x1, p.y); c.lineTo(lerp(p.x1, p.x2, u), p.y); c.stroke();
+        c.strokeStyle = `rgba(160,230,255,${.5 * (1 - k)})`; c.lineWidth = 12 * (1 - k); c.stroke(); c.restore(); continue; }
+      if (p.ghost) { c.save(); c.globalAlpha = .55 * (1 - k); if (p.flip) { c.translate(p.x, 0); c.scale(-1, 1); c.translate(-p.x, 0); } drawBT(c, tinted(p.img, '#7dffb0'), p.anim, p.fr, p.x, p.y, p.s); c.restore(); continue; }
+      if (p.blinkIn) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(125,255,176,${1 - k})`; c.lineWidth = 2; c.beginPath(); c.ellipse(p.x, p.y, 8 + 30 * k, 3 + 40 * k, 0, 0, 7); c.stroke(); c.restore(); continue; }
       if (p.clash) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(255,240,180,${1 - k})`; c.lineWidth = 3 * (1 - k); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4 + .3; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 6, p.y + Math.sin(an) * 6); c.lineTo(p.x + Math.cos(an) * (10 + 30 * k), p.y + Math.sin(an) * (10 + 30 * k)); c.stroke(); } c.restore(); continue; }
       if (p.field) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.8 * (1 - k)})`; c.lineWidth = 2;
         for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + p.t / 400; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 34, p.y + Math.sin(an) * 40); c.lineTo(p.x + Math.cos(an + Math.PI / 3) * 34, p.y + Math.sin(an + Math.PI / 3) * 40); c.stroke(); }

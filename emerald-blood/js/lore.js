@@ -68,7 +68,7 @@ function worldMenuHTML() {
   const f = G.S.f;
   const known = p => !p.need || f[p.need];
   let h = `<div class="stat" style="margin-bottom:6px"><h3>Tiers of power</h3>${TIERS.map(([t, d]) => `<p><b style="color:${TIER_COL[t] || '#fff'};display:inline-block;min-width:48px">${t}</b> ${d}</p>`).join('')}
-    <p class="muted">Your Guild rank: ${G.S.rank ? `<b style="color:${TIER_COL[G.S.rank]}">${G.S.rank}</b> · ${G.S.rp || 0} RP` : 'unregistered'}</p></div>`;
+    <p class="muted">Your power: ${Power.badge()} · Guild card: ${G.S.rank ? `<b style="color:${TIER_COL[G.S.rank]}">${G.S.rank}-RANK</b>` : 'unregistered'}</p></div>`;
   for (const k of ['empire', 'kings', 'guild']) {
     const W = WORLD[k];
     h += `<div class="stat" style="margin-bottom:6px"><h3>${W.title}</h3><p class="muted">${W.blurb}</p></div>`;

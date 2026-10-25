@@ -14,7 +14,7 @@ const UI = {
     const card = (nm, hp, mhp, mp, mmp, extra) => `<div class="pcard"><div class="nm"><span>${esc(nm)}</span><span class="muted" style="font-weight:400">${extra || ''}</span></div>
       <div class="row"><span class="ic h"></span><i><b style="width:${hp / mhp * 100}%"></b></i><span>${hp}/${mhp}</span></div>
       <div class="row mp"><span class="ic m"></span><i><b style="width:${mp / mmp * 100}%"></b></i><span>${mp}/${mmp}</span></div></div>`;
-    let h = card(S.name, s.hp, s.maxHp, s.mp, s.maxMp, 'Lv ' + S.lvl);
+    let h = card(S.name, s.hp, s.maxHp, s.mp, s.maxMp, Power.badge());
     for (const id of S.party) { const A = ALLY[id], st = S.allies[id] || {}, lv = S.lvl - 1, mh = A.hp + lv * 7, mm = A.mp + lv * 2; h += card(A.name, st.hp ?? mh, mh, st.mp ?? mm, mm); }
     $('#hud').innerHTML = h;
     $('#sus').innerHTML = S.f.hoodGiven ? Array.from({ length: 5 }, (_, i) => `<i class="eye ${i < Math.floor(S.sus) ? 'on' : ''}"></i>`).join('') : '<span class="muted" style="font-size:11px">Thornvale</span>';
@@ -149,7 +149,7 @@ const UI = {
     const s = loadSave(); if (!s) return; audioUnlock();
     G.S = s; $('#title').classList.add('hide');
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Waking up…';
-    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); G.S.arts = G.S.arts.map(k => k === 'draw' ? 'azure' : k === 'cast' ? 'crimson' : k); if (G.S.f.eye && !G.S.arts.includes('sight')) G.S.arts.unshift('sight'); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
+    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); G.S.arts = G.S.arts.map(k => k === 'draw' ? 'azure' : k === 'cast' ? 'crimson' : k); if (G.S.f.eye && !G.S.arts.includes('sight')) G.S.arts.unshift('sight'); if ((G.S.f.vaneDone || G.S.f.newDawn || G.S.f.cultivation) && !G.S.arts.includes('horizon')) G.S.arts.push('horizon'); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     G.mode = 'world'; await World.load(s.map, s.x, s.y, s.dir); this.controls(true); this.hud();
     await fadeIn(500); banner(SCENES[s.map].title || '', SCENES[s.map].subtitle || '');
   },
@@ -184,7 +184,7 @@ const UI = {
       $('#menu').classList.remove('hide');
       $('#menuCard').innerHTML = `<h2>CHAPTER I COMPLETE</h2><p>Ilya was moved to <b style="color:var(--green)">Greyspire Citadel</b>.</p>
         <div class="grid2">
-          <div class="stat"><h3>Your Drag</h3><p>Level <b>${G.S.lvl}</b> · Suspicion <b>${Math.floor(G.S.sus)}/5</b></p><p>Saw your eyes: <b>${who.length ? who.join(', ') : 'no one'}</b></p></div>
+          <div class="stat"><h3>Your Drag</h3><p>Power ${Power.badge()} · Suspicion <b>${Math.floor(G.S.sus)}/5</b></p><p>Saw your eyes: <b>${who.length ? who.join(', ') : 'no one'}</b></p></div>
           <div class="stat"><h3>Choices</h3><p>Halvard: <b>${f.halvardKilled ? 'killed by you' : f.halvardKilledByKairo ? 'killed by Kairo' : 'spared'}</b></p><p>Kess: <b>${f.kessJoined ? 'travels with you' : f.kessRefused ? 'turned you away' : f.kessHelp ? 'helped, then vanished' : 'a stranger'}</b></p>
           <p>Kairo: <b>${f.duel === 'won' ? 'duel won · Ashford spared' : 'duel lost'}${f.halvardKilledByKairo ? ' · he executed Halvard' : ''}</b></p>
           <p>Liora: <b>${f.lioraMet ? 'fought beside you — hunting Dread alone' : 'a stranger on the mill roof'}</b></p>
@@ -204,10 +204,10 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'arts', 'stones', 'items', 'quests', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'skills', 'arts', 'stones', 'items', 'quests', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', skills: 'Skills', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
-      body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · Lv ${S.lvl}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>XP <b>${S.xp}/${S.lvl * 30}</b> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
+      body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · ${Power.badge()}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>EXP <b>${Power.xp()}/${Power.now().hi}</b> · <span style="color:${BAND_COL[Power.now().band]}">${BAND_NAME[Power.now().band]}</span> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
         S.party.map(id => { const A = ALLY[id], lv = S.lvl - 1; return `<div class="stat"><h3>${A.name}</h3><p>ATK <b>${A.atk + lv * 2}</b> · DEF <b>${A.def + lv}</b> · SPD <b>${A.spd}</b></p><p>Arts: <b>${A.arts.map(k => ARTS[k].name).join(', ')}</b></p><p>Link Art: <b>${LINKS[id].name}</b></p></div>`; }).join('') + '</div>';
     } else if (t === 'arts') {
       body = S.arts.map(k => `<div class="stat" style="margin-bottom:6px"><h3>${ARTS[k].name} <span class="muted">· ${ARTS[k].mp} MP</span></h3><p>${ARTS[k].desc}</p></div>`).join('') +
@@ -215,11 +215,15 @@ const UI = {
         `<div class="stat" style="margin-bottom:6px"><h3>Strain ⚡</h3><p>Every Drag Art heats your blood. Strain cools a little each turn — Guard and Cultivate cool it fast. Let it climb past 90% and you fall into <b style="color:#ff6a5a">BLOOD FEVER</b>: Arts locked, HP burning, for 2 turns.</p></div>` +
         (S.arts.includes('azure') && S.arts.includes('crimson') ? `<div class="stat" style="margin-bottom:6px"><h3>??? Eclipse Convergence <span class="muted">· locked</span></h3><p>Blue in the field, then red called through it. Two currents meeting at one point. You can feel its shape. You can't touch it yet.</p></div>` : '') +
         `<div class="stat"><h3>How to fight</h3><p>On your attacks, tap when the gold ring closes for a <b>PERFECT</b> hit (×1.5, can't be dodged or parried).</p><p>On enemy attacks: <b>DODGE</b> (wide window) or <b>PARRY</b> (tight window). Perfect timing earns MP. Parry <b>every</b> hit of an attack to COUNTER.</p><p>Red <b>!!</b> attacks can't be parried — dodge them. Fill an enemy's yellow bar to <b>BREAK</b> them.</p></div>`;
+    } else if (t === 'skills') {
+      body = skillsMenuHTML();
+    } else if (t === 'world') {
+      body = worldMenuHTML();
     } else if (t === 'stones') {
       body = stonesMenuHTML();
     } else if (t === 'items') {
       body = `<div class="grid2"><div class="stat"><h3>Tonic ×${S.items.tonic}</h3><p>Restores 45% HP.</p><button class="btn" id="useT" ${S.items.tonic && s.hp < s.maxHp ? '' : 'disabled'}>Use</button></div><div class="stat"><h3>Ether ×${S.items.ether}</h3><p>Restores 12 MP.</p><button class="btn" id="useE" ${S.items.ether && s.mp < s.maxMp ? '' : 'disabled'}>Use</button></div>
-<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.lioraPin ? '<div class="stat"><h3 style="color:#ff9ccc">Liora\'s hairpin</h3><p>A silver spear the length of your finger, tipped with a chip of green stone. Her mother\'s. You promised to give it back.</p></div>' : ''}${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
+<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.bellToken ? '<div class="stat"><h3 style="color:#ffe36a">The Headmaster\'s Bell</h3><p>A small brass bell that hums instead of ringing. "Come to the Guild Citadel in Aurel and ring it."</p></div>' : ''}${S.f.lioraPin ? '<div class="stat"><h3 style="color:#ff9ccc">Liora\'s hairpin</h3><p>A silver spear the length of your finger, tipped with a chip of green stone. Her mother\'s. You promised to give it back.</p></div>' : ''}${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
     } else if (t === 'quests') {
       body = `<div class="stat"><h3>Main</h3><p>${esc(S.quest || '—')}</p></div>` + (S.side ? `<div class="stat" style="margin-top:6px"><h3>Side</h3><p>${esc(S.side)}</p></div>` : '') +
         `<div class="stat" style="margin-top:6px"><h3>Suspicion ${Math.floor(S.sus)}/5</h3><p>How sure the Hollow is that a Drag walks among them. Every new person who sees your eyes adds to it. High suspicion closes doors, raises prices — and brings hunters.</p></div>`;
@@ -233,6 +237,7 @@ const UI = {
     $$('#menuCard .tabs button[data-t]').forEach(b => bindTap(b, () => { this.menuTab = b.dataset.t; sfx('blip'); this.renderMenu(); }));
     bindTap($('#mClose'), () => this.closeMenu());
     if (t === 'stones') bindStonesMenu();
+    if (t === 'skills') bindSkillsMenu();
     const uT = $('#useT'), uE = $('#useE');
     if (uT) bindTap(uT, () => { if (!S.items.tonic) return; S.items.tonic--; s.hp = Math.min(s.maxHp, s.hp + Math.round(s.maxHp * .45)); sfx('heal'); this.renderMenu(); });
     if (uE) bindTap(uE, () => { if (!S.items.ether) return; S.items.ether--; s.mp = Math.min(s.maxMp, s.mp + 12); sfx('heal'); this.renderMenu(); });

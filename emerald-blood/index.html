@@ -201,7 +201,11 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
   font-size:clamp(14px,2.3vw,19px);line-height:1.4;color:#f4f1e8;text-shadow:0 2px 4px #000,0 0 10px #000;background:linear-gradient(transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent);padding:8px 16px}
 #cineCap.on{opacity:1}#cineCap b{display:block;font-family:'Press Start 2P';font-size:clamp(9px,1.5vw,12px);margin-bottom:4px;letter-spacing:1px}#cineCap.narr span{font-style:italic;color:#e0e6dc}
 #cineSkip{position:absolute;top:max(8px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:4;background:rgba(0,0,0,.55);color:#cfe;border:1px solid #46ff9566;border-radius:8px;padding:6px 12px;font-size:13px;font-family:inherit}
-.sockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.sockrow b{min-width:58px}.sock{border:1px dashed #3a5a46;border-radius:7px;padding:3px 8px;font-size:13px;color:#8aa}.sock.on{border-style:solid;color:#e8fff0}.sock.small{border-color:#7fe8a8}.sock.medium{border-color:#ffd88a}</style>
+.sockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.sockrow b{min-width:58px}.sock{border:1px dashed #3a5a46;border-radius:7px;padding:3px 8px;font-size:13px;color:#8aa}.sock.on{border-style:solid;color:#e8fff0}.sock.small{border-color:#7fe8a8}.sock.medium{border-color:#ffd88a}.stat.lore.locked{opacity:.55}.grade{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 6px;border-radius:7px;font-family:'Press Start 2P';font-size:11px;color:#0b120e;background:var(--gc);box-shadow:0 0 8px var(--gc)}
+.gbar{height:8px;background:#0e1a13;border-radius:5px;overflow:hidden;margin:6px 0;border:1px solid #2f5a40}.gbar i{display:block;height:100%}
+.tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.branch h4{margin:2px 0 6px;color:var(--green);font-family:'Press Start 2P';font-size:10px}
+.node{border:1px solid #2f5a40;border-radius:9px;padding:7px;margin-bottom:6px;display:flex;flex-direction:column;gap:4px;font-size:13px}.node b{color:#e8fff0}.node span{color:#9ab8a6}.node em{font-style:normal;font-size:12px;color:#7a9}
+.node.got{border-color:#46ff95;background:#123a22}.node.locked{opacity:.5}.node .btn{padding:4px 8px;font-size:12px}</style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -278,6 +282,9 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/realm.js"></script>
 <script src="js/story.js"></script>
 <script src="js/stones.js"></script>
+<script src="js/lore.js"></script>
+<script src="js/guild.js"></script>
+<script src="js/progress.js"></script>
 <script src="js/ui.js"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>

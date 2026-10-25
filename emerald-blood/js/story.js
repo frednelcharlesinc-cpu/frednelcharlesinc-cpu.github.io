@@ -471,6 +471,7 @@ SCENES.ashford = {
 async function fountain() {
   await narr('A three-tiered fountain. Someone scratched a dragon\'s eye into the stone basin. Someone else tried very hard to scrub it out.');
   if (F().marenKnows) await narr('This is where they hanged him. The little girl\'s father.');
+  if (G.S.q && G.S.q.gerald === 'active') await geraldFound();
 }
 async function talkFolk(e) {
   const s = G.S.sus; CHAR[e.id] = { name: e.kid ? 'Child' : 'Townsperson', sprite: e.sprite };
@@ -740,7 +741,7 @@ SCENES.woods = {
     '43,16': () => crate(),
     '8,24': () => spring(), '9,24': () => spring(), '10,24': () => spring(), '11,24': () => spring(), '12,25': () => spring(), '7,25': () => spring()
   },
-  async onEnter() { if (!F().woodsTip) { F().woodsTip = true; toast('Beasts hide in the tall grass. The dirt paths are safe.', 3500); } }
+  async onEnter() { if (!F().woodsTip) { F().woodsTip = true; toast('Beasts hide in the tall grass. The dirt paths are safe.', 3500); } if (G.S.q && G.S.q.toll === 'active') await tollMen(); }
 };
 async function spring() { Story.heal(true); await narr('Cold spring water. You feel your strength return.'); }
 async function shrine() {
@@ -769,7 +770,8 @@ async function talkRook() {
   const r = await Battle.start({ enemies: ['rook', 'bandit'], bd: 'camp', intro: 'Rook draws a rusty blade!' });
   if (r === 'lose') { await Story.defeat(); return; }
   if (r === 'flee') return;
-  f.rookBeaten = true; World.remove('rook'); World.remove('bandit');
+  f.rookBeaten = true; f.houndKnown = true; World.remove('rook'); World.remove('bandit');
+  await say('rook', 'anger', 'You know who I run for? Varro Kade. The Gilded Hound. He\'ll hear about this, hood. He hears about EVERYTHING.');
   if (G.S.hood === false) {
     await say('rook', 'shock', "Your eyes— you're a DRAG! …Oh, the whole Hollow's gonna hear about this!");
     await narr('Rook crashes off through the trees — toward town.');
@@ -801,7 +803,7 @@ async function talkAlpha() {
   if (r !== 'win') return;
   f.alphaBeaten = true; f.lioraMet = true; World.remove('alpha'); G.S.items.ether += 2; toast("Found <b>2 Ethers</b> in the beast's den.");
   await narr('She cleans her spear in the snowmelt before she says a word to you.');
-  await say('liora', 'neutral', "You fight like someone trained you properly. Who?");
+  await say('liora', 'neutral', "You keep your blade sheathed until the cut. My mother told me only one swordsman alive fought like that — and he was supposed to be dead. Who trained you?");
   const c = await ask('me', 'blush', '…', ['Who are you?', 'An old man with one arm.', "You're… incredible with that spear."]);
   if (c === 0) await say('liora', 'neutral', 'Liora. That\'s all you get. Now — who trained you?');
   if (c === 2) { await say('liora', 'blush', "…Don't. Every Drag between here and the mountains has tried that line."); await say('liora', 'shame', "…Answer the question."); Story.heart(1); }
@@ -872,6 +874,7 @@ async function ending() {
   await narr('Halvard falls to one knee. The light around him gutters out.');
   await say('halvard', 'shock', blazed ? 'That fire… and you aimed it at me, not at the town. Maybe I read the texts wrong.' : 'You never used it. The fire. Why?');
   await say('halvard', 'sad', "She isn't here. They moved the children at dawn. To Greyspire Citadel.");
+  await say('halvard', 'neutral', "And when the Lantern hears what happened here — Ysolde Marr, the Second Pillar — she won't send another Halvard. She'll come herself."); f.ysoldeKnown = true;
   await say('halvard', 'happy', "And Drag — your valley wasn't found. It was sold. One of your own drew us the map to the bridge. Think on that.");
   await say('halvard', 'neutral', "You want to know why we do it? I'll tell you what the Crown tells its inquisitors on the night they take the white. Not your eyes. Not your quick hands. The Dragonoid.");
   await say('halvard', 'sad', "Somewhere in every one of you is the shape of the thing that nearly ended the world. One day, one of you will remember how to wear it. I have spent thirty years making sure it isn't today.");
@@ -979,7 +982,7 @@ async function kairoDuel() {
   const r = await Battle.start({ enemies: ['kairo_duel'], allies: [], noFlee: true, boss: true, bd: 'mill', music: 'boss', intro: 'RIVAL — Kairo of Green Eclipse',
     onTurn: async (B, Bt) => {
       const e = B.actors.find(a => a.key === 'kairo_duel'), me = Bt.me();
-      if (e && !e.t1 && e.hp < e.maxHp * .6) { e.t1 = 1; await Bt.msg('Kairo: "You learned to parry like THAT? From who?!"', 1800); }
+      if (e && !e.t1 && e.hp < e.maxHp * .6) { e.t1 = 1; await Bt.msg('Kairo: "Sheath, draw, cut, sheath — like one breath. Who the hell taught you THAT?!"', 1900); }
       if (e && e.exhausted && e.hp < e.maxHp * .3) { await Bt.msg('Kairo drops to one knee.', 1300); return 'win'; }
       if (me.hp < me.maxHp * .22) { await Bt.msg('Your blade hits the dirt.', 1300); return 'lose'; }
     } });
@@ -1010,6 +1013,7 @@ async function kairoDuel() {
   await say('liora', 'neutral', "Your cages were empty before you got here, Kairo. Dread moved the children to Greyspire. And he'll be there himself in nine days.");
   await say('kairoB', 'neutral', "Then come with us. Greyspire's walls won't fall to one spear.");
   await say('liora', 'neutral', "I don't join, Kairo. I help, when it suits me. Tonight it suited me.");
+  await say('liora', 'neutral', "Greyspire's undercity belongs to the Velvet Knife — Lysandra Voe. One of the Eight. If anyone knows which cell your sister's in, it's her. Her price will be ugly."); f.knifeKnown = true;
   if (f.duel === 'won') { await narr('She looks at the ash still flaking off Kairo\'s arms. For a heartbeat her face does something soft and unguarded.'); await say('liora', 'sad', "You used it again. The Bloom. You promised me you'd stop doing that to yourself."); await say('kairoB', 'blush', "…You were counting?"); await say('liora', 'anger', "Somebody has to."); }
   if (F().lioraMet) await say('liora', 'happy', "And you, Sword Saint's student. Still alive. Good. At Greyspire, stay out of my way — or keep up.");
   else await say('liora', 'neutral', "Who's this? …Another Drag with a hood and a grudge. Wonderful. Stay out of my way at Greyspire.");
@@ -1160,7 +1164,7 @@ room('a_guild', 'in_inn', "Adventurers' Guild", { npcs: () => [
   { id: 'sylwen', x: 12, y: 7, dir: 'left', talk: talkSylwen, ai: 'turn', turns: ['left', 'down'] },
   { id: 'garrick', x: 9, y: 7, dir: 'down', talk: talkGarrick },
   { id: 'tilda', x: 2, y: 7, dir: 'right', talk: talkTilda }],
-  tiles: { '9,2': () => rankBoard(), '10,2': () => rankBoard() } });
+  tiles: { '9,2': () => questBoard(), '10,2': () => questBoard() } });
 async function rankBoard() {
   await narr('A slate board, chalked in a dwarf\'s square hand: TIERS OF MASTERY.');
   for (const r of RANKS) await narr(`${r}-RANK — ${RANK_DESC[r]}`);
@@ -1195,6 +1199,9 @@ async function talkBrom() {
   }
   S.rank = 'E'; sfx('level');
   await say('brom', 'happy', 'There. E-RANK. Everyone starts at E — even the ones who obviously aren\'t. Earn the rest.');
+  await say('brom', 'neutral', 'Board\'s on the back wall. Bounties, trials, the Proving Bouts when you\'re D-rank. Every job pays in coin and in rank points. Enough points and the letter on your card changes.');
+  await say('brom', 'sad', 'And mind the roads. Outside the Crown\'s walls the land belongs to the Eight — the bandit kings. Every one of them SSS. The Gilded Hound owns the toll-roads round here. Don\'t owe him money. Don\'t owe him anything.');
+  F().kingsKnown = true;
   toast('Registered at the <b>Adventurers\' Guild</b>: <b style="color:#9aa3a0">E-RANK</b>. Win the hard fights and your rank will climb.', 4800);
   UI.hud();
 }
@@ -1357,6 +1364,12 @@ async function vaneYears() {
   await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Year Three — sparring between the stones', music: 'battle',
     onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man takes a step back. Just one.', 1500); return 'scripted'; } } });
   Story.heal(true);
+  await say('vane', 'neutral', 'Enough flailing. Watch.');
+  await narr('He sheathes his blade. Stands perfectly still. Then — you never see it move. A branch three paces away falls in two pieces, and the sword is already back in its sheath.');
+  await say('vane', 'neutral', 'A sword is loudest in its sheath, pup. The draw IS the cut. Keep the blade home until the moment it has to leave — and bring it home before they know it left.');
+  await say('vane', 'happy', 'It took me twenty years. You have five. Start now.');
+  if (!G.S.arts.includes('horizon')) G.S.arts.push('horizon');
+  sfx('level'); toast('Learned Vane\'s sheathed style and <b style="color:#cfe8ff">Horizon Draw</b> — one draw-cut across the whole enemy line. Sword techniques never make your eyes blaze.', 5200);
   await say('vane', 'neutral', 'You want to kill the men who burned your village. They have sons. When the sons grow up, they\'ll come for you. Will you kill them too?');
   const c3 = await ask('me', 'anger', '…', ['I would.', '…I don\'t know.', 'No. Somebody has to stop.']);
   if (c3 === 0) { await say('vane', 'neutral', 'And their sons?'); await me('anger', '…I would.'); await say('vane', 'sad', 'Then you\'re not ending anything, pup. You\'re just taking your turn.'); }
@@ -1410,6 +1423,9 @@ async function vaneFinal() {
   await say('vane', 'neutral', 'But I\'ll tell you something I never told the Crown. He fought like a man who wanted to lose. And behind the visor — I would swear on what\'s left of my sword arm — his eyes were green.');
   await me('shock', '…Green? Dread is… a Drag?');
   await say('vane', 'neutral', 'I don\'t know what he is. Neither do you. Remember that before you decide what to do with him.');
+  await say('vane', 'sad', 'And one more name, since you\'re going out there. Caspian Thorne. My first student. The best I ever had — before you.');
+  await say('vane', 'sad', 'He left me for a chair beside the throne. The night before I faced Dread, Caspian told the Crown every habit I had. Now he\'s one of the Four Pillars. SSS, the Guild would call him.');
+  await say('vane', 'neutral', 'If you ever meet a swordsman who fights the way I taught you — and smiles while he does it — walk away. He\'s been looking for my grave for twenty years. He\'ll settle for my student.'); F().caspianKnown = true;
   await me('neutral', 'You told me once about the Dragonoid. You never told me what it is.');
   await say('vane', 'sad', 'Because nobody knows, pup. That\'s the point of it. Every Drag can become one — that\'s what the old texts say. Not a gift. Past the gift. Fratenaptor\'s own shape, worn by a mortal.');
   await say('vane', 'sad', 'Nobody has done it in three hundred years. The art is lost. Forbidden. The Crown burned every book that so much as named it, and then burned the people who\'d read them.');
@@ -1426,6 +1442,7 @@ async function vaneFinal() {
   Story.heal(true);
   if (r === 'win') await say('vane', 'happy', 'There it is. You made me use the sleeve. …Don\'t tell anyone. I have a reputation.');
   else await say('vane', 'happy', 'Not today. But you stopped fighting angry halfway through. That\'s the lesson. The rest is just practice.');
+  await say('vane', 'neutral', 'The draw is mine, pup. Anyone who ever saw me fight will know it the moment you cut. Some of them will be glad. Some of them will want you dead for it. Use it anyway.');
   await say('vane', 'neutral', 'Three weeks ago a courier\'s boat broke apart on the river at the edge of the Realm. I took this off his body.');
   await narr('A waterlogged Inquisition ledger. One line, in neat ink: "Girl, green-eyed, ribbon on wrist. Transfer via Ashford Hollow."');
   await me('shock', '…She\'s alive.');
@@ -1440,7 +1457,8 @@ async function vaneFinal() {
 }
 Story.timeSkip = async function () {
   G.S.kid = false; G.S.hood = true;
-  const st = G.S.stats; G.S.lvl = Math.max(G.S.lvl, 4); st.maxHp = 80; st.maxMp = 24; st.atk = 16; st.def = 7; st.spd = 12; st.hp = st.maxHp; st.mp = st.maxMp;
+  G.S.xpTotal = Math.max(Power.xp(), 420); G.S.lvl = Power.now().step + 1; G.S.sp = G.S.sp || {}; G.S.sp.me = (G.S.sp.me || 0) + 3;
+  const st = G.S.stats; st.maxHp = 80; st.maxMp = 24; st.atk = 16; st.def = 7; st.spd = 12; st.hp = st.maxHp; st.mp = st.maxMp;
   $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Five years pass…'; await wait(30);
   G.A.portCache = {}; await buildPlayerSprites(); $('#loading').classList.add('hide');
 };

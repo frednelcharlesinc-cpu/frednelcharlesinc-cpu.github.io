@@ -131,7 +131,7 @@ async function buildPlayerSprites() {
   const L = G.S.look;
   G.A.pHair = composeLook(L, false); await wait(10);
   G.A.pHood = composeLook(L, true); await wait(10);
-  G.A.sword = G.img.part_sword; G.A.swordBg = G.img.part_sword_bg; G.A.glow = G.img.part_glow; G.A.glowBg = G.img.part_glow_bg;
+  G.A.sword = G.img.part_katana || G.img.part_sword; G.A.swordBg = G.img.part_katana_bg || G.img.part_sword_bg; G.A.glow = G.img.part_glow; G.A.glowBg = G.img.part_glow_bg;
 }
 /* ---------- customizable cast: Ilya & Kairo ---------- */
 const KID_HAIR_X = { spiked2: 'swoop_side', spiked: 'swoop_side', messy2: 'relm_short', swoop_side: 'swoop_side', unkempt: 'wavy', long_messy: 'wavy', long_straight: 'wavy', long_center_part: 'wavy', wavy: 'wavy', pigtails: 'wavy', bunches: 'wavy' };
