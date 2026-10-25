@@ -804,10 +804,11 @@ async function crate() {
 async function talkAlpha() {
   const f = F();
   await narr('A huge black beast-man rears over a carcass — and between you and it stands a girl with a spear.');
-  await narr('Long white hair. Eyes as green as yours, and not hidden at all. She doesn\'t look back at you.');
+  await narr('Long white hair, loose to her waist. A crimson cape. Eyes as green as yours — and not hidden at all.');
+  await narr('She is, without any question, the most beautiful person you have ever seen. She is also covered in wolf blood, and she doesn\'t look back at you.');
   await say('liora', 'anger', "Move. That one's mine.");
   const c0 = await ask('me', 'blush', '…', ["I'm not moving.", 'Let me help.']);
-  await say('liora', 'neutral', c0 === 0 ? "Then don't die where I have to step over you." : "Fine. Keep up.");
+  await say('liora', 'neutral', c0 === 0 ? "Then don't die where I have to step over you." : "Fine. Keep up."); if (c0 === 1) Story.heart(1);
   const r = await Battle.start({ enemies: ['lupine_alpha', 'lupine', 'lupine'], allies: ['liora'].concat(G.S.party), bd: 'forest', intro: 'The Lupine Alpha howls! Liora fights at your side.' });
   if (r === 'lose') { await Story.defeat(); return; }
   if (r !== 'win') return;
@@ -816,15 +817,17 @@ async function talkAlpha() {
   await say('liora', 'neutral', "You fight like someone trained you properly. Who?");
   const c = await ask('me', 'blush', '…', ['Who are you?', 'An old man with one arm.', "You're… incredible with that spear."]);
   if (c === 0) await say('liora', 'neutral', 'Liora. That\'s all you get. Now — who trained you?');
-  if (c === 2) await say('liora', 'shame', "…Don't. Every Drag boy between here and the mountains has tried that line. Answer the question.");
+  if (c === 2) { await say('liora', 'blush', "…Don't. Every Drag between here and the mountains has tried that line."); await say('liora', 'shame', "…Answer the question."); Story.heart(1); }
+  if (c === 1) Story.heart(1);
   await me('neutral', 'An old man in the Realm of No Return. One arm. He lost the other to Dread.');
   await say('liora', 'shock', "…The Sword Saint is ALIVE? Vane? The man who lasted four strokes against Dread?");
   await say('liora', 'anger', "Dread killed my mother. In our doorway, while I watched from under the stairs. I was eight.");
   await say('liora', 'anger', "I've spent every day since getting good enough to put this spear through his heart. I'm almost there.");
   const c2 = await ask('liora', 'neutral', "So don't get in my way, Sword Saint's student.", ["Revenge isn't the way. Someone taught me that.", "Then we want the same man.", "Let me help you."]);
   if (c2 === 0) await say('liora', 'anger', "Easy to say when your monster only took your sister. Mine took everything. Come back when you've buried someone.");
-  else if (c2 === 1) await say('liora', 'neutral', "No. You want your sister. I want his heart. Only one of those ends at Dread.");
-  else await say('liora', 'happy', "…Ha. You're sweet. I don't need help. I work alone. Kairo's been asking for three years and the answer's still no.");
+  else if (c2 === 1) { await say('liora', 'neutral', "No. You want your sister. I want his heart. Only one of those ends at Dread."); Story.heart(1); }
+  else { await say('liora', 'happy', "…Ha. You're sweet. I don't need help. I work alone. Kairo's been asking for three years and the answer's still no."); Story.heart(1); }
+  if (c2 === 0) F().lioraRevenge = true;
   await say('liora', 'neutral', "Don't follow me.");
   await narr('She\'s gone between the trees before you can answer. You realize you\'re still staring at the place where she was.');
   World.remove('liora');
@@ -892,6 +895,7 @@ async function ending() {
   await narr("You tie it to your wrist, next to yours. Now they make one whole knot.");
   await me('sad', "I'll find you. Dragon law.");
   await kairoDuel();
+  await millRoof();
   if (f.kessJoined) {
     await say('kessE', 'neutral', 'Greyspire. Nobody comes back from Greyspire.');
     const k = await ask('kessE', 'neutral', '…So what now?', ["Then I'll be the first.", "We'll be the first."]);
@@ -957,7 +961,7 @@ async function kairoDuel() {
   await W.addNpc({ id: 'reb1', sprite: 'tamsin', x: 16, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb2', sprite: 'bo', x: 18, y: 17, dir: 'up' });
   await W.addNpc({ id: 'reb3', sprite: 'ge_dace', x: 15, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb4', sprite: 'ge_wren', x: 19, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb5', sprite: 'ge_sefa', x: 17, y: 18, dir: 'up' });
   W.player.dir = 'down';
-  await narr('A tall figure steps into the lamplight. Black spiked hair. Half his face a map of old burns. Green eyes you would know anywhere.');
+  await narr('A tall figure steps into the lamplight. Long black hair, hanging in ragged strands across his face. Under it, a burn the colour of raw meat spreads over one eye. Green eyes you would know anywhere.');
   await me('shock', "…Kairo.");
   await say('kairoB', 'neutral', "Seven years, {name}. You got tall.");
   await say('kairoB', 'neutral', "Lark said you came out of the Realm of No Return. Nobody comes out of there. …I should've known you'd be the first.");
@@ -1015,6 +1019,7 @@ async function kairoDuel() {
   await say('liora', 'neutral', "Your cages were empty before you got here, Kairo. Dread moved the children to Greyspire. And he'll be there himself in nine days.");
   await say('kairoB', 'neutral', "Then come with us. Greyspire's walls won't fall to one spear.");
   await say('liora', 'neutral', "I don't join, Kairo. I help, when it suits me. Tonight it suited me.");
+  if (f.duel === 'won') { await narr('She looks at the ash still flaking off Kairo\'s arms. For a heartbeat her face does something soft and unguarded.'); await say('liora', 'sad', "You used it again. The Bloom. You promised me you'd stop doing that to yourself."); await say('kairoB', 'blush', "…You were counting?"); await say('liora', 'anger', "Somebody has to."); }
   if (F().lioraMet) await say('liora', 'happy', "And you, Sword Saint's student. Still alive. Good. At Greyspire, stay out of my way — or keep up.");
   else await say('liora', 'neutral', "Who's this? …Another Drag with a hood and a grudge. Wonderful. Stay out of my way at Greyspire.");
   await narr("She's gone over the mill roof as quietly as she came.");
@@ -1030,6 +1035,48 @@ async function kairoDuel() {
   await say('kairoB', 'happy', "…See you at Greyspire, brother. Try to keep up.");
   await narr('Green Eclipse melts back into the trees. In a heartbeat, the clearing is empty again.');
   W.remove('kairo'); ['reb1', 'reb2', 'reb3', 'reb4', 'reb5'].forEach(r => W.remove(r)); f.millDone = true;
+}
+
+/* ---- Liora: a heart pulled two ways ---- */
+Story.heart = function (n) {
+  const f = F(); f.lioraAff = (f.lioraAff || 0) + n;
+  const r = $('#portR').getBoundingClientRect(), h = document.createElement('div'); h.className = 'heart'; h.textContent = '♥';
+  h.style.left = (r.left + r.width * .7) + 'px'; h.style.top = (r.top + 12) + 'px'; document.body.appendChild(h); setTimeout(() => h.remove(), 1500);
+};
+async function millRoof() {
+  const f = F(); if (f.roofDone) return; f.roofDone = true;
+  Music.play('night'); await fadeOut(900); await wait(300); await fadeIn(900);
+  await narr('Later. Green Eclipse\'s fires burn low in the trees. Everyone who can sleep is asleep.');
+  await narr('You can\'t. And when you look up, neither can she — Liora is sitting on the ridge of the mill roof, moonlight caught in her white hair like frost.');
+  await narr('There\'s a ladder. You climb it before you can talk yourself out of it.');
+  await say('liora', 'neutral', "You followed me. Kairo would have too. He'd have brought a speech.");
+  const a = await ask('me', 'neutral', '…', ["I couldn't sleep.", "You look… really beautiful up here.", "Are you okay?"]);
+  if (a === 0) { await say('liora', 'neutral', "Neither could I. I never can, the night before something."); Story.heart(1); }
+  else if (a === 1) {
+    if ((f.lioraAff || 0) >= 2) { await say('liora', 'blush', "…You say that like you mean it. Most people say it like a password."); await say('liora', 'shame', "Sit down before I push you off the roof."); Story.heart(1); }
+    else await say('liora', 'anger', "Careful. I've put spears through people for less.");
+  } else { await say('liora', 'sad', "…Nobody asks me that. They ask how many I've killed, or what Dread looks like up close. Not that."); Story.heart(2); }
+  await narr('She hums something under her breath. Old. Slow. A lullaby with the words worn off.');
+  await say('liora', 'sad', "My mother's song. Seren — that was her name. She braided my hair on nights like this and sang it wrong on purpose so I'd correct her.");
+  await say('liora', 'sad', "Dread came on a night like this too. Clear sky. I counted his footsteps from under the stairs. Eleven. I still count to eleven before I fall asleep.");
+  const b = await ask('me', 'neutral', '…', ["What will you do after Dread?", "Kairo cares about you. A lot.", "(Sit a little closer.)"]);
+  if (b === 0) {
+    if ((f.lioraAff || 0) >= 4) { await say('liora', 'blush', "After? …I never let myself imagine an after. Tonight I almost can."); await say('liora', 'shame', "Don't make me say more than that."); Story.heart(1); }
+    else await say('liora', 'neutral', "There is no after. There's Dread, and then there's whatever's left of me. I don't plan for it.");
+  } else if (b === 1) {
+    await say('liora', 'sad', "I know. Kairo carried me out of a burning fort when I was fifteen. He was bleeding worse than me and he wouldn't put me down.");
+    await say('liora', 'neutral', "He's loud, and angry, and he'd burn the whole world for anyone with green eyes. …Some days that's exactly what I love about him. Some days it's what scares me.");
+    await say('liora', 'blush', "…And then someone like you climbs a ladder. Ugh. Forget I said any of this.");
+    Story.heart(1); f.lioraKairoTalk = true;
+  } else { await narr('She doesn\'t move away. After a while, her shoulder rests against yours. Neither of you mentions it.'); await say('liora', 'blush', "…Just tonight. Don't make it a thing."); Story.heart(2); }
+  if ((f.lioraAff || 0) >= 5) {
+    await narr('She pulls a silver pin from her hair — a tiny spear, its tip set with a chip of green stone — and presses it into your palm.');
+    await say('liora', 'blush', "My mother's. Give it back to me when this is over. That way I have to live long enough to collect it.");
+    f.lioraPin = true; sfx('level'); toast("You received <b style=\"color:#ff9ccc\">Liora's hairpin</b>. A promise to come back.", 4200);
+  } else await say('liora', 'neutral', "Go sleep, Sword Saint's student. Greyspire won't care how tired you are.");
+  await narr('Below the roof, at the edge of the trees, a pair of green eyes is watching. Then they turn away into the dark.');
+  if (f.lioraAff >= 5) await say('kairoB', 'sad', "(…Of everyone in the world, brother. It had to be you.)");
+  Music.play('sad');
 }
 
 async function talkKids(e) {

@@ -84,8 +84,8 @@ function recolor(img, mat, base, target) {
 const LOOK_OPTS = {
   sex: ['male', 'female'],
   skin: ['light', 'amber', 'olive', 'taupe', 'bronze', 'brown', 'black'],
-  hair: ['dreadlocks_long', 'dreadlocks_short', 'twists_straight', 'twists_fade', 'cornrows', 'afro', 'high_ponytail', 'long_tied', 'braid', 'buzzcut', 'curly_short', 'bob', 'pixie', 'natural', 'long', 'none'],
-  hairCol: ['black', 'raven', 'dark_brown', 'chestnut', 'light_brown', 'ginger', 'blonde', 'platinum', 'white', 'gray', 'red', 'navy', 'green'],
+  hair: ['dreadlocks_long', 'dreadlocks_short', 'twists_straight', 'twists_fade', 'cornrows', 'afro', 'high_ponytail', 'long_tied', 'braid', 'buzzcut', 'curly_short', 'bob', 'pixie', 'natural', 'long', 'long_straight', 'long_center_part', 'wavy', 'pigtails', 'bunches', 'spiked2', 'spiked', 'messy2', 'swoop_side', 'unkempt', 'long_messy', 'none'],
+  hairCol: ['black', 'dark_gray', 'raven', 'dark_brown', 'chestnut', 'light_brown', 'ginger', 'blonde', 'platinum', 'white', 'gray', 'red', 'navy', 'green'],
   beard: ['none', 'beard', 'mustache'],
   cloth: ['charcoal', 'black', 'slate', 'navy', 'bluegray', 'teal', 'forest', 'green', 'maroon', 'red', 'purple', 'walnut', 'brown', 'tan', 'white'],
 };
@@ -131,6 +131,78 @@ async function buildPlayerSprites() {
   G.A.pHair = composeLook(L, false); await wait(10);
   G.A.pHood = composeLook(L, true); await wait(10);
   G.A.sword = G.img.part_sword; G.A.swordBg = G.img.part_sword_bg; G.A.glow = G.img.part_glow; G.A.glowBg = G.img.part_glow_bg;
+}
+/* ---------- customizable cast: Ilya & Kairo ---------- */
+const KID_HAIR_X = { spiked2: 'swoop_side', spiked: 'swoop_side', messy2: 'relm_short', swoop_side: 'swoop_side', unkempt: 'wavy', long_messy: 'wavy', long_straight: 'wavy', long_center_part: 'wavy', wavy: 'wavy', pigtails: 'wavy', bunches: 'wavy' };
+Object.assign(KID_HAIR_MAP, KID_HAIR_X);
+const KAIRO_HAIR = ['unkempt', 'spiked2', 'spiked', 'messy2', 'swoop_side', 'long_messy', 'dreadlocks_short', 'twists_fade', 'cornrows', 'afro', 'buzzcut', 'curly_short', 'long_tied'];
+const ILYA_HAIR = ['wavy', 'jewfro', 'relm_short', 'swoop_side'];
+const ILYA_HAIR_NAMES = { wavy: 'Wavy & long', jewfro: 'Curly puff', relm_short: 'Short', swoop_side: 'Side swoop' };
+Object.assign(HAIR_NAMES, { long_straight: 'Long & sleek', long_center_part: 'Center part', wavy: 'Wavy', pigtails: 'Pigtails', bunches: 'Buns', spiked2: 'Spiked', spiked: 'Spiky', messy2: 'Messy', swoop_side: 'Side swoop', unkempt: 'Wild', long_messy: 'Long & messy' });
+function defaultCast() {
+  return { ilya: { skin: 'light', hair: 'wavy', hairCol: 'pink', top: 'white', bottom: 'green', skirt: true },
+           kairo: { skin: 'light', hair: 'unkempt', hairCol: 'dark_gray', top: 'black', pants: 'charcoal', obi: 'forest', cape: 'forest' } };
+}
+function castLists(cast) {
+  const I = cast.ilya, K = cast.kairo, kh = KID_HAIR_MAP[K.hair] || 'swoop_side';
+  const kidK = [['kbody', K.skin], ['kpants_' + (KID_PANTS_MAP[K.pants] || 'black'), null], ['kshirt_' + (KID_SHIRT_MAP[K.top] || 'black'), null], ['khead', K.skin], ['keyes', null], ['khair_' + kh, K.hairCol]];
+  const adultK = [['katana_bg', null]];
+  if (G.man.parts['hairbg_' + K.hair]) adultK.push(['hairbg_' + K.hair, K.hairCol]);
+  adultK.push(['body_male', K.skin], ['tabi_male', 'black'], ['sandals_male', 'black'], ['pants_male', K.pants], ['top_male', K.top], ['obi_male', K.obi], ['head_male', K.skin], ['face_male', K.skin],
+    ['hair_' + K.hair, K.hairCol], ['bandage_male', null], ['cape_tattered', K.cape], ['katana', null]);
+  const ilya = [['kbody', I.skin], [(I.skirt ? 'kskirt_' : 'kpants_') + I.bottom, null], ['kshirt_' + I.top, null], ['khead', I.skin], ['keyes', null], ['khair_' + I.hair, I.hairCol]];
+  return { ilya, kairo_kid: kidK, kairo_kidb: kidK, kairo_b: adultK };
+}
+// Kairo's burn: a raw red patch over his right eye, up into the brow and down the cheek (skin pixels only)
+function burnPts(ex, ey, k) {
+  const P = [];
+  for (let y = ey - 9; y <= ey + 10; y++) for (let x = ex - 7; x <= ex + 6; x++) {
+    const inE = ((x - ex + 1) / (5.5 * k)) ** 2 + ((y - ey) / (6.5 * k)) ** 2 <= 1;
+    const brow = x >= ex + 1 && x <= ex + 4 && y >= ey - 8 * k && y < ey - 4;
+    const drip = x >= ex - 3 && x <= ex && y > ey + 4 && y <= ey + 9 * k;
+    if (inE || brow || drip) P.push([x, y]);
+  }
+  return P;
+}
+function burnMask(x, W, PY, o) {
+  const pts = burnPts(o.ex, o.ey, o.k || 1);
+  const cells = [];
+  for (let e = 0; e < 8; e++) cells.push([e * 64, PY]);
+  for (const r of [2, 6, 10]) for (let c = 0; c < 9; c++) cells.push([c * 64, r * 64]);
+  for (const [cx, cy] of cells) {
+    if (cx + 64 > W) continue;
+    const d = x.getImageData(cx, cy, 64, 64), p = d.data;
+    for (const [px, py] of pts) { const i = (py * 64 + px) * 4, r = p[i], g = p[i + 1], b = p[i + 2];
+      if (p[i + 3] && r > b + 18 && r >= g && !(g > 150 && g > r + 40)) { p[i] = r * .45 + 225 * .55; p[i + 1] = g * .45 + 80 * .55; p[i + 2] = b * .45 + 82 * .55; } }
+    x.putImageData(d, cx, cy);
+  }
+}
+const SCAR_PTS = [[24,20],[25,20],[23,21],[24,21],[25,21],[26,21],[23,22],[24,22],[25,22],[24,23],[25,23],[26,23],[24,24],[25,24],[23,25],[24,25],[25,25],[24,26],[25,26],[26,26],[25,27],[26,27],[26,28]];
+function castAtlas(list, o) {
+  list = list.filter(([pn]) => G.img['part_' + pn] && G.man.parts[pn]);
+  const first = G.img['part_' + list[0][0]], W = first.width, H = first.height, PY = H - 64;
+  const out = document.createElement('canvas'); out.width = W; out.height = H; const x = out.getContext('2d');
+  const rec = list.map(([pn, col]) => [pn, recolor(G.img['part_' + pn], G.man.parts[pn].mat, G.man.parts[pn].base, col)]);
+  for (const [, c] of rec) x.drawImage(c, 0, 0, W, PY, 0, 0, W, PY);
+  // portrait row: face part carries the 8 expressions, everything else repeats its neutral cell
+  for (let e = 0; e < 8; e++) for (const [pn, c] of rec) { const sx = pn.startsWith('face_') ? e * 64 : 0; if (sx + 64 <= c.width) x.drawImage(c, sx, PY, 64, 64, e * 64, PY, 64, 64); }
+  if (o.mirror) { // part atlases face west in battle; enemies need to face east
+    const by = G.man.bt.y, t = document.createElement('canvas'); t.width = 128; t.height = 128; const tx = t.getContext('2d');
+    for (let y = by; y + 128 <= PY; y += 128) for (let cx = 0; cx + 128 <= W; cx += 128) {
+      tx.clearRect(0, 0, 128, 128); tx.drawImage(out, cx, y, 128, 128, 0, 0, 128, 128);
+      x.clearRect(cx, y, 128, 128); x.save(); x.translate(cx + 128, y); x.scale(-1, 1); x.drawImage(t, 0, 0); x.restore();
+    }
+  }
+  if (o.burn) burnMask(x, W, PY, o.burn);
+  return out;
+}
+async function applyCast() {
+  if (!G.S || !G.S.cast) return;
+  const L = castLists(G.S.cast);
+  G.img.ilya = castAtlas(L.ilya, {}); await wait(5);
+  G.img.kairo_kid = castAtlas(L.kairo_kid, { mirror: 1 }); await wait(5);
+  G.img.kairo_kidb = castAtlas(L.kairo_kidb, { burn: { ex: 27, ey: 34, k: .85 } }); await wait(5);
+  G.img.kairo_b = castAtlas(L.kairo_b, { mirror: 1, burn: { ex: 27, ey: 29 } });
 }
 function playerImg() { return G.S.hood ? G.A.pHood : G.A.pHair; }
 
@@ -329,7 +401,7 @@ function newState(look, name) {
   return {
     v: 2, kid: true, name: name || 'Ren', look, lvl: 1, xp: 0, gold: 20, hood: false, sus: 0, seen: {},
     stats: { hp: 52, maxHp: 52, mp: 16, maxMp: 16, atk: 11, def: 4, spd: 10 },
-    items: { tonic: 3, ether: 1 }, arts: ['fang', 'ward'],
+    items: { tonic: 3, ether: 1 }, arts: ['fang', 'ward'], cast: defaultCast(),
     party: [], allies: {},
     map: 'thornvale', x: 9, y: 14, dir: 'down',
     quest: '', side: '', f: {}, steps: 0, chapter: 0, playtime: 0

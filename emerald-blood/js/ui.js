@@ -42,37 +42,92 @@ const UI = {
   creator() {
     return new Promise(resolve => {
       $('#title').classList.add('hide'); $('#creator').classList.remove('hide'); G.mode = 'creator';
-      const look = defaultLook(); let name = 'Ren';
-      G.S = newState(look, name);
+      const look = defaultLook(); let name = 'Ren', tab = 'me';
+      G.S = newState(look, name); const cast = G.S.cast;
       const box = $('#crOpts');
       const swatch = (mat, key) => { const p = G.man.pal[mat][key]; return p ? p[Math.min(3, p.length - 1)] : '#888'; };
-      let prev = null, dirI = 0, animT = 0, raf = 0;
-      const rebuild = () => { prev = composeLook(look, false, [0, 0, 576, 512]); playerPortrait($('#crPort'), 'happy'); };
+      const KCOL = { black: '#2a2a2e', blue: '#3a5fc0', brown: '#7a4e2c', gray: '#8a8f96', green: '#3f8f4a', lavender: '#b39ad8', lightblue: '#8ec8ee', pink: '#f29ac0', red: '#c43c3c', white: '#eeeeee', darkblue: '#24346e', maroon: '#7a2436' };
+      let prev = null, prev2 = null, dirI = 0, raf = 0;
+      const region = [0, 0, 576, 512];
+      const listPreview = (list, cell0) => {
+        const out = document.createElement('canvas'); out.width = 576; out.height = 512; const o = out.getContext('2d');
+        for (const [pn, col] of list) { const img = G.img['part_' + pn], meta = G.man.parts[pn]; if (!img || !meta) continue;
+          const c = document.createElement('canvas'); c.width = 576; c.height = 512; c.getContext('2d').drawImage(img, 0, 0, 576, 512, 0, 0, 576, 512); o.drawImage(recolor(c, meta.mat, meta.base, col), 0, 0); }
+        return out;
+      };
+      const listPortrait = (cv, list, expr, kid) => {
+        const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, 32, 36); const ei = Math.max(0, EXPRS.indexOf(expr)), oy = kid ? 15 : 4;
+        for (const [pn, col] of list) { const img = G.img['part_' + pn], meta = G.man.parts[pn]; if (!img || !meta) continue;
+          const t = document.createElement('canvas'); t.width = 32; t.height = 36; t.getContext('2d').drawImage(img, (pn.startsWith('face_') ? ei * 64 : 0) + 16, img.height - 64 + oy, 32, 36, 0, 0, 32, 36);
+          x.drawImage(recolor(t, meta.mat, meta.base, col), 0, 0); }
+        glowEyes(x, 32, 36);
+      };
+      const rebuild = () => {
+        if (tab === 'me') { prev = composeLook(look, false, region); prev2 = null; playerPortrait($('#crPort'), 'happy'); }
+        else if (tab === 'ilya') { const L = castLists(cast).ilya; prev = listPreview(L); prev2 = null; listPortrait($('#crPort'), L, 'happy', true); }
+        else { const L = castLists(cast); prev = listPreview(L.kairo_kid); prev2 = listPreview(L.kairo_b.filter(([p]) => !p.startsWith('katana'))); listPortrait($('#crPort'), L.kairo_b.filter(([p]) => !p.startsWith('katana')), 'neutral', false);
+          const px = $('#crPort').getContext('2d'), d = px.getImageData(0, 0, 32, 36), q = d.data;
+          for (const [bx, by] of burnPts(27, 29, 1)) { const X = bx - 16, Y = by - 4; if (X < 0 || Y < 0 || X >= 32 || Y >= 36) continue; const i = (Y * 32 + X) * 4, r = q[i], g = q[i + 1], b = q[i + 2];
+            if (q[i + 3] && r > b + 18 && r >= g && !(g > 150 && g > r + 40)) { q[i] = r * .45 + 124; q[i + 1] = g * .45 + 44; q[i + 2] = b * .45 + 45; } }
+          px.putImageData(d, 0, 0); }
+        $('#crNote').innerHTML = tab === 'me' ? "Every Drag's eyes glow green.<br>That part you can't change.<br><span style='color:#ffd88a'>Your story begins when you are ten.</span>"
+          : tab === 'ilya' ? "Ilya. Your little sister.<br>Turning six. Unstoppable.<br><span style='color:#ffd88a'>She'll never take off her ribbon.</span>"
+          : "Kairo. Your best friend.<br>Your rival. Your brother.<br><span style='color:#ffd88a'>Shown as a kid, then seven years later — scarred.</span>";
+      };
       const draw = t => {
         if ($('#creator').classList.contains('hide')) return;
         const c = $('#crCv').getContext('2d'); c.imageSmoothingEnabled = false; c.clearRect(0, 0, 64, 64);
-        if (prev) { const d = ['down', 'left', 'up', 'right'][Math.floor(t / 2400) % 4]; drawOW(c, prev, 'walk', d, 1 + Math.floor(t / 110) % 8, 32, 60); }
+        const img = prev2 && Math.floor(t / 4800) % 2 ? prev2 : prev;
+        if (img) { const d = ['down', 'left', 'up', 'right'][Math.floor(t / 2400) % 4]; drawOW(c, img, 'walk', d, 1 + Math.floor(t / 110) % 8, 32, 60); }
         raf = requestAnimationFrame(draw);
       };
       const render = () => {
-        const row = (label, key, opts, names) => `<div class="opt"><label>${label}</label><button class="arr" data-k="${key}" data-d="-1">◀</button><div class="val">${esc((names || {})[look[key]] || look[key].replace(/_/g, ' '))}</div><button class="arr" data-k="${key}" data-d="1">▶</button></div>`;
-        const sw = (label, key, mat, opts) => `<div class="opt"><label>${label}</label><div class="sw">${opts.map(o => `<button data-k="${key}" data-v="${o}" class="${look[key] === o ? 'on' : ''}" style="background:${swatch(mat, o)}" title="${o}"></button>`).join('')}</div></div>`;
-        box.innerHTML = `<h2>WHO ARE YOU?</h2>
+        const obj = tab === 'me' ? look : tab === 'ilya' ? cast.ilya : cast.kairo;
+        const row = (label, key, opts, names) => `<div class="opt"><label>${label}</label><button class="arr" data-k="${key}" data-o="${opts}" data-d="-1">◀</button><div class="val">${esc((names || {})[obj[key]] || String(obj[key]).replace(/_/g, ' '))}</div><button class="arr" data-k="${key}" data-o="${opts}" data-d="1">▶</button></div>`;
+        const sw = (label, key, mat, opts) => `<div class="opt"><label>${label}</label><div class="sw">${opts.map(o => `<button data-k="${key}" data-v="${o}" class="${obj[key] === o ? 'on' : ''}" style="background:${mat ? swatch(mat, o) : KCOL[o]}" title="${o}"></button>`).join('')}</div></div>`;
+        const tabs = `<div class="crTabs">${[['me', 'You'], ['ilya', 'Ilya'], ['kairo', 'Kairo']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+        const ILC = ['pink', 'rose', 'black', 'raven', 'dark_brown', 'chestnut', 'ginger', 'blonde', 'platinum', 'white', 'red', 'purple', 'navy', 'green'];
+        let body = '';
+        if (tab === 'me') body = `<h2>WHO ARE YOU?</h2>
           <div class="opt"><label>Name</label><input id="crName" maxlength="12" value="${esc(name)}" autocomplete="off"></div>
-          ${row('Body', 'sex', LOOK_OPTS.sex, { male: 'Brother to Ilya', female: 'Sister to Ilya' })}
+          ${row('Body', 'sex', 'sex', { male: 'Brother to Ilya', female: 'Sister to Ilya' })}
           ${sw('Skin', 'skin', 'body', LOOK_OPTS.skin)}
-          ${row('Hair', 'hair', LOOK_OPTS.hair, HAIR_NAMES)}
+          ${row('Hair', 'hair', 'hair', HAIR_NAMES)}
           ${sw('Hair color', 'hairCol', 'hair', LOOK_OPTS.hairCol)}
-          ${look.sex === 'male' ? row('Facial hair', 'beard', LOOK_OPTS.beard) : ''}
+          ${look.sex === 'male' ? row('Facial hair', 'beard', 'beard') : ''}
           ${sw('Gi', 'top', 'cloth', LOOK_OPTS.cloth)}
           ${sw('Pants', 'pants', 'cloth', LOOK_OPTS.cloth)}
           ${sw('Sash', 'obi', 'cloth', LOOK_OPTS.cloth)}
-          ${sw('Hood', 'hood', 'cloth', LOOK_OPTS.cloth)}
-          <div class="btnrow"><button class="btn" id="crRand">🎲 Random</button><button class="btn pri" id="crGo" style="flex:1">Begin ▶</button></div>`;
-        $('#crName').addEventListener('input', e => { name = e.target.value; G.S.name = name || 'Ren'; });
-        box.querySelectorAll('.arr').forEach(b => bindTap(b, () => { const k = b.dataset.k, L = LOOK_OPTS[k === 'sex' ? 'sex' : k === 'hair' ? 'hair' : 'beard'], i = L.indexOf(look[k]); look[k] = L[(i + (+b.dataset.d) + L.length) % L.length]; if (k === 'sex' && look.sex === 'female') look.beard = 'none'; sfx('blip'); render(); rebuild(); }));
-        box.querySelectorAll('.sw button').forEach(b => bindTap(b, () => { look[b.dataset.k] = b.dataset.v; sfx('blip'); render(); rebuild(); }));
-        bindTap($('#crRand'), () => { look.sex = pick(LOOK_OPTS.sex); look.skin = pick(LOOK_OPTS.skin); look.hair = pick(LOOK_OPTS.hair); look.hairCol = pick(LOOK_OPTS.hairCol.slice(0, 10)); look.beard = look.sex === 'male' ? pick(LOOK_OPTS.beard) : 'none'; ['top', 'pants', 'obi', 'hood'].forEach(k => look[k] = pick(LOOK_OPTS.cloth)); sfx('blip'); render(); rebuild(); });
+          ${sw('Hood', 'hood', 'cloth', LOOK_OPTS.cloth)}`;
+        else if (tab === 'ilya') body = `<h2>YOUR SISTER — ILYA</h2>
+          ${sw('Skin', 'skin', 'body', LOOK_OPTS.skin)}
+          ${row('Hair', 'hair', 'ilyaHair', ILYA_HAIR_NAMES)}
+          ${sw('Hair color', 'hairCol', 'hair', ILC)}
+          ${sw('Shirt', 'top', null, G.man.kid.shirts)}
+          ${row('Wears', 'skirt', 'skirt', { true: 'Skirt', false: 'Pants' })}
+          ${sw(cast.ilya.skirt ? 'Skirt' : 'Pants', 'bottom', null, cast.ilya.skirt ? G.man.kid.skirts : G.man.kid.pants)}`;
+        else body = `<h2>YOUR RIVAL — KAIRO</h2>
+          ${sw('Skin', 'skin', 'body', LOOK_OPTS.skin)}
+          ${row('Hair', 'hair', 'kairoHair', HAIR_NAMES)}
+          ${sw('Hair color', 'hairCol', 'hair', LOOK_OPTS.hairCol)}
+          ${sw('Gi', 'top', 'cloth', LOOK_OPTS.cloth)}
+          ${sw('Pants', 'pants', 'cloth', LOOK_OPTS.cloth)}
+          ${sw('Sash', 'obi', 'cloth', LOOK_OPTS.cloth)}
+          ${sw('Cape (later)', 'cape', 'cloth', LOOK_OPTS.cloth)}`;
+        box.innerHTML = tabs + body + `<div class="btnrow"><button class="btn" id="crRand">🎲 Random</button><button class="btn pri" id="crGo" style="flex:1">Begin ▶</button></div>`;
+        const ni = $('#crName'); if (ni) ni.addEventListener('input', e => { name = e.target.value; G.S.name = name || 'Ren'; });
+        box.querySelectorAll('.crTabs button').forEach(b => bindTap(b, () => { tab = b.dataset.tab; sfx('blip'); render(); rebuild(); }));
+        const OPTS = { sex: LOOK_OPTS.sex, hair: LOOK_OPTS.hair, beard: LOOK_OPTS.beard, ilyaHair: ILYA_HAIR, kairoHair: KAIRO_HAIR, skirt: [true, false] };
+        box.querySelectorAll('.arr').forEach(b => bindTap(b, () => { const k = b.dataset.k, L = OPTS[b.dataset.o], i = L.indexOf(obj[k]); obj[k] = L[(i + (+b.dataset.d) + L.length) % L.length];
+          if (k === 'sex' && look.sex === 'female') look.beard = 'none';
+          if (k === 'skirt') { const L2 = obj.skirt ? G.man.kid.skirts : G.man.kid.pants; if (!L2.includes(obj.bottom)) obj.bottom = L2[0]; }
+          sfx('blip'); render(); rebuild(); }));
+        box.querySelectorAll('.sw button').forEach(b => bindTap(b, () => { obj[b.dataset.k] = b.dataset.v; sfx('blip'); render(); rebuild(); }));
+        bindTap($('#crRand'), () => {
+          if (tab === 'me') { look.sex = pick(LOOK_OPTS.sex); look.skin = pick(LOOK_OPTS.skin); look.hair = pick(LOOK_OPTS.hair); look.hairCol = pick(LOOK_OPTS.hairCol.slice(0, 10)); look.beard = look.sex === 'male' ? pick(LOOK_OPTS.beard) : 'none'; ['top', 'pants', 'obi', 'hood'].forEach(k => look[k] = pick(LOOK_OPTS.cloth)); }
+          else if (tab === 'ilya') { const I = cast.ilya; I.skin = pick(LOOK_OPTS.skin); I.hair = pick(ILYA_HAIR); I.hairCol = pick(ILC); I.top = pick(G.man.kid.shirts); I.skirt = Math.random() < .6; I.bottom = pick(I.skirt ? G.man.kid.skirts : G.man.kid.pants); }
+          else { const K = cast.kairo; K.skin = pick(LOOK_OPTS.skin); K.hair = pick(KAIRO_HAIR); K.hairCol = pick(LOOK_OPTS.hairCol.slice(0, 10)); ['top', 'pants', 'obi', 'cape'].forEach(k => K[k] = pick(LOOK_OPTS.cloth)); }
+          sfx('blip'); render(); rebuild(); });
         bindTap($('#crGo'), () => { cancelAnimationFrame(raf); G.S.name = (name || 'Ren').trim().slice(0, 12) || 'Ren'; $('#creator').classList.add('hide'); sfx('start'); resolve(); });
       };
       render(); rebuild(); raf = requestAnimationFrame(draw);
@@ -83,7 +138,7 @@ const UI = {
     audioUnlock();
     await this.creator();
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Forging your Drag…'; $('#loadBar').style.width = '60%';
-    await wait(30); await buildPlayerSprites(); $('#loading').classList.add('hide');
+    await wait(30); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     await this.intro([
       'Four hundred years ago, the demon dragon Fratenaptor nearly ended the world. Even the dragons curse his name.',
       'The people say the Drags worshipped him. That his fire lives in their blood. That you can always know a Drag by their eyes — green, and glowing.',
@@ -98,7 +153,7 @@ const UI = {
     const s = loadSave(); if (!s) return; audioUnlock();
     G.S = s; $('#title').classList.add('hide');
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Waking up…';
-    await wait(30); await buildPlayerSprites(); $('#loading').classList.add('hide');
+    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     G.mode = 'world'; await World.load(s.map, s.x, s.y, s.dir); this.controls(true); this.hud();
     await fadeIn(500); banner(SCENES[s.map].title || '', SCENES[s.map].subtitle || '');
   },
@@ -166,7 +221,7 @@ const UI = {
         `<div class="stat"><h3>How to fight</h3><p>On your attacks, tap when the gold ring closes for a <b>PERFECT</b> hit (×1.5, can't be dodged or parried).</p><p>On enemy attacks: <b>DODGE</b> (wide window) or <b>PARRY</b> (tight window). Perfect timing earns MP. Parry <b>every</b> hit of an attack to COUNTER.</p><p>Red <b>!!</b> attacks can't be parried — dodge them. Fill an enemy's yellow bar to <b>BREAK</b> them.</p></div>`;
     } else if (t === 'items') {
       body = `<div class="grid2"><div class="stat"><h3>Tonic ×${S.items.tonic}</h3><p>Restores 45% HP.</p><button class="btn" id="useT" ${S.items.tonic && s.hp < s.maxHp ? '' : 'disabled'}>Use</button></div><div class="stat"><h3>Ether ×${S.items.ether}</h3><p>Restores 12 MP.</p><button class="btn" id="useE" ${S.items.ether && s.mp < s.maxMp ? '' : 'disabled'}>Use</button></div>
-        ${S.f.shard ? '<div class="stat"><h3>Drag Shard</h3><p>Green stone from Fratenaptor\'s tomb. It drinks mana from the air. +1 MP every turn in battle.</p></div>' : ''}<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
+        ${S.f.shard ? '<div class="stat"><h3>Drag Shard</h3><p>Green stone from Fratenaptor\'s tomb. It drinks mana from the air. +1 MP every turn in battle.</p></div>' : ''}<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.lioraPin ? '<div class="stat"><h3 style="color:#ff9ccc">Liora\'s hairpin</h3><p>A silver spear the length of your finger, tipped with a chip of green stone. Her mother\'s. You promised to give it back.</p></div>' : ''}${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
     } else if (t === 'quests') {
       body = `<div class="stat"><h3>Main</h3><p>${esc(S.quest || '—')}</p></div>` + (S.side ? `<div class="stat" style="margin-top:6px"><h3>Side</h3><p>${esc(S.side)}</p></div>` : '') +
         `<div class="stat" style="margin-top:6px"><h3>Suspicion ${Math.floor(S.sus)}/5</h3><p>How sure the Hollow is that a Drag walks among them. Every new person who sees your eyes adds to it. High suspicion closes doors, raises prices — and brings hunters.</p></div>`;

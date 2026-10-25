@@ -27,7 +27,7 @@ const Dlg = {
       this.partner = who;
       const img = G.img[C.sprite || who];
       if (img) portraitTo(R.querySelector('canvas'), img, expr, C.kid || (C.sprite || '').startsWith('kid') || C.sprite === 'pip' || C.sprite === 'ilya'); R.querySelector('.tag').textContent = C.name;
-      R.classList.remove('dim', 'off');
+      R.classList.remove('dim', 'off'); R.classList.toggle('shine', /^liora/.test(C.sprite || ''));
       playerPortrait(L.querySelector('canvas'), this.lastMe); L.querySelector('.tag').textContent = G.S.name;
       L.classList.remove('off'); L.classList.add('dim');
       if (C.noMe) L.classList.add('off');
