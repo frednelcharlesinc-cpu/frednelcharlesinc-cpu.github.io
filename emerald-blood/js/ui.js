@@ -136,7 +136,8 @@ const UI = {
   async newGame() {
     if (loadSave() && !confirm('Start a new game? Your current save will be replaced.')) return;
     audioUnlock();
-    await this.creator();
+    // character creation is switched off for now: Ren, Ilya and Kairo use the looks from the portrait art
+    $('#title').classList.add('hide'); G.S = newState(defaultLook(), 'Ren'); sfx('start');
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Forging your Drag…'; $('#loadBar').style.width = '60%';
     await wait(30); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     $('#fade').classList.add('on');

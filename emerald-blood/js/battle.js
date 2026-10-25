@@ -360,10 +360,20 @@ const Battle = {
     if (t.side === 'e' && !t.ko) { t.brk += (grade === 'perfect' ? 12 : grade === 'good' ? 6 : 2) + (opts.brk || 0); this.checkBreak(t); }
     return 'hit';
   },
+  // the painted face pops in at the edge of the screen: hurt, power, shout
+  faceOf(a) { if (a.isMe) return 'me'; if (a.side === 'p') return a.id; const b = (a.key || '').split('_')[0]; return Art.port[ART_ID[b] || b] ? b : null; },
+  facePop(a, exprs) {
+    const who = this.faceOf(a); if (!who) return; const e = exprs.find(x => artHas(who, x)); if (!e) return;
+    const now = performance.now(); if (now - (this.lastPop || 0) < 1300) return; this.lastPop = now;
+    let el = $('#facePop'); if (!el) { el = document.createElement('div'); el.id = 'facePop'; el.innerHTML = '<canvas></canvas>'; document.body.appendChild(el); }
+    const left = a.side === 'p'; drawPortrait(el.firstChild, who, e, left ? 1 : -1);
+    el.className = left ? 'l' : 'r'; void el.offsetWidth; el.classList.add('on');
+    clearTimeout(this.popT); this.popT = setTimeout(() => el.classList.remove('on'), 1050);
+  },
   damage(t, dmg, big) {
     const M = t.E && t.E.morph;
     t.hp = Math.max(M && !t.exhausted ? 1 : 0, t.hp - dmg); if (M && !t.morphed && t.hp < t.maxHp * M.at) t.pendMorph = 1;
-    this.text(t, String(dmg), t.side === 'e' ? '#fff' : '#ff8080', 0, big);
+    this.text(t, String(dmg), t.side === 'e' ? '#fff' : '#ff8080', 0, big); if (t.side === 'p' && t.hp > 0 && dmg >= t.maxHp * .18) this.facePop(t, ['hurt']);
     sfx(big ? 'crit' : 'hit'); this.B.shake = big ? 9 : 5; t.hurtT = 220; this.spark(t.x, t.y - 30, big ? '#ffe36a' : '#fff', big ? 16 : 9);
     if (t.hp <= 0 && !t.ko) { t.ko = true; t.anim = 'hurt'; t.once = true; t.frame = 0; t.fn = 6; t.fms = 90; t.at = 0; t.loopAnim = 'hurt'; this.text(t, t.side === 'e' ? 'DEFEATED' : 'DOWN', '#ff6b6b', -20); }
     this.hud();
@@ -384,6 +394,7 @@ const Battle = {
   async useArt(a, k) {
     const B = this.B, A = ARTS[k], cost = this.artCost(a, k), boost = (a.isMe ? Stones.artBoost(k) : 1) * Skills.artMul(a.isMe ? 'me' : a.id, k);
     this.closeMenu(); a.mp -= cost; a.strain += this.artStrain(a, k);
+    if (!['sight', 'cast'].includes(A.type)) this.facePop(a, A.sword ? ['focused', 'power', 'shout'] : ['power', 'shout']);
     if (a.strain >= a.strainMax * .9 && !a.fever) { a.fever = 2; B.flash = .4; this.text(a, 'BLOOD FEVER!', '#ff5a3a', -60, true); sfx('alarm'); }
     if (a.isMe && B.sb.verdict) { const d = Math.max(1, Math.round(a.maxHp * .04)); a.hp = Math.max(1, a.hp - d); this.text(a, 'VERDICT -' + d, '#fff3b0', -70); }
     this.hud();
@@ -561,7 +572,7 @@ const Battle = {
   },
   async enemyStrike(e, t, sk, isCounter) {
     const B = this.B;
-    const el = elOf(sk); if (!isCounter) await this.msg(`${e.name}: ${sk.name}${el ? '  [' + ELEM[el][0] + ']' : ''}`, 750);
+    const el = elOf(sk); if (!isCounter) this.facePop(e, ['shout', 'power', 'anger']); if (!isCounter) await this.msg(`${e.name}: ${sk.name}${el ? '  [' + ELEM[el][0] + ']' : ''}`, 750);
     if (sk.hits.some(h => h.unp)) { this.text(e, '!! UNPARRYABLE', '#ff5050', -50, true); sfx('alarm'); await wait(450); }
     const ranged = sk.hits[0].anim === 'spellcast';
     if (B.orb && t.side === 'p' && (ranged || el) && !isCounter) {
