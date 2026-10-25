@@ -8,7 +8,9 @@ Object.assign(CHAR, {
   kess: { name: 'Kess', sprite: 'kess' }, kessE: { name: 'Kess', sprite: 'kess_eyes' }, voss: { name: 'Captain Voss', sprite: 'voss' }, guard: { name: 'Guard', sprite: 'guard' },
   rook: { name: 'Rook', sprite: 'rook' }, bandit: { name: 'Bandit', sprite: 'bandit' }, sable: { name: 'Sable', sprite: 'hunter' }, cassel: { name: 'Brother Cassel', sprite: 'cassel' },
   hoshi: { name: 'Old Hoshi', sprite: 'hoshi' }, bram: { name: 'Bram', sprite: 'innkeep' },
-  kairo: { name: 'Kairo', sprite: 'kairo' }, kairoB: { name: 'Kairo', sprite: 'kairo_b' }, dread: { name: 'Dread', sprite: 'dread' }, rebel: { name: 'Green Eclipse', sprite: 'rebel' }
+  kairo: { name: 'Kairo', sprite: 'kairo_kid', kid: 1 }, kairoKB: { name: 'Kairo', sprite: 'kairo_kidb', kid: 1 },
+  tamsinK: { name: 'Tamsin', sprite: 'tamsin_kid', kid: 1 }, boK: { name: 'Bo', sprite: 'bo_kid', kid: 1 }, larkK: { name: 'Lark', sprite: 'lark_kid', kid: 1 }, nixK: { name: 'Nix', sprite: 'nix_kid', kid: 1 },
+  tamsin: { name: 'Tamsin', sprite: 'tamsin' }, dace: { name: 'Dace', sprite: 'ge_dace' }, sefa: { name: 'Sefa', sprite: 'ge_sefa' }, wren: { name: 'Wren', sprite: 'ge_wren' }, corran: { name: 'Corran', sprite: 'ge_corran' }, bo: { name: 'Bo', sprite: 'bo' }, lark: { name: 'Lark', sprite: 'lark' }, kairoB: { name: 'Kairo', sprite: 'kairo_b' }, dread: { name: 'Dread', sprite: 'dread' }, rebel: { name: 'Green Eclipse', sprite: 'rebel' }
 });
 const F = () => G.S.f;
 const Story = {
@@ -58,9 +60,20 @@ const ALLY_TALK = {
 
 /* ---------------- THORNVALE (prologue) ---------------- */
 const HIDE = [[30, 22, 'tallgrass'], [30, 11, 'barrels'], [10, 26, 'pond']];
+const HIDE_HINT = ['Find Ilya! You hear giggling from the tall grass east of the square, by the stream.', "Find Ilya! Something just knocked over a bucket near Oren's barrels, north-east.", 'Last one! A splash and a "shhh!" from the pond reeds in the south-west.'];
+const VILLAGER_LINES = () => F().dusk ? ['Happy birthday, Ilya!', 'Best festival in years.', 'Jun, more sparks!', 'Pass the honey cakes.', 'Look at Kairo dance, ha!'] : ['Ember Festival tonight!', 'Happy birthday to Ilya!', 'The mountains look close today.', 'Has anyone seen my good knife?', "Asha's been jumpy all week.", 'Lovely morning.', 'Mind the stream, little ones!'];
+async function talkVillager(e) {
+  CHAR[e.id] = { name: e.kid ? 'Village kid' : 'Villager', sprite: e.sprite, kid: e.kid };
+  const L = e.kid ? ["Ilya's hiding SO good this year.", "When I grow up my eyes are gonna be the greenest.", "Kairo says he can beat a grown-up. I believe him."]
+    : F().dusk ? ['"Sit, child, sit. Have a honey cake before Jun eats them all."', '"Your father would have loved tonight."', '"Mind the sparks. Jun gets carried away."']
+    : ['"Morning, little one. Big day for your sister."', '"The Elder says no one climbs the ridge today. Or any day."', '"Oren\'s been hammering since dawn. Something special for someone, I think."', '"Stay close to the village, hear? Strangers on the far road."'];
+  await say(e.id, null, pick(L));
+}
 SCENES = {};
 SCENES.thornvale = {
   title: 'Thornvale', subtitle: 'A hidden Drag village', safe: true,
+  get crowd() { const f = F(); if (f.raid) return null; return f.dusk ? { count: 12, pool: () => G.man.dfolk, areas: [[13, 16, 21, 20], [12, 15, 24, 16]], talk: talkVillager, lines: VILLAGER_LINES, witness: false }
+    : { count: 13, pool: () => G.man.dfolk, areas: [[5, 15, 31, 16], [13, 16, 21, 20], [24, 16, 27, 23], [2, 17, 9, 21], [16, 11, 22, 14]], talk: talkVillager, lines: VILLAGER_LINES, witness: false }; },
   music: () => F().raid ? (F().after ? 'sad' : 'night') : 'village',
   get bd() { return F().raid ? 'dusk' : 'field'; },
   async setup(W) {
@@ -75,29 +88,42 @@ SCENES.thornvale = {
   npcs() {
     const f = F(); const L = [];
     if (!f.raid) {
-      L.push({ id: 'ilya', x: f.hs === undefined ? 10 : HIDE[Math.min(f.hs || 0, 2)][0], y: f.hs === undefined ? 14 : HIDE[Math.min(f.hs || 0, 2)][1], dir: 'left', talk: talkIlya, hidden: f.hs !== undefined && f.hs < 3 && f.hs >= 0 && !f.found3, ghostTalk: true,
+      const hiding = f.hs !== undefined && f.hs < 3 && f.hs >= 0 && !f.found3;
+      L.push({ id: 'ilya', x: f.hs === undefined ? 10 : HIDE[Math.min(f.hs || 0, 2)][0], y: f.hs === undefined ? 14 : HIDE[Math.min(f.hs || 0, 2)][1], dir: 'left', talk: talkIlya, hidden: hiding, peek: true, ai: hiding ? 'giggle' : null,
         show: () => true });
+      if (!f.dusk) {
+        L.push({ id: 'tamsinK', sprite: 'tamsin_kid', x: 21, y: 15, dir: 'down', talk: talkKids, ai: 'wander', area: [18, 14, 26, 16] });
+        L.push({ id: 'boK', sprite: 'bo_kid', x: 12, y: 18, dir: 'down', talk: talkKids, ai: 'wander', area: [11, 17, 13, 21] });
+        L.push({ id: 'larkK', sprite: 'lark_kid', x: 6, y: 16, dir: 'down', talk: talkKids, ai: 'wander', area: [3, 15, 8, 17] });
+        L.push({ id: 'nixK', sprite: 'nix_kid', x: 31, y: 13, dir: 'down', talk: talkKids, ai: 'turn' });
+      } else {
+        L.push({ id: 'tamsinK', sprite: 'tamsin_kid', x: 14, y: 18, dir: 'right', talk: talkKids }); L.push({ id: 'boK', sprite: 'bo_kid', x: 20, y: 18, dir: 'left', talk: talkKids });
+        L.push({ id: 'larkK', sprite: 'lark_kid', x: 14, y: 17, dir: 'right', talk: talkKids }); L.push({ id: 'nixK', sprite: 'nix_kid', x: 20, y: 17, dir: 'left', talk: talkKids });
+      }
       L.push({ id: 'nana', x: 17, y: 12, dir: 'down', talk: talkNana, ai: 'turn', turns: ['down', 'left', 'right'] });
       L.push({ id: 'oren', x: 26, y: 14, dir: 'left', talk: talkOren, ai: 'bark', barks: () => ['*clang* *clang*', 'Hah! Good steel.', 'Ember Festival tonight!'] });
       L.push({ id: 'mei', x: 13, y: 22, dir: 'down', talk: talkMei, ai: 'turn' });
       L.push({ id: 'jun', x: 29, y: 18, dir: 'down', talk: talkJun, ai: 'wander', area: [27, 17, 32, 19] });
       L.push({ id: 'asha', x: 37, y: 15, dir: 'right', talk: talkAsha, ai: 'turn', turns: ['right', 'up', 'down'] });
       if (f.dusk) {
-        L.push({ id: 'kairo', x: 18, y: 17, dir: 'down', talk: async () => { await say('kairo', 'happy', "If Ilya asks, I'm a GREAT dancer. Back me up."); } });
+        L.push({ id: 'kairo', sprite: 'kairo_kid', x: 18, y: 17, dir: 'down', talk: async () => { await say('kairo', 'happy', "If Ilya asks, I'm a GREAT dancer. Back me up."); } });
         L.forEach(n => { if (n.id === 'ilya') { n.x = 16; n.y = 17; n.hidden = false; } if (n.id === 'nana') { n.x = 15; n.y = 17; } if (n.id === 'oren') { n.x = 19; n.y = 17; n.ai = null; } if (n.id === 'mei') { n.x = 15; n.y = 19; } if (n.id === 'jun') { n.x = 19; n.y = 19; n.ai = null; } });
       }
     } else if (f.after) {
       if (!F().nanaDead) L.push({ id: 'nana', x: 17, y: 12, dir: 'down', talk: talkNanaAfter });
       if (!F().hoodGiven || !F().greenEclipse) {
         L.push({ id: 'mei', x: 14, y: 13, dir: 'right', talk: async () => { await say('mei', 'sad', F().nanaDead ? "We'll bury her by the old wall, where she could see the mountains. Then we go with Kairo. Go get your sister, {name}." : "Nana's asking for you. Go to her."); } });
-        L.push({ id: 'jun', x: 20, y: 14, dir: 'left', talk: async () => { await say('jun', 'anger', "Seven of us gone in chains. And Ilya. And Oren… I saw him fall."); } });
+        L.push({ id: 'jun', x: 20, y: 14, dir: 'left', talk: async () => { await say('jun', 'anger', "Seven of us gone in chains. Ilya. Little Nix. And Oren… I saw him fall."); } });
+        L.push({ id: 'tamsinK', sprite: 'tamsin_kid', x: 15, y: 14, dir: 'up', talk: async () => say('tamsinK', null, "Kairo went back in for us. Three times. I'm never leaving his side. Never.") });
+        L.push({ id: 'boK', sprite: 'bo_kid', x: 19, y: 15, dir: 'left', talk: async () => say('boK', null, "…I couldn't find my mama. Lark's holding my hand so I don't have to look.") });
+        L.push({ id: 'larkK', sprite: 'lark_kid', x: 18, y: 15, dir: 'left', talk: async () => say('larkK', null, "I'm not crying. Bo's crying. I'm just… holding his hand. That's all.") });
       }
     }
     return L;
   },
   exits: [
     { x: 43, y: 14, y2: 16, to: 'ashford', tx: 29, ty: 39, dir: 'up', msg: "Ilya's still waiting for you to find her.", when: () => !F().after },
-    { x: 43, y: 14, y2: 16, to: 'ashford', tx: 29, ty: 39, dir: 'up', check: async () => { UI.controls(false); await narr("You follow the wagon ruts east, out of the only home you've ever known."); Dlg.close(); await Story.prologueEnd(); return true; }, when: () => F().after }
+    { x: 43, y: 14, y2: 16, to: 'ashford', tx: 29, ty: 39, dir: 'up', check: async () => { UI.controls(false); await narr("Mei takes your hand. You cross the bridge, out of the only home you've ever known, and you don't look back. Not yet."); Dlg.close(); await Story.prologueEnd(); return true; }, when: () => F().after }
   ],
   tiles: {
     '9,12': async () => narr(F().raid ? 'Your home. The roof is gone. The door still stands, somehow.' : 'Home. Ilya has scratched a little dragon into the doorframe.'),
@@ -121,7 +147,8 @@ async function prologueWake() {
   else await say('ilya', null, "Five minutes is a hundred years in dragon time. Okay! Count to ten!");
   await narr('You cover your eyes. Their green glow leaks between your fingers anyway.');
   await me('closed', "One… two… three…");
-  il.hidden = true; F().hs = 0; Story.quest('Find Ilya — she is hiding somewhere in Thornvale (3 times).');
+  il.hidden = true; il.peek = true; il.ai = 'giggle'; F().hs = 0; Story.quest(HIDE_HINT[0]);
+  toast('Tip: when you get close, Ilya peeks out and giggles. Face her and tap <b>A</b>.', 4500);
   toast('Drag the left side of the screen to walk. Tap <b>A</b> to talk and search.', 4500);
   await World.walk(il, [[12, 14], [12, 15]], 120); il.x = HIDE[0][0]; il.y = HIDE[0][1]; il.px = il.x * 32 + 16; il.py = il.y * 32 + 26;
 }
@@ -136,10 +163,10 @@ async function talkIlya(e) {
     await say('ilya', null, lines[f.hs][0]); await say('ilya', null, lines[f.hs][1]);
     f.hs++;
     if (f.hs < 3) {
-      await say('ilya', null, "Again! Count to ten! No peeking!"); e.hidden = true;
+      await say('ilya', null, "Again! Count to ten! No peeking!"); e.hidden = true; e.ai = 'giggle';
       const [x, y] = HIDE[f.hs]; e.x = x; e.y = y; e.px = x * 32 + 16; e.py = y * 32 + 26;
-      Story.quest(`Find Ilya — ${3 - f.hs} more time${3 - f.hs > 1 ? 's' : ''}.`);
-    } else { f.found3 = true; Story.quest("Visit Nana's house with Ilya (north of the road)."); e.ai = 'follow'; }
+      Story.quest(HIDE_HINT[f.hs]);
+    } else { f.found3 = true; Story.quest("Visit Nana's house with Ilya (north of the road)."); e.ai = null; }
     return;
   }
   if (f.dusk) { await say('ilya', null, "Come sit by the fire! Jun says he'll make the sparks dance!"); return; }
@@ -155,7 +182,7 @@ async function talkNana() {
     await say('nana', 'happy', "Dusk is coming. Go to the fire, child."); return;
   }
   f.ribbon = true;
-  await say('nana', 'happy', "There's my birthday girl. Eight years old. Eight! When did that happen?");
+  await say('nana', 'happy', "There's my birthday girl. Six years old. Six! When did that happen?");
   await say('ilya', null, "Nana! {Sib} found me THREE times. I let {them}.");
   await say('nana', 'happy', "Of course you did. Here — I dyed this myself. Green silk, from the market in Ashford Hollow.");
   await narr('Nana ties a ribbon of green silk around Ilya\'s wrist. It catches the light like your eyes do.');
@@ -177,19 +204,19 @@ async function talkOren() {
   if (f.oren) { await say('oren', 'neutral', "Keep it oiled. And remember — read the swing, not the sword."); return; }
   f.oren = true;
   await say('oren', 'neutral', "There you are. Close your mouth, you'll catch flies.");
-  await narr('Oren lifts a cloth from the anvil. Beneath it: a slim, single-edged blade, dark as river stone.');
-  await say('oren', 'happy', "Your father's. I reforged it. It's yours now.");
+  await narr('Oren lifts a cloth from the anvil. Beneath it: a wooden practice sword, worn smooth, with an iron spine down its back.');
+  await say('oren', 'happy', "Your father carved this when he was your age. Oak, with an iron spine. His real blade waits for you until you're grown.");
   await say('oren', 'neutral', "Listen to me. The Inquisition's been seen on the far roads. If they ever come here, you don't stand and trade blows like a fool.");
   await say('oren', 'neutral', "You watch the swing. You DODGE, or you PARRY — and if you parry every blow they throw, you'll have them wide open for a counter.");
   await say('oren', 'anger', "And the fire in your blood… only when you have to. Every time your eyes blaze, someone remembers them.");
   await me('neutral', "You sound like Nana.");
   await say('oren', 'happy', "Nana's the smartest person in Thornvale. Now get. Dusk is coming.");
-  sfx('coin'); toast('You received <b style="color:#46ff95">Father\'s Blade</b>.');
+  sfx('coin'); toast('You received <b style="color:#46ff95">Father\'s Practice Sword</b>.');
   await kairoIntro();
 }
 async function kairoIntro() {
   const f = F(); const W = World;
-  const k = await W.addNpc({ id: 'kairo', x: 27, y: 15, dir: 'left' });
+  const k = await W.addNpc({ id: 'kairo', sprite: 'kairo_kid', x: 27, y: 15, dir: 'left' });
   await say('kairo', 'happy', "Your father's blade, huh? Took you long enough to show up for it, {name}.");
   await me('happy', "Kairo. Shouldn't you be helping Jun with the hay?");
   await say('kairo', 'happy', "I did. Twice as fast as Jun. Now I'm bored. And you've got a new sword.");
@@ -215,7 +242,15 @@ async function kairoIntro() {
   await say('kairo', 'neutral', "Found it up on the slope. Feel that? It's warm. It hums. The Elder nearly took my head off when she saw one last year.");
   await say('kairo', 'neutral', "'Never take a stone from the mountain. Never speak of them outside the valley.' …Why would rocks be a secret?");
   await me('neutral', "Maybe because someone out there would want them.");
-  await say('kairo', 'happy', "Then they're ours first. Come on. Festival. If Ilya catches me missing her dance, I'm dead.");
+  await narr('Footsteps on the wall. Tamsin, Bo, Lark and Nix climb up and squeeze in beside you.');
+  await say('tamsinK', null, "Are you two talking about the mountains AGAIN?");
+  await say('larkK', null, "Ooh, ooh, is it the secret plan? Is it the climbing plan? I want in! I'm small, I can fit in cracks!");
+  await say('boK', null, "…Can Frog come?");
+  await say('nixK', null, "If we climb, we climb together. All of us. Or nobody.");
+  await say('kairo', 'happy', "Then swear it. Hands in. One day, all of us, over the top — and nobody ever makes us hide again.");
+  await narr('Six small hands stack on the old stone. Below you, the village bells start ringing for the festival.');
+  f.oath = true;
+  await say('kairo', 'happy', "Sworn. Come on. If Ilya catches me missing her dance, I'm dead.");
   f.kairo = true; W.remove('kairo');
   await fadeOut(800);
   f.dusk = true; await World.load('thornvale', 17, 19, 'up'); await fadeIn(800);
@@ -271,7 +306,7 @@ async function festival() {
   await say('ilya', null, "{SIB}!! Get up — please get up—");
   await narr('Ilya throws herself over you. Dread looks down at the two of you for a long moment. Then he reaches out one black, clawed hand.');
   // ---- KAIRO ----
-  const k = await World.addNpc({ id: 'kairo', sprite: 'kairo', x: 31, y: 17, dir: 'up' });
+  const k = await World.addNpc({ id: 'kairo', sprite: 'kairo_kid', x: 31, y: 17, dir: 'up' });
   await say('kairo', 'anger', "GET AWAY FROM THEM!");
   await narr('Kairo comes out of a burning house with his sleeves on fire. Something green blazes in his fist — the stone from the mountain.');
   await narr('He drives it into Dread\'s arm. The light is blinding. For the first time, the giant takes a step BACK.');
@@ -286,6 +321,8 @@ async function festival() {
   await narr('Acolytes pour off the bridge. A gloved hand closes around Ilya\'s wrist and rips her away from you.');
   World.remove('ilya');
   await say('ilya', null, "{SIB}! LET GO OF ME! KAIRO!");
+  await narr('Behind Halvard, an acolyte drags another child by the collar. Nix. He isn\'t screaming. He\'s staring right at you.');
+  await say('nixK', null, "…Tell Kairo it wasn't goats.");
   await say('halvard', 'neutral', "Calm, child. You are going somewhere you can be… corrected.");
   await me('anger', "Let. Her. GO.");
   await say('halvard', 'happy', "Fratenaptor's blood doesn't sleep. One day it wakes — in her, in you — and the world burns. I am the firebreak.");
@@ -318,35 +355,51 @@ async function talkNanaAfter() {
   await say('nana', 'happy', "I smashed it. With Oren's hammer, while the giant was busy with you. Let the Crown chase the wind.");
   await say('nana', 'sad', "But the pieces will land somewhere. And wherever they land, people will kill for them. Remember that.");
   await narr('She presses a bundle of grey cloth into your hands. An old traveling hood, mended a hundred times.');
-  await say('nana', 'neutral', "Your grandfather's. No one ever saw his eyes. Ashford Hollow — the wagons always stop there first. Find her, child.");
+  await say('nana', 'neutral', "Your grandfather's. Too big for you now. One day it won't be. No one ever saw his eyes beneath it.");
+  await say('nana', 'neutral', "Grow up first, child. Grow strong. Then find her. The wagons always pass through Ashford Hollow.");
   await say('nana', 'sad', "Out there, people will decide who you are before you open your mouth. Don't let them be right.");
   await narr('Her hand goes still in yours. The wind keeps carrying the green dust east, the same way the wagons went.');
   f.hoodGiven = true; f.nanaDead = true; G.S.hood = true; sfx('hood'); Story.heal(true);
   World.remove('nana');
   toast('You received <b style="color:#46ff95">Grandfather\'s Hood</b>. Tap <b>Hood</b> to raise or lower it.', 4200);
-  // Kairo
+  // Kairo — the separation
   Music.play('sad');
-  const k = await World.addNpc({ id: 'kairo', sprite: 'kairo_b', x: 19, y: 13, dir: 'left' });
-  await narr('Kairo stands behind you. Half his face is wrapped in bandages, and what shows beneath them is raw and red. Nine children hold onto his cloak.');
-  await say('kairoB', 'sad', "I got eleven out of the west houses. Eleven. I couldn't get back in for the rest.");
-  await say('kairoB', 'anger', "They burned children, {name}. While we sang. They didn't even look at their faces. Just their eyes.");
+  await World.addNpc({ id: 'kairo', sprite: 'kairo_kidb', x: 19, y: 13, dir: 'left' });
+  await narr('Kairo stands behind you. Half his face is wrapped in strips of a burned shirt, and what shows beneath them is raw and red. Tamsin, Bo and Lark hold onto his sleeves.');
+  await say('kairoKB', null, "I got eleven out of the west houses. Eleven. I couldn't get back in for the rest.");
+  await say('kairoKB', null, "They burned children, {name}. While we sang. They didn't even look at our faces. Just our eyes.");
   await me('sad', "Kairo, your face—");
-  await say('kairoB', 'anger', "Let it scar. I want to remember. Every time I look in water, I want to remember exactly what they are.");
-  await say('kairoB', 'anger', "Every soldier. Every priest. Every 'good' townsman who sold the road to them. All of them will answer for this.");
-  const c = await ask('kairoB', 'neutral', "Come with me. The older kids, Mei, Jun — we'll build something. An eclipse. Green fire swallowing their sun. No more hiding. Ever.", ["I'm going after Ilya.", "Revenge won't bring them back.", "Not everyone out there is the enemy."]);
-  if (c === 0) await say('kairoB', 'sad', "…Of course you are. You always pick her. That's why I— …Go. Get her back.");
-  else if (c === 1) await say('kairoB', 'anger', "It won't. But it'll stop the next fire. That's more than hiding ever did.");
-  else await say('kairoB', 'anger', "Then they can prove it. I'm done waiting for them to.");
-  await say('kairoB', 'neutral', "I'll find my own way to Greyspire. The long way. Through every one of them.");
-  await say('kairoB', 'happy', "…Forty-two to whatever, brother. Don't you dare die before I win the next one.");
-  await narr('He turns, and the children turn with him. Not one of them looks back. They are already following him like he hung the moon.');
-  World.remove('kairo'); f.greenEclipse = true;
-  Story.quest('Follow the wagon ruts east across the bridge to Ashford Hollow.');
+  await say('kairoKB', null, "Let it scar. I want to remember. Every time I look in water, I want to remember exactly what they are.");
+  await say('kairoKB', null, "We're going up. Into the mountain, into the caves. We swore it — all of us, over the top. No grown-up is coming to save us. So we save ourselves.");
+  const c = await ask('kairoKB', null, "Come with us. Please. You're my brother.", ["I'm going after Ilya.", "We should stay with Mei and Jun.", "Revenge won't bring them back."]);
+  if (c === 0) await say('kairoKB', null, "…Of course you are. You always pick her.");
+  else if (c === 1) await say('kairoKB', null, "Grown-ups are what got us here. I'm done listening to them.");
+  else await say('kairoKB', null, "I didn't say revenge. …Not yet.");
+  await say('mei', 'sad', "{name} is coming with me. South, to the coast, where no one knows our faces. Kairo — you're eleven. Come with us. All of you.");
+  await say('kairoKB', null, "No.");
+  await say('kairoKB', null, "…Forty-two to whatever, {name}. Don't you dare die before I win the next one.");
+  await narr('He turns, and the children turn with him. Tamsin looks back once. Then she doesn\'t.');
+  await narr('That is the last time you see Kairo for seven years.');
+  World.remove('kairo'); f.greenEclipse = true; f.split = true;
+  Story.quest('Go with Mei — east across the bridge, then south.');
   UI.hud();
 }
 Story.prologueEnd = async function () {
-  G.S.chapter = 1; G.S.stats.hp = G.S.stats.maxHp; G.S.stats.mp = G.S.stats.maxMp;
   await fadeOut(800);
+  await UI.intro([
+    'SEVEN YEARS LATER',
+    'Mei raised you in a fishing town on the southern coast. Hood up. Eyes down. Every morning, your father\'s blade, until your hands bled and healed and bled again.',
+    'Every winter, rumors came south on the trade boats. A burned-faced rebel in the mountains. Wagons set on fire. Cages broken open. They called his band Green Eclipse.',
+    'You never went looking for him. You were looking for someone else.',
+    'Then, last month: an Inquisition ledger, lifted off a drowned courier. One line, in neat ink — "Girl, green-eyed, ribbon on wrist. Transfer via Ashford Hollow."',
+    'Ilya is alive.'
+  ]);
+  G.S.kid = false; G.S.hood = true;
+  const st = G.S.stats; G.S.lvl = Math.max(G.S.lvl, 3); st.maxHp = 70; st.maxMp = 20; st.atk = 15; st.def = 6; st.spd = 11; st.hp = st.maxHp; st.mp = st.maxMp;
+  $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Seven years pass…'; await wait(30);
+  G.A.portCache = {}; await buildPlayerSprites(); $('#loading').classList.add('hide');
+  toast('You received <b style="color:#46ff95">Father\'s Blade</b>. Grandfather\'s hood fits now.', 4000);
+  G.S.chapter = 1;
   await UI.chapterCard('CHAPTER I', 'Ashford Hollow');
   F().ashIntro = true;
   Story.quest('Ask around Ashford Hollow for where the Inquisition took Ilya.');
@@ -363,7 +416,7 @@ const FOLK_LINES = () => {
 };
 SCENES.ashford = {
   title: 'Ashford Hollow', subtitle: 'Market town of the eastern vale', music: 'town', bd: 'town',
-  crowd: { count: 20, areas: [[22, 19, 37, 25], [5, 20, 20, 23], [28, 27, 31, 37], [39, 20, 54, 23], [33, 33, 48, 34], [22, 19, 37, 25]], talk: talkFolk, lines: FOLK_LINES },
+  crowd: { count: 30, areas: [[22, 19, 37, 25], [5, 20, 20, 23], [28, 27, 31, 37], [39, 20, 54, 23], [33, 33, 48, 34], [22, 19, 37, 25]], talk: talkFolk, lines: FOLK_LINES },
   async setup(W) { },
   npcs() {
     const f = F(); const L = [];
@@ -660,7 +713,13 @@ SCENES.woods = {
   npcs() {
     const f = F(); const L = [];
     if (!f.rookBeaten) { L.push({ id: 'rook', x: 42, y: 17, dir: 'left', talk: talkRook }); L.push({ id: 'bandit', x: 40, y: 18, dir: 'left', talk: async () => say('bandit', 'anger', "Talk to the boss, hood. I just stab people.") }); }
-    if (!f.scoutMet || !f.millDone) L.push({ id: 'scout', sprite: 'rebel2', x: 12, y: 9, dir: 'down', talk: talkScout, ai: 'turn', turns: ['down', 'left', 'right'] });
+    if (!f.millDone) {
+      L.push({ id: 'dace', sprite: 'ge_dace', x: 13, y: 8, dir: 'left', talk: () => geTalk('dace'), ai: 'turn', turns: ['left', 'down'] });
+      L.push({ id: 'sefa', sprite: 'ge_sefa', x: 11, y: 10, dir: 'down', talk: () => geTalk('sefa') });
+      L.push({ id: 'wren', sprite: 'ge_wren', x: 14, y: 10, dir: 'left', talk: () => geTalk('wren'), ai: 'turn', turns: ['left', 'up'] });
+      L.push({ id: 'corran', sprite: 'ge_corran', x: 8, y: 10, dir: 'right', talk: () => geTalk('corran') });
+    }
+    if (!f.scoutMet || !f.millDone) L.push({ id: 'scout', sprite: 'lark', x: 12, y: 9, dir: 'down', talk: talkScout, ai: 'turn', turns: ['down', 'left', 'right'] });
     if (!f.alphaBeaten) L.push({ id: 'alpha', sprite: 'lupine_alpha', x: 28, y: 26, dir: 'down', ai: 'turn', turns: ['down', 'left', 'right'], talk: talkAlpha });
     return L;
   },
@@ -758,7 +817,8 @@ async function halvardEvent() {
   const f = F(); if (f.halvardBeaten) return;
   World.player.dir = 'up';
   await say('halvard', 'happy', 'Green eyes in the dark. I wondered when you\'d come.');
-  await say('halvard', 'neutral', "The girl with the ribbon. Your sister. She cried less than the others. Brave little thing.");
+  await say('halvard', 'neutral', "The girl with the ribbon. Your sister. Seven years, and she never once took it off. Not when we asked. Not when we didn't ask.");
+  await say('halvard', 'happy', "And the quiet boy — Nix. He prays now. Very sincerely. You'd hardly know him.");
   const c = await ask('halvard', 'neutral', "You think this is hatred. It isn't. Fratenaptor's blood doesn't sleep. One day it wakes — in her, in you — and the world burns. I am the firebreak.", ['Where is she?', "You're wrong about us."]);
   if (c === 0) await say('halvard', 'happy', "Somewhere you can't follow. Not with those eyes.");
   else await say('halvard', f.shrineRead ? 'anger' : 'neutral', f.shrineRead ? 'The stone in the east woods? Old carvings. Half-truths. I\'ve read the real texts.' : 'Then prove it. Without the fire.');
@@ -778,8 +838,9 @@ async function ending() {
   const c = await ask('halvard', 'neutral', 'Go on, Drag. Be what the stories say you are.', ['Spare him.', 'End him.']);
   if (c === 0) { f.halvardSpared = true; await me('anger', "No. I'm not your story."); await narr("You leave him kneeling in the dirt. He doesn't look up."); }
   else { f.halvardKilled = true; await narr("It's quick."); await narr('Somewhere in the trees, a bird stops singing. The stories, you realize, just got one chapter truer.'); }
-  await narr('Inside the mill: empty cages. Straw. Chains. And on the floor, a scrap of faded green silk.');
-  await narr("The other half of Ilya's ribbon. You tie it to your wrist, next to yours. Now they make one whole knot.");
+  await narr('Inside the mill: empty cages. Straw. Chains. And tied to the bars of the last cage, a scrap of faded green silk.');
+  await narr("The other half of Ilya's ribbon — tied in the worst knot you have ever seen. A dragon knot. She left it here on purpose. She knew you'd come.");
+  await narr("You tie it to your wrist, next to yours. Now they make one whole knot.");
   await me('sad', "I'll find you. Dragon law.");
   await kairoDuel();
   if (f.kessJoined) {
@@ -829,10 +890,11 @@ async function talkAsha() {
 }
 
 async function talkScout() {
-  const f = F(); CHAR.scout = { name: 'Green Eclipse scout', sprite: 'rebel2' };
+  const f = F(); CHAR.scout = { name: 'Lark', sprite: 'lark' };
   if (f.scoutMet) { await say('scout', 'neutral', G.S.hood ? "Still wearing the hood? Kairo says hoods are for people who've already lost." : "Better. Let them look."); return; }
   f.scoutMet = true;
-  await say('scout', 'neutral', "Easy. Green eyes, same as you. Kairo said you'd come this way. He said you'd be slow.");
+  await say('scout', 'happy', "{NAME}?! It IS you! Seven years! You got so TALL — wait, do you remember me? Lark! Small! Fit in cracks! I still fit in cracks!".replace('{NAME}', G.S.name.toUpperCase()));
+  await say('scout', 'neutral', "Kairo said you'd come this way. He said you'd be slow. He was right, you're very slow, I've been in this tree for TWO DAYS.");
   await say('scout', 'happy', "He also said if you got yourself killed in these woods, he'd dig you up just to beat you at something.");
   const c = await ask('scout', 'neutral', "Green Eclipse is twenty strong now. Thirty by winter. You could be one of us.", ["Where is he?", "What is Green Eclipse doing?", "I have my own road."]);
   if (c === 0) await say('scout', 'neutral', "Everywhere the Inquisition is. You'll see him when he wants to be seen.");
@@ -843,8 +905,14 @@ async function kairoDuel() {
   const f = F(); const W = World;
   await narr('Footsteps. Many of them. Torches between the trees — and green eyes behind every one.');
   await W.addNpc({ id: 'kairo', sprite: 'kairo_b', x: 17, y: 16, dir: 'up' });
-  await W.addNpc({ id: 'reb1', sprite: 'rebel', x: 16, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb2', sprite: 'rebel2', x: 18, y: 17, dir: 'up' });
+  await W.addNpc({ id: 'reb1', sprite: 'tamsin', x: 16, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb2', sprite: 'bo', x: 18, y: 17, dir: 'up' });
+  await W.addNpc({ id: 'reb3', sprite: 'ge_dace', x: 15, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb4', sprite: 'ge_wren', x: 19, y: 17, dir: 'up' }); await W.addNpc({ id: 'reb5', sprite: 'ge_sefa', x: 17, y: 18, dir: 'up' });
   W.player.dir = 'down';
+  await narr('A tall figure steps into the lamplight. Black spiked hair. Half his face a map of old burns. Green eyes you would know anywhere.');
+  await me('shock', "…Kairo.");
+  await say('kairoB', 'neutral', "Seven years, {name}. You got tall.");
+  await say('tamsin', 'anger', "Kairo. That's the one who went with Mei. The one who LEFT.");
+  await say('bo', 'happy', "…Hi, {name}. We missed you. Some of us did. I did.");
   await say('kairoB', 'happy', "So you got here first. Of course you did. You always beat me to the places that matter.");
   if (f.halvardSpared) await say('kairoB', 'anger', "And you let HIM live. The man who tore her out of your hands. You let him keep breathing.");
   else await say('kairoB', 'neutral', "…Halvard's done, then. Good. That's one.");
@@ -854,6 +922,10 @@ async function kairoDuel() {
   else if (c === 1) await say('kairoB', 'anger', "DON'T. Don't you ever put me next to him. He burns us for what we are. I burn them for what they DID.");
   else await say('kairoB', 'sad', "…I knew you'd say that. I think I came here hoping you would.");
   if (G.S.party.includes('kess')) await say('kessE', 'sad', "This one's yours. I'm not getting between brothers.");
+  await say('dace', 'anger', "Want me to put the hood on the ground, boss? Or the head in it?");
+  await say('sefa', 'sad', "Dace. Shut up.");
+  await say('tamsin', 'anger', "Let me do it, Kairo.");
+  await say('kairoB', 'neutral', "No. This one's mine. It always was.");
   await say('kairoB', 'anger', "Fine. Like old times. First to yield.");
   const r = await Battle.start({ enemies: ['kairo_duel'], allies: [], noFlee: true, boss: true, bd: 'mill', music: 'boss', intro: 'RIVAL — Kairo of Green Eclipse',
     onTurn: async (B, Bt) => {
@@ -878,7 +950,99 @@ async function kairoDuel() {
   await say('kairoB', 'neutral', "Halvard's staff. That's how his light burned so bright — a Drag stone. OUR stone. Take it. Greyspire's walls are thick.");
   f.shard = true; sfx('art'); toast('You received a <b style="color:#46ff95">Drag Shard</b>: +1 MP every turn in battle.', 4200);
   await say('kairoB', 'anger', "One more thing. Whoever sold Thornvale — I'll find them before you do. Pray I'm gentle about it.");
+  await say('kairoB', 'sad', "…Nix is in Greyspire too. Whatever they've made him. We swore it, {name}. All of us, or nobody.");
   await say('kairoB', 'happy', "…See you at Greyspire, brother. Try to keep up.");
   await narr('Green Eclipse melts back into the trees. In a heartbeat, the clearing is empty again.');
-  W.remove('kairo'); W.remove('reb1'); W.remove('reb2'); f.millDone = true;
+  W.remove('kairo'); ['reb1', 'reb2', 'reb3', 'reb4', 'reb5'].forEach(r => W.remove(r)); f.millDone = true;
+}
+
+async function talkKids(e) {
+  const f = F(), id = e.id;
+  const M = {
+    tamsinK: f.dusk ? "Kairo dances like a drunk goat. Don't tell him I said that. …Okay, tell him." : f.kairo ? "You lost to Kairo AGAIN? …Okay, you didn't? Huh. He's gonna be grumpy all night." : "I'm not playing hide-and-seek. It's for babies. I'm practicing being a warrior. Like Kairo.",
+    boK: f.dusk ? "I ate four honey cakes. Five. Don't count." : "Hi, {name}! I found a frog. His name is Frog. I'm gonna keep him forever. Or till lunch.",
+    larkK: f.dusk ? "Did you know if you jump over the fire you get luck for a year? I made that up. But it's probably true!" : "Ilya's hiding SO good, I checked under every bucket — did you know there's forty-one buckets in Thornvale? I counted. Forty-two if you count Bo's head. Ha!",
+    nixK: f.dusk ? "…The fire is the same green as our eyes. Do you think that's on purpose?" : "…I'm watching the ridge. Somebody keeps walking along the top of it. Asha says it's goats. Goats don't carry lanterns."
+  };
+  await say(id, null, M[id]);
+}
+
+/* ---------------- HOUSE INTERIORS ---------------- */
+function room(key, map, title, o) {
+  o = o || {};
+  SCENES[key] = Object.assign({ map, title, subtitle: o.sub || '', safe: o.safe ?? false, bd: o.bd || 'town',
+    get exits() { const d = G.maps[map].door; return [{ x: d[0], y: d[1], to: '__ret' }]; },
+    music: o.music || (() => G.S.ret && SCENES[G.S.ret.map] ? (typeof SCENES[G.S.ret.map].music === 'function' ? SCENES[G.S.ret.map].music() : SCENES[G.S.ret.map].music) : null),
+    npcs: o.npcs || (() => []), tiles: o.tiles || {} }, o.extra || {});
+}
+async function enter(key, rx, ry) {
+  G.S.ret = { map: G.S.map, x: rx, y: ry };
+  const d = G.maps[SCENES[key].map].door;
+  await World.go(key, d[0], d[1] - 1, 'up');
+}
+function door(sceneKey, x, y, key, cond) {
+  SCENES[sceneKey].tiles[x + ',' + y] = async () => { if (cond) { const msg = await cond(); if (msg) { if (msg !== true) await narr(msg); return; } } await enter(key, x, y + 1); };
+}
+const resident = (id, sprite, x, y, lines, extra) => Object.assign({ id, sprite, x, y, dir: 'down', ai: 'turn', turns: ['down', 'left', 'right'], folk: true,
+  talk: async e => { CHAR[e.id] = { name: e.nm || 'Resident', sprite: e.sprite, kid: e.sprite.startsWith('kid') || e.sprite.startsWith('dkid') };
+    if (!G.S.hood && G.S.f.hoodGiven && !e.drag) { await say(e.id, null, pick(['"Get OUT of my house!"', '"Those eyes— please, we have children here."', '"I won\'t scream. Just… go. Please go."'])); return; }
+    await say(e.id, null, pick(typeof lines === 'function' ? lines() : lines)); } }, extra || {});
+const DF = i => (G.man.dfolk || [])[i % 12] || 'folk0', FK = i => G.man.folk[i % G.man.folk.length];
+// ---- Thornvale ----
+const burned = async () => F().raid ? 'Only ash and black beams inside. You can\'t make yourself go in.' : null;
+room('t_home', 'in_home', 'Home', { safe: true, tiles: {
+  '8,6': async () => narr("Ilya's drawing, pinned under a cup: you, her, and a big green dragon. The dragon is smiling. So are you."),
+  '9,6': async () => narr("Ilya's drawing, pinned under a cup: you, her, and a big green dragon. The dragon is smiling. So are you."),
+  '6,2': async () => narr('The hearth is still warm. Ilya hid her birthday wish in a crack in the stones. You promised not to read it. You don\'t.'),
+  '9,3': async () => narr('Your clothes. Ilya\'s clothes. A wooden dragon Oren carved, missing one wing.') } });
+room('t_nana', 'in_nana', "Nana's House", { safe: true, tiles: Object.fromEntries(['1,2', '2,2', '3,2', '4,2'].map(k => [k, async () => {
+  await narr('Old books, older than the village. One falls open to a drawing: seven figures with green eyes, holding chains.');
+  await narr('Beneath it, in Nana\'s handwriting: "Not worshippers. Wardens. Tell the children when they are ready."'); }])) });
+room('t_forge', 'in_forge', "Oren's Forge", { safe: true, tiles: { '4,4': async () => narr("Oren's anvil. A half-finished blade lies on it, too small for a grown-up. Your size."), '7,4': async () => narr('A second anvil, for Kairo. Oren says he hits too hard and too early. Kairo says that\'s the point.') } });
+room('t_mei', 'in_cottage', "Mei's House", { safe: true, npcs: () => [resident('mei_kid', 'dkid3', 6, 3, ['"Mama says I can stay up for the fire tonight!"', '"Is Ilya still hiding? She\'s the BEST at it."'], { drag: 1 }), resident('mei_gran', DF(1), 2, 5, ['"Mei\'s at her loom. She\'ll weave half the village lanterns before dusk."', '"Sit, sit. You look hungry. You always look hungry."'], { drag: 1 })] });
+room('t_jun', 'in_cottage2', "Jun's House", { safe: true, npcs: () => [resident('jun_wife', DF(2), 5, 3, ['"Jun\'s been at the hay since sunrise. He says he\'s practicing his spark trick."', '"Happy birthday to your sister, love."'], { drag: 1 })] });
+door('thornvale', 9, 12, 't_home', burned); door('thornvale', 17, 10, 't_nana', burned); door('thornvale', 24, 12, 't_forge', burned);
+door('thornvale', 9, 22, 't_mei', burned); door('thornvale', 23, 24, 't_jun', burned);
+// ---- Ashford Hollow ----
+const ASH_HOME = [['"Wipe your boots. …Fine, don\'t."', '"The Inquisition searched our cellar last week. Took the good cheese."', '"We don\'t get many visitors. On purpose."'],
+  ['"My husband says the Drags will come back one day. I say good, the old ones fixed our roof for free."', '"Don\'t mind the mess. Children."', '"Tea? No? More for me."'],
+  ['"Shh. Baby\'s sleeping."', '"If you\'re selling something, we\'re poor. If you\'re buying something, we\'re rich."', '"Voss used to be a good man. Still is, maybe. Just tired."']];
+room('a_clinic', 'in_clinic', "Maren's Clinic", { npcs: () => [resident('pat1', FK(1), 2, 5, ['"Cough… the healer\'s a saint. A saint with very cold hands."', '"Stay back, I\'m catching."'], { nm: 'Patient', ai: null }), resident('pat2', FK(4), 10, 5, ['"Fell off a roof. Don\'t ask what I was doing on the roof."'], { nm: 'Patient', ai: null }), resident('pat3', FK(6), 12, 5, ['"I hear Maren treats anybody. ANYBODY. Even… you know."'], { nm: 'Patient', ai: null })] });
+room('a_pip', 'in_cottage2', "Pip's House", { npcs: () => [resident('pipdad', FK(2), 5, 3, ['"Pip\'s out with his rock again. Gerald. Don\'t ask."', '"His mother worries. Me, I figure the world\'s not as bad as she thinks. Mostly."'], { nm: "Pip's Father" })].concat(F().pipGone ? [resident('pipin', 'pip', 7, 5, ['"Psst! Hi! Mama says I can\'t talk to you. So I\'m whispering. Gerald says hi too."'], { nm: 'Pip', drag: 1 })] : []) });
+room('a_shop', 'in_shop', "Tobb's Goods", { npcs: () => [resident('clerk', FK(3), 5, 3, ['"Tobb runs the stall in the market. I just guard the jars. And dust them. Mostly dust them."', '"Don\'t touch the blue ones. Tobb says they explode. I think he\'s joking."'], { nm: 'Shop Clerk', ai: null })] });
+room('a_inn', 'in_inn', 'The Crooked Lantern', { npcs: () => [
+  Object.assign(resident('bram_in', 'innkeep', 3, 4, [], { nm: 'Bram', ai: null }), { talk: innRest }),
+  resident('pat_a', FK(5), 2, 7, ['"Ale\'s watered. Always has been. Still the best in the vale."', '"Heard the Dread General\'s heading east. Pray he keeps going."'], { nm: 'Patron', ai: null }),
+  resident('pat_b', FK(7), 9, 7, ['"Green Eclipse hit a wagon on the south road. Freed every cage. I didn\'t say that."'], { nm: 'Patron', ai: null }),
+  resident('pat_c', FK(9), 12, 9, ['"Shh, I\'m sleeping. On purpose. At the table. It\'s a skill."'], { nm: 'Patron', ai: null })] });
+async function innRest() {
+  CHAR.bram_in = { name: 'Bram', sprite: 'innkeep' };
+  const c = await ask('bram_in', 'happy', 'Room for the night? 15 gold. Warm bed, no questions. (Restores HP & MP and saves.)', ['Rest (15g)', 'Not now']);
+  if (c === 0) { if (G.S.gold >= 15) { G.S.gold -= 15; await fadeOut(600); Story.heal(true); save(); await fadeIn(600); await narr('You keep your hood on all night. You sleep badly, but you sleep. (Game saved.)'); } else await say('bram_in', 'neutral', "Coin first, friend."); }
+}
+['a_h1', 'a_h2', 'a_h3', 'a_h4', 'a_h5', 'a_h6'].forEach((k, i) => room(k, i % 2 ? 'in_cottage2' : 'in_cottage', 'A Home', { npcs: () => [resident(k + 'a', FK(10 + i), 5, 3, ASH_HOME[i % 3], { nm: 'Resident' }), resident(k + 'b', FK(16 + i), i % 2 ? 6 : 3, 6, ASH_HOME[(i + 1) % 3], { nm: 'Resident' })] }));
+const innCheck = async () => { if (G.S.sus >= 3) return 'The innkeeper sees you through the window and slams the shutters.'; if (!G.S.hood) return 'The innkeeper takes one look at your eyes and taps the NO DRAGS carving on the doorframe.'; return null; };
+door('ashford', 9, 14, 'a_clinic', async () => F().marenKnows ? "Maren's clinic. The door stays closed to you. You don't knock." : null);
+door('ashford', 16, 14, 'a_pip'); door('ashford', 35, 14, 'a_shop'); door('ashford', 42, 14, 'a_inn', innCheck);
+door('ashford', 8, 30, 'a_h1'); door('ashford', 15, 31, 'a_h2'); door('ashford', 22, 36, 'a_h3'); door('ashford', 41, 31, 'a_h4'); door('ashford', 49, 31, 'a_h5'); door('ashford', 53, 10, 'a_h6');
+
+/* ---- Green Eclipse: the people Kairo built after you left ---- */
+async function geTalk(id) {
+  const f = F(); f['ge_' + id] = (f['ge_' + id] || 0) + 1; const n = f['ge_' + id];
+  const L = {
+    dace: [["happy", "So YOU'RE the one. The one who went to the beach. Kairo doesn't talk about you. Which means he thinks about you constantly."],
+           ["anger", "Kairo pulled me out of a cage when I was nine. Nine! I'd burn the whole Crown down if he pointed at it. I'd burn it down if he DIDN'T point at it."],
+           ["neutral", "Lower your hood, coward. We don't hide in Green Eclipse. That's the first rule. The second rule is also don't hide."]],
+    sefa: [["neutral", "I'm the healer. Which means I'm the one who sees what's left after Kairo's 'lessons.' Theirs and ours."],
+           ["sad", "Last spring we freed forty children from a wagon. Then Kairo burned the toll-house it came from. There was a family upstairs. He said he didn't know."],
+           ["sad", "…I believe him. I think. Ask me again next spring."]],
+    wren: [["anger", "Don't talk to me about 'good humans.' I was in a cage for four years. Good humans walked past it every single day."],
+           ["neutral", "Kairo says the ones who look away are the same as the ones who hold the key. He's right."],
+           ["happy", "…You've got his old knot on your wrist. The terrible one. Ilya's, isn't it? Kairo used to tie it on every rescued kid's wrist. 'So you can always find us.'"]],
+    corran: [["neutral", "I'm the oldest thing in Green Eclipse, kid. Forty-one. Kairo calls me 'grandfather.' I let him think it annoys me."],
+             ["sad", "I was a smith in a Drag village two valleys over. It burned the same year as yours. I followed the green fire because nothing else was left burning."],
+             ["neutral", "He's a good leader. He's a frightening one. Those used to be different things. In war, they stop being different."]]
+  }[id];
+  const [e, t] = L[Math.min(n - 1, L.length - 1)];
+  await say(id, e, t);
 }

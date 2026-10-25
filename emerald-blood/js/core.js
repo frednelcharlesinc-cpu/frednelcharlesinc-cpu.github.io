@@ -91,7 +91,15 @@ const LOOK_OPTS = {
 };
 const HAIR_NAMES = { dreadlocks_long: 'Long locs', dreadlocks_short: 'Short locs', twists_straight: 'Twists', twists_fade: 'Twist fade', cornrows: 'Cornrows', afro: 'Afro', high_ponytail: 'High ponytail', long_tied: 'Tied back', braid: 'Braid', buzzcut: 'Buzz cut', curly_short: 'Short curls', bob: 'Bob', pixie: 'Pixie', natural: 'Natural', long: 'Long', none: 'Shaved' };
 function defaultLook() { return { sex: 'male', skin: 'bronze', hair: 'dreadlocks_long', hairCol: 'black', beard: 'none', top: 'charcoal', pants: 'charcoal', obi: 'black', hood: 'charcoal' }; }
+const KID_HAIR_MAP = { dreadlocks_long: 'jewfro', dreadlocks_short: 'jewfro', twists_straight: 'jewfro', twists_fade: 'jewfro', cornrows: 'jewfro', afro: 'jewfro', natural: 'jewfro', curly_short: 'jewfro',
+  high_ponytail: 'wavy', long_tied: 'wavy', braid: 'wavy', long: 'wavy', bob: 'wavy', buzzcut: 'relm_short', pixie: 'relm_short', none: 'relm_short' };
+const KID_SHIRT_MAP = { charcoal: 'gray', black: 'black', slate: 'gray', navy: 'blue', bluegray: 'blue', teal: 'lightblue', forest: 'green', green: 'green', maroon: 'red', red: 'red', purple: 'lavender', walnut: 'brown', brown: 'brown', tan: 'brown', white: 'white' };
+const KID_PANTS_MAP = { charcoal: 'black', black: 'black', slate: 'black', navy: 'darkblue', bluegray: 'blue', teal: 'blue', forest: 'green', green: 'green', maroon: 'maroon', red: 'red', purple: 'darkblue', walnut: 'brown', brown: 'brown', tan: 'brown', white: 'white' };
+function kidPartList(look) {
+  return [['kbody', look.skin], ['kpants_' + (KID_PANTS_MAP[look.pants] || 'brown'), null], ['kshirt_' + (KID_SHIRT_MAP[look.top] || 'white'), null], ['khead', look.skin], ['keyes', null], ['khair_' + (KID_HAIR_MAP[look.hair] || 'swoop_side'), look.hairCol]];
+}
 function partList(look, hooded) {
+  if (G.S && G.S.kid) return kidPartList(look);
   const s = look.sex, L = [];
   const bgk = 'hairbg_' + look.hair;
   if (!hooded && look.hair !== 'none' && G.man.parts[bgk]) L.push([bgk, look.hairCol]);
@@ -130,7 +138,7 @@ function playerImg() { return G.S.hood ? G.A.pHood : G.A.pHair; }
 const BT_ROW = {}; let BT_Y = 512;
 function initBT() { G.man.bt.anims.forEach((a, i) => BT_ROW[a[0]] = i); BT_Y = G.man.bt.y; }
 function drawOW(c, img, anim, dir, f, x, y, alpha, sz) {
-  const row = (anim === 'walk' ? 4 : 0) + DROW[dir]; sz = sz || 1;
+  const row = (anim === 'walk' ? 4 : anim === 'run' ? 8 : 0) + DROW[dir]; sz = sz || 1;
   if (alpha !== undefined) c.globalAlpha = alpha;
   c.drawImage(img, f * 64, row * 64, 64, 64, Math.round(x - 32 * sz), Math.round(y - 58 * sz), 64 * sz, 64 * sz);
   if (alpha !== undefined) c.globalAlpha = 1;
@@ -154,7 +162,8 @@ function playerPortrait(canvas, expr) {
   // player portrait: compose parts' portrait strips (face part holds expressions)
   const L = G.S.look, x = canvas.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, canvas.width, canvas.height);
   const ei = Math.max(0, EXPRS.indexOf(expr || 'neutral'));
-  const key = JSON.stringify(L) + G.S.hood + ei;
+  const key = JSON.stringify(L) + G.S.hood + ei + (G.S.kid ? 'k' : '');
+  const oy = G.S.kid ? 15 : 4;
   G.A.portCache = G.A.portCache || {};
   if (!G.A.portCache[key]) {
     const c = document.createElement('canvas'); c.width = 32; c.height = 36; const cx = c.getContext('2d');
@@ -162,7 +171,7 @@ function playerPortrait(canvas, expr) {
       const img = G.img['part_' + pn], meta = G.man.parts[pn]; if (!img) continue;
       const sy = img.height - 64, sx = pn.startsWith('face_') ? ei * 64 : 0;
       const t = document.createElement('canvas'); t.width = 32; t.height = 36;
-      t.getContext('2d').drawImage(img, sx + 16, sy + 4, 32, 36, 0, 0, 32, 36);
+      t.getContext('2d').drawImage(img, sx + 16, sy + oy, 32, 36, 0, 0, 32, 36);
       cx.drawImage(recolor(t, meta.mat, meta.base, col), 0, 0);
     }
     G.A.portCache[key] = c;
@@ -256,6 +265,7 @@ function sfx(t) {
   try {
     switch (t) {
       case 'blip': tone(620, .03, 'square', .015); break;
+      case 'press': tone(180, .05, 'square', .03, 90); noise(.03, .04, 3000); break;
       case 'step': noise(.04, .02, 2500); break;
       case 'swing': noise(.12, .07, 1800); tone(300, .08, 'sawtooth', .02, 120); break;
       case 'hit': noise(.08, .12, 400); tone(160, .12, 'square', .06, 60); break;
@@ -317,7 +327,7 @@ const Music = {
 /* ---------- state & save ---------- */
 function newState(look, name) {
   return {
-    v: 2, name: name || 'Ren', look, lvl: 1, xp: 0, gold: 20, hood: false, sus: 0, seen: {},
+    v: 2, kid: true, name: name || 'Ren', look, lvl: 1, xp: 0, gold: 20, hood: false, sus: 0, seen: {},
     stats: { hp: 52, maxHp: 52, mp: 16, maxMp: 16, atk: 11, def: 4, spd: 10 },
     items: { tonic: 3, ether: 1 }, arts: ['fang', 'ward'],
     party: [], allies: {},
@@ -352,3 +362,17 @@ function loop(t) {
   requestAnimationFrame(loop);
 }
 window.addEventListener('load', () => { boot().catch(e => { $('#loadTxt').textContent = 'Could not load: ' + e.message; console.error(e); }); });
+
+/* ---------- buttons that feel like buttons ---------- */
+(function pressFeel() {
+  const SEL = '.rb,.sb,.rx,.btn,.tbtn,.choice,.arr,#cmdList button,#btnMenu,.sw button,.tabs button';
+  let held = [];
+  const down = e => {
+    const b = e.target.closest && e.target.closest(SEL); if (!b || b.disabled) return;
+    b.classList.add('press'); held.push(b);
+    if (b.matches('.rb,.rx')) { try { navigator.vibrate && navigator.vibrate(12); } catch (x) {} sfx('press'); }
+  };
+  const up = () => { const h = held; held = []; setTimeout(() => h.forEach(b => b.classList.remove('press')), 90); };
+  document.addEventListener('pointerdown', down, true);
+  document.addEventListener('pointerup', up, true); document.addEventListener('pointercancel', up, true);
+})();

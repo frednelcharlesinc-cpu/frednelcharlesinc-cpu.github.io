@@ -8,8 +8,9 @@ const World = {
   async load(name, x, y, dir) {
     this.loading = true;
     G.S.map = name; G.S.x = x; G.S.y = y; if (dir) G.S.dir = dir;
-    this.map = G.maps[name]; this.scene = SCENES[name] || {};
-    this.mapImg = G.img['map_' + name] || (G.img['map_' + name] = await loadImg('assets/map_' + name + '.png'));
+    this.scene = SCENES[name] || {}; const mk = this.scene.map || name;
+    this.map = G.maps[mk];
+    this.mapImg = G.img['map_' + mk] || (G.img['map_' + mk] = await loadImg('assets/map_' + mk + '.png'));
     this.col = this.map.col.map(r => r.split('').map(Number));
     this.grass = new Set(this.map.grass.map(p => p[0] + ',' + p[1]));
     this.extraProps = []; this.lights = []; this.tint = null;
@@ -36,14 +37,14 @@ const World = {
     Music.play(this.scene.music ? (typeof this.scene.music === 'function' ? this.scene.music() : this.scene.music) : null);
   },
   async spawnCrowd(cr) {
-    const folk = G.man.folk.slice(); const r = (a) => a[Math.floor(Math.random() * a.length)];
+    const folk = (cr.pool ? cr.pool() : G.man.folk).slice(); const r = (a) => a[Math.floor(Math.random() * a.length)];
     for (let i = 0; i < cr.count; i++) {
       const area = r(cr.areas); let tries = 40, x, y;
       do { x = area[0] + Math.floor(Math.random() * (area[2] - area[0] + 1)); y = area[1] + Math.floor(Math.random() * (area[3] - area[1] + 1)); } while (tries-- > 0 && !this.free(x, y));
       if (tries <= 0) continue;
       const id = folk[i % folk.length];
       const e = new Ent({ id: 'folk_' + i, sprite: id, img: await npcImg(id), x, y, dir: r(['down', 'left', 'right', 'up']), folk: true, kid: id.startsWith('kid'), area,
-        ai: 'wander', name: cr.names ? cr.names[i % cr.names.length] : 'Townsperson', talk: cr.talk, talkLines: cr.lines });
+        ai: 'wander', name: cr.names ? cr.names[i % cr.names.length] : 'Townsperson', talk: cr.talk, talkLines: cr.lines, witness: cr.witness });
       e.wait = rnd(500, 4000);
       this.ents.push(e);
     }
@@ -114,10 +115,18 @@ const World = {
       if (enc) Story.run(async () => { const r = await Battle.start(enc); if (r === 'lose') await Story.defeat(); });
     }
   },
+  async go(to, x, y, dir) {
+    await fadeOut(300);
+    await this.load(to, x, y, dir);
+    save(); UI.hud();
+    await fadeIn(300);
+    if (SCENES[to].title) banner(SCENES[to].title, SCENES[to].subtitle || '', 1300);
+  },
   async useExit(ex) {
     if (this.busy) return; this.busy = true;
     if (ex.check && !(await ex.check())) { this.busy = false; return; }
     await fadeOut(350);
+    if (ex.to === '__ret') { const r = G.S.ret || { map: 'ashford', x: 29, y: 30 }; ex = { to: r.map, tx: r.x, ty: r.y, dir: 'down' }; }
     await this.load(ex.to, ex.tx, ex.ty, ex.dir || this.player.dir);
     save(); UI.hud();
     await fadeIn(350);
@@ -147,7 +156,7 @@ const World = {
   crowdReact(dt) {
     const p = this.player; if (G.S.hood || !G.S.f.hoodGiven || this.scene.safe) return;
     for (const e of this.ents) {
-      if (!e.folk && !e.witness) continue;
+      if (!(e.folk && e.witness !== false) && !e.witness) continue;
       const d = Math.abs(e.x - p.x) + Math.abs(e.y - p.y);
       if (d <= 4 && !e.alarmed && this.sees(e, p)) {
         e.alarmed = true; e.dir = this.dirTo(e, p); e.wait = 900;
@@ -197,7 +206,10 @@ const World = {
     this.flat.forEach(drawProp);
     const list = [];
     for (const o of this.propsDraw) list.push([o.by, 0, o]);
-    for (const e of this.ents) if (!e.hidden) list.push([e.py, 1, e]);
+    for (const e of this.ents) {
+      if (!e.hidden) list.push([e.py, 1, e]);
+      else if (e.peek && Math.abs(e.x - this.player.x) + Math.abs(e.y - this.player.y) <= 6) { e.alpha = .42 + .12 * Math.sin(t / 220); list.push([e.py, 1, e]); }
+    }
     list.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     for (const [, k, o] of list) {
       if (k === 0) drawProp(o);
@@ -293,6 +305,7 @@ class Ent {
       if (W.free(nx, ny, this)) this.startMove(nx, ny, 260); else this.wait = 600;
       return;
     }
+    if (this.ai === 'giggle') { if (this.hidden && Math.abs(this.x - p.x) + Math.abs(this.y - p.y) <= 8) this.say(pick(['hee hee!', '*giggle*', "you'll never find me!", 'shhh…', '*snort*']), 1800); this.wait = rnd(2600, 4200); return; }
     if (this.ai === 'turn') { this.dir = pick(this.turns || ['down', 'left', 'right']); this.wait = rnd(1500, 4000); }
     if (this.ai === 'bark' && this.barks && Math.abs(this.x - p.x) + Math.abs(this.y - p.y) < 9 && G.t > W.bubbleGate) {
       this.say(pick(this.barks()), 3000); W.bubbleGate = G.t + 2500; this.wait = rnd(5000, 9000);
@@ -305,7 +318,8 @@ class Ent {
     const x = this.px - cx, y = this.py - cy;
     if (x < -40 || y < -10 || x > G.view.w + 40 || y > G.view.h + 70) return;
     c.fillStyle = 'rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(x, y, 10, 4, 0, 0, 7); c.fill();
-    if (this.move) { const f = 1 + Math.floor(this.walkT / (this.move.ms / 3.2)) % 8; drawOW(c, img, 'walk', this.dir, f, x, y, this.alpha, this.size); }
+    if (this.move && this.move.ms < 160) { const f = Math.floor(this.walkT / (this.move.ms / 3.4)) % 8; drawOW(c, img, 'run', this.dir, f, x, y, this.alpha, this.size); }
+    else if (this.move) { const f = 1 + Math.floor(this.walkT / (this.move.ms / 3.2)) % 8; drawOW(c, img, 'walk', this.dir, f, x, y, this.alpha, this.size); }
     else drawOW(c, img, 'idle', this.dir, Math.floor((t + (this.x * 97)) / 600) % 2, x, y, this.alpha, this.size);
   }
   drawBubble(c, cx, cy) {

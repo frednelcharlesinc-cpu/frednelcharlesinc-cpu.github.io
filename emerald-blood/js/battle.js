@@ -28,7 +28,7 @@ const ENEMY = {
   halvard: { name: 'Inquisitor Halvard', hp: 280, atk: 14, def: 5, spd: 11, dodge: .08, parry: .25, brk: 90, xp: 90, gold: 60, boss: 1,
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 300 }, { anim: 'thrust', m: 1.1, w: 460 }] },
       { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.4, w: 640 }] }, { name: 'Binding Psalm', psalm: 1 }, { name: 'Purging Light', w: 0, hits: [{ anim: 'spellcast', m: 2.4, w: 1100, unp: 1 }] }] },
-  kairo_spar: { name: 'Kairo', hp: 80, atk: 7, def: 3, spd: 13, dodge: .15, parry: .15, brk: 50, xp: 20, gold: 0, img: 'kairo',
+  kairo_spar: { name: 'Kairo', hp: 80, atk: 7, def: 3, spd: 13, dodge: .15, parry: .15, brk: 50, xp: 20, gold: 0, img: 'kairo_kid',
     skills: [{ name: 'Quick Draw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Twin Cut', w: .45, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'slash', m: .6, w: 320 }] }, { name: 'Show-off Leap', w: .25, hits: [{ anim: 'jump', m: 1.1, w: 760, unp: 1 }] }] },
   kairo_duel: { name: 'Kairo', hp: 260, atk: 14, def: 5, spd: 15, dodge: .25, parry: .25, brk: 85, xp: 70, gold: 0, img: 'kairo_b', boss: 1,
     skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'slash', m: 1.4, w: 340 }] },
@@ -468,9 +468,9 @@ const Battle = {
       if (a.afterimg > 0) { a.afterimg -= 16; c.save(); c.globalAlpha = .3; drawBT(c, a.isMe ? playerImg() : a.img, a.anim, fr, a.x + 18, a.y, s); c.restore(); }
       if (a.isMe) {
         const anim = a.anim, glow = a.glow && anim === 'slash';
-        drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, fr, a.x, a.y, s);
+        if (!G.S.kid) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, fr, a.x, a.y, s);
         drawBT(c, playerImg(), anim, fr, a.x, a.y, s);
-        if (!glow) drawBT(c, G.A.sword, anim, fr, a.x, a.y, s);
+        if (G.S.kid) {} else if (!glow) drawBT(c, G.A.sword, anim, fr, a.x, a.y, s);
         else { c.save(); c.globalCompositeOperation = 'lighter'; drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); c.restore(); drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); }
         if (!G.S.hood) { const g = c.createRadialGradient(a.x - 4, a.y - 50, 0, a.x - 4, a.y - 50, 8); g.addColorStop(0, 'rgba(70,255,140,.4)'); g.addColorStop(1, 'rgba(70,255,140,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(a.x - 20, a.y - 66, 32, 32); c.restore(); }
       } else drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
