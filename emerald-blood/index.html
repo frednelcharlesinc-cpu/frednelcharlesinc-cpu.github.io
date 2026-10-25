@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Emerald Blood">
+<meta name="theme-color" content="#090c0a">
+<title>Emerald Blood</title>
+<link rel="apple-touch-icon" id="appicon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#090c0a;--panel:#111814;--panel2:#18221c;--line:#2a3a2f;--text:#e6efe8;--muted:#8ea596;--green:#39ff88;--hp:#e5484d;--mp:#3f9bff;--gold:#f2c14e}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'VT323',ui-monospace,monospace;font-size:21px;line-height:1.15;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font-family:inherit;color:inherit;cursor:pointer}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+#hud{display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--panel);border-bottom:2px solid var(--line)}
+.bars{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.bar{display:flex;align-items:center;gap:6px;font-size:16px}
+.bar span{width:20px;color:var(--muted)}
+.bar i{flex:1;height:8px;background:#0006;border:1px solid var(--line);position:relative}
+.bar b{position:absolute;left:0;top:0;bottom:0;background:var(--hp);transition:width .3s}
+.bar.mp b{background:var(--mp)}
+.bar em{font-style:normal;font-size:15px;width:50px;text-align:right;color:var(--muted)}
+#susWrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+#susWrap small{font-size:12px;color:var(--muted);letter-spacing:1px}
+#sus{display:flex;gap:2px}
+.eye{width:11px;height:7px;border-radius:50%;background:#1f2a23;border:1px solid #3a4a3f}
+.eye.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+#gold{color:var(--gold);font-size:19px;white-space:nowrap}
+#obj{padding:4px 12px;font-size:17px;color:var(--muted);background:var(--panel2);border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#obj b{color:var(--green);font-weight:normal}
+#view{flex:1;position:relative;overflow:hidden;background:#000;min-height:0}
+#map{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-rendering:pixelated;image-rendering:crisp-edges}
+#controls{flex:none;height:170px;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--panel);border-top:2px solid var(--line)}
+#dpad{display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:3px}
+#dpad button{background:var(--panel2);border:2px solid var(--line);border-radius:9px;font-size:18px;color:var(--muted);touch-action:none}
+#dpad button.held{background:#203024;color:var(--green);border-color:#2f6b43}
+#dpad .c{visibility:hidden}
+#btns{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;gap:10px 12px;align-items:center}
+#bA{grid-column:2;grid-row:1/3;width:76px;height:76px;border-radius:50%;background:#173322;border:3px solid #2f6b43;font-size:22px;color:var(--green);font-family:'Press Start 2P',monospace}
+#bA:active{background:#21472f}
+.pill{padding:8px 10px;border-radius:10px;background:var(--panel2);border:2px solid var(--line);font-size:18px;min-width:82px}
+#bHood.down{border-color:var(--green);color:var(--green);box-shadow:0 0 12px #39ff8855}
+#dlg{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(9,13,11,.97);border:2px solid var(--line);border-radius:10px;padding:10px 12px 14px;display:none;gap:10px;box-shadow:0 6px 24px #000c;z-index:5}
+#dlg.on{display:flex}
+#dlgPort{width:58px;height:58px;image-rendering:pixelated;border:2px solid var(--line);border-radius:6px;flex:none;background:#0d120f}
+#dlgBody{flex:1;min-width:0}
+#dlgName{color:var(--green);font-size:18px;margin-bottom:2px}
+#dlgText{font-size:21px;min-height:46px;white-space:pre-wrap}
+#dlgChoices{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.choice{text-align:left;padding:8px 10px;background:var(--panel2);border:2px solid var(--line);border-radius:8px;font-size:20px}
+.choice:active{border-color:var(--green)}
+#dlgMore{position:absolute;right:12px;bottom:4px;color:var(--green);font-size:16px;animation:bob 1s infinite}
+@keyframes bob{50%{transform:translateY(3px)}}
+#toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);max-width:88%;background:rgba(9,13,11,.94);border:1px solid #2f6b43;color:var(--text);padding:6px 12px;border-radius:8px;font-size:18px;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;z-index:4}
+#toast.on{opacity:1}
+#banner{position:absolute;left:0;right:0;top:38%;text-align:center;font-family:'Press Start 2P',monospace;font-size:14px;color:#fff;text-shadow:0 2px 0 #000,0 0 12px #000;opacity:0;transition:opacity .6s;pointer-events:none;z-index:3}
+#banner.on{opacity:1}
+.ov{position:fixed;inset:0;display:none;z-index:10;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.ov.on{display:flex}
+#battle{background:#070a08;flex-direction:column}
+#bcv{width:100%;image-rendering:pixelated;flex:none;border-bottom:2px solid var(--line);max-height:42vh;object-fit:contain;background:#000}
+#bpanel{flex:1;display:flex;flex-direction:column;padding:10px 12px;gap:8px;min-height:0}
+.erow{display:flex;align-items:center;gap:10px;font-size:20px}
+.erow span:first-child{white-space:nowrap}
+.ebar{flex:1;height:8px;background:#0006;border:1px solid var(--line);position:relative}
+.ebar b{position:absolute;left:0;top:0;bottom:0;background:#d8a23a;transition:width .3s}
+#blog{flex:1;overflow:hidden;font-size:19px;color:var(--muted);display:flex;flex-direction:column;justify-content:flex-end;min-height:60px}
+#blog div:last-child{color:var(--text)}
+#bcmd{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bbtn{padding:11px 8px;background:var(--panel2);border:2px solid var(--line);border-radius:9px;font-size:21px;text-align:center}
+.bbtn small{display:block;font-size:15px;color:var(--muted)}
+.bbtn.art{border-color:#2f6b43;color:var(--green)}
+.bbtn.wide{grid-column:1/3}
+.bbtn:disabled{opacity:.35}
+#title,#menu,#endscr{background:radial-gradient(circle at 50% 35%,#13261a,#060807 70%);align-items:center;justify-content:center;flex-direction:column}
+#tcv{width:190px;height:190px;image-rendering:pixelated}
+h1{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--green);text-shadow:0 0 14px #39ff8899;margin:10px 0 4px;text-align:center}
+.sub{color:var(--muted);margin-bottom:22px;text-align:center}
+.tbtn{display:block;width:230px;margin:8px auto;padding:12px;background:var(--panel2);border:2px solid #2f6b43;border-radius:10px;font-size:22px;color:var(--green)}
+#tName input{display:block;width:230px;margin:0 auto 8px;padding:10px;font-family:inherit;font-size:24px;background:#0b110d;color:var(--text);border:2px solid var(--line);border-radius:10px;text-align:center;-webkit-user-select:text;user-select:text}
+#tName p{text-align:center;color:var(--muted);margin:0 0 8px}
+#intro{background:#000;align-items:center;justify-content:center;flex-direction:column;padding:30px}
+#introText{max-width:420px;font-size:24px;text-align:center;line-height:1.3;min-height:120px}
+.tap{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));color:#555;font-size:17px}
+.card{width:min(92vw,420px);max-height:86vh;overflow:auto;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-family:'Press Start 2P',monospace;font-size:14px;color:var(--green);margin:0 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;margin-bottom:10px}
+.grid div span{color:var(--muted)}
+.sec{color:var(--muted);font-size:17px;margin-top:10px}
+.card p{margin:4px 0}
+.row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.row button{flex:1;padding:10px;background:var(--panel2);border:2px solid var(--line);border-radius:9px;font-size:19px;min-width:40%}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div class="bars">
+      <div class="bar"><span>HP</span><i><b id="hpb"></b></i><em id="hpt"></em></div>
+      <div class="bar mp"><span>MP</span><i><b id="mpb"></b></i><em id="mpt"></em></div>
+    </div>
+    <div id="susWrap"><div id="sus"></div><small>SUSPICION</small></div>
+    <div id="gold"></div>
+  </div>
+  <div id="obj"></div>
+  <div id="view">
+    <canvas id="map"></canvas>
+    <div id="banner"></div><div id="toast"></div>
+    <div id="dlg"><canvas id="dlgPort" width="48" height="48"></canvas><div id="dlgBody"><div id="dlgName"></div><div id="dlgText"></div><div id="dlgChoices"></div></div><div id="dlgMore">▼</div></div>
+  </div>
+  <div id="controls">
+    <div id="dpad">
+      <button class="c"></button><button data-d="up">▲</button><button class="c"></button>
+      <button data-d="left">◀</button><button class="c"></button><button data-d="right">▶</button>
+      <button class="c"></button><button data-d="down">▼</button><button class="c"></button>
+    </div>
+    <div id="btns">
+      <button id="bHood" class="pill">Hood ▲</button>
+      <button id="bA">A</button>
+      <button id="bMenu" class="pill">Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="battle" class="ov">
+  <canvas id="bcv" width="192" height="112"></canvas>
+  <div id="bpanel">
+    <div class="erow"><span id="bename"></span><span class="ebar"><b id="behp"></b></span></div>
+    <div class="bars">
+      <div class="bar"><span>HP</span><i><b id="bphp"></b></i><em id="bphpt"></em></div>
+      <div class="bar mp"><span>MP</span><i><b id="bpmp"></b></i><em id="bpmpt"></em></div>
+    </div>
+    <div id="blog"></div>
+    <div id="bcmd"></div>
+  </div>
+</div>
+
+<div id="menu" class="ov"><div class="card" id="menuCard"></div></div>
+<div id="endscr" class="ov"><div class="card" id="endCard"></div></div>
+<div id="intro" class="ov"><div id="introText"></div><div class="tap">tap to continue</div></div>
+
+<div id="title" class="ov on">
+  <canvas id="tcv" width="112" height="112"></canvas>
+  <h1>EMERALD BLOOD</h1>
+  <div class="sub">A Drags Chronicle · Chapter I: Ashford Hollow</div>
+  <div id="tMain">
+    <button class="tbtn" id="tContinue">Continue</button>
+    <button class="tbtn" id="tNew">New Game</button>
+  </div>
+  <div id="tName" style="display:none">
+    <p>What is your name, Drag?</p>
+    <input id="nameIn" maxlength="12" value="Ren" autocomplete="off">
+    <button class="tbtn" id="tBegin">Begin</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const TS=16, SAVE_KEY='emeraldblood_save_v1';
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+const OPP={up:'down',down:'up',left:'right',right:'left'};
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null}}
+function hash(x,y,s){s=s||0;let n=(x*374761393+y*668265263+s*982451653)|0;n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967296;}
+
+/* ================= DATA ================= */
+/*MAPS*/
+const MAPS={
+ town:{name:'Ashford Hollow',tint:null,enc:null,rows:[
+  "fffffffffff,ffffffffff",
+  "f..........,.........f",
+  "f.RRRR.....,....RRRR.f",
+  "f.RRRR.....,....RRRR.f",
+  "f.#D##.....,....##D#.f",
+  "f..,.......,......,..f",
+  "f..,,,,,,,,,,,,,,,,...",
+  "f..........,.........f",
+  "f..T.......,..W.....Tf",
+  "f.RRRR.....,.........f",
+  "f.RRRR.....,...RRRR..f",
+  "f.##D#.....,...RRRR..f",
+  "f...,......,...#D##..f",
+  "f...,,,,,,,,,,,,,....f",
+  "f.TT.......,......TT.f",
+  "f..........,.........f",
+  "f.T........,.......T.f",
+  "fffffffffff,ffffffffff"],
+  exits:[{x:21,y:6,to:'forest',tx:1,ty:7},{x:11,y:0,to:'mill',tx:10,ty:12},{x:11,y:17,msg:"Turning back isn't an option. Ilya is somewhere ahead."}]},
+ forest:{name:'The East Woods',tint:'rgba(0,25,10,.18)',enc:true,rows:[
+  "TTTTTTTTTTTTTTTTTTTTTT",
+  "TTFFFFTTTFFFFFTTTTTTTT",
+  "TFFFSFFTFFFFFFFFTTTTTT",
+  "TFFFFFFFFFTTFFFFFFTTTT",
+  "TTFFFFTFFFTTTFFFFFFFTT",
+  "TTTTFFFFFFFFFFFFFFFFTT",
+  "TTTTTFF,,,,,FFFFFFFFTT",
+  ",,,,,,,,FFFF,,,,FFFFTT",
+  "TTTFFFFFFFFFFFF,..C.TT",
+  "TTFFFFTTFFFFFFF,....TT",
+  "TFFFFFTTTFFFFFF,....TT",
+  "TFFFFFFFFFFFTTTTTTTTTT",
+  "TTFFFFFFFFFFFTTTTTTTTT",
+  "TTTFFF~~~FFFTTTTTTTTTT",
+  "TTTTFF~~~FFTTTTTTTTTTT",
+  "TTTTTTTTTTTTTTTTTTTTTT"],
+  exits:[{x:0,y:7,to:'town',tx:20,ty:6}]},
+ mill:{name:'The Old Mill',tint:'rgba(45,20,75,.30)',enc:true,rows:[
+  "TTTTTTTTTTTTTTTTTTTTTT",
+  "TTTTTTRRRRRRRRRTTTTTTT",
+  "TTTTTTRRRRRRRRRTT~~TTT",
+  "TTTTTT####D####TT~~TTT",
+  "TTTTT.....,....TT~~TTT",
+  "TTTT......,......~~TTT",
+  "TTTT..x...,...x..~~TTT",
+  "TTTTT.....,.....TT~~TT",
+  "TTTTTTFFFF,FFFFTTT~~TT",
+  "TTTTTFFFFF,FFFFFTTT~~T",
+  "TTTTTTFFFF,FFFFTTTTT~T",
+  "TTTTTTTFFF,FFFTTTTTTTT",
+  "TTTTTTTTFF,FFTTTTTTTTT",
+  "TTTTTTTTTT,TTTTTTTTTTT"],
+  exits:[{x:10,y:13,to:'town',tx:11,ty:1}]}
+};
+/*ENDMAPS*/
+const WALK=new Set(['.',',','F']);
+
+const LOOK={
+ player:{skin:'#8a5a3c',hair:'#141414',style:'dreads',robe:'#3a3e44',robe2:'#23262b',belt:'#5b6068',hoodCol:'#2b2f35'},
+ maren:{skin:'#a8754f',hair:'#d9d9d9',style:'bun',robe:'#5f7f64',robe2:'#3f5a45',belt:'#c9b98a'},
+ tobb:{skin:'#e2b08a',hair:'#6b4a2b',style:'bald',robe:'#8f4a2a',robe2:'#5e2f1a',apron:'#d8c8a0',belt:'#5e2f1a'},
+ pip:{skin:'#c98d63',hair:'#3b2416',style:'short',robe:'#4f7fb0',robe2:'#2f5276',belt:'#2f5276'},
+ kess:{skin:'#9b6844',hair:'#5a2e1e',style:'short',robe:'#5b4a6b',robe2:'#3a2f46',belt:'#8e7aa6',specs:true},
+ voss:{skin:'#c48a62',hair:'#8d969f',style:'helm',robe:'#7c858e',robe2:'#4d545b',belt:'#a33a2e'},
+ rook:{skin:'#d19a72',hair:'#222222',style:'bandana',band:'#b3362c',robe:'#5c3b2a',robe2:'#36231a',belt:'#222222'},
+ halvard:{skin:'#e3b896',hair:'#bbbbbb',style:'short',robe:'#e6dfcc',robe2:'#b8932a',belt:'#b8932a',hoodCol:'#efe8d6',hoodEye:'#cfe6ff',alwaysHood:true}
+};
+
+const ENEMIES={
+ wolf:{name:'Gray Wolf',hp:18,atk:7,def:1,xp:9,gold:4,kind:'wolf',col:'#7d7f80'},
+ ashwolf:{name:'Ash Wolf',hp:28,atk:9,def:2,xp:15,gold:7,kind:'wolf',col:'#46484a'},
+ rook:{name:'Rook the Bandit',hp:40,atk:9,def:2,xp:25,gold:20,kind:'person'},
+ voss:{name:'Captain Voss',hp:60,atk:10,def:4,xp:30,gold:0,kind:'person'},
+ halvard:{name:'Inquisitor Halvard',hp:110,atk:13,def:4,xp:60,gold:50,kind:'person'}
+};
+const ARTS={
+ fang:{name:'Emerald Fang',cost:4,desc:'Heavy strike'},
+ ward:{name:'Scale Ward',cost:3,desc:'-60% dmg, 2 turns'},
+ ruin:{name:'Verdant Ruin',cost:9,desc:'Devastating blast'}
+};
+
+const NPCS={
+ maren:{name:'Maren',map:'town',x:2,y:5,dir:'down',show:()=>true,talk:()=>talkMaren()},
+ tobb:{name:'Tobb',map:'town',x:19,y:5,dir:'down',show:()=>true,talk:()=>talkTobb()},
+ pip:{name:'Pip',map:'town',x:8,y:7,dir:'down',show:()=>!S.f.pipGone,talk:()=>talkPip()},
+ kess:{name:'Kess',map:'town',x:19,y:15,dir:'left',show:()=>!S.f.kessLeft,talk:()=>talkKess()},
+ voss:{name:'Captain Voss',map:'town',x:11,y:1,dir:'down',show:()=>!S.f.vossGone,talk:()=>talkVoss()},
+ rook:{name:'Rook',map:'forest',x:17,y:9,dir:'left',show:()=>!S.f.rookBeaten,talk:()=>talkRook()},
+ halvard:{name:'Halvard',map:'mill',x:10,y:4,dir:'down',show:()=>!S.f.halvardBeaten,talk:()=>halvardEvent()}
+};
+
+const S0=()=>({name:'Ren',lvl:1,xp:0,hp:42,maxHp:42,mp:14,maxMp:14,atk:9,def:3,gold:15,tonics:2,hood:true,sus:0,
+ map:'town',x:11,y:16,dir:'up',quest:'Find out where the Inquisition took Ilya. Ask around Ashford Hollow.',side:'',
+ arts:['fang','ward'],f:{},steps:0,muted:false});
+let S=null;
+
+/* ================= DRAWING ================= */
+function drawPerson(ctx,ox,oy,s,L,dir,step,opt){
+ opt=opt||{}; dir=dir||'down';
+ const r=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(ox+x*s,oy+y*s,w*s,h*s)};
+ const p=(x,y,c)=>r(x,y,1,1,c);
+ const hood=opt.hood||L.alwaysHood;
+ r(4,15,8,1,'rgba(0,0,0,.28)');
+ const ly=step===1?-1:0, ry=step===2?-1:0;
+ r(5,13+ly,2,1,L.robe2); r(5,14+ly,2,1,'#2b1d14');
+ r(9,13+ry,2,1,L.robe2); r(9,14+ry,2,1,'#2b1d14');
+ r(4,8,8,5,L.robe); r(4,12,8,1,L.robe2); r(4,10,8,1,L.belt||L.robe2);
+ if(L.apron&&dir!=='up') r(5,9,6,4,L.apron);
+ if(dir!=='up'){p(7,8,L.skin);p(8,8,L.skin);p(7,9,L.robe2);}
+ if(dir==='left'){r(6,9,2,3,L.robe2);p(6,12,L.skin);}
+ else if(dir==='right'){r(8,9,2,3,L.robe2);p(9,12,L.skin);}
+ else{r(3,8,1,4,L.robe);r(12,8,1,4,L.robe);p(3,12,L.skin);p(12,12,L.skin);}
+ r(5,3,6,5,L.skin);
+ const H=L.hair, st=L.style;
+ if(!hood){
+  if(dir==='up'){
+   if(st==='helm') r(4,1,8,7,H); else if(st!=='bald'){r(5,1,6,7,H);}
+   else{r(5,3,6,5,L.skin);r(5,5,6,2,H);}
+   if(st==='dreads'){r(7,0,2,1,H);for(let y=3;y<10;y++){p(4,y,H);p(11,y,H);if(y>7){p(6,y,H);p(9,y,H);}}}
+   if(st==='bun'){r(7,0,2,1,H);}
+   if(st==='bandana'){r(5,1,6,2,L.band);p(8,3,L.band);p(8,4,L.band);}
+  } else {
+   if(st==='dreads'){r(7,0,2,1,H);r(5,1,6,1,H);r(4,2,8,1,H);r(5,3,6,1,H);
+    for(let y=3;y<10;y++){p(4,y,H);p(11,y,H);if(y%2)p(4,y,'rgba(255,255,255,.08)');}
+    if(dir==='left'){for(let y=3;y<9;y++)p(10,y,H);} if(dir==='right'){for(let y=3;y<9;y++)p(5,y,H);}}
+   else if(st==='bun'){r(7,0,2,1,H);r(6,1,4,1,H);r(5,2,6,1,H);p(5,3,H);p(10,3,H);}
+   else if(st==='short'){r(5,1,6,2,H);p(5,3,H);p(10,3,H);}
+   else if(st==='bald'){p(5,4,H);p(10,4,H);p(5,5,H);p(10,5,H);}
+   else if(st==='bandana'){r(5,1,6,2,L.band);p(11,2,L.band);p(12,3,L.band);p(5,3,H);p(10,3,H);}
+   else if(st==='helm'){r(5,0,6,1,H);r(4,1,8,3,H);p(4,4,H);p(11,4,H);r(4,3,8,1,'rgba(0,0,0,.25)');}
+  }
+ } else {
+  const HC=L.hoodCol||'#2b2f35';
+  r(6,0,4,1,HC);r(5,1,6,1,HC);r(4,2,8,6,HC);r(3,5,1,4,HC);r(12,5,1,4,HC);r(4,8,8,1,HC);
+  r(4,2,8,1,'rgba(255,255,255,.07)');
+ }
+ if(dir==='up') return;
+ const ex=dir==='left'?[5,7]:dir==='right'?[8,10]:[6,9];
+ if(hood){
+  const wx=dir==='left'?5:dir==='right'?7:6;
+  r(wx,4,4,4,L.skin); r(wx,4,4,1,'rgba(0,0,0,.5)'); r(wx,5,4,1,'rgba(0,0,0,.25)');
+  const ec=L.hoodEye||'#0d110f';
+  ex.forEach(x=>p(x,5,ec));
+  return;
+ }
+ if(L.specs&&!opt.noSpecs){ r(ex[0]-1,5,3,1,'#2b2633'); r(ex[1]-1,5,3,1,'#2b2633'); return; }
+ if(opt.glow){
+  ex.forEach(x=>{ctx.fillStyle='rgba(57,255,136,.4)';[[x-1,5],[x+1,5],[x,4],[x,6]].forEach(q=>ctx.fillRect(ox+q[0]*s,oy+q[1]*s,s,s));p(x,5,'#c4ffdc');});
+ } else ex.forEach(x=>p(x,5,opt.eye||'#1a1410'));
+}
+function drawWolf(ctx,ox,oy,s,col){
+ const r=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(ox+x*s,oy+y*s,w*s,h*s)};
+ r(2,15,12,1,'rgba(0,0,0,.28)');
+ r(4,7,9,5,col); r(5,6,7,1,col); r(5,11,7,1,'rgba(0,0,0,.25)'); r(5,7,7,1,'rgba(255,255,255,.12)');
+ r(12,5,2,2,col); r(13,3,2,2,col); r(14,2,1,2,col);
+ r(0,5,5,4,col); r(1,4,1,1,col); r(3,4,1,1,col); r(0,8,3,1,col);
+ r(1,6,1,1,'#ff5a3c'); r(0,7,1,1,'#111');
+ [4,6,10,12].forEach(x=>{r(x,12,1,3,col);r(x,14,1,1,'rgba(0,0,0,.35)');});
+}
+function drawTile(c,ch,x,y){
+ const ox=x*TS,oy=y*TS; const r=(px,py,w,h,col)=>{c.fillStyle=col;c.fillRect(ox+px,oy+py,w,h)};
+ const grass=()=>{r(0,0,16,16,'#3d6a3a');for(let i=0;i<5;i++)r(Math.floor(hash(x,y,i)*15),Math.floor(hash(y,x,i+9)*15),1,1,i%2?'#4e7f48':'#325a30');};
+ switch(ch){
+  case '.':grass();break;
+  case ',':r(0,0,16,16,'#8a6c47');for(let i=0;i<6;i++)r(Math.floor(hash(x,y,i)*15),Math.floor(hash(y,x,i+4)*15),1,1,i%2?'#7a5e3d':'#9b7c55');break;
+  case 'F':r(0,0,16,16,'#2f5631');for(let i=0;i<6;i++){const a=Math.floor(hash(x,y,i)*14)+1,b=Math.floor(hash(y,x,i+3)*10)+3;r(a,b,1,3,'#4a8044');r(a,b,1,1,'#5d9a55');}break;
+  case 'T':grass();r(7,10,2,6,'#4a3220');r(3,1,10,2,'#1f4a28');r(1,3,14,6,'#1f4a28');r(2,9,12,2,'#1f4a28');r(4,11,8,1,'#1a3d22');r(4,3,4,2,'#2e6537');r(3,5,2,2,'#2e6537');r(9,8,5,2,'#173a1f');break;
+  case 'f':grass();r(0,6,16,2,'#86613c');r(0,11,16,2,'#86613c');r(2,4,2,11,'#6b4a2c');r(12,4,2,11,'#6b4a2c');r(0,8,16,1,'rgba(0,0,0,.2)');break;
+  case 'R':r(0,0,16,16,'#7b3a2c');for(let i=0;i<16;i+=4)r(0,i+3,16,1,'#5e2a20');r(0,0,16,1,'#95503d');r((y%2)?4:11,0,1,16,'rgba(0,0,0,.12)');break;
+  case '#':r(0,0,16,16,'#6e4c33');for(let i=0;i<16;i+=4)r(i,0,1,16,'#573a26');r(0,15,16,1,'#3d2818');r(0,0,16,2,'rgba(0,0,0,.25)');
+   if(hash(x,y,7)>0.5){r(5,5,6,5,'#2a1a10');r(6,6,4,3,'#f0c96a');r(8,6,1,3,'#2a1a10');}break;
+  case 'D':r(0,0,16,16,'#6e4c33');r(0,0,16,2,'rgba(0,0,0,.25)');r(4,3,8,13,'#3b2616');r(5,4,6,11,'#4a301c');r(9,10,1,1,'#e2bd5a');break;
+  case 'W':grass();r(3,4,10,10,'#7a7c82');r(4,5,8,8,'#5d5f64');r(5,6,6,6,'#1b3954');r(6,7,2,1,'#3d6f99');r(2,2,1,10,'#5a3e28');r(13,2,1,10,'#5a3e28');r(2,1,12,2,'#7b3a2c');break;
+  case '~':r(0,0,16,16,'#28598a');for(let i=0;i<3;i++)r(Math.floor(hash(x,y,i)*12),Math.floor(hash(y,x,i)*14),4,1,'#3f7bb0');break;
+  case 'S':r(0,0,16,16,'#2f5631');r(4,2,8,13,'#6d7275');r(5,1,6,1,'#6d7275');r(4,2,1,13,'#888d90');r(6,5,1,1,'#39ff88');r(9,5,1,1,'#39ff88');r(7,7,2,4,'#2a8f55');r(6,9,4,1,'#2a8f55');r(4,14,8,1,'#4a4f52');r(4,11,3,3,'#3f6b38');break;
+  case 'C':grass();r(3,5,10,9,'#9a6b3c');r(3,5,10,1,'#b3824f');r(3,9,10,1,'#6f4a28');r(3,5,1,9,'#6f4a28');r(12,5,1,9,'#6f4a28');r(4,13,9,1,'rgba(0,0,0,.3)');break;
+  case 'x':grass();r(2,3,12,1,'#2c2e33');r(2,14,12,1,'#2c2e33');for(let i=2;i<14;i+=3)r(i,3,1,12,'#44474e');break;
+  default:r(0,0,16,16,'#000');
+ }
+}
+
+/* ================= MAP / MOVEMENT ================= */
+const mapCv=$('#map'), ctx=mapCv.getContext('2d');
+const pre=document.createElement('canvas');
+function tile(m,x,y){const M=MAPS[m];if(y<0||y>=M.rows.length||x<0||x>=M.rows[0].length)return 'T';let c=M.rows[y][x];if(m==='forest'&&x===18&&y===8&&S.f.crateTaken)c='.';return c;}
+function exitAt(m,x,y){return(MAPS[m].exits||[]).find(e=>e.x===x&&e.y===y);}
+function npcAt(m,x,y){for(const id in NPCS){const n=NPCS[id];if(n.map===m&&n.x===x&&n.y===y&&n.show())return n;}return null;}
+function buildMap(){const M=MAPS[S.map];const w=M.rows[0].length,h=M.rows.length;pre.width=w*TS;pre.height=h*TS;const c=pre.getContext('2d');for(let y=0;y<h;y++)for(let x=0;x<w;x++)drawTile(c,tile(S.map,x,y),x,y);}
+
+let mv=null, held=null, busy=false, lastBattleStep=0, lastMsg=0;
+function tryMove(d){
+ S.dir=d; const nx=S.x+DIRS[d][0], ny=S.y+DIRS[d][1];
+ const ex=exitAt(S.map,nx,ny);
+ if(ex&&ex.msg){if(Date.now()-lastMsg>2500){lastMsg=Date.now();toast(ex.msg);}return;}
+ if(!WALK.has(tile(S.map,nx,ny)))return;
+ if(npcAt(S.map,nx,ny))return;
+ mv={fx:S.x,fy:S.y,tx:nx,ty:ny,t:0};
+}
+function afterStep(){
+ S.steps++;
+ const ex=exitAt(S.map,S.x,S.y);
+ if(ex&&ex.to){changeMap(ex.to,ex.tx,ex.ty);return;}
+ noticeCheck();
+ if(S.map==='mill'&&!S.f.halvardBeaten&&S.y<=6){runEvent(halvardEvent);return;}
+ if(MAPS[S.map].enc&&tile(S.map,S.x,S.y)==='F'&&S.steps-lastBattleStep>4&&Math.random()<0.1){
+  runEvent(async()=>{const pool=S.map==='mill'?['ashwolf']:(S.lvl>=2?['wolf','wolf','ashwolf']:['wolf']);
+   const r=await battle(pool[Math.floor(Math.random()*pool.length)]);if(r.result==='lose')await revive();});
+ }
+}
+function noticeCheck(){
+ if(S.hood||S.map!=='town')return;
+ for(const id of ['tobb','voss']){const n=NPCS[id];if(!n.show())continue;
+  if(Math.abs(n.x-S.x)+Math.abs(n.y-S.y)<=2&&!S.f[id+'Knows']){S.f[id+'Knows']=true;S.sus=Math.min(5,S.sus+1);toast(n.name+' saw your eyes. Suspicion rises.');updateHud();}}
+}
+function changeMap(to,x,y){
+ S.map=to;S.x=x;S.y=y;mv=null;buildMap();banner(MAPS[to].name);save();
+ if(to==='forest'&&!S.f.tipForest){S.f.tipForest=true;setTimeout(()=>toast('Wolves hide in tall grass. Paths are safe.'),1400);}
+ if(to==='mill'&&!S.f.tipMill){S.f.tipMill=true;setTimeout(()=>toast('The air smells of smoke and incense.'),1400);}
+}
+
+let lastT=0;
+function loop(t){
+ const dt=Math.min(50,t-(lastT||t));lastT=t;
+ if(S&&!$('#title').classList.contains('on')){update(dt);render(t);}
+ requestAnimationFrame(loop);
+}
+function update(dt){
+ if(mv){mv.t+=dt/150;if(mv.t>=1){S.x=mv.tx;S.y=mv.ty;mv=null;afterStep();}}
+ if(!mv&&held&&!busy)tryMove(held);
+ if(Math.random()<0.004){const n=NPCS.pip;n.dir=['down','left','right','up'][Math.floor(Math.random()*4)];}
+ if(Math.random()<0.002){const n=NPCS.tobb;n.dir=['down','left'][Math.floor(Math.random()*2)];}
+}
+function render(t){
+ const cw=mapCv.width,ch=mapCv.height;ctx.imageSmoothingEnabled=false;
+ ctx.fillStyle='#000';ctx.fillRect(0,0,cw,ch);
+ let px=S.x*TS,py=S.y*TS;
+ if(mv){px=(mv.fx+(mv.tx-mv.fx)*mv.t)*TS;py=(mv.fy+(mv.ty-mv.fy)*mv.t)*TS;}
+ const M=MAPS[S.map],mw=M.rows[0].length*TS,mh=M.rows.length*TS;
+ let cx=mw<=cw?(mw-cw)/2:Math.max(0,Math.min(mw-cw,px+8-cw/2));
+ let cy=mh<=ch?(mh-ch)/2:Math.max(0,Math.min(mh-ch,py+8-ch/2));
+ cx=Math.round(cx);cy=Math.round(cy);
+ ctx.drawImage(pre,-cx,-cy);
+ const ents=[];
+ for(const id in NPCS){const n=NPCS[id];if(n.map===S.map&&n.show())ents.push({y:n.y,d:()=>drawPerson(ctx,n.x*TS-cx,n.y*TS-cy-3,1,LOOK[id],n.dir,0,{})});}
+ const step=mv?(Math.floor(mv.t*2)%2+1):0;
+ ents.push({y:py/TS,d:()=>drawPerson(ctx,Math.round(px)-cx,Math.round(py)-cy-3,1,LOOK.player,S.dir,step,{hood:S.hood,glow:!S.hood})});
+ ents.sort((a,b)=>a.y-b.y).forEach(e=>e.d());
+ if(M.tint){ctx.fillStyle=M.tint;ctx.fillRect(0,0,cw,ch);}
+ if(!S.hood&&S.dir!=='up'){
+  const gx=Math.round(px)-cx+8,gy=Math.round(py)-cy+2,a=.22+.08*Math.sin(t/300);
+  const g=ctx.createRadialGradient(gx,gy,1,gx,gy,16);g.addColorStop(0,'rgba(57,255,136,'+a+')');g.addColorStop(1,'rgba(57,255,136,0)');
+  ctx.fillStyle=g;ctx.fillRect(gx-16,gy-16,32,32);
+ }
+}
+
+/* ================= UI HELPERS ================= */
+let toastT=null;
+function toast(msg,ms){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms||2800);}
+let banT=null;
+function banner(txt){const b=$('#banner');b.textContent=txt;b.classList.add('on');clearTimeout(banT);banT=setTimeout(()=>b.classList.remove('on'),1600);}
+function updateHud(){
+ if(!S)return;
+ $('#hpb').style.width=(S.hp/S.maxHp*100)+'%';$('#hpt').textContent=S.hp+'/'+S.maxHp;
+ $('#mpb').style.width=(S.mp/S.maxMp*100)+'%';$('#mpt').textContent=S.mp+'/'+S.maxMp;
+ $('#gold').textContent=S.gold+'g';
+ let e='';for(let i=0;i<5;i++)e+='<i class="eye'+(i<S.sus?' on':'')+'"></i>';$('#sus').innerHTML=e;
+ const hb=$('#bHood');hb.classList.toggle('down',!S.hood);hb.textContent=S.hood?'Hood ▲':'Hood ▼';
+ $('#obj').innerHTML='<b>▸</b> '+S.quest;
+}
+function save(){if(S)store(SAVE_KEY,JSON.stringify(S));}
+function load(){const raw=store(SAVE_KEY);if(!raw)return null;try{const d=JSON.parse(raw);return Object.assign(S0(),d,{f:Object.assign({},d.f||{})});}catch(e){return null}}
+
+/* sound */
+let AC=null;
+function sfx(t){
+ if(S&&S.muted)return;
+ try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const now=AC.currentTime;
+  const tone=(f,d,type,v,f2,dl)=>{dl=dl||0;const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,now+dl);if(f2)o.frequency.exponentialRampToValueAtTime(f2,now+dl+d);g.gain.setValueAtTime(v,now+dl);g.gain.exponentialRampToValueAtTime(0.0001,now+dl+d);o.connect(g);g.connect(AC.destination);o.start(now+dl);o.stop(now+dl+d+0.03);};
+  switch(t){
+   case 'blip':tone(520,.03,'square',.012);break;
+   case 'hit':tone(180,.12,'sawtooth',.06,60);break;
+   case 'hurt':tone(120,.18,'square',.06,50);break;
+   case 'art':tone(300,.25,'triangle',.08,1200);tone(600,.25,'square',.02,1800,.05);break;
+   case 'heal':[523,659,784].forEach((f,i)=>tone(f,.12,'triangle',.05,null,i*.08));break;
+   case 'level':[523,659,784,1046].forEach((f,i)=>tone(f,.14,'square',.04,null,i*.09));break;
+   case 'coin':tone(988,.06,'square',.04);tone(1319,.12,'square',.04,null,.06);break;
+   case 'start':tone(200,.2,'sawtooth',.05,400);break;
+   case 'win':[392,523,659].forEach((f,i)=>tone(f,.16,'triangle',.06,null,i*.1));break;
+   case 'chant':tone(220,.5,'sine',.06,330);break;
+   case 'hood':tone(300,.08,'triangle',.04,200);break;
+  }}catch(e){}
+}
+
+/* ================= DIALOG ================= */
+const dlg={typing:false,full:'',res:null,choices:null,timer:null};
+function drawPortrait(c,key){
+ const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.fillStyle='#0d120f';x.fillRect(0,0,48,48);
+ let L=LOOK[key],o={};
+ if(key==='player')o={hood:S.hood,glow:!S.hood};
+ if(key==='kess'&&S.f.kessKnows)o={noSpecs:true,eye:'#2fd977'};
+ drawPerson(x,-8,2,4,L,'down',0,o);
+}
+function showDlg(who,text,port,choices,res){
+ $('#dlg').classList.add('on');
+ const nm=$('#dlgName');nm.textContent=who||'';nm.style.display=who?'':'none';
+ const pc=$('#dlgPort');if(port){pc.style.display='';drawPortrait(pc,port);}else pc.style.display='none';
+ text=text.replace(/\{name\}/g,S.name);
+ const t=$('#dlgText');t.textContent='';$('#dlgChoices').innerHTML='';$('#dlgMore').style.visibility='hidden';
+ t.style.fontStyle=who?'normal':'italic';t.style.color=who?'':'#b9c9bd';
+ let i=0;dlg.typing=true;dlg.full=text;dlg.res=res;dlg.choices=choices;
+ clearInterval(dlg.timer);
+ dlg.timer=setInterval(()=>{i++;t.textContent=text.slice(0,i);if(i%3===0)sfx('blip');if(i>=text.length)finishType();},20);
+}
+function finishType(){
+ clearInterval(dlg.timer);dlg.typing=false;$('#dlgText').textContent=dlg.full;
+ if(dlg.choices){const ch=$('#dlgChoices');ch.innerHTML='';dlg.choices.forEach((c,idx)=>{const b=document.createElement('button');b.className='choice';b.textContent=c;
+  b.onclick=e=>{e.stopPropagation();if(!dlg.res)return;sfx('blip');const r=dlg.res;dlg.res=null;dlg.choices=null;r(idx);};ch.appendChild(b);});}
+ else $('#dlgMore').style.visibility='visible';
+}
+function dlgAdvance(){
+ if(!$('#dlg').classList.contains('on'))return false;
+ if(dlg.typing){finishType();return true;}
+ if(!dlg.choices&&dlg.res){const r=dlg.res;dlg.res=null;r();}
+ return true;
+}
+function closeDlg(){clearInterval(dlg.timer);$('#dlg').classList.remove('on');dlg.res=null;dlg.choices=null;}
+const say=(who,text,port)=>new Promise(res=>showDlg(who,text,port,null,res));
+const ask=(who,text,choices,port)=>new Promise(res=>showDlg(who,text,port,choices,res));
+const narr=text=>say(null,text,null);
+const me=text=>say(S.name,text,'player');
+
+async function runEvent(fn){
+ busy=true;held=null;
+ try{await fn();}catch(e){console.error(e);}
+ finally{closeDlg();busy=false;save();updateHud();}
+}
+function interact(){
+ if(busy||mv||!S)return;
+ const tx=S.x+DIRS[S.dir][0],ty=S.y+DIRS[S.dir][1];
+ const npc=npcAt(S.map,tx,ty);
+ if(npc){npc.dir=OPP[S.dir];runEvent(npc.talk);return;}
+ const fn=OBJ[S.map+','+tx+','+ty]||(OBJT[tile(S.map,tx,ty)]);
+ if(fn)runEvent(fn);
+}
+function heal(){S.hp=S.maxHp;S.mp=S.maxMp;sfx('heal');updateHud();toast('HP & MP restored.');}
+function gainXp(n){S.xp+=n;const m=[];while(S.xp>=S.lvl*25){S.xp-=S.lvl*25;S.lvl++;S.maxHp+=8;S.maxMp+=3;S.atk+=2;S.def+=1;S.hp=S.maxHp;S.mp=S.maxMp;m.push('LEVEL UP! You are now Lv '+S.lvl+'.');}return m;}
+
+/* ================= STORY: NPCs ================= */
+async function marenMill(){
+ S.f.learnedMill=true;
+ await say('Maren',"...The Inquisition's wagons came through two nights back. Cages on the back. Children in some of them.",'maren');
+ await say('Maren',"They took the north road to the old mill. Captain Voss closed the gate behind them.",'maren');
+ await say('Maren',"Whatever you're planning, child — this town already has enough ghosts.",'maren');
+ if(S.quest.indexOf('Find')===0)S.quest='The wagons went north to the Old Mill. Get past Captain Voss at the north gate.';
+}
+async function talkMaren(){
+ const f=S.f;
+ if(!S.hood&&!f.marenKnows){
+  f.marenKnows=true;f.metMaren=true;
+  await say('Maren',"Let me see that cut, traveler—",'maren');
+  await say('Maren',"...Green.",'maren');
+  await say('Maren',"I saw eyes like yours once. A little girl, years back. They hanged her father in the square. Right where that well stands.",'maren');
+  heal();
+  await say('Maren',"Sit. I'll treat you. Here, on the porch.",'maren');
+  const c=await ask('Maren',"The door stays closed.",["Why?","...Thank you."],'maren');
+  if(c===0)await say('Maren',"Because I have six patients inside who'd rather bleed out than share a roof with you. I hate that. But I choose who I can save, every single day.",'maren');
+  else await say('Maren',"Don't thank me. Kindness with a closed door isn't much kindness.",'maren');
+  await say('Maren',"I won't tell anyone what you are. That much I can do.",'maren');
+  if(!f.learnedMill)await marenMill();
+  return;
+ }
+ if(!f.metMaren){
+  f.metMaren=true;heal();
+  await say('Maren',"Another traveler with road-dust up to the knees. Sit, sit. Let me look at you.",'maren');
+  await say('Maren',"There. Patched. You're hunting something — I can tell by the way you stand.",'maren');
+  const c=await ask('Maren',"Well?",["My sister. The Inquisition took her.","Just passing through."],'maren');
+  if(c===0)await marenMill();
+  else await say('Maren',"Mm. Everyone's passing through. Mind the east woods — the wolves are bold this year.",'maren');
+  return;
+ }
+ heal();
+ if(f.marenKnows)await say('Maren',S.sus>=3?"The whole town's whispering about green eyes. It wasn't me. I need you to know that.":"Porch again. Sit. ...There. Good as I can make you.",'maren');
+ else await say('Maren',["Patched up again. Try not to bleed so much.","Wolves again? Hold still.","There. And eat something — you're all bones."][S.steps%3],'maren');
+ if(!f.learnedMill){const c=await ask('Maren',"Anything else?",["Seen any Inquisition wagons?","No. Thank you."],'maren');if(c===0)await marenMill();}
+}
+
+async function talkTobb(){
+ const f=S.f;
+ if((f.tobbKnows||!S.hood)&&!f.tobbReveal){
+  if(!f.tobbKnows){f.tobbKnows=true;S.sus=Math.min(5,S.sus+1);updateHud();}
+  f.tobbReveal=true;f.metTobb=true;
+  if(f.rookSaw)await say('Tobb',"Rook came screaming into town about green eyes in the woods. So that was... you.",'tobb');
+  else await say('Tobb',"Welcome to— oh. Oh. Your eyes.",'tobb');
+  await say('Tobb',"No, no, it's fine! I'm not one of THOSE people. Some of my best customers are... well, not Drags. But I'm sure some of you are lovely.",'tobb');
+  await say('Tobb',"Prices are a little different for, ah, higher-risk customers. Nothing personal. Insurance.",'tobb');
+ } else if(!f.metTobb){
+  f.metTobb=true;
+  await say('Tobb',"Welcome, welcome! Tobb's Goods — finest tonics this side of the Ashen River!",'tobb');
+  await say('Tobb',"Careful on the roads, friend. Heard there's Drags about. Nasty business. No offense to anyone, of course.",'tobb');
+ }
+ while(true){
+  const price=f.tobbKnows?(f.crateDone?20:30):10;
+  const opts=['Buy tonic ('+price+'g)'];
+  if(f.hasCrate&&!f.crateDone)opts.push('Return the crate');
+  else if(!f.crateQuest)opts.push('Any work?');
+  opts.push('Leave');
+  const c=await ask('Tobb',f.tobbKnows?"Well? Gold first. Customer... policy.":"What can I get you, friend?",opts,'tobb');
+  const o=opts[c];
+  if(o.indexOf('Buy')===0){
+   if(S.gold>=price){S.gold-=price;S.tonics++;sfx('coin');updateHud();await say('Tobb',"One tonic. That's "+S.tonics+" in your bag.",'tobb');}
+   else await say('Tobb',"Short on coin, I see. I can't run a charity.",'tobb');
+  } else if(o==='Any work?'){
+   f.crateQuest=true;
+   await say('Tobb',"Bandits hit my cart on the east road. Took a whole crate of tonics! Bring it back and I'll pay 40 gold and three tonics.",'tobb');
+   if(f.tobbKnows)await say('Tobb',"I'd ask the guard, but they won't go in those woods. You people are, ah, hardier. Supposedly.",'tobb');
+   S.side="Recover Tobb's crate from the bandits in the East Woods (east exit).";
+   toast('Side quest: Tobb\'s stolen crate');
+  } else if(o==='Return the crate'){
+   f.crateDone=true;f.hasCrate=false;S.gold+=40;S.tonics+=3;S.side='';sfx('coin');
+   if(f.tobbKnows){
+    await say('Tobb',"You... brought it back. Every bottle.",'tobb');
+    await say('Tobb',"I didn't think your kind would— I mean... Here. Forty gold, three tonics. And tonics are twenty for you now. Best I can do. People watch my shop, you understand.",'tobb');
+   } else {
+    await say('Tobb',"My crate! Every bottle! You're a saint, friend. An absolute saint!",'tobb');
+    await say('Tobb',"Forty gold and three tonics, as promised. If only everyone were as decent as you — instead of, you know. Drags and bandits.",'tobb');
+   }
+   gainXp(20).forEach(m=>{sfx('level');toast(m);});
+  } else break;
+ }
+}
+
+async function talkPip(){
+ const f=S.f;
+ if(!S.hood){
+  await say('Pip',"WHOA! Your eyes are GLOWING! Like fireflies!",'pip');
+  await say('Pip',"Mama says Drags eat babies. Do you eat babies? You don't LOOK like you eat babies.",'pip');
+  await narr("A door bangs open. A woman storms out and yanks Pip behind her.");
+  await say("Pip's Mother","PIP. Inside. NOW.",null);
+  await say("Pip's Mother","Stay away from my son. I mean it.",null);
+  await say('Pip',"But Mama, he's nice—",'pip');
+  await narr("The door slams. A moment later, a small face appears at the window. It waves.");
+  f.pipGone=true;return;
+ }
+ if(!f.metPip){
+  f.metPip=true;
+  const c=await ask('Pip',"Mister, why do you wear a hood when it's not even raining?",["To keep the sun off.","I'm hiding my eyes."],'pip');
+  if(c===0)await say('Pip',"Oh. Okay! Wanna see my rock? It's a normal rock. I named it Gerald.",'pip');
+  else await say('Pip',"Mama says Drags wear hoods so you can't see their eyes. Are you a Drag? ...You'd be the first one I ever met!",'pip');
+  return;
+ }
+ await say('Pip',["Gerald says hi. Gerald is my rock.","When I grow up I'm gonna be a knight. Or a frog.","Mama says don't talk to strangers. You're not strange though."][S.steps%3],'pip');
+}
+
+async function talkKess(){
+ const f=S.f;
+ if(f.kessHelp){await say('Kess',"Go talk to Voss. I'll handle the rest. And for once — keep your eyes down.",'kess');return;}
+ if(f.kessRefused){await say('Kess',"Get away from me. You've done enough.",'kess');return;}
+ if(S.hood){
+  if(!f.metKess){
+   f.metKess=true;
+   const c=await ask('Kess',"Lost? The inn's that way. Go bother it.",["Tinted glasses at dusk?","Sorry. Leaving."],'kess');
+   if(c===0){await say('Kess',"And a hood with no rain. We've all got our reasons. Walk on.",'kess');await narr("She never looks up. Her lenses never leave her face.");}
+  } else await say('Kess',"Still here? People who linger get noticed. Trust me.",'kess');
+  return;
+ }
+ f.kessKnows=true;
+ await say('Kess',"Are you INSANE? Cover your—",'kess');
+ await narr("She grabs your sleeve and drags you behind the trees. Then she lowers her glasses.");
+ await narr("Her eyes are green. Dim, like coals she's spent years smothering.");
+ await say('Kess',"Twelve years. Twelve years I've kept my head down in this town. And you stroll in burning like a lighthouse.",'kess');
+ if(S.sus>=3){
+  f.kessRefused=true;
+  await say('Kess',"Everyone's talking about green eyes. Now they'll check every face in the Hollow — mine too. I can't help you. Get away from me.",'kess');
+  S.quest='Get past Captain Voss at the north gate — any way you can.';return;
+ }
+ const c=await ask('Kess',"What do you want?",["My sister. The Inquisition took her.","I want to stop hiding."],'kess');
+ if(c===1)await say('Kess',"Hiding is how I'm still breathing. Don't you dare make it sound cowardly.",'kess');
+ await say('Kess',"...The cages went to the old mill, north. Halvard runs it. He's not like the others. He believes.",'kess');
+ await say('Kess',"Voss guards the north gate. He's not cruel — just obedient. I can pull him away. Once.",'kess');
+ await say('Kess',"Don't make me regret this.",'kess');
+ f.kessHelp=true;f.learnedMill=true;S.quest='Kess will distract Captain Voss. Go to the north gate and talk to him.';
+}
+
+async function fightVoss(){
+ S.sus=Math.min(5,S.sus+2);updateHud();
+ const r=await battle('voss',{noFlee:true,intro:'Captain Voss raises his shield. "Your choice, then."'});
+ if(r.result==='lose'){await revive();return;}
+ if(r.blazed){S.f.vossKnows=true;S.sus=5;}
+ await say('Captain Voss',"...Enough. Enough.",'voss');
+ if(S.f.vossKnows)await say('Captain Voss',"I've seen Drags hanged for less than what you just did. And you're letting me breathe.",'voss');
+ await say('Captain Voss',"Go north, then. I didn't see you. I'm too tired to have seen anything.",'voss');
+ await narr("Voss limps off toward the barracks.");
+ S.f.vossGone=true;S.f.vossBeaten=true;S.quest='Reach the Old Mill through the north gate.';
+}
+async function talkVoss(){
+ const f=S.f;
+ if(f.kessHelp){
+  await narr("Before Voss can speak, Kess comes sprinting up the road.");
+  await say('Kess',"Captain! The inn stables — fire! The horses are trapped!",'kess');
+  await say('Captain Voss',"What? Blast it — nobody touches this gate!",'voss');
+  await narr("Voss runs. Kess passes you without slowing down.");
+  await say('Kess',"Go. And keep your eyes down.",'kess');
+  f.vossGone=true;f.kessLeft=true;S.quest='Reach the Old Mill through the north gate.';return;
+ }
+ if(!S.hood&&!f.vossKnows){f.vossKnows=true;S.sus=Math.min(5,S.sus+1);updateHud();}
+ if(f.vossKnows||S.sus>=3){
+  await say('Captain Voss',S.hood?"Hood won't help you now. Half the Hollow's talking about green eyes.":"Green eyes. So the rumors are true.",'voss');
+  await say('Captain Voss',"I don't hate you, Drag. I don't have to. The law does that for me. Hands where I can see them.",'voss');
+  const c=await ask(S.name,"What do you do?",["Raise your hands.","Fight."],'player');
+  if(c===0){await say('Captain Voss',"...You're not resisting. Huh. Get out of my sight. But you're not going north.",'voss');return;}
+  return fightVoss();
+ }
+ const c=await ask('Captain Voss',"Road's closed. Inquisition business. Turn around, traveler.",["What's up north?","Let me through.","[Force your way past]"],'voss');
+ if(c===0)await say('Captain Voss',"The old mill. Not my concern. Not yours either.",'voss');
+ else if(c===1)await say('Captain Voss',"I've got orders. Orders don't care what I think — and I've stopped thinking.",'voss');
+ else return fightVoss();
+}
+
+async function talkRook(){
+ const f=S.f;
+ const c=await ask('Rook',"Well, well. A hood in the woods. You lost, or looking to lose something?",["That crate is Tobb's.","Just passing."],'rook');
+ if(c===1){await say('Rook',"Then pass. Quietly.",'rook');return;}
+ await say('Rook',"Tobb? That fat liar owes me three months' wages. Want his crate? Come and take it.",'rook');
+ const r=await battle('rook',{intro:'Rook draws a rusty blade!'});
+ if(r.result==='lose'){await revive();return;}
+ if(r.result==='flee')return;
+ f.rookBeaten=true;
+ if(r.blazed){
+  await say('Rook',"Your eyes— you're a DRAG! ...Oh, the whole Hollow's gonna hear about this!",'rook');
+  await narr("Rook crashes off through the trees — toward town.");
+  f.rookSaw=true;f.tobbKnows=true;S.sus=Math.min(5,S.sus+2);toast('Rook will spread the word. Suspicion rises.');
+ } else {
+  await say('Rook',"Alright, alright! Take the stupid crate! Tell Tobb he still owes me.",'rook');
+  await narr("Rook limps off into the woods.");
+ }
+ if(!f.crateDone)S.side="Grab Tobb's crate at the bandit camp.";
+}
+
+async function halvardEvent(){
+ S.dir='up';
+ await say('Halvard',"Green eyes in the dark. I wondered when you'd come.",'halvard');
+ await say('Halvard',"The girl with the ribbon — your sister? She cried less than the others. Brave little thing.",'halvard');
+ const c=await ask('Halvard',"You think this is hatred. It isn't. Fratenaptor's blood doesn't sleep. One day it wakes — in her, in you — and the world burns. I am the firebreak.",["Where is she?","You're wrong about us."],'halvard');
+ if(c===0)await say('Halvard',"Somewhere you can't follow. Not with those eyes.",'halvard');
+ else await say('Halvard',S.f.shrineRead?"The stone in the east woods? Old carvings. Half-truths. I've read the real texts.":"Then prove it. Without the fire.",'halvard');
+ const r=await battle('halvard',{noFlee:true,intro:'Inquisitor Halvard draws a blade of pale light!'});
+ if(r.result==='lose'){await revive();return;}
+ S.f.halvardBeaten=true;
+ await ending(r);
+}
+
+async function ending(r){
+ const f=S.f;
+ await narr("Halvard falls to one knee. The light around him gutters out.");
+ await say('Halvard',r.blazed?"That fire... and you aimed it at me, not at the town. Maybe I read the texts wrong.":"You never used it. The fire. Why?",'halvard');
+ await say('Halvard',"She isn't here. They moved the children at dawn. To Greyspire Citadel.",'halvard');
+ const c=await ask('Halvard',"Go on, Drag. Be what the stories say you are.",["Spare him.","End him."],'halvard');
+ if(c===0){f.halvardSpared=true;await me("No. I'm not your story.");await narr("You leave him kneeling in the dirt. He doesn't look up.");}
+ else{f.halvardKilled=true;await narr("It's quick.");await narr("Somewhere in the trees, a bird stops singing. The stories, you realize, just got one chapter truer.");}
+ await narr("Inside the mill: empty cages. Straw. Chains. And on the floor, a faded green ribbon.");
+ await narr("Ilya's ribbon. You tie it around your wrist.");
+ if(f.kessHelp){
+  await say('Kess',"Saw the light from the road. Figured one of you was dead.",'kess');
+  const k=await ask('Kess',"Greyspire. Nobody comes back from Greyspire.",["Then I'll be the first.","Come with me."],'kess');
+  await say('Kess',k===0?"...Idiot. Fine. Somebody has to stop you glowing in public.":"Twelve years of hiding. ...Fine. I'm tired of hiding anyway.",'kess');
+  f.kessJoined=true;
+ }
+ f.chapter1Done=true;S.quest='Chapter I complete. Greyspire Citadel awaits.';S.side='';save();
+ closeDlg();showEnd();
+}
+
+async function revive(){
+ await narr("Darkness. Then the bitter smell of herbs.");
+ S.hp=S.maxHp;S.mp=S.maxMp;const lost=Math.floor(S.gold/2);S.gold-=lost;
+ changeMap('town',2,6);S.dir='up';updateHud();
+ await say('Maren',S.f.marenKnows?"Dragged you onto my porch myself. My back will never forgive you.":"Found you face-down on the road. Lucky the crows didn't find you first.",'maren');
+ if(lost)toast('You lost '+lost+' gold.');
+}
+
+/* objects */
+const OBJ={
+ 'town,3,4':async()=>{await narr(S.f.marenKnows?"Maren's clinic. The door is shut. You don't knock.":"Maren's clinic. You hear coughing inside.");},
+ 'town,18,4':async()=>{await narr("Tobb's Goods. Dusty shelves of tonics behind glass. Tobb trades from the stall outside.");},
+ 'town,4,11':async()=>{await narr(S.f.pipGone?"A small face watches you from behind the curtain. It waves.":"A small house. Someone inside is humming.");},
+ 'town,16,12':async()=>{
+  await narr("The Crooked Lantern Inn. Someone carved NO DRAGS into the doorframe — deep, old cuts, worn smooth by hands.");
+  if(S.sus>=3){await narr("The innkeeper sees you through the window and slams the shutters.");return;}
+  if(!S.hood){await narr("The innkeeper takes one look at your eyes and taps the carving.");return;}
+  const c=await ask(null,"Rest here for 15 gold?",["Rest (15g)","Leave"]);
+  if(c===0){if(S.gold>=15){S.gold-=15;heal();await narr("You keep your hood on all night. You sleep badly, but you sleep.");}else await narr("Not enough gold.");}
+ },
+ 'town,14,8':async()=>{await narr("Someone scratched a dragon's eye into the well stone. Someone else tried very hard to scrub it out.");if(S.f.marenKnows)await narr("This is where they hanged him.");},
+ 'forest,4,2':async()=>{
+  if(S.f.shrineRead){await narr("Seven figures. One chained dragon. Your eyes still tingle when you look at it.");return;}
+  S.f.shrineRead=true;
+  await narr("An ancient stone, choked with moss. You scrape some away.");
+  await narr("Carvings: seven figures with glowing eyes stand in a ring around a vast dragon.");
+  await narr("The dragon is wrapped in chains. The seven are holding the chains.");
+  await narr("They weren't worshipping Fratenaptor. They were binding him.");
+  sfx('art');await narr("Your eyes flare on their own. Something old wakes in your blood.");
+  S.arts.push('ruin');await narr("New Drag Art learned: VERDANT RUIN.");
+ },
+ 'forest,18,8':async()=>{
+  if(!S.f.rookBeaten){await say('Rook',"Hands off. Talk to me first, hood.",'rook');return;}
+  S.f.crateTaken=true;S.f.hasCrate=true;buildMap();sfx('coin');
+  await narr("You hoist Tobb's crate onto your shoulder. Bottles clink inside.");
+  S.side='Bring the crate back to Tobb in Ashford Hollow.';
+ },
+ 'mill,10,3':async()=>{await narr("The mill is empty now. Straw, chains, and the smell of old fear.");}
+};
+const OBJT={
+ '~':async()=>{if(S.map==='forest'){heal();await narr("Cold spring water. You feel your strength return.");}else await narr("Dark millrace water. You wouldn't drink it.");},
+ 'x':async()=>{await narr("An empty cage. Tiny scratch marks on the bars, low down — the height of a child.");}
+};
+
+/* ================= BATTLE ================= */
+let B=null;
+const bcv=$('#bcv'),bctx=bcv.getContext('2d');
+function blog(t){const d=document.createElement('div');d.textContent=t;const l=$('#blog');l.appendChild(d);while(l.children.length>5)l.removeChild(l.firstChild);}
+function dmg(a,d,m){return Math.max(1,Math.round(a*m*(0.85+Math.random()*0.3)-d));}
+function fx(txt,who,col){B.fx.push({txt,x:who==='e'?142:52,y:34,t:0,col});}
+function battle(key,o){
+ o=o||{};closeDlg();
+ return new Promise(resolve=>{
+  const base=ENEMIES[key];
+  B={key,o,E:Object.assign({},base,{max:base.hp}),turn:0,blazed:false,guard:false,ward:0,bind:0,charge:false,fx:[],shake:{p:0,e:0},flash:{p:0,e:0},fade:1,resolve,lock:false,res:null,taunt:false};
+  $('#blog').innerHTML='';$('#battle').classList.add('on');
+  blog(o.intro||(base.kind==='wolf'?'A '+base.name+' leaps from the grass!':base.name+' blocks your way!'));
+  if(!S.f.tutArts){S.f.tutArts=true;blog('Tip: Drag Arts hit hard — but they make your eyes blaze.');}
+  sfx('start');updBattle();showCmds('main');battleLoop();
+ });
+}
+function updBattle(){
+ const E=B.E;$('#bename').textContent=E.name;$('#behp').style.width=(E.hp/E.max*100)+'%';
+ $('#bphp').style.width=(S.hp/S.maxHp*100)+'%';$('#bphpt').textContent=S.hp+'/'+S.maxHp;
+ $('#bpmp').style.width=(S.mp/S.maxMp*100)+'%';$('#bpmpt').textContent=S.mp+'/'+S.maxMp;
+}
+function showCmds(mode){
+ const el=$('#bcmd');el.innerHTML='';
+ const add=(label,fn,cls,dis)=>{const b=document.createElement('button');b.className='bbtn '+(cls||'');b.innerHTML=label;b.disabled=!!dis;b.onclick=()=>{sfx('blip');fn();};el.appendChild(b);};
+ if(mode==='main'){
+  add('Attack',()=>pAct('attack'));add('Drag Arts',()=>showCmds('arts'),'art');
+  add('Guard<small>+3 MP</small>',()=>pAct('guard'));add('Tonic ×'+S.tonics,()=>pAct('tonic'),'',S.tonics<=0);
+  add('Flee',()=>pAct('flee'),'wide',!!B.o.noFlee);
+ } else if(mode==='arts'){
+  S.arts.forEach(k=>{const A=ARTS[k],cost=A.cost+(B.bind>0?2:0);add(A.name+'<small>'+cost+' MP · '+A.desc+'</small>',()=>pAct('art',k),'art',S.mp<cost);});
+  add('Back',()=>showCmds('main'),S.arts.length%2?'':'wide');
+ } else if(mode==='cont'){add('Continue',()=>endBattle(B.res),'wide');}
+}
+function blaze(){
+ if(B.blazed)return;B.blazed=true;S.f.everBlazed=true;blog('Your eyes blaze emerald!');
+ if(S.hood){S.hood=false;blog('The heat burns your hood back.');}
+}
+function hitE(d){B.E.hp=Math.max(0,B.E.hp-d);B.shake.e=10;B.flash.e=6;fx('-'+d,'e','#ffffff');}
+async function pAct(a,art){
+ if(!B||B.lock)return;B.lock=true;$('#bcmd').innerHTML='';
+ const E=B.E;B.guard=false;
+ if(a==='attack'){const d=dmg(S.atk,E.def,1);hitE(d);sfx('hit');blog('You strike for '+d+'.');}
+ else if(a==='guard'){B.guard=true;S.mp=Math.min(S.maxMp,S.mp+3);blog('You brace yourself. (+3 MP)');}
+ else if(a==='tonic'){const h=Math.min(25+S.lvl*3,S.maxHp-S.hp);S.tonics--;S.hp+=h;fx('+'+h,'p','#7dffb0');sfx('heal');blog('You drink a tonic. +'+h+' HP.');}
+ else if(a==='flee'){if(Math.random()<0.7){blog('You slip away.');await wait(700);return endBattle('flee');}blog("You can't get away!");}
+ else if(a==='art'){
+  const A=ARTS[art],cost=A.cost+(B.bind>0?2:0);S.mp-=cost;blaze();sfx('art');
+  if(art==='fang'){const d=dmg(S.atk,E.def,2);hitE(d);blog('Emerald Fang! '+d+' damage.');}
+  if(art==='ward'){B.ward=2;blog('Scales of green light ripple over your skin.');}
+  if(art==='ruin'){const d=dmg(S.atk,E.def,3.2);hitE(d);blog('VERDANT RUIN! '+d+' damage!');}
+ }
+ updBattle();updateHud();await wait(650);
+ if(E.hp<=0)return winBattle();
+ if(B.key==='halvard'&&!B.taunt&&E.hp<E.max*0.35){B.taunt=true;blog('Halvard: "She bit me, you know. Your sister. Same fire."');await wait(500);}
+ await enemyTurn();updBattle();updateHud();
+ if(S.hp<=0){await wait(500);return loseBattle();}
+ B.turn++;if(B.ward>0)B.ward--;if(B.bind>0)B.bind--;
+ S.mp=Math.min(S.maxMp,S.mp+1);updBattle();
+ B.lock=false;showCmds('main');
+}
+async function enemyTurn(){
+ const E=B.E;let m=1,txt=E.name+' attacks';
+ await wait(150);
+ if(B.key==='halvard'){
+  const ph=B.turn%4;
+  if(B.charge){B.charge=false;m=2.5;txt='PURGING LIGHT crashes down';}
+  else if(ph===1){B.bind=3;const dr=Math.min(S.mp,3);S.mp-=dr;sfx('chant');blog('Halvard chants a Binding Psalm. Your blood feels heavy. (-'+dr+' MP, Arts +2 cost)');return;}
+  else if(ph===2){B.charge=true;sfx('chant');blog('Halvard raises his hands. Light gathers... (Guard or Ward!)');return;}
+ } else if(E.kind==='wolf'&&Math.random()<0.25){m=1.4;txt=E.name+' lunges';}
+ else if(B.key==='rook'&&Math.random()<0.25){m=1.35;txt='Rook kicks dirt and slashes';}
+ else if(B.key==='voss'&&Math.random()<0.3){m=1.3;txt='Voss slams his shield';}
+ let d=dmg(E.atk,S.def,m);if(B.guard)d=Math.ceil(d/2);if(B.ward>0)d=Math.ceil(d*0.4);
+ S.hp=Math.max(0,S.hp-d);B.shake.p=10;B.flash.p=6;fx('-'+d,'p','#ff6b6b');sfx('hurt');
+ blog(txt+'! You take '+d+'.');
+}
+function winBattle(){
+ const E=B.E;blog(E.name+' is defeated!');sfx('win');
+ S.gold+=E.gold;const ms=gainXp(E.xp);blog('+'+E.xp+' XP, +'+E.gold+' gold.');
+ ms.forEach(m=>blog(m));if(ms.length)setTimeout(()=>sfx('level'),400);
+ updBattle();updateHud();B.res='win';showCmds('cont');
+}
+function loseBattle(){blog('Your knees hit the dirt. Everything goes dark...');B.res='lose';showCmds('cont');}
+function endBattle(res){
+ $('#battle').classList.remove('on');
+ const r={result:res,blazed:B.blazed},resolve=B.resolve;B=null;lastBattleStep=S.steps;updateHud();resolve(r);
+}
+function battleLoop(){if(!B)return;drawBattle();requestAnimationFrame(battleLoop);}
+function drawBattle(){
+ const c=bctx,W=192,H=112,t=performance.now()/1000;c.imageSmoothingEnabled=false;
+ const pal={town:['#22324a','#3d6a3a'],forest:['#0b1d11','#24452a'],mill:['#20132e','#3a3528']}[S.map];
+ c.fillStyle=pal[0];c.fillRect(0,0,W,H);
+ for(let i=0;i<13;i++){const x=i*16-4,h=16+hash(i,3)*16;c.fillStyle='rgba(0,0,0,.35)';c.fillRect(x,64-h,13,h);}
+ c.fillStyle=pal[1];c.fillRect(0,62,W,50);
+ for(let i=0;i<40;i++){c.fillStyle='rgba(0,0,0,.18)';c.fillRect(Math.floor(hash(i,1)*W),62+Math.floor(hash(1,i)*50),2,1);}
+ const ps=B.shake.p>0?(Math.random()*4-2):0;if(B.shake.p>0)B.shake.p--;
+ if(B.blazed){const a=.3+.1*Math.sin(t*4);const g=c.createRadialGradient(52,48,2,52,48,34);g.addColorStop(0,'rgba(57,255,136,'+a+')');g.addColorStop(1,'rgba(57,255,136,0)');c.fillStyle=g;c.fillRect(10,6,84,84);}
+ if(B.ward>0){c.strokeStyle='rgba(57,255,136,.6)';c.lineWidth=1;c.beginPath();c.arc(52,52,26,0,7);c.stroke();}
+ if(!(B.flash.p>0&&B.flash.p%2))drawPerson(c,28+ps,30,3,LOOK.player,'right',0,{hood:S.hood,glow:!S.hood});
+ if(B.flash.p>0)B.flash.p--;
+ const E=B.E,es=B.shake.e>0?(Math.random()*4-2):0;if(B.shake.e>0)B.shake.e--;
+ if(E.hp<=0)B.fade=Math.max(0,B.fade-0.03);c.globalAlpha=B.fade;
+ if(!(B.flash.e>0&&B.flash.e%2)){if(E.kind==='wolf')drawWolf(c,118+es,34,3,E.col);else drawPerson(c,118+es,30,3,LOOK[B.key],'left',0,{});}
+ if(B.flash.e>0)B.flash.e--;c.globalAlpha=1;
+ if(B.charge){c.fillStyle='rgba(255,240,180,'+(.25+.15*Math.sin(t*10))+')';c.beginPath();c.arc(142,40,20,0,7);c.fill();}
+ B.fx=B.fx.filter(f=>f.t<1);
+ B.fx.forEach(f=>{f.t+=0.02;c.globalAlpha=1-f.t;c.fillStyle='#000';c.font='bold 11px monospace';c.textAlign='center';c.fillText(f.txt,f.x+1,f.y-f.t*16+1);c.fillStyle=f.col;c.fillText(f.txt,f.x,f.y-f.t*16);});
+ c.globalAlpha=1;
+}
+
+/* ================= MENU / END / TITLE ================= */
+function openMenu(){if(busy||!S||mv)return;busy=true;held=null;renderMenu();$('#menu').classList.add('on');}
+function closeMenu(){$('#menu').classList.remove('on');busy=false;save();}
+function renderMenu(){
+ const sn=['Unseen','Whispers','Rumors','Watched','Hunted','Hunted'][S.sus];
+ $('#menuCard').innerHTML=
+  '<h2>'+esc(S.name)+' · Lv '+S.lvl+'</h2>'+
+  '<div class="grid"><div><span>HP</span> '+S.hp+'/'+S.maxHp+'</div><div><span>MP</span> '+S.mp+'/'+S.maxMp+'</div>'+
+  '<div><span>ATK</span> '+S.atk+'</div><div><span>DEF</span> '+S.def+'</div>'+
+  '<div><span>XP</span> '+S.xp+'/'+(S.lvl*25)+'</div><div><span>Gold</span> '+S.gold+'</div>'+
+  '<div><span>Tonics</span> '+S.tonics+'</div><div><span>Hood</span> '+(S.hood?'Up':'Down')+'</div></div>'+
+  '<div class="sec">DRAG ARTS</div>'+S.arts.map(k=>'<p>'+ARTS[k].name+' <span style="color:var(--muted)">— '+ARTS[k].cost+' MP, '+ARTS[k].desc+'</span></p>').join('')+
+  '<div class="sec">OBJECTIVE</div><p>'+S.quest+'</p>'+(S.side?'<div class="sec">SIDE QUEST</div><p>'+S.side+'</p>':'')+
+  '<div class="sec">SUSPICION: '+sn.toUpperCase()+'</div><p style="color:var(--muted)">How sure the Hollow is that a Drag walks among them. High suspicion closes doors — and opens fights.</p>'+
+  '<div class="row"><button id="mTonic">Use Tonic</button><button id="mSound">Sound: '+(S.muted?'Off':'On')+'</button><button id="mTitle">Title Screen</button><button id="mClose" style="border-color:#2f6b43;color:var(--green)">Close</button></div>';
+ $('#mTonic').onclick=()=>{if(S.tonics>0&&S.hp<S.maxHp){S.tonics--;S.hp=Math.min(S.maxHp,S.hp+25+S.lvl*3);sfx('heal');updateHud();renderMenu();}};
+ $('#mSound').onclick=()=>{S.muted=!S.muted;renderMenu();};
+ $('#mTitle').onclick=()=>{save();$('#menu').classList.remove('on');busy=false;titleScreen();};
+ $('#mClose').onclick=closeMenu;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function showEnd(){
+ const f=S.f;busy=true;
+ const who=[f.marenKnows&&'Maren',f.tobbKnows&&'Tobb',f.vossKnows&&'Voss',f.pipGone&&'Pip',f.rookSaw&&'Rook',f.kessKnows&&'Kess'].filter(Boolean);
+ $('#endCard').innerHTML='<h2>CHAPTER I COMPLETE</h2><p>Ilya was moved to <b style="color:var(--green)">Greyspire Citadel</b>.</p>'+
+  '<div class="sec">YOUR STORY SO FAR</div>'+
+  '<p>Suspicion: '+S.sus+'/5</p>'+
+  '<p>Saw your eyes: '+(who.length?who.join(', '):'no one')+'</p>'+
+  '<p>Halvard: '+(f.halvardKilled?'killed':'spared')+'</p>'+
+  '<p>Kess: '+(f.kessJoined?'travels with you':f.kessRefused?'turned you away':'a stranger')+'</p>'+
+  '<p>Tobb: '+(f.crateDone?(f.tobbKnows?'still prejudiced — but softening':'thinks you are a saint'):'never helped')+'</p>'+
+  '<p>The east stone: '+(f.shrineRead?'you know the truth':'unread')+'</p>'+
+  '<p style="color:var(--muted);margin-top:10px">These choices will carry into Chapter II: Greyspire.</p>'+
+  '<div class="row"><button id="eKeep">Keep Exploring</button><button id="eTitle">Title Screen</button></div>';
+ $('#endscr').classList.add('on');
+ $('#eKeep').onclick=()=>{$('#endscr').classList.remove('on');busy=false;};
+ $('#eTitle').onclick=()=>{$('#endscr').classList.remove('on');busy=false;titleScreen();};
+}
+let titleRAF=0;
+function titleScreen(){
+ $('#title').classList.add('on');$('#tMain').style.display='';$('#tName').style.display='none';
+ $('#tContinue').style.display=load()?'':'none';
+ const c=$('#tcv').getContext('2d');
+ const draw=t=>{if(!$('#title').classList.contains('on'))return;c.imageSmoothingEnabled=false;c.clearRect(0,0,112,112);
+  const a=.25+.12*Math.sin(t/400);const g=c.createRadialGradient(56,40,2,56,40,56);g.addColorStop(0,'rgba(57,255,136,'+a+')');g.addColorStop(1,'rgba(57,255,136,0)');c.fillStyle=g;c.fillRect(0,0,112,112);
+  drawPerson(c,8,6,6,LOOK.player,'down',0,{glow:true});titleRAF=requestAnimationFrame(draw);};
+ cancelAnimationFrame(titleRAF);titleRAF=requestAnimationFrame(draw);
+}
+function typeInto(el,text){
+ return new Promise(res=>{let i=0,done=false;el.textContent='';
+  const tm=setInterval(()=>{i++;el.textContent=text.slice(0,i);if(i>=text.length){clearInterval(tm);done=true;}},30);
+  const ov=$('#intro');const h=()=>{if(!done){clearInterval(tm);el.textContent=text;done=true;return;}ov.removeEventListener('pointerup',h);res();};
+  ov.addEventListener('pointerup',h);});
+}
+async function introSeq(lines){$('#intro').classList.add('on');for(const l of lines)await typeInto($('#introText'),l);$('#intro').classList.remove('on');}
+async function newGame(name){
+ S=S0();S.name=(name||'Ren').trim().slice(0,12)||'Ren';
+ $('#title').classList.remove('on');
+ await introSeq([
+  "Four hundred years ago, the demon dragon Fratenaptor nearly ended the world. Even the dragons curse his name.",
+  "The people say the Drags worshipped him. That his fire lives in their blood. That you can always know a Drag by their eyes — green, and glowing.",
+  "They say a lot of things.",
+  "Three nights ago, the Ember Inquisition burned your village. They took your little sister, Ilya.",
+  "Her trail leads to Ashford Hollow. Keep your hood up, "+S.name+"."
+ ]);
+ enterGame();
+ setTimeout(()=>toast('Tap A to talk. Tap HOOD to show your eyes — some will trust you, some never will.',5000),1800);
+}
+function enterGame(){$('#title').classList.remove('on');busy=false;mv=null;held=null;buildMap();resize();updateHud();banner(MAPS[S.map].name);save();}
+
+/* ================= INPUT / INIT ================= */
+function toggleHood(){
+ if(!S||busy)return;S.hood=!S.hood;sfx('hood');
+ toast(S.hood?'Hood up. Your eyes are hidden.':'Hood down. Your eyes glow for everyone to see.');
+ noticeCheck();updateHud();save();
+}
+function resize(){
+ const v=$('#view'),w=v.clientWidth,h=v.clientHeight;if(!w||!h)return;
+ const tp=Math.min(w/11,h/9);const VW=Math.ceil(w/tp),VH=Math.ceil(h/tp);
+ mapCv.width=VW*TS;mapCv.height=VH*TS;mapCv.style.width=(VW*tp)+'px';mapCv.style.height=(VH*tp)+'px';
+}
+function bindControls(){
+ document.querySelectorAll('#dpad button[data-d]').forEach(b=>{
+  const d=b.dataset.d;
+  const on=e=>{e.preventDefault();if(dlgAdvanceBlocked())return;held=d;b.classList.add('held');};
+  const off=()=>{if(held===d)held=null;b.classList.remove('held');};
+  b.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,off));
+ });
+ $('#bA').addEventListener('pointerdown',e=>{e.preventDefault();if(!dlgAdvance())interact();});
+ $('#bHood').onclick=toggleHood;$('#bMenu').onclick=openMenu;$('#obj').onclick=openMenu;
+ $('#view').addEventListener('pointerup',e=>{if(e.target.closest('.choice'))return;dlgAdvance();});
+ const keys={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};
+ window.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'){if(e.key==='Enter')$('#tBegin').click();return;}
+  if(keys[e.key]){e.preventDefault();if(!$('#dlg').classList.contains('on'))held=keys[e.key];return;}
+  if(e.key===' '||e.key==='Enter'||e.key==='z'){e.preventDefault();if($('#intro').classList.contains('on')){$('#intro').dispatchEvent(new Event('pointerup'));return;}if(!dlgAdvance())interact();}
+  if(/^[1-4]$/.test(e.key)){const b=document.querySelectorAll('#dlgChoices .choice')[+e.key-1];if(b)b.click();}
+  if(e.key==='h')toggleHood();
+  if(e.key==='m'||e.key==='Escape'){if($('#menu').classList.contains('on'))closeMenu();else openMenu();}
+ });
+ window.addEventListener('keyup',e=>{if(keys[e.key]===held)held=null;});
+ $('#tNew').onclick=()=>{if(load()&&!confirm('Start over? Your saved game will be replaced.'))return;sfx('blip');$('#tMain').style.display='none';$('#tName').style.display='';};
+ $('#tContinue').onclick=()=>{sfx('blip');S=load();if(S)enterGame();};
+ $('#tBegin').onclick=()=>{sfx('start');$('#nameIn').blur();newGame($('#nameIn').value);};
+ document.addEventListener('gesturestart',e=>e.preventDefault());
+}
+function dlgAdvanceBlocked(){return $('#dlg').classList.contains('on');}
+function makeIcon(){try{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');x.fillStyle='#0b120d';x.fillRect(0,0,180,180);
+ const g=x.createRadialGradient(90,70,10,90,70,90);g.addColorStop(0,'rgba(57,255,136,.35)');g.addColorStop(1,'rgba(57,255,136,0)');x.fillStyle=g;x.fillRect(0,0,180,180);
+ x.imageSmoothingEnabled=false;drawPerson(x,10,8,10,LOOK.player,'down',0,{glow:true});$('#appicon').href=c.toDataURL('image/png');}catch(e){}}
+function init(){resize();window.addEventListener('resize',()=>{resize();});bindControls();makeIcon();titleScreen();requestAnimationFrame(loop);}
+init();
+</script>
+</body>
+</html>
