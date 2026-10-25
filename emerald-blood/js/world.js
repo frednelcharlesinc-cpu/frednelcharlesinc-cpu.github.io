@@ -34,6 +34,7 @@ const World = {
     if (this.scene.crowd) await this.spawnCrowd(this.scene.crowd);
     this.buildPropList();
     this.snapCam(); this.loading = false;
+    if (this.scene.weather) Weather.start(typeof this.scene.weather === 'string' ? this.scene.weather : 'snow'); else Weather.stop();
     Music.play(this.scene.music ? (typeof this.scene.music === 'function' ? this.scene.music() : this.scene.music) : null);
   },
   async spawnCrowd(cr) {
@@ -94,6 +95,7 @@ const World = {
       }
     }
     for (const e of this.ents) e.update(dt, this);
+    Weather.update(dt);
     // camera follow
     const w = G.view.w, h = G.view.h, mw = this.map.w * TILE, mh = this.map.h * TILE;
     const tx = mw <= w ? (mw - w) / 2 : clamp(p.px - w / 2, 0, mw - w);
@@ -104,6 +106,7 @@ const World = {
   onStep(e) {
     if (!e.isPlayer) return;
     G.S.x = e.x; G.S.y = e.y; G.S.dir = e.dir; G.S.steps++;
+    Realm.step();
     if (G.S.steps % 2 === 0) sfx('step');
     const ex = this.exitAt(e.x, e.y);
     if (ex && !ex.msg) { this.useExit(ex); return; }
@@ -229,6 +232,7 @@ const World = {
         c.restore();
       }
     }
+    Weather.render(c, t);
     // player eye glow
     const p = this.player;
     if (!G.S.hood && G.S.f.dragAwake !== false && p.dir !== 'up' && !p.hidden) {

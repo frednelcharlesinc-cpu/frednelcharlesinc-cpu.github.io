@@ -136,6 +136,7 @@ const UI = {
           <div class="stat"><h3>Your Drag</h3><p>Level <b>${G.S.lvl}</b> · Suspicion <b>${Math.floor(G.S.sus)}/5</b></p><p>Saw your eyes: <b>${who.length ? who.join(', ') : 'no one'}</b></p></div>
           <div class="stat"><h3>Choices</h3><p>Halvard: <b>${f.halvardKilled ? 'killed by you' : f.halvardKilledByKairo ? 'killed by Kairo' : 'spared'}</b></p><p>Kess: <b>${f.kessJoined ? 'travels with you' : f.kessRefused ? 'turned you away' : f.kessHelp ? 'helped, then vanished' : 'a stranger'}</b></p>
           <p>Kairo: <b>${f.duel === 'won' ? 'duel won · Ashford spared' : 'duel lost'}${f.halvardKilledByKairo ? ' · he executed Halvard' : ''}</b></p>
+          <p>Liora: <b>${f.lioraMet ? 'fought beside you — hunting Dread alone' : 'a stranger on the mill roof'}</b></p>
           <p>Tobb: <b>${f.crateDone ? (f.tobbKnows ? 'prejudiced — but softening' : 'thinks you are a saint') : 'never helped'}</b></p><p>The binding stone: <b>${f.shrineRead ? 'you know the truth' : 'unread'}</b></p></div>
         </div><p class="muted" style="margin-top:10px">These choices carry into Chapter II: Greyspire.</p>
         <div class="btnrow"><button class="btn pri" id="eKeep">Keep exploring</button><button class="btn" id="eTitle">Title screen</button></div>`;

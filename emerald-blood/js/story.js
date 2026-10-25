@@ -10,7 +10,7 @@ Object.assign(CHAR, {
   hoshi: { name: 'Old Hoshi', sprite: 'hoshi' }, bram: { name: 'Bram', sprite: 'innkeep' },
   kairo: { name: 'Kairo', sprite: 'kairo_kid', kid: 1 }, kairoKB: { name: 'Kairo', sprite: 'kairo_kidb', kid: 1 },
   tamsinK: { name: 'Tamsin', sprite: 'tamsin_kid', kid: 1 }, boK: { name: 'Bo', sprite: 'bo_kid', kid: 1 }, larkK: { name: 'Lark', sprite: 'lark_kid', kid: 1 }, nixK: { name: 'Nix', sprite: 'nix_kid', kid: 1 },
-  tamsin: { name: 'Tamsin', sprite: 'tamsin' }, dace: { name: 'Dace', sprite: 'ge_dace' }, sefa: { name: 'Sefa', sprite: 'ge_sefa' }, wren: { name: 'Wren', sprite: 'ge_wren' }, corran: { name: 'Corran', sprite: 'ge_corran' }, bo: { name: 'Bo', sprite: 'bo' }, lark: { name: 'Lark', sprite: 'lark' }, kairoB: { name: 'Kairo', sprite: 'kairo_b' }, dread: { name: 'Dread', sprite: 'dread' }, rebel: { name: 'Green Eclipse', sprite: 'rebel' }
+  tamsin: { name: 'Tamsin', sprite: 'tamsin' }, liora: { name: 'Liora', sprite: 'liora_e' }, vane: { get name() { return G.S && G.S.f.vaneName ? 'Vane' : 'The Old Man'; }, sprite: 'vane' }, dace: { name: 'Dace', sprite: 'ge_dace' }, sefa: { name: 'Sefa', sprite: 'ge_sefa' }, wren: { name: 'Wren', sprite: 'ge_wren' }, corran: { name: 'Corran', sprite: 'ge_corran' }, bo: { name: 'Bo', sprite: 'bo' }, lark: { name: 'Lark', sprite: 'lark' }, kairoB: { name: 'Kairo', sprite: 'kairo_b' }, dread: { name: 'Dread', sprite: 'dread' }, rebel: { name: 'Green Eclipse', sprite: 'rebel' }
 });
 const F = () => G.S.f;
 const Story = {
@@ -123,7 +123,7 @@ SCENES.thornvale = {
   },
   exits: [
     { x: 43, y: 14, y2: 16, to: 'ashford', tx: 29, ty: 39, dir: 'up', msg: "Ilya's still waiting for you to find her.", when: () => !F().after },
-    { x: 43, y: 14, y2: 16, to: 'ashford', tx: 29, ty: 39, dir: 'up', check: async () => { UI.controls(false); await narr("Mei takes your hand. You cross the bridge, out of the only home you've ever known, and you don't look back. Not yet."); Dlg.close(); await Story.prologueEnd(); return true; }, when: () => F().after }
+    { x: 43, y: 14, y2: 16, to: 'realm', tx: 23, ty: 29, dir: 'up', check: async () => { UI.controls(false); await narr("Mei takes your hand. You cross the bridge, out of the only home you've ever known."); await narr('That night, camped on the mountain pass, you can\'t sleep. Below you, the wagon ruts turn north — up into the peaks nobody climbs.'); await narr("Ilya's ribbon is on your wrist. You promised. Dragon law."); await narr('While Mei sleeps, you slip out of the camp and follow the ruts into the dark.'); Dlg.close(); return true; }, when: () => F().after }
   ],
   tiles: {
     '9,12': async () => narr(F().raid ? 'Your home. The roof is gone. The door still stands, somehow.' : 'Home. Ilya has scratched a little dragon into the doorframe.'),
@@ -386,20 +386,7 @@ async function talkNanaAfter() {
 }
 Story.prologueEnd = async function () {
   await fadeOut(800);
-  await UI.intro([
-    'SEVEN YEARS LATER',
-    'Mei raised you in a fishing town on the southern coast. Hood up. Eyes down. Every morning, your father\'s blade, until your hands bled and healed and bled again.',
-    'Every winter, rumors came south on the trade boats. A burned-faced rebel in the mountains. Wagons set on fire. Cages broken open. They called his band Green Eclipse.',
-    'You never went looking for him. You were looking for someone else.',
-    'Then, last month: an Inquisition ledger, lifted off a drowned courier. One line, in neat ink — "Girl, green-eyed, ribbon on wrist. Transfer via Ashford Hollow."',
-    'Ilya is alive.'
-  ]);
-  G.S.kid = false; G.S.hood = true;
-  const st = G.S.stats; G.S.lvl = Math.max(G.S.lvl, 3); st.maxHp = 70; st.maxMp = 20; st.atk = 15; st.def = 6; st.spd = 11; st.hp = st.maxHp; st.mp = st.maxMp;
-  $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Seven years pass…'; await wait(30);
-  G.A.portCache = {}; await buildPlayerSprites(); $('#loading').classList.add('hide');
-  toast('You received <b style="color:#46ff95">Father\'s Blade</b>. Grandfather\'s hood fits now.', 4000);
-  G.S.chapter = 1;
+  G.S.chapter = 1; G.S.hood = true;
   await UI.chapterCard('CHAPTER I', 'Ashford Hollow');
   F().ashIntro = true;
   Story.quest('Ask around Ashford Hollow for where the Inquisition took Ilya.');
@@ -721,6 +708,7 @@ SCENES.woods = {
     }
     if (!f.scoutMet || !f.millDone) L.push({ id: 'scout', sprite: 'lark', x: 12, y: 9, dir: 'down', talk: talkScout, ai: 'turn', turns: ['down', 'left', 'right'] });
     if (!f.alphaBeaten) L.push({ id: 'alpha', sprite: 'lupine_alpha', x: 28, y: 26, dir: 'down', ai: 'turn', turns: ['down', 'left', 'right'], talk: talkAlpha });
+    if (!f.alphaBeaten) L.push({ id: 'liora', sprite: 'liora_e', x: 27, y: 25, dir: 'right', talk: talkAlpha });
     return L;
   },
   exits: [{ x: 0, y: 16, y2: 18, to: 'ashford', tx: 58, ty: 21, dir: 'left' }],
@@ -776,11 +764,32 @@ async function crate() {
   G.S.side = 'Bring the crate back to Tobb in Ashford Hollow (market stall).';
 }
 async function talkAlpha() {
-  const c = await ask(null, null, 'A huge black beast-man crouches over a carcass. Its yellow eyes find you.', ['Fight it.', 'Back away slowly.']);
-  if (c === 1) return;
-  const r = await Battle.start({ enemies: ['lupine_alpha', 'lupine'], bd: 'forest', intro: 'The Lupine Alpha howls!' });
+  const f = F();
+  await narr('A huge black beast-man rears over a carcass — and between you and it stands a girl with a spear.');
+  await narr('Long white hair. Eyes as green as yours, and not hidden at all. She doesn\'t look back at you.');
+  await say('liora', 'anger', "Move. That one's mine.");
+  const c0 = await ask('me', 'blush', '…', ["I'm not moving.", 'Let me help.']);
+  await say('liora', 'neutral', c0 === 0 ? "Then don't die where I have to step over you." : "Fine. Keep up.");
+  const r = await Battle.start({ enemies: ['lupine_alpha', 'lupine', 'lupine'], allies: ['liora'].concat(G.S.party), bd: 'forest', intro: 'The Lupine Alpha howls! Liora fights at your side.' });
   if (r === 'lose') { await Story.defeat(); return; }
-  if (r === 'win') { F().alphaBeaten = true; World.remove('alpha'); G.S.items.ether += 2; toast('Found <b>2 Ethers</b> in the beast\'s den.'); }
+  if (r !== 'win') return;
+  f.alphaBeaten = true; f.lioraMet = true; World.remove('alpha'); G.S.items.ether += 2; toast("Found <b>2 Ethers</b> in the beast's den.");
+  await narr('She cleans her spear in the snowmelt before she says a word to you.');
+  await say('liora', 'neutral', "You fight like someone trained you properly. Who?");
+  const c = await ask('me', 'blush', '…', ['Who are you?', 'An old man with one arm.', "You're… incredible with that spear."]);
+  if (c === 0) await say('liora', 'neutral', 'Liora. That\'s all you get. Now — who trained you?');
+  if (c === 2) await say('liora', 'shame', "…Don't. Every Drag boy between here and the mountains has tried that line. Answer the question.");
+  await me('neutral', 'An old man in the Realm of No Return. One arm. He lost the other to Dread.');
+  await say('liora', 'shock', "…The Sword Saint is ALIVE? Vane? The man who lasted four strokes against Dread?");
+  await say('liora', 'anger', "Dread killed my mother. In our doorway, while I watched from under the stairs. I was eight.");
+  await say('liora', 'anger', "I've spent every day since getting good enough to put this spear through his heart. I'm almost there.");
+  const c2 = await ask('liora', 'neutral', "So don't get in my way, Sword Saint's student.", ["Revenge isn't the way. Someone taught me that.", "Then we want the same man.", "Let me help you."]);
+  if (c2 === 0) await say('liora', 'anger', "Easy to say when your monster only took your sister. Mine took everything. Come back when you've buried someone.");
+  else if (c2 === 1) await say('liora', 'neutral', "No. You want your sister. I want his heart. Only one of those ends at Dread.");
+  else await say('liora', 'happy', "…Ha. You're sweet. I don't need help. I work alone. Kairo's been asking for three years and the answer's still no.");
+  await say('liora', 'neutral', "Don't follow me.");
+  await narr('She\'s gone between the trees before you can answer. You realize you\'re still staring at the place where she was.');
+  World.remove('liora');
 }
 
 /* ---------------- OLD MILL ---------------- */
@@ -911,19 +920,24 @@ async function kairoDuel() {
   await narr('A tall figure steps into the lamplight. Black spiked hair. Half his face a map of old burns. Green eyes you would know anywhere.');
   await me('shock', "…Kairo.");
   await say('kairoB', 'neutral', "Seven years, {name}. You got tall.");
-  await say('tamsin', 'anger', "Kairo. That's the one who went with Mei. The one who LEFT.");
+  await say('kairoB', 'neutral', "Lark said you came out of the Realm of No Return. Nobody comes out of there. …I should've known you'd be the first.");
+  await say('tamsin', 'anger', "Kairo. That's the one who walked into the snow. Seven years without a word — we buried an empty box for you.");
   await say('bo', 'happy', "…Hi, {name}. We missed you. Some of us did. I did.");
   await say('kairoB', 'happy', "So you got here first. Of course you did. You always beat me to the places that matter.");
   if (f.halvardSpared) await say('kairoB', 'anger', "And you let HIM live. The man who tore her out of your hands. You let him keep breathing.");
   else await say('kairoB', 'neutral', "…Halvard's done, then. Good. That's one.");
-  await say('kairoB', 'anger', "Green Eclipse burns this mill tonight. Then we march on Ashford Hollow. They hanged a Drag at that fountain while the whole town watched. Did anyone tell you that?");
-  const c = await ask('kairoB', 'anger', "So step aside, {name}.", ["Ashford has children in it, Kairo.", "Then you're no different from Halvard.", "I won't let you."]);
-  if (c === 0) await say('kairoB', 'anger', "So did Thornvale.");
-  else if (c === 1) await say('kairoB', 'anger', "DON'T. Don't you ever put me next to him. He burns us for what we are. I burn them for what they DID.");
-  else await say('kairoB', 'sad', "…I knew you'd say that. I think I came here hoping you would.");
+  await say('kairoB', 'neutral', "Green Eclipse takes this mill tonight. Every cage opened. Every priest who locked one answers for it.");
+  await say('kairoB', 'anger', "Then Ashford Hollow. Not to burn it — to make it kneel. They hanged a Drag at that fountain while the whole town watched. Every town that ever did that will learn who the strong ones are.");
+  await say('kairoB', 'anger', "And you — seven years gone, and the first thing you do is stand between a Drag and the man who caged Drag children. Whose side are you on, {name}?");
+  const c = await ask('kairoB', 'anger', "So step aside, {name}.", ["Ashford has children in it, Kairo.", "Then you're no different from Halvard.", "I want a world where we live together. Both of us."]);
+  if (c === 0) await say('kairoB', 'anger', "I'm not going to TOUCH their children. I'm going to make sure no Drag child there ever has to hide again. I'm not a monster, {name}. I'm the end of the monsters.");
+  else if (c === 1) await say('kairoB', 'anger', "DON'T. Halvard wants us gone. I want us on TOP. I'll let them live — under us, the way we lived under them. That's more mercy than they ever gave.");
+  else { await say('kairoB', 'sad', "…Together. You sound like Nana. Hide nicely, be good, and maybe one day they'll stop flinching."); await say('kairoB', 'anger', "They'll never stop flinching, {name}. So we give them something real to flinch at. Fratenaptor's blood isn't a curse. It's a crown."); }
+  await me('anger', "I'm not on their side, Kairo. I'm not on yours either. I'm on the side where nobody gets caged — not us, not them.");
+  await say('kairoB', 'sad', "Then you're on nobody's side. And nobody's side is the one that loses.");
   if (G.S.party.includes('kess')) await say('kessE', 'sad', "This one's yours. I'm not getting between brothers.");
-  await say('dace', 'anger', "Want me to put the hood on the ground, boss? Or the head in it?");
-  await say('sefa', 'sad', "Dace. Shut up.");
+  await say('dace', 'anger', "Boss — that's a Drag standing with the priests. Let me talk some sense into them.");
+  await say('sefa', 'sad', "Dace. Look at their wrist. That's Ilya's knot. That's family. Let Kairo handle this.");
   await say('tamsin', 'anger', "Let me do it, Kairo.");
   await say('kairoB', 'neutral', "No. This one's mine. It always was.");
   await say('kairoB', 'anger', "Fine. Like old times. First to yield.");
@@ -938,14 +952,30 @@ async function kairoDuel() {
   if (r === 'win') {
     f.duel = 'won';
     await say('kairoB', 'shock', "…Hah. Forty-two to one.");
-    await say('kairoB', 'sad', "Fine. Ashford keeps its fountain. For now. Not because you're right — because you beat me. Remember the difference.");
-    if (f.halvardSpared) await say('kairoB', 'anger', "Keep your pet priest. When he burns another village, that's on you.");
+    await say('kairoB', 'neutral', "You fight different. Like you're not trying to kill me. Who taught you that?");
+    await me('neutral', "An old man with one arm.");
+    await say('kairoB', 'sad', "Fine. Ashford stands on its own feet. For now. Not because you're right — because you beat me. Remember the difference.");
+    if (f.halvardSpared) await say('kairoB', 'anger', "Keep your priest, then. When he cages another child, I hope you're there to tell the child about 'together.'");
   } else {
     f.duel = 'lost';
     await say('kairoB', 'sad', "Stay down, {name}. Please. Just this once, stay down.");
-    if (f.halvardSpared) { await narr('Kairo walks past you, into the mill. When he comes back out, his blade is wet. Halvard does not follow him.'); f.halvardKilledByKairo = true; }
-    await say('kairoB', 'neutral', "Ashford can wait. I need soldiers more than I need ashes.");
+    if (f.halvardSpared) { await narr('Kairo walks past you, into the mill. When he comes back out, his blade is wet. Halvard does not follow him.'); await say('kairoB', 'sad', "He caged children for thirty years. That was justice, not revenge. …Tell yourself whatever you need to."); f.halvardKilledByKairo = true; }
+    await say('kairoB', 'neutral', "Ashford can wait. Freeing the cages comes first. It always comes first.");
   }
+  await narr('Footsteps on the mill roof. Someone drops into the clearing, light as falling snow — white hair, a spear across her back.');
+  await World.addNpc({ id: 'liora', sprite: 'liora_e', x: 20, y: 14, dir: 'left' });
+  await say('kairoB', 'blush', "…Liora.");
+  await say('tamsin', 'neutral', "Oh, here we go.");
+  await say('liora', 'neutral', "Your cages were empty before you got here, Kairo. Dread moved the children to Greyspire. And he'll be there himself in nine days.");
+  await say('kairoB', 'neutral', "Then come with us. Greyspire's walls won't fall to one spear.");
+  await say('liora', 'neutral', "I don't join, Kairo. I help, when it suits me. Tonight it suited me.");
+  if (F().lioraMet) await say('liora', 'happy', "And you, Sword Saint's student. Still alive. Good. At Greyspire, stay out of my way — or keep up.");
+  else await say('liora', 'neutral', "Who's this? …Another Drag with a hood and a grudge. Wonderful. Stay out of my way at Greyspire.");
+  await narr("She's gone over the mill roof as quietly as she came.");
+  World.remove('liora');
+  await say('kairoB', 'anger', "…Don't.");
+  await me('shock', "Don't what?");
+  await say('kairoB', 'anger', "You know what.");
   await narr('Kairo tosses something into the dirt at your feet. A shard of green stone, humming softly.');
   await say('kairoB', 'neutral', "Halvard's staff. That's how his light burned so bright — a Drag stone. OUR stone. Take it. Greyspire's walls are thick.");
   f.shard = true; sfx('art'); toast('You received a <b style="color:#46ff95">Drag Shard</b>: +1 MP every turn in battle.', 4200);
@@ -1030,19 +1060,177 @@ door('ashford', 8, 30, 'a_h1'); door('ashford', 15, 31, 'a_h2'); door('ashford',
 async function geTalk(id) {
   const f = F(); f['ge_' + id] = (f['ge_' + id] || 0) + 1; const n = f['ge_' + id];
   const L = {
-    dace: [["happy", "So YOU'RE the one. The one who went to the beach. Kairo doesn't talk about you. Which means he thinks about you constantly."],
-           ["anger", "Kairo pulled me out of a cage when I was nine. Nine! I'd burn the whole Crown down if he pointed at it. I'd burn it down if he DIDN'T point at it."],
-           ["neutral", "Lower your hood, coward. We don't hide in Green Eclipse. That's the first rule. The second rule is also don't hide."]],
-    sefa: [["neutral", "I'm the healer. Which means I'm the one who sees what's left after Kairo's 'lessons.' Theirs and ours."],
-           ["sad", "Last spring we freed forty children from a wagon. Then Kairo burned the toll-house it came from. There was a family upstairs. He said he didn't know."],
-           ["sad", "…I believe him. I think. Ask me again next spring."]],
+    dace: [["happy", "So YOU'RE the one. The one who walked out of the Realm of No Return. Kairo doesn't talk about you. Which means he thinks about you constantly."],
+           ["anger", "Kairo pulled me out of a cage when I was nine. Nine. The men who put me there called me an animal. Kairo called me a Drag — like it was a title."],
+           ["neutral", "Fratenaptor's blood makes us faster, stronger, harder to kill. They've known it for four hundred years. That's why they cage us. Kairo's just the first one who stopped pretending we should be grateful."]],
+    sefa: [["neutral", "I'm the healer. Before Kairo found me I was patching Drag children in a cellar, with stolen thread, waiting for the Inquisition to knock."],
+           ["sad", "Last spring we freed forty children from a wagon and set fire to the toll-house that sold them. We didn't know there was a family asleep upstairs. Kairo carried them out himself. Two didn't make it."],
+           ["sad", "He hasn't forgiven himself. He's also never stopped. I don't know if that's strength or the start of something worse. …I still follow him. Who else is fighting for us?"]],
     wren: [["anger", "Don't talk to me about 'good humans.' I was in a cage for four years. Good humans walked past it every single day."],
-           ["neutral", "Kairo says the ones who look away are the same as the ones who hold the key. He's right."],
+           ["neutral", "Kairo says the ones who look away are the same as the ones who hold the key. Four years taught me he's right."],
            ["happy", "…You've got his old knot on your wrist. The terrible one. Ilya's, isn't it? Kairo used to tie it on every rescued kid's wrist. 'So you can always find us.'"]],
     corran: [["neutral", "I'm the oldest thing in Green Eclipse, kid. Forty-one. Kairo calls me 'grandfather.' I let him think it annoys me."],
-             ["sad", "I was a smith in a Drag village two valleys over. It burned the same year as yours. I followed the green fire because nothing else was left burning."],
-             ["neutral", "He's a good leader. He's a frightening one. Those used to be different things. In war, they stop being different."]]
+             ["sad", "I was a smith in a Drag village two valleys over. It burned the same year as yours. For twenty years I kept my head down. Kairo's the first person who ever told me to lift it."],
+             ["neutral", "He wants a world where Drags sit on the thrones and humans ask permission. Maybe that's wrong. But I've lived the other way round my whole life, and that was wrong too."]]
   }[id];
   const [e, t] = L[Math.min(n - 1, L.length - 1)];
   await say(id, e, t);
 }
+
+/* ================= INTERLUDE: THE REALM OF NO RETURN ================= */
+SCENES.realm = {
+  title: 'The Realm of No Return', subtitle: 'Where the mana never thins', realm: true, safe: true, bd: 'snow', music: 'night',
+  get weather() { return F().vaneMet ? 'snow' : 'blizzard'; },
+  encounters() { if (!F().cultivation) return null; const r = Math.random(); return { enemies: r < .4 ? ['rime_lupine'] : r < .7 ? ['mana_wyrm'] : r < .92 ? ['rime_lupine', 'mana_wyrm'] : ['rime_alpha'], bd: 'snow' }; },
+  npcs() {
+    const f = F(); const L = [];
+    if (f.vaneMet && !f.vaneDone) L.push({ id: 'vane', x: 29, y: 15, dir: 'left', talk: talkVaneStone, ai: 'turn', turns: ['left', 'down', 'right'] });
+    return L;
+  },
+  exits: [{ x: 22, x2: 24, y: 31, msg: 'The storm turns you around. Every path out of the Realm leads back to the hut.', when: () => !F().vaneDone },
+          { x: 22, x2: 24, y: 31, to: 'ashford', tx: 29, ty: 39, dir: 'up', when: () => F().vaneDone, check: async () => { UI.controls(false); await narr('You walk south into the white. Behind you, a thin line of chimney smoke. You don\'t look back. He told you not to.'); Dlg.close(); await Story.prologueEnd(); return true; } }],
+  tiles: { '31,14': () => stoneTile(), '30,14': () => stoneTile(), '32,14': () => stoneTile() },
+  step(x, y) { const f = F(); if (!f.vaneMet && y <= 22) { Story.run(realmAmbush); return true; } },
+  async onEnter() {
+    const f = F(); if (f.realmIn) return; f.realmIn = true;
+    Weather.forced = 'blizzard';
+    await narr('Snow. Endless snow. The wagon ruts vanished hours ago, and so did the path back.');
+    await narr('The air tastes like metal. Every breath stings, like breathing in sparks.');
+    await me('sad', "Ilya… I'm coming. I'm coming…");
+    Story.quest('Find shelter. Anywhere. Keep walking north.');
+  }
+};
+async function stoneTile() { if (!F().cultivation) await narr('A ring of old standing stones. The snow never settles on them.'); else await narr('The meditation stones. Even the storm goes quiet here.'); }
+async function realmAmbush() {
+  const f = F();
+  await narr('Something moves in the white. Then another. Pale shapes, walking on two legs, with the heads of wolves.');
+  await me('shock', '…No. No, no, no—');
+  await Battle.start({ enemies: ['rime_lupine', 'rime_lupine'], noFlee: true, bd: 'snow', intro: 'Rime Lupines close in!',
+    onTurn: async (B, Bt) => { const me = Bt.me(); if (B.turn >= 6 || me.hp < me.maxHp * .35) {
+      await Bt.msg('A shadow steps out of the storm.', 1200); B.flash = 1.4; sfx('crit'); await wait(250);
+      B.actors.filter(a => a.side === 'e').forEach(a => { a.hp = 0; a.ko = true; a.anim = 'hurt'; a.frame = 5; Bt.text(a, 'SEVERED', '#cfe8ff', -10, true); });
+      await Bt.msg('SNOW SEVER', 1400); return 'scripted'; } } });
+  Weather.forced = null;
+  await World.addNpc({ id: 'vane', x: 23, y: 19, dir: 'down' });
+  await narr('A man stands over the bodies. Old. Grey hair tied back. A long coat, one sleeve pinned and empty. The other hand holds a blade so clean the snow slides off it.');
+  await say('vane', 'neutral', 'Hm. A Drag pup. In here.');
+  await say('vane', 'neutral', '…Of course. The idiots always find their way in.');
+  await narr('Your knees fold. The last thing you feel is a single arm lifting you out of the snow like you weigh nothing.');
+  await fadeOut(900);
+  f.vaneMet = true; World.remove('vane');
+  G.S.ret = { map: 'realm', x: 23, y: 12 }; Story.heal(true);
+  await World.load('r_hut', 7, 4, 'left'); await fadeIn(900);
+  banner('The Old Man\'s Hut', '');
+  await hutWake();
+}
+room('r_hut', 'in_cottage2', "The Old Man's Hut", { safe: true, music: 'sad', npcs: () => !F().hutWake ? [{ id: 'vane', x: 5, y: 4, dir: 'right', talk: async () => {} }] : [], tiles: { '4,2': async () => narr('A fire that never quite goes out. Above it, a bare hook where a sword used to hang.'), '7,3': async () => narr('A narrow bed. He gave it to you the first night and slept in the chair. He still won\'t admit it.') } });
+door('realm', 23, 11, 'r_hut');
+async function hutWake() {
+  const f = F(); f.hutWake = true;
+  await narr('A fire. A smell of pine smoke and boiled roots. A ceiling made of old dark beams.');
+  await say('vane', 'neutral', 'You\'re awake. Good. Corpses are heavy and the ground is frozen.');
+  await me('shock', 'Who… who are you?');
+  await say('vane', 'neutral', 'Nobody. An old man with one arm and no visitors. Call me "old man." Everyone who\'s left alive does.');
+  await me('anger', 'I have to go. They took my sister — the Inquisition — I have to—');
+  await say('vane', 'neutral', 'Go where? You walked into the Realm of No Return, pup. Nobody walks in. And nobody walks out.');
+  await say('vane', 'neutral', 'The weather changes every hour. The beasts here eat bears for practice. And the air—');
+  await say('vane', 'sad', 'The air is so thick with mana it eats you from the inside. That ache in your chest? That\'s the mountain chewing. A week, and you\'ll be dead.');
+  await me('sad', '…Then why did you save me?');
+  await say('vane', 'neutral', '…Hm. Good question. Ask me again in a few years.');
+  await say('vane', 'neutral', 'Dawn. The standing stones, east of the hut. I\'ll teach you how to breathe. Don\'t be late. The poison won\'t be.');
+  Story.quest('Meet the old man at the standing stones east of the hut.');
+}
+async function talkVaneStone() {
+  const f = F();
+  if (!f.cultivation) return vaneLesson();
+  if (f.vaneDone) { await say('vane', 'neutral', 'Go on. South. Don\'t make me carry you out too.'); return; }
+  if (f.adultVane) return vaneFinal();
+  await say('vane', 'neutral', 'Again.'); return vaneYears();
+}
+async function vaneLesson() {
+  const f = F();
+  Weather.set('clear', true);
+  await narr('Green light ripples across the sky. The old man sits cross-legged in the snow between the stones, his one hand resting on his knee.');
+  await say('vane', 'neutral', 'Sit. The mana here is a river. You\'ve been trying to swim against it. Stop. Breathe it in. Let it pass through you, and keep what you need.');
+  await say('vane', 'neutral', 'The old Drags had a name for it. Tomb Breath. Your people\'s blood was made for this air. You just never had to learn.');
+  await breathe(3);
+  f.cultivation = true; sfx('level');
+  toast('You learned <b style="color:#46ff95">Tomb Breath</b>. In the Realm, mana now restores you. New battle command: <b>Cultivate</b>.', 5000);
+  Story.heal(true);
+  await say('vane', 'happy', 'Hm. Faster than I was. Don\'t let it go to your head.');
+  await say('vane', 'neutral', 'Now. Show me how you swing that stick.');
+  await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Sparring: the old man', music: 'battle',
+    onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man taps your forehead with two fingers. You fall over.', 1600); return 'scripted'; } } });
+  Story.heal(true);
+  await say('vane', 'neutral', 'Why do you swing like that? Like you\'re trying to kill the air.');
+  const c = await ask('me', 'anger', '…', ['Because I\'m going to kill them. All of them.', 'Because I\'m angry.', 'I don\'t know.']);
+  if (c === 0) await say('vane', 'neutral', 'All of them. Hm. That\'s a lot of graves to dig with one stick.');
+  else if (c === 1) await say('vane', 'neutral', 'Good. Anger is honest. It\'s also stupid. It swings early and it swings wide.');
+  else await say('vane', 'neutral', 'That\'s the first true thing you\'ve said. Keep it. We\'ll find out together.');
+  await say('vane', 'neutral', 'Tomorrow, the same. And the day after. Until your arms stop shaking or fall off.');
+  await vaneYears();
+}
+async function vaneYears() {
+  const f = F();
+  await fadeOut(900);
+  await UI.intro([
+    'Days became seasons. Seasons became years.',
+    'Every dawn, Tomb Breath between the stones. Every noon, the stick. Every night, the old man\'s questions.',
+    '"You want to kill the men who burned Thornvale. They have sons. When the sons grow up, they\'ll come for you. Will you kill them too?"',
+    '"I would."  "And their sons?"  "…I would."  "Then you\'re not ending anything, pup. You\'re just taking your turn."',
+    'You hunted beasts that ate bears. You learned to read a blizzard like a sentence. You grew.',
+    'Sometimes, on the trade winds, you heard a name: a burned-faced boy in the mountains, freeing cages, breaking Inquisition outposts, swearing that Drags would never bow again. Green Eclipse. You never answered the wind.',
+    'Seven years.'
+  ]);
+  await Story.timeSkip();
+  f.adultVane = true;
+  await World.load('realm', 28, 15, 'right'); await fadeIn(900);
+  banner('Seven Years Later', 'The Realm of No Return');
+  await vaneFinal();
+}
+async function vaneFinal() {
+  const f = F();
+  Weather.set('clear', true);
+  await say('vane', 'neutral', 'You\'re taller than me now. I hate it.');
+  await say('vane', 'neutral', 'Before you go anywhere, one more question. The last one. Answer it honestly or don\'t answer at all.');
+  const c = await ask('vane', 'neutral', 'If you find the man who took your sister — and he\'s on his knees — what do you do?', ['I kill him.', 'I take her home. That\'s all.', 'I don\'t know yet.']);
+  f.vaneAnswer = c;
+  if (c === 0) { await say('vane', 'sad', 'Then you\'ve learned the sword and nothing else. Hatred is a debt, pup. Somebody always inherits it. Usually a child.'); await say('vane', 'neutral', 'Your friend in the mountains. The burned one. He wants to build a better world on top of the old one\'s bones. Bones grow the same weeds, pup.'); }
+  else if (c === 1) { await say('vane', 'happy', '…Hm. Seven years, and that\'s the first time you\'ve made me proud.'); await say('vane', 'neutral', 'Remember it when someone hands you a reason to forget.'); }
+  else { await say('vane', 'neutral', 'Good. A man who\'s sure is a man who\'s stopped looking.'); await say('vane', 'neutral', 'When you find out, make sure it\'s your answer. Not your anger\'s. Not your friend\'s.'); }
+  await me('neutral', 'You never told me who you were. Who you really were.');
+  await say('vane', 'sad', '…No. I didn\'t.');
+  f.vaneName = true;
+  await say('vane', 'neutral', 'Vane. Once they called me the Sword Saint of the West. Forty years, I never lost a duel. Kings paid me to stand behind their thrones and look frightening.');
+  await say('vane', 'sad', 'Then the Crown sent me against a giant in black scales. Dread. They wanted to know which of their weapons was sharper.');
+  await say('vane', 'sad', 'One stroke. He took the arm, and the title, and he let me live. The Crown called it shame and threw what was left of me in here.');
+  await say('vane', 'neutral', 'But I\'ll tell you something I never told the Crown. He fought like a man who wanted to lose. And behind the visor — I would swear on what\'s left of my sword arm — his eyes were green.');
+  await me('shock', '…Green? Dread is… a Drag?');
+  await say('vane', 'neutral', 'I don\'t know what he is. Neither do you. Remember that before you decide what to do with him.');
+  await say('vane', 'happy', 'Now. Draw. If you can make me use the sleeve, you\'re ready.');
+  const r = await Battle.start({ enemies: ['vane'], noFlee: true, boss: true, bd: 'snow', music: 'boss', intro: 'FINAL LESSON — Vane, the Sword Saint',
+    onTurn: async (B, Bt) => { const e = B.actors.find(a => a.key === 'vane'), me = Bt.me();
+      if (e && !e.t1 && e.hp < e.maxHp * .6) { e.t1 = 1; await Bt.msg('Vane: "Better. Stop trying to kill me and you might actually hit me."', 1800); }
+      if (e && e.hp < e.maxHp * .3) { await Bt.msg('Vane lowers his blade. He is smiling.', 1400); return 'win'; }
+      if (me.hp < me.maxHp * .22) { await Bt.msg('Vane\'s blade stops a hair from your throat.', 1400); return 'lose'; } } });
+  Story.heal(true);
+  if (r === 'win') await say('vane', 'happy', 'There it is. You made me use the sleeve. …Don\'t tell anyone. I have a reputation.');
+  else await say('vane', 'happy', 'Not today. But you stopped fighting angry halfway through. That\'s the lesson. The rest is just practice.');
+  await say('vane', 'neutral', 'Three weeks ago a courier\'s boat broke apart on the river at the edge of the Realm. I took this off his body.');
+  await narr('A waterlogged Inquisition ledger. One line, in neat ink: "Girl, green-eyed, ribbon on wrist. Transfer via Ashford Hollow."');
+  await me('shock', '…She\'s alive.');
+  await say('vane', 'neutral', 'And this.');
+  await narr('He holds out his sword, hilt-first. The one that never left his side in seven years.');
+  await say('vane', 'neutral', 'Last Light. It was never sharp because of the steel. Don\'t fight to kill, pup. Fight so that it ends.');
+  sfx('level'); toast('You received <b style="color:#46ff95">Last Light</b>, Vane\'s blade.', 4000);
+  G.S.stats.atk += 3; G.S.f.vaneDone = true;
+  await say('vane', 'sad', '…Go on. South, through the storm. You know how to breathe it now. Don\'t come back. Old men hate goodbyes.');
+  Story.quest('Leave the Realm of No Return — south, through the storm.');
+  World.ent('vane') && (World.ent('vane').talk = talkVaneStone);
+}
+Story.timeSkip = async function () {
+  G.S.kid = false; G.S.hood = true;
+  const st = G.S.stats; G.S.lvl = Math.max(G.S.lvl, 4); st.maxHp = 80; st.maxMp = 24; st.atk = 16; st.def = 7; st.spd = 12; st.hp = st.maxHp; st.mp = st.maxMp;
+  $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Seven years pass…'; await wait(30);
+  G.A.portCache = {}; await buildPlayerSprites(); $('#loading').classList.add('hide');
+};

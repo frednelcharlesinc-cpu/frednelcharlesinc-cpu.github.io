@@ -6,6 +6,8 @@ const ARTS = {
   ruin: { name: 'Verdant Ruin', mp: 9, desc: 'The binding-fire of the Seven. Hits ALL enemies, 3 timed hits.', type: 'all', hits: [{ anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: 1.3 }], blaze: 1, brk: 10 },
   cleave: { name: 'Forge Cleave', mp: 4, desc: 'Oren\'s two-handed overhead cut. ×2.', type: 'hit', hits: [{ anim: 'backslash', m: 2 }], brk: 12 },
   needle: { name: 'Viper Needle', mp: 4, desc: 'Three fast stabs. Hard to parry.', type: 'hit', hits: [{ anim: 'slash', m: .8 }, { anim: 'slash', m: .8 }, { anim: 'slash', m: 1 }], brk: 8, pierce: 1 },
+  wyrm: { name: 'Wyrmpiercer', mp: 5, desc: 'A spear thrust forged to punch through dragon scale. ×2.6, pierces parries.', type: 'hit', hits: [{ anim: 'thrust', m: 2.6 }], brk: 18, pierce: 1 },
+  moonstep: { name: 'Moonstep', mp: 3, desc: 'Liora moves like moonlight on water: enemies lose track of her for 2 turns.', type: 'veil' },
   veil: { name: 'Smoke Veil', mp: 3, desc: 'Kess melts into shadow: enemies lose track of her for 2 turns.', type: 'veil' }
 };
 const LINKS = {
@@ -35,14 +37,26 @@ const ENEMY = {
       { name: 'Shard Flare', w: .25, hits: [{ anim: 'spellcast', m: 2, w: 1000, unp: 1 }] }] },
   dread: { name: 'Dread', hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
     skills: [{ name: 'Cleave', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Wingbeat', w: .25, hits: [{ anim: 'spellcast', m: 1.6, w: 1000, unp: 1 }] }] },
+  rime_lupine: { name: 'Rime Lupine', hp: 46, atk: 12, def: 3, spd: 13, dodge: .22, parry: 0, brk: 44, xp: 18, gold: 4,
+    skills: [{ name: 'Frost Claw', hits: [{ anim: 'slash', m: 1, w: 520 }] }, { name: 'Whiteout Frenzy', w: .45, hits: [{ anim: 'slash', m: .55, w: 440 }, { anim: 'halfslash', m: .55, w: 280 }, { anim: 'slash', m: .7, w: 360 }] }] },
+  rime_alpha: { name: 'Rime Alpha', hp: 120, atk: 15, def: 4, spd: 13, dodge: .25, parry: .05, brk: 70, xp: 50, gold: 12, size: 1.3,
+    skills: [{ name: 'Glacier Rend', hits: [{ anim: 'slash', m: 1.1, w: 500 }, { anim: 'halfslash', m: .9, w: 320 }] }, { name: 'Avalanche Pounce', w: .35, hits: [{ anim: 'jump', m: 1.9, w: 800, unp: 1 }] }] },
+  mana_wyrm: { name: 'Mana Wyrm', hp: 58, atk: 13, def: 3, spd: 11, dodge: .12, parry: .1, brk: 50, xp: 24, gold: 8,
+    skills: [{ name: 'Tail Lash', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Mana Breath', w: .4, hits: [{ anim: 'spellcast', m: 1.5, w: 900, unp: 1 }] }] },
+  vane_spar: { name: 'The Old Man', hp: 9999, atk: 5, def: 40, spd: 15, dodge: .45, parry: .55, brk: 9999, xp: 0, gold: 0, img: 'vane',
+    skills: [{ name: 'Tap', hits: [{ anim: 'slash', m: .6, w: 480 }] }, { name: 'Three Snowflakes', w: .5, hits: [{ anim: 'slash', m: .4, w: 420 }, { anim: 'slash', m: .4, w: 260 }, { anim: 'slash', m: .4, w: 260 }] }] },
+  vane: { name: 'Vane, the Sword Saint', hp: 320, atk: 15, def: 6, spd: 16, dodge: .25, parry: .4, brk: 100, xp: 120, gold: 0, boss: 1,
+    skills: [{ name: 'Snow Sever', hits: [{ anim: 'slash', m: 1.3, w: 320 }] }, { name: 'Thousand Flakes', w: .4, hits: [{ anim: 'slash', m: .45, w: 460 }, { anim: 'slash', m: .45, w: 230 }, { anim: 'slash', m: .45, w: 230 }, { anim: 'slash', m: .45, w: 300 }, { anim: 'slash', m: .7, w: 260 }] },
+      { name: 'The Empty Sleeve', w: .3, hits: [{ anim: 'slash', m: 1.2, w: 1150 }] }, { name: 'Last Light', w: .15, hits: [{ anim: 'slash', m: 2.2, w: 900, unp: 1 }] }] },
   halvard_pro: { name: 'Inquisitor Halvard', hp: 9999, atk: 16, def: 40, spd: 11, dodge: .5, parry: .5, brk: 9999, xp: 0, gold: 0, img: 'halvard',
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 320 }] }, { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.3, w: 620 }] }] },
 };
 const ALLY = {
   oren: { name: 'Oren', sprite: 'oren', color: '#a8592a', hp: 70, mp: 14, atk: 12, def: 5, spd: 9, arts: ['cleave'] },
+  liora: { name: 'Liora', sprite: 'liora', color: '#b23a5a', hp: 72, mp: 20, atk: 17, def: 5, spd: 17, arts: ['wyrm', 'moonstep'], atkAnim: 'thrust' },
   kess: { name: 'Kess', sprite: 'kess_bt', color: '#7a4aa6', hp: 46, mp: 18, atk: 10, def: 3, spd: 14, arts: ['needle', 'veil'] }
 };
-const ALLY_SPRITE = { oren: 'oren', kess: 'kess_eyes' };
+const ALLY_SPRITE = { oren: 'oren', kess: 'kess_eyes', liora: 'liora_e' };
 
 const Battle = {
   B: null,
@@ -64,7 +78,7 @@ const Battle = {
       const id = allies[i], A = ALLY[id], st = G.S.allies[id] || {};
       const lv = G.S.lvl - 1;
       const maxHp = A.hp + lv * 7, maxMp = A.mp + lv * 2;
-      B.actors.push(this.mk({ side: 'p', id, name: A.name, color: A.color, img: await npcImg(A.sprite), hp: st.hp ?? maxHp, maxHp, mp: st.mp ?? maxMp, maxMp,
+      B.actors.push(this.mk({ side: 'p', id, name: A.name, color: A.color, atkAnim: A.atkAnim, img: await npcImg(A.sprite), hp: st.hp ?? maxHp, maxHp, mp: st.mp ?? maxMp, maxMp,
         atk: A.atk + lv * 2, def: A.def + lv, spd: A.spd, arts: A.arts, slot: pSlots[i + 1] }));
     }
     cfg.enemies.forEach((k, i) => {
@@ -147,6 +161,7 @@ const Battle = {
           const Lk = LINKS[partner.id], ok = a.mp >= Lk.mp[0] && partner.mp >= Lk.mp[1];
           L.push(['Link Art', `${Lk.name}: ${Lk.desc} (${G.S.name} ${Lk.mp[0]} MP + ${partner.name} ${Lk.mp[1]} MP)`, () => ok ? this.pickTarget(a, t => this.doLink(a, partner, t).then(done)) : toast('Not enough MP for a Link Art.'), !ok]);
         }
+        if (a.isMe && G.S.f.cultivation) L.push(['Cultivate', 'Tomb Breath: drink the mana in the air. +5 MP, and your next strike is a guaranteed PERFECT.', () => { const g = 5 + (World.scene && World.scene.realm ? 3 : 0); a.mp = Math.min(a.maxMp, a.mp + g); a.focus = 1; sfx('heal'); this.spark(a.x, a.y - 30, '#46ff95', 22); this.text(a, '+' + g + ' MP · FOCUS', '#46ff95'); this.hud(); done(); }]);
         L.push(['Guard', 'Halve damage until your next turn and recover 3 MP.', () => { a.guard = true; a.mp = Math.min(a.maxMp, a.mp + 3); this.text(a, 'GUARD', '#9ad1ff'); this.hud(); done(); }]);
         L.push([`Items`, `Tonic ×${G.S.items.tonic}  ·  Ether ×${G.S.items.ether}`, () => items()]);
         if (a.isMe && !B.cfg.noFlee) L.push(['Flee', 'Try to escape (70%).', async () => { this.closeMenu(); if (Math.random() < 0.7) { await this.msg('You slip away!', 900); resolve('flee'); } else { await this.msg("Can't escape!", 900); done(); } }]);
@@ -234,7 +249,7 @@ const Battle = {
   async strike(a, t, hit, mult, opts) {
     // windup then QTE then impact
     a.anim = hit.anim; a.frame = 0; a.once = true; a.fn = 99; a.fms = 1e9; a.glow = !!hit.glow;
-    const g = opts.auto ? 'good' : await this.qte(t);
+    let g; if (opts.auto) g = 'good'; else if (a.focus) { a.focus = 0; g = await this.qte(t); g = 'perfect'; } else g = await this.qte(t);
     this.play(a, hit.anim, { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[hit.anim] || 6, hit.anim === 'backslash' ? 45 : 70);
     a.frame = hit.anim === 'backslash' ? 4 : 2;
     sfx('swing');
@@ -269,7 +284,7 @@ const Battle = {
   hop(t) { const x0 = t.x, d = t.side === 'e' ? -26 : 26; let k = 0; const it = setInterval(() => { k++; t.x = x0 + Math.sin(k / 8 * Math.PI) * d; if (k >= 8) { clearInterval(it); t.x = x0; } }, 22); },
   async doAttack(a, t) {
     const B = this.B; await this.dash(a, t.x + (a.side === 'p' ? 52 : -52), t.y + 2, 260);
-    const seq = [{ anim: 'slash', m: .75 }, { anim: a.isMe ? 'backslash' : 'halfslash', m: .85 }];
+    const seq = a.atkAnim ? [{ anim: a.atkAnim, m: .8 }, { anim: a.atkAnim, m: .9 }] : [{ anim: 'slash', m: .75 }, { anim: a.isMe ? 'backslash' : 'halfslash', m: .85 }];
     let parried = 0;
     for (const h of seq) { if (t.ko) break; const r = await this.strike(a, t, h, 1, {}); if (r === 'parried') parried++; await wait(160); }
     a.glow = false;
@@ -438,6 +453,7 @@ const Battle = {
   async msg(s, ms, hold) { const m = $('#bmsg'); m.textContent = s; m.classList.add('on'); await wait(ms || 900); if (!hold) m.classList.remove('on'); else setTimeout(() => m.classList.remove('on'), 600); },
   update(dt) {
     const B = this.B; if (!B) return;
+    if (World.scene && World.scene.realm) Weather.update(dt);
     for (const a of B.actors) {
       a.at += dt;
       if (a.once) { if (a.at >= a.fms) { a.at = 0; a.frame++; if (a.frame >= a.fn) { a.frame = a.fn - 1; if (!a.ko) { a.once = false; a.anim = a.loopAnim; a.frame = 0; } } } }
@@ -507,6 +523,7 @@ const Battle = {
       c.fillStyle = '#000'; c.fillText(x.s, x.x + 1, y + 1); c.fillStyle = x.col; c.fillText(x.s, x.x, y);
     }
     c.globalAlpha = 1; c.restore();
+    if (World.scene && World.scene.realm) Weather.render(c, t);
     if (B.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(.8, B.flash)})`; c.fillRect(0, 0, W, H); }
   }
 };
