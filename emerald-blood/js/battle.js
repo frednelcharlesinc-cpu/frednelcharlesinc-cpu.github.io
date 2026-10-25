@@ -1,13 +1,15 @@
 'use strict';
 /* ================= BATTLE: CTB timeline + Expedition-33 style reactions ================= */
 const ARTS = {
-  fang: { name: 'Emerald Fang', mp: 4, desc: 'A single strike wreathed in Drag fire. Timed hit ×2.2. Makes your eyes blaze.', type: 'hit', hits: [{ anim: 'slash', m: 2.2, glow: 1 }], blaze: 1, brk: 14 },
-  ward: { name: 'Scale Ward', mp: 3, desc: 'Emerald scales cut damage taken by 60% for 2 turns. Makes your eyes blaze.', type: 'buff', blaze: 1 },
-  ruin: { name: 'Verdant Ruin', mp: 9, desc: 'The binding-fire of the Seven. Hits ALL enemies, 3 timed hits.', type: 'all', hits: [{ anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: 1.3 }], blaze: 1, brk: 10 },
+  fang: { name: 'Emerald Fang', mp: 4, desc: 'A blade edge of raw mana — no element, so nothing can resist it. Timed hit ×2.2. Makes your eyes blaze.', type: 'hit', hits: [{ anim: 'slash', m: 2.2, glow: 1 }], blaze: 1, brk: 14 },
+  ward: { name: 'Emerald Field', mp: 3, desc: 'An energy field of raw mana. Cuts damage by 60% for 2 turns — 90% against ELEMENTAL attacks, because Drags unmake elements. Makes your eyes blaze.', type: 'buff', blaze: 1 },
+  ruin: { name: 'Verdant Ruin', mp: 9, desc: 'The Seven Wardens\' barrage: a storm of raw mana blasts. Hits ALL enemies, 3 timed hits.', type: 'all', hits: [{ anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: 1.3 }], blaze: 1, brk: 10 },
   cleave: { name: 'Forge Cleave', mp: 4, desc: 'Oren\'s two-handed overhead cut. ×2.', type: 'hit', hits: [{ anim: 'backslash', m: 2 }], brk: 12 },
   needle: { name: 'Viper Needle', mp: 4, desc: 'Three fast stabs. Hard to parry.', type: 'hit', hits: [{ anim: 'slash', m: .8 }, { anim: 'slash', m: .8 }, { anim: 'slash', m: 1 }], brk: 8, pierce: 1 },
   wyrm: { name: 'Wyrmpiercer', mp: 5, desc: 'A spear thrust forged to punch through dragon scale. ×2.6, pierces parries.', type: 'hit', hits: [{ anim: 'thrust', m: 2.6 }], brk: 18, pierce: 1 },
   moonstep: { name: 'Moonstep', mp: 3, desc: 'Liora moves like moonlight on water: enemies lose track of her for 2 turns.', type: 'veil' },
+  draw: { name: 'Verdant Tide: Draw', mp: 5, desc: 'Your eyes find the current in everything — and pull it INWARD. Every enemy is dragged together: 2 timed hits to all, and for 2 turns they can\'t dodge or parry.', type: 'draw', hits: [{ m: .8 }, { m: 1 }], blaze: 1, brk: 12 },
+  cast: { name: 'Verdant Tide: Cast', mp: 7, desc: 'Push the current OUTWARD. A crimson burst hurls one enemy back. ×2.8, pierces everything, and knocks their next turn back.', type: 'cast', hits: [{ m: 2.8 }], blaze: 1, brk: 22 },
   veil: { name: 'Smoke Veil', mp: 3, desc: 'Kess melts into shadow: enemies lose track of her for 2 turns.', type: 'veil' }
 };
 const LINKS = {
@@ -24,18 +26,20 @@ const ENEMY = {
   rook: { name: 'Rook', hp: 70, atk: 11, def: 3, spd: 14, dodge: .3, parry: .1, brk: 50, xp: 28, gold: 22,
     skills: [{ name: 'Twin Stab', hits: [{ anim: 'thrust', m: .75, w: 480 }, { anim: 'thrust', m: .75, w: 260 }] }, { name: 'Feint', w: .45, hits: [{ anim: 'slash', m: 1.3, w: 980 }] }, { name: 'Dirt in the Eyes', w: .3, hits: [{ anim: 'slash', m: 1.5, w: 560, unp: 1 }] }] },
   acolyte: { name: 'Acolyte', hp: 50, atk: 11, def: 4, spd: 10, dodge: .05, parry: .25, brk: 44, xp: 16, gold: 9,
-    skills: [{ name: 'Verdict', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Litany of Blades', w: .5, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'halfslash', m: .6, w: 320 }, { anim: 'backslash', m: .8, w: 420 }] }] },
+    skills: [{ name: 'Ember Verdict', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Litany of Blades', w: .5, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'halfslash', m: .6, w: 320 }, { anim: 'backslash', m: .8, w: 420 }] }] },
   voss: { name: 'Captain Voss', hp: 125, atk: 12, def: 5, spd: 10, dodge: .05, parry: .35, brk: 70, xp: 40, gold: 0,
     skills: [{ name: 'Spear Thrust', hits: [{ anim: 'thrust', m: 1.1, w: 560 }] }, { name: 'Phalanx', w: .45, hits: [{ anim: 'thrust', m: .7, w: 500 }, { anim: 'thrust', m: .7, w: 300 }, { anim: 'thrust', m: .9, w: 520 }] }, { name: 'Shield Rush', w: .3, hits: [{ anim: 'run', m: 1.6, w: 700, unp: 1 }] }] },
   halvard: { name: 'Inquisitor Halvard', hp: 280, atk: 14, def: 5, spd: 11, dodge: .08, parry: .25, brk: 90, xp: 90, gold: 60, boss: 1,
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 300 }, { anim: 'thrust', m: 1.1, w: 460 }] },
       { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.4, w: 640 }] }, { name: 'Binding Psalm', psalm: 1 }, { name: 'Purging Light', w: 0, hits: [{ anim: 'spellcast', m: 2.4, w: 1100, unp: 1 }] }] },
-  kairo_spar: { name: 'Kairo', hp: 80, atk: 7, def: 3, spd: 13, dodge: .15, parry: .15, brk: 50, xp: 20, gold: 0, img: 'kairo_kid',
+  kairo_spar: { name: 'Kairo', drag: 1, hp: 80, atk: 7, def: 3, spd: 13, dodge: .15, parry: .15, brk: 50, xp: 20, gold: 0, img: 'kairo_kid',
     skills: [{ name: 'Quick Draw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Twin Cut', w: .45, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'slash', m: .6, w: 320 }] }, { name: 'Show-off Leap', w: .25, hits: [{ anim: 'jump', m: 1.1, w: 760, unp: 1 }] }] },
-  kairo_duel: { name: 'Kairo', hp: 260, atk: 14, def: 5, spd: 15, dodge: .25, parry: .25, brk: 85, xp: 70, gold: 0, img: 'kairo_b', boss: 1,
+  kairo_duel: { name: 'Kairo', drag: 1, hp: 260,
+    morph: { at: .55, turns: 4, name: 'SCAR BLOOM', lines: ['Kairo: "…You want to see what the fire left me?"', 'His scars split open. Something underneath them is MOVING.', 'Black scale. Claws. A crown of burning spines. It is still Kairo — and it isn\'t.'],
+      hint: 'He adapts to anything that hurts him. Each attack works ONCE — change it up!', end: ['The scales crack and fall away like ash.', 'Kairo: "…Hah… it never… lasts…"'] }, atk: 14, def: 5, spd: 15, dodge: .25, parry: .25, brk: 85, xp: 70, gold: 0, img: 'kairo_b', boss: 1,
     skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'slash', m: 1.4, w: 340 }] },
       { name: 'Shard Flare', w: .25, hits: [{ anim: 'spellcast', m: 2, w: 1000, unp: 1 }] }] },
-  dread: { name: 'Dread', hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
+  dread: { name: 'Dread', drag: 1, hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
     skills: [{ name: 'Cleave', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Wingbeat', w: .25, hits: [{ anim: 'spellcast', m: 1.6, w: 1000, unp: 1 }] }] },
   rime_lupine: { name: 'Rime Lupine', hp: 46, atk: 12, def: 3, spd: 13, dodge: .22, parry: 0, brk: 44, xp: 18, gold: 4,
     skills: [{ name: 'Frost Claw', hits: [{ anim: 'slash', m: 1, w: 520 }] }, { name: 'Whiteout Frenzy', w: .45, hits: [{ anim: 'slash', m: .55, w: 440 }, { anim: 'halfslash', m: .55, w: 280 }, { anim: 'slash', m: .7, w: 360 }] }] },
@@ -51,15 +55,33 @@ const ENEMY = {
   halvard_pro: { name: 'Inquisitor Halvard', hp: 9999, atk: 16, def: 40, spd: 11, dodge: .5, parry: .5, brk: 9999, xp: 0, gold: 0, img: 'halvard',
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 320 }] }, { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.3, w: 620 }] }] },
 };
+const TIER = { lupine: 'E', bandit: 'E', kairo_spar: 'E', acolyte: 'D', rook: 'D', lupine_alpha: 'D', rime_lupine: 'D', voss: 'C', mana_wyrm: 'C', rime_alpha: 'C',
+  halvard: 'B', halvard_pro: 'B', kairo_duel: 'A', vane: 'S', vane_spar: 'S', dread: 'S' };
+const TIER_COL = { E: '#9aa3a0', D: '#7fc97f', C: '#6ab4ff', B: '#c58cff', A: '#ffb347', S: '#ff5a5a' };
+const ELEM = { fire: ['Fire', '#ff7a3a'], water: ['Water', '#4aa8ff'], ice: ['Ice', '#9fe4ff'], lightning: ['Lightning', '#ffe14a'], earth: ['Earth', '#c79a5a'], wind: ['Wind', '#bfe8d0'], light: ['Light', '#fff3b0'], mana: ['Raw Mana', '#46ff95'] };
+// which enemy techniques carry an element (everyone uses elements — except Drags, who move raw mana)
+const SKILL_EL = { 'Ember Verdict': 'fire', 'Radiant Lance': 'light', 'Purging Light': 'light', 'Shield Rush': 'earth', 'Dirt in the Eyes': 'earth', 'Frost Claw': 'ice', 'Whiteout Frenzy': 'ice',
+  'Avalanche Pounce': 'ice', 'Glacier Rend': 'ice', 'Mana Breath': 'lightning', 'Snow Sever': 'wind', 'Thousand Flakes': 'wind', 'Shard Flare': 'mana', 'Wingbeat': 'mana', 'Howl Pounce': 'wind' };
+const elOf = sk => SKILL_EL[sk.name];
 const ALLY = {
-  oren: { name: 'Oren', sprite: 'oren', color: '#a8592a', hp: 70, mp: 14, atk: 12, def: 5, spd: 9, arts: ['cleave'] },
-  liora: { name: 'Liora', sprite: 'liora', color: '#b23a5a', hp: 72, mp: 20, atk: 17, def: 5, spd: 17, arts: ['wyrm', 'moonstep'], atkAnim: 'thrust' },
-  kess: { name: 'Kess', sprite: 'kess_bt', color: '#7a4aa6', hp: 46, mp: 18, atk: 10, def: 3, spd: 14, arts: ['needle', 'veil'] }
+  oren: { name: 'Oren', drag: 1, sprite: 'oren', color: '#a8592a', hp: 70, mp: 14, atk: 12, def: 5, spd: 9, arts: ['cleave'] },
+  liora: { name: 'Liora', drag: 1, sprite: 'liora', color: '#b23a5a', hp: 72, mp: 20, atk: 17, def: 5, spd: 17, arts: ['wyrm', 'moonstep'], atkAnim: 'thrust' },
+  kess: { name: 'Kess', drag: 1, sprite: 'kess_bt', color: '#7a4aa6', hp: 46, mp: 18, atk: 10, def: 3, spd: 14, arts: ['needle', 'veil'] }
 };
 const ALLY_SPRITE = { oren: 'oren', kess: 'kess_eyes', liora: 'liora_e' };
 
+function tinted(img, col) {
+  img._t = img._t || {}; if (img._t[col]) return img._t[col];
+  const c2 = document.createElement('canvas'); c2.width = img.width; c2.height = img.height; const x = c2.getContext('2d');
+  x.drawImage(img, 0, 0); x.globalCompositeOperation = 'source-atop'; x.fillStyle = col; x.fillRect(0, 0, c2.width, c2.height);
+  return (img._t[col] = c2);
+}
+const SRC_NAME = s => s === 'attack' ? 'Attack' : s === 'link' ? 'Link Arts' : s === 'counter' ? 'Counters' : (ARTS[s] ? ARTS[s].name : s);
 const Battle = {
   B: null,
+  // Drag reflex: Drag bodies move more efficiently — wider timing windows. The Verdant Eye widens them further.
+  reflex(a) { if (!a || a.side !== 'p') return 1; let k = 1; if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.isMe && G.S.f.eye) k *= 1.2; return k; },
+  chooseSkill(e) { const pool = e.E.skills.filter(s => s.hits); let r = Math.random(), sk = pool[0]; for (const s of pool.slice(1)) { if (r < (s.w || .3)) { sk = s; break; } r -= (s.w || .3); } return sk; },
   async start(cfg) {
     if (typeof cfg === 'string') cfg = { enemies: [cfg] };
     const prevMode = G.mode; G.mode = 'battle'; Dlg.close(); UI.controls(false); $('#hud').classList.add('hide'); $('#hudR').classList.add('hide');
@@ -86,7 +108,7 @@ const Battle = {
       B.actors.push(this.mk({ side: 'e', id: k + i, key: k, name: E.name + (cfg.enemies.filter(x => x === k).length > 1 ? ' ' + 'ABCD'[i] : ''), hp: Math.round(E.hp * sc), maxHp: Math.round(E.hp * sc),
         mp: 0, maxMp: 0, atk: E.atk, def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: eSlots[i], spr: E.img || k, size: E.size || 1 }));
     });
-    for (const a of B.actors) if (a.side === 'e') a.img = await npcImg(a.spr);
+    for (const a of B.actors) if (a.side === 'e') { a.img = await npcImg(a.spr); if (a.key !== 'halvard') a.next = this.chooseSkill(a); }
     B.actors.forEach(a => { a.wait = 100 / a.spd * rnd(0.6, 1.0); });
     B.actors.filter(a => a.side === 'p').forEach(a => a.wait *= 0.7);
     Music.play(cfg.music || (cfg.boss ? 'boss' : 'battle'));
@@ -99,6 +121,7 @@ const Battle = {
     S.hp = Math.max(1, me.hp); S.mp = me.mp;
     for (const a of B.actors) if (a.side === 'p' && !a.isMe && G.S.party.includes(a.id)) G.S.allies[a.id] = { hp: Math.max(1, a.hp), mp: a.mp };
     if (B.blazed) { G.S.hood = false; if (cfg.witness) Story.addSus(cfg.witness); }
+    if (result === 'win' && Story.rankCheck) setTimeout(() => Story.rankCheck(), 50);
     this.ui(false);
     G.mode = prevMode === 'battle' ? 'world' : 'world'; UI.controls(true); UI.hud();
     if (World.scene && World.scene.music) Music.play(typeof World.scene.music === 'function' ? World.scene.music() : World.scene.music);
@@ -138,12 +161,14 @@ const Battle = {
       const live = B.actors.filter(a => !a.ko); live.sort((a, b) => a.wait - b.wait);
       const cur = live[0]; const base = cur.wait; live.forEach(a => a.wait -= base);
       B.cur = cur; B.turn++; this.hud();
-      if (B.cfg.onTurn) { const r = await B.cfg.onTurn(B, this); if (r) return r; }
+      if (B.cfg.onTurn) { const r = await B.cfg.onTurn(B, this); if (r === 'skip') { cur.wait += 100 / cur.spd; continue; } if (r) return r; }
       if (cur.broken) { cur.broken--; await this.text(cur, 'STUNNED', '#ffd34a'); cur.wait += 100 / cur.spd; if (!cur.broken) { cur.brk = 0; } continue; }
-      if (cur.ward) cur.ward--; if (cur.veil) cur.veil--; cur.guard = false;
+      if (cur.ward) cur.ward--; if (cur.veil) cur.veil--; if (cur.drawn) cur.drawn--; cur.guard = false;
       if (cur.side === 'p') { const r = await this.playerTurn(cur); if (r) return r; }
       else await this.enemyTurn(cur);
       cur.wait += 100 / cur.spd * (cur.delay || 1); cur.delay = 1;
+      await this.adaptTick();
+      for (const e of B.actors) if (e.pendMorph && !e.morphed && !e.ko) { e.pendMorph = 0; await this.morph(e); }
       this.hud();
       if (!this.alive('e').length) return await this.victory();
       if (!this.alive('p').filter(a => a.isMe).length || !this.alive('p').length) { await this.msg('Your vision fades to black…', 1600); return 'lose'; }
@@ -169,6 +194,7 @@ const Battle = {
       };
       const sub = () => {
         const L = a.arts.map(k => { const A = ARTS[k], cost = A.mp + (a.bind ? 2 : 0); return [A.name, A.desc, () => this.useArt(a, k).then(done), a.mp < cost, cost]; });
+        if (a.isMe && a.arts.includes('draw') && a.arts.includes('cast')) L.push(['??? (Null Tide)', 'Draw and Cast, meeting in one point. You can feel the shape of it behind your eyes — but the two currents won\'t touch. Not yet.', () => {}, true]);
         L.push(['◀ Back', 'Return.', menu]); this.openMenu(L, true);
       };
       const items = () => {
@@ -221,8 +247,8 @@ const Battle = {
     }
   },
   // ---------------- timed hits (player attacking) ----------------
-  async qte(target, dur, color) {
-    const B = this.B; dur = dur || rnd(470, 640);
+  async qte(target, dur, color, who) {
+    const B = this.B; dur = dur || rnd(470, 640); const rk = this.reflex(who || B.cur);
     if (B.tutorial && B.tutorial.hit) { B.tutorial.hit = 0; B.timeScale = 0.4; await this.msg('Tap when the ring closes on the center!', 1200, true); }
     const ring = { x: target.x, y: target.y - 30, t0: performance.now(), dur: dur / B.timeScale, kind: 'hit', color: color || '#ffd34a' }; B.rings.push(ring);
     $('#hitTap').classList.remove('hide');
@@ -231,10 +257,10 @@ const Battle = {
       let done = false;
       const prevA = Input.handlers.a;
       const fin = v => { if (done) return; done = true; Input.on('a', prevA); hit.removeEventListener('pointerdown', h); r(v); };
-      const judge = () => { const d = Math.abs(performance.now() - T) * B.timeScale; fin(d <= 75 ? 'perfect' : d <= 170 ? 'good' : 'miss'); };
+      const judge = () => { const d = Math.abs(performance.now() - T) * B.timeScale; fin(d <= 75 * rk ? 'perfect' : d <= 170 * rk ? 'good' : 'miss'); };
       const hit = $('#hitTap'); const h = e => { e.preventDefault(); judge(); };
       hit.addEventListener('pointerdown', h); Input.on('a', judge);
-      const ck = () => { if (done) return; if (performance.now() > T + 175 / B.timeScale) fin('miss'); else requestAnimationFrame(ck); }; ck();
+      const ck = () => { if (done) return; if (performance.now() > T + 175 * rk / B.timeScale) fin('miss'); else requestAnimationFrame(ck); }; ck();
     });
     // wait until impact moment for sync
     const left = T - performance.now(); if (left > 0) await wait(left);
@@ -249,7 +275,7 @@ const Battle = {
   async strike(a, t, hit, mult, opts) {
     // windup then QTE then impact
     a.anim = hit.anim; a.frame = 0; a.once = true; a.fn = 99; a.fms = 1e9; a.glow = !!hit.glow;
-    let g; if (opts.auto) g = 'good'; else if (a.focus) { a.focus = 0; g = await this.qte(t); g = 'perfect'; } else g = await this.qte(t);
+    let g; if (opts.auto) g = 'good'; else if (a.focus) { a.focus = 0; g = await this.qte(t, 0, 0, a); g = 'perfect'; } else g = await this.qte(t, 0, 0, a);
     this.play(a, hit.anim, { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[hit.anim] || 6, hit.anim === 'backslash' ? 45 : 70);
     a.frame = hit.anim === 'backslash' ? 4 : 2;
     sfx('swing');
@@ -260,22 +286,27 @@ const Battle = {
     this.text(a, grade === 'perfect' ? 'PERFECT!' : grade === 'good' ? 'GOOD' : 'MISS', grade === 'perfect' ? '#ffd34a' : grade === 'good' ? '#c9f7d6' : '#999', -40);
     sfx(grade === 'perfect' ? 'perfect' : grade === 'good' ? 'good' : 'miss');
     // enemy defense (they can dodge/parry you unless PERFECT)
-    if (t.side === 'e' && grade !== 'perfect' && !t.broken && !opts.unblockable) {
-      const r = Math.random();
-      if (r < t.dodge * (grade === 'miss' ? 1.6 : 1)) { this.text(t, 'DODGED', '#9ad1ff'); sfx('dodge'); this.hop(t); return 'dodged'; }
-      if (r < (t.dodge + t.parry) * (grade === 'miss' ? 1.6 : 1) && !opts.pierce) { this.text(t, 'PARRIED', '#ffe36a'); sfx('parry'); this.spark(t.x + 10, t.y - 34, '#fff3a0', 10); return 'parried'; }
+    if (t.side === 'e' && grade !== 'perfect' && !t.broken && !t.drawn && !opts.unblockable) {
+      const r = Math.random(), dk = (grade === 'miss' ? 1.6 : 1) * (t.E.drag ? 1.3 : 1);
+      if (r < t.dodge * dk) { this.text(t, t.E.drag ? 'DRAG REFLEX' : 'DODGED', '#9ad1ff'); sfx('dodge'); this.hop(t); return 'dodged'; }
+      if (r < (t.dodge + t.parry) * dk && !opts.pierce) { this.text(t, 'PARRIED', '#ffe36a'); sfx('parry'); this.spark(t.x + 10, t.y - 34, '#fff3a0', 10);
+        if (t.E.drag && a.side === 'p' && Math.random() < .4) { this.text(t, 'RIPOSTE!', '#ff9a5a', -16, true); this.chip(t, a, .45, true); }
+        return 'parried'; }
     }
     if (t.veil && t.side === 'p') { this.text(t, 'MISSED', '#9ad1ff'); return 'dodged'; }
     let dmg = Math.max(1, Math.round((a.atk * m) * (grade === 'perfect' ? 1.5 : grade === 'good' ? 1 : 0.6) * rnd(.9, 1.1) - t.def * (t.broken ? 0 : 1)));
     if (t.broken) dmg = Math.round(dmg * 1.5);
     if (t.guard) dmg = Math.ceil(dmg / 2);
     if (t.ward) dmg = Math.ceil(dmg * .4);
+    if (t.morph > 0 && opts.src) { const n = t.adapt[opts.src] || 0; if (n) { dmg = Math.max(1, Math.round(dmg * [1, .35, .1][Math.min(n, 2)])); this.text(t, 'ADAPTED', '#ff8a6a', -30); } t.pendAdapt = t.pendAdapt || new Set(); t.pendAdapt.add(opts.src); }
     this.damage(t, dmg, grade === 'perfect');
     if (t.side === 'e' && !t.ko) { t.brk += (grade === 'perfect' ? 12 : grade === 'good' ? 6 : 2) + (opts.brk || 0); this.checkBreak(t); }
     return 'hit';
   },
   damage(t, dmg, big) {
-    t.hp = Math.max(0, t.hp - dmg); this.text(t, String(dmg), t.side === 'e' ? '#fff' : '#ff8080', 0, big);
+    const M = t.E && t.E.morph;
+    t.hp = Math.max(M && !t.exhausted ? 1 : 0, t.hp - dmg); if (M && !t.morphed && t.hp < t.maxHp * M.at) t.pendMorph = 1;
+    this.text(t, String(dmg), t.side === 'e' ? '#fff' : '#ff8080', 0, big);
     sfx(big ? 'crit' : 'hit'); this.B.shake = big ? 9 : 5; t.hurtT = 220; this.spark(t.x, t.y - 30, big ? '#ffe36a' : '#fff', big ? 16 : 9);
     if (t.hp <= 0 && !t.ko) { t.ko = true; t.anim = 'hurt'; t.once = true; t.frame = 0; t.fn = 6; t.fms = 90; t.at = 0; t.loopAnim = 'hurt'; this.text(t, t.side === 'e' ? 'DEFEATED' : 'DOWN', '#ff6b6b', -20); }
     this.hud();
@@ -286,7 +317,7 @@ const Battle = {
     const B = this.B; await this.dash(a, t.x + (a.side === 'p' ? 52 : -52), t.y + 2, 260);
     const seq = a.atkAnim ? [{ anim: a.atkAnim, m: .8 }, { anim: a.atkAnim, m: .9 }] : [{ anim: 'slash', m: .75 }, { anim: a.isMe ? 'backslash' : 'halfslash', m: .85 }];
     let parried = 0;
-    for (const h of seq) { if (t.ko) break; const r = await this.strike(a, t, h, 1, {}); if (r === 'parried') parried++; await wait(160); }
+    for (const h of seq) { if (t.ko) break; const r = await this.strike(a, t, h, 1, { src: 'attack' }); if (r === 'parried') parried++; await wait(160); }
     a.glow = false;
     if (parried === seq.length && !t.ko) { await this.msg(`${t.name} reads every blow — COUNTER!`, 900); await this.enemyStrike(t, a, { name: 'Counter', hits: [{ anim: t.E.skills[0].hits[0].anim, m: 1.2, w: 520 }] }, true); }
     await this.home(a);
@@ -297,25 +328,73 @@ const Battle = {
     if (A.blaze && a.isMe) { if (!B.blazed) { B.blazed = true; if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
     B.dim = .55; B.dimCol = a.isMe ? '10,40,20' : '30,10,40'; sfx('art');
     await this.msg(A.name, 700);
-    if (A.type === 'buff') { await this.play(a, 'spellcast', 7, 80); a.ward = 3; this.spark(a.x, a.y - 30, '#46ff95', 26); this.text(a, 'SCALE WARD', '#46ff95'); }
+    if (A.type === 'buff') { await this.play(a, 'spellcast', 7, 80); a.ward = 3; this.spark(a.x, a.y - 30, '#46ff95', 26); this.text(a, 'EMERALD FIELD', '#46ff95'); B.fx.push({ field: 1, x: a.x, y: a.y - 30, t: 0, life: 900 }); }
     else if (A.type === 'veil') { await this.play(a, 'spellcast', 7, 70); a.veil = 3; a.alpha = .45; this.text(a, 'VEILED', '#c9a6ff'); }
     else if (A.type === 'hit') {
       await new Promise(r => this.pickTarget(a, r)).then(async t => {
         await this.dash(a, t.x + 52, t.y + 2, 240);
-        for (const h of A.hits) { if (t.ko) break; await this.strike(a, t, h, 1, { brk: A.brk || 0, pierce: A.pierce, unblockable: a.isMe }); if (h.glow) this.spark(t.x, t.y - 30, '#46ff95', 30); await wait(140); }
+        for (const h of A.hits) { if (t.ko) break; await this.strike(a, t, h, 1, { brk: A.brk || 0, pierce: A.pierce, unblockable: a.isMe, src: k }); if (h.glow) this.spark(t.x, t.y - 30, '#46ff95', 30); await wait(140); }
         a.glow = false; await this.home(a);
       });
+    } else if (A.type === 'draw') {
+      B.dimCol = '0,20,40'; await this.play(a, 'spellcast', 7, 80);
+      let es = this.alive('e'); const cx = es.reduce((s, t) => s + t.x, 0) / es.length, cy = es.reduce((s, t) => s + t.y, 0) / es.length;
+      B.fx.push({ orb: 1, kind: 'draw', x: cx, y: cy - 30, t: 0, life: 1500 }); sfx('chant');
+      await Promise.all(es.map(t => this.slide(t, lerp(t.x, cx, .5), lerp(t.y, cy, .5), 420)));
+      for (const h of A.hits) {
+        es = this.alive('e'); if (!es.length) break;
+        const g = await this.qte(es[0], rnd(480, 620), '#5fd8ff', a); sfx('art'); B.flash = .3;
+        for (const t of es) { this.spark(t.x, t.y - 30, '#5fd8ff', 14); this.resolveHit(a, t, h.m, g, { brk: A.brk, unblockable: 1, src: k }); }
+        await wait(160);
+      }
+      for (const t of this.alive('e')) { t.drawn = 2; t.wait += 20; this.text(t, 'DRAWN IN', '#5fd8ff', -24); }
+      await wait(350); await Promise.all(this.alive('e').map(t => this.slide(t, t.hx, t.hy, 320)));
+    } else if (A.type === 'cast') {
+      B.dimCol = '40,0,0';
+      const t = await new Promise(r => this.pickTarget(a, r));
+      await this.play(a, 'spellcast', 7, 70);
+      B.fx.push({ orb: 1, kind: 'cast', x: a.x - 22, y: a.y - 36, t: 0, life: 700 }); sfx('chant');
+      const g = await this.qte(t, rnd(420, 560), '#ff4a4a', a);
+      B.fx.push({ beam: 1, x1: a.x - 22, y1: a.y - 36, x2: t.x, y2: t.y - 30, t: 0, life: 420 }); sfx('crit'); B.flash = .5; B.shake = 12;
+      this.spark(t.x, t.y - 30, '#ff5a4a', 30);
+      this.resolveHit(a, t, A.hits[0].m, g, { brk: A.brk, unblockable: 1, pierce: 1, src: k }); B.tideUsed = 1;
+      if (!t.ko) { t.wait += 40; this.text(t, 'HURLED BACK', '#ff6a5a', -24); await this.slide(t, t.hx - 70, t.hy, 160); await wait(220); await this.slide(t, t.hx, t.hy, 320); }
     } else if (A.type === 'all') {
       await this.play(a, 'spellcast', 7, 90);
       for (const h of A.hits) {
         const es = this.alive('e'); if (!es.length) break;
-        const g = await this.qte(es[0], rnd(500, 650), '#46ff95');
+        const g = await this.qte(es[0], rnd(500, 650), '#46ff95', a);
         sfx('art'); B.flash = .5;
-        for (const t of es) { this.pillar(t.x, t.y); this.resolveHit(a, t, h.m, g, { brk: A.brk, unblockable: 1 }); }
+        for (const t of es) { this.pillar(t.x, t.y); this.resolveHit(a, t, h.m, g, { brk: A.brk, unblockable: 1, src: k }); }
         await wait(200);
       }
     }
     B.dim = 0; a.alpha = a.veil ? .45 : 1; this.hud();
+  },
+  async slide(a, x, y, ms) { const fx = a.x, fy = a.y, t0 = performance.now();
+    while (true) { const k = Math.min(1, (performance.now() - t0) / ms), e = 1 - (1 - k) * (1 - k); a.x = lerp(fx, x, e); a.y = lerp(fy, y, e); if (k >= 1) break; await wait(16); } },
+  async adaptTick() {
+    for (const e of this.B.actors) {
+      if (!e.pendAdapt || !e.pendAdapt.size) continue;
+      if (e.morph > 0 && !e.ko) for (const s of e.pendAdapt) {
+        const n = (e.adapt[s] = (e.adapt[s] || 0) + 1); e.wheel = (e.wheel || 0) + 1; sfx('chant'); this.B.shake = 6;
+        await this.msg(`The spines turn. ${e.name} ${n >= 2 ? 'has fully adapted to' : 'is adapting to'}: ${SRC_NAME(s)}`, 1250);
+      }
+      e.pendAdapt.clear();
+    }
+  },
+  async morph(e) {
+    const B = this.B, M = e.E.morph; e.morphed = 1; e.adapt = {}; e.tempo = 1; e.wheel = 0; e.wheelAng = 0;
+    B.dim = .65; B.dimCol = '45,0,0'; sfx('break'); B.shake = 14;
+    for (const l of M.lines) await this.msg(l, 1600);
+    B.flash = 1.3; sfx('crit'); e.morph = M.turns; e.size = 1.32; e.atk = Math.round(e.E.atk * 1.3); e.spd = e.E.spd + 3; e.def = e.E.def + 4; e.brk = 0; e.broken = 0;
+    this.text(e, M.name, '#ff5a3a', -50, true); await this.msg(M.name, 1200); await this.msg(M.hint, 2000); B.dim = 0;
+  },
+  async unmorph(e) {
+    const B = this.B, M = e.E.morph; B.dim = .5; B.dimCol = '30,10,0';
+    for (const l of M.end) await this.msg(l, 1500);
+    e.morph = 0; e.size = 1; e.atk = e.E.atk; e.spd = e.E.spd; e.def = 0; e.broken = 2; e.brk = e.brkMax; e.exhausted = 1;
+    this.text(e, 'BURNED OUT', '#ffb070', -30, true); sfx('break'); B.dim = 0;
   },
   async doLink(a, p, t) {
     const B = this.B, Lk = LINKS[p.id];
@@ -327,7 +406,7 @@ const Battle = {
     for (let i = 0; i < Lk.hits; i++) {
       if (t.ko) break;
       const who = i % 2 ? p : a, h = { anim: i === Lk.hits - 1 ? (who.isMe ? 'backslash' : 'slash') : 'slash', m: Lk.m + (i === Lk.hits - 1 ? .6 : 0), glow: who.isMe };
-      await this.strike(who, t, h, 1, { brk: 8, unblockable: 1 });
+      await this.strike(who, t, h, 1, { brk: 8, unblockable: 1, src: 'link' });
       this.spark(t.x, t.y - 30, i % 2 ? '#c9a6ff' : '#46ff95', 18);
       await wait(90);
     }
@@ -344,8 +423,8 @@ const Battle = {
       sk = e.phase2 && ph === 2 ? E.skills[3] : ph === 1 ? E.skills[2] : pick([E.skills[0], E.skills[1]]);
       if (e.phase2 && Math.random() < .25) sk = E.skills[3];
     } else {
-      const pool = E.skills; let r = Math.random(); sk = pool[0];
-      for (const s of pool.slice(1)) { if (r < (s.w || .3)) { sk = s; break; } r -= (s.w || .3); }
+      if (E.morph && !e.morphed && e.hp < e.maxHp * E.morph.at) await this.morph(e);
+      sk = e.next || this.chooseSkill(e); e.next = this.chooseSkill(e);
     }
     const targets = this.alive('p').filter(p => !p.veil); const t = targets.length ? pick(targets) : pick(this.alive('p'));
     if (sk.psalm) {
@@ -354,10 +433,11 @@ const Battle = {
       await wait(900); B.dim = 0; this.hud(); return;
     }
     await this.enemyStrike(e, t, sk, false);
+    if (e.morph > 0 && !e.ko) { e.morph--; if (!e.morph) await this.unmorph(e); }
   },
   async enemyStrike(e, t, sk, isCounter) {
     const B = this.B;
-    if (!isCounter) await this.msg(`${e.name}: ${sk.name}`, 700);
+    const el = elOf(sk); if (!isCounter) await this.msg(`${e.name}: ${sk.name}${el ? '  [' + ELEM[el][0] + ']' : ''}`, 750);
     if (sk.hits.some(h => h.unp)) { this.text(e, '!! UNPARRYABLE', '#ff5050', -50, true); sfx('alarm'); await wait(450); }
     const ranged = sk.hits[0].anim === 'spellcast';
     if (!ranged) await this.dash(e, t.x - 54, t.y + 2, 280);
@@ -365,7 +445,7 @@ const Battle = {
     let parries = 0, n = 0;
     for (const h of sk.hits) {
       if (t.ko) break; n++;
-      const r = await this.defend(e, t, h);
+      const r = await this.defend(e, t, Object.assign({ el }, h));
       if (r === 'parry' || r === 'pparry') parries++;
       await wait(120);
     }
@@ -377,14 +457,14 @@ const Battle = {
       await this.dash(t, e.x + 52, e.y + 2, 180);
       t.anim = t.isMe ? 'backslash' : 'slash'; this.play(t, t.anim, t.isMe ? 13 : 6, 40);
       await wait(220);
-      this.resolveHit(t, e, 1.8, 'perfect', { unblockable: 1, brk: 16 });
+      this.resolveHit(t, e, 1.8, 'perfect', { unblockable: 1, brk: 16, src: 'counter' });
       await wait(300); await this.home(t); B.dim = 0;
     }
   },
   defend(e, t, h) {
     const B = this.B;
     return new Promise(async resolve => {
-      let w = h.w || 520;
+      let w = (h.w || 520) * (e.tempo || 1); const rk = this.reflex(t);
       let slow = false;
       if (B.tutorial) {
         if (B.tutorial.dodge) { B.tutorial.dodge = 0; slow = true; await this.msg('Press DODGE as the ring closes!', 1300, true); }
@@ -402,7 +482,7 @@ const Battle = {
       // animate swing so the impact frame lands on T
       const nF = { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[h.anim] || 6, imp = Math.floor(nF / 2);
       const swingAt = T - imp * 60;
-      while (performance.now() < T + 75 / B.timeScale) {
+      while (performance.now() < T + 75 * rk / B.timeScale) {
         const now = performance.now();
         if (now >= swingAt && e.fms > 1e8) { e.fms = 60; e.at = 0; e.frame = 0; e.fn = nF; sfx('swing'); }
         await wait(10);
@@ -414,26 +494,28 @@ const Battle = {
       if (pressed) {
         const d = (pressed[1] - T) * B.timeScale || (pressed[1] - T);
         const dd = (pressed[1] - T) * (slow ? 0.38 : 1);
-        if (pressed[0] === 'dodge') { if (dd >= -110 && dd <= 45) res = 'pdodge'; else if (dd >= -290 && dd <= 75) res = 'dodge'; else res = 'early'; }
-        else { if (h.unp) res = 'unp'; else if (dd >= -70 && dd <= 35) res = 'pparry'; else if (dd >= -175 && dd <= 60) res = 'parry'; else res = 'early'; }
+        if (pressed[0] === 'dodge') { if (dd >= -110 * rk && dd <= 45 * rk) res = 'pdodge'; else if (dd >= -290 * rk && dd <= 75 * rk) res = 'dodge'; else res = 'early'; }
+        else { if (h.unp) res = 'unp'; else if (dd >= -70 * rk && dd <= 35 * rk) res = 'pparry'; else if (dd >= -175 * rk && dd <= 60 * rk) res = 'parry'; else res = 'early'; }
       }
       const m = h.m;
+      if (e.morph > 0 && (res === 'pdodge' || res === 'pparry')) { e.tempo = Math.max(.68, (e.tempo || 1) * .9); this.text(e, 'ADAPTING TO YOUR TIMING', '#ff8a6a', -40); }
       if (res === 'pdodge') { sfx('pdodge'); this.text(t, 'PERFECT DODGE', '#6ad7ff', -10, true); this.hop(t); t.mp = Math.min(t.maxMp, t.mp + 1); t.afterimg = 400; }
       else if (res === 'dodge') { sfx('dodge'); this.text(t, 'DODGE', '#9ad1ff'); this.hop(t); }
-      else if (res === 'pparry') { sfx('pparry'); this.text(t, 'PERFECT PARRY', '#ffe36a', -10, true); t.mp = Math.min(t.maxMp, t.mp + 2); this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 22); B.flash = .35; e.brk += 18; this.checkBreak(e); t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 40); }
+      else if (res === 'pparry') { sfx('pparry'); this.text(t, 'PERFECT PARRY', '#ffe36a', -10, true); t.mp = Math.min(t.maxMp, t.mp + 2);
+        if (h.el && h.el !== 'mana' && this.reflex(t) > 1) { t.mp = Math.min(t.maxMp, t.mp + 3); this.text(t, 'UNRAVELED! +3 MP', '#46ff95', -34); this.spark(t.x, t.y - 34, ELEM[h.el][1], 16); } this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 22); B.flash = .35; e.brk += 18; this.checkBreak(e); t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 40); }
       else if (res === 'parry') { sfx('parry'); this.text(t, 'PARRY', '#ffe36a'); t.mp = Math.min(t.maxMp, t.mp + 1); this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 10); e.brk += 8; this.checkBreak(e); this.chip(e, t, m * .25); }
       else {
         if (res === 'unp') this.text(t, "CAN'T PARRY THAT!", '#ff6b6b', -20);
         if (res === 'early') this.text(t, 'TOO EARLY', '#bbb', -20);
-        this.chip(e, t, m, true);
+        this.chip(e, t, m, true, h.el);
       }
       this.hud();
       resolve(res);
     });
   },
-  chip(e, t, m, full) {
+  chip(e, t, m, full, el) {
     let dmg = Math.max(1, Math.round(e.atk * m * rnd(.9, 1.1) - t.def * .6));
-    if (t.guard) dmg = Math.ceil(dmg / 2); if (t.ward) dmg = Math.ceil(dmg * .4);
+    if (t.guard) dmg = Math.ceil(dmg / 2); if (t.ward) dmg = Math.ceil(dmg * (el && el !== 'mana' ? .1 : .4));
     if (e.broken) dmg = Math.ceil(dmg * .6);
     this.damage(t, dmg, false); if (full) sfx('hurt');
   },
@@ -489,6 +571,31 @@ const Battle = {
         if (G.S.kid) {} else if (!glow) drawBT(c, G.A.sword, anim, fr, a.x, a.y, s);
         else { c.save(); c.globalCompositeOperation = 'lighter'; drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); c.restore(); drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); }
         if (!G.S.hood) { const g = c.createRadialGradient(a.x - 4, a.y - 50, 0, a.x - 4, a.y - 50, 8); g.addColorStop(0, 'rgba(70,255,140,.4)'); g.addColorStop(1, 'rgba(70,255,140,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(a.x - 20, a.y - 66, 32, 32); c.restore(); }
+        if (a.ward) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.25 + Math.sin(t / 200) * .1})`; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30, 26, 36, 0, 0, 7); c.stroke(); c.restore(); }
+      } else if (a.morph > 0) {
+        // SCAR BLOOM: a burning outline, a larger shadow-body, darkened scaled skin, horns and a crown of spines
+        const ga = c.globalAlpha, pul = Math.sin(t / 110);
+        c.save();
+        c.globalAlpha = ga * (.55 + pul * .15); drawBT(c, tinted(a.img, '#ff3a14'), a.anim, fr, a.x, a.y + 3, s * 1.14);
+        c.globalAlpha = ga * .95; drawBT(c, tinted(a.img, '#1a0505'), a.anim, fr, a.x, a.y + 2, s * 1.09);
+        c.globalAlpha = ga; drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
+        c.globalAlpha = ga * .42; drawBT(c, tinted(a.img, '#2a0606'), a.anim, fr, a.x, a.y, s);
+        // horns
+        const hx = a.x, hy = a.y - 52 * s;
+        for (const d of [-1, 1]) { c.beginPath(); c.moveTo(hx + d * 5 * s, hy + 6 * s); c.quadraticCurveTo(hx + d * 15 * s, hy - 2 * s, hx + d * 11 * s, hy - 14 * s); c.quadraticCurveTo(hx + d * 9 * s, hy - 3 * s, hx + d * 2 * s, hy + 5 * s);
+          c.fillStyle = '#140404'; c.fill(); c.strokeStyle = `rgba(255,90,40,${.7 + pul * .2})`; c.lineWidth = 1.2; c.stroke(); }
+        // glowing green eyes through the dark
+        c.globalCompositeOperation = 'lighter'; const eg = c.createRadialGradient(hx + 3 * s, hy + 12 * s, 0, hx + 3 * s, hy + 12 * s, 7 * s);
+        eg.addColorStop(0, 'rgba(90,255,150,.9)'); eg.addColorStop(1, 'rgba(90,255,150,0)'); c.fillStyle = eg; c.fillRect(hx - 6 * s, hy + 4 * s, 18 * s, 16 * s);
+        c.restore();
+        if (Math.random() < .5) B.fx.push({ x: a.x + rnd(-24, 24), y: a.y - rnd(10, 95), vx: rnd(-.4, .4), vy: rnd(-1.6, -.6), life: rnd(400, 800), t: 0, col: pick(['#ff6a2a', '#ffb050', '#ff3a1a']), s: rnd(1.5, 3) });
+        // crown of spines — turns one notch each time he adapts
+        a.wheelAng = lerp(a.wheelAng || 0, (a.wheel || 0) * Math.PI / 4, .08);
+        const cx = hx, cy = hy - 16 * s; c.save(); c.globalAlpha = ga;
+        c.strokeStyle = '#ff6a2a'; c.lineWidth = 2; c.beginPath(); c.ellipse(cx, cy, 15, 4.5, 0, 0, 7); c.stroke();
+        for (let i = 0; i < 8; i++) { const an = a.wheelAng + i * Math.PI / 4, px = cx + Math.cos(an) * 15, py = cy + Math.sin(an) * 4.5, h = 7 + (Math.sin(an) > 0 ? 3 : 0);
+          c.fillStyle = Math.sin(an) > 0 ? '#ffb050' : '#7a1a0a'; c.beginPath(); c.moveTo(px - 3, py); c.lineTo(px + 3, py); c.lineTo(px, py - h); c.fill(); }
+        c.restore();
       } else drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
       c.globalAlpha = 1;
       if (a.side === 'e' && !a.ko) {
@@ -496,7 +603,10 @@ const Battle = {
         c.fillStyle = 'rgba(0,0,0,.7)'; c.fillRect(x - 1, y - 1, bw + 2, 9);
         c.fillStyle = '#e04848'; c.fillRect(x, y, bw * a.hp / a.maxHp, 4);
         c.fillStyle = a.broken ? '#fff' : '#ffd34a'; c.fillRect(x, y + 5, bw * Math.min(1, a.brk / a.brkMax), 2);
-        c.font = '600 9px "Pixelify Sans"'; c.textAlign = 'center'; c.fillStyle = '#fff'; c.fillText(a.name, a.x, y - 3);
+        c.font = '600 9px "Pixelify Sans"'; c.textAlign = 'center'; c.fillStyle = '#fff'; c.fillText(a.name, a.x - 7, y - 3);
+        const tr = TIER[a.key]; if (tr) { const tx = a.x - 7 + c.measureText(a.name).width / 2 + 9; c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(tx - 6, y - 12, 12, 11); c.fillStyle = TIER_COL[tr]; c.font = '700 8px "Press Start 2P"'; c.fillText(tr, tx, y - 3); }
+        if (G.S.f.eye && a.next) { const u = a.next.hits.some(h => h.unp), el = elOf(a.next); c.font = '600 8px "Pixelify Sans"'; c.fillStyle = '#000'; const nt = '◉ ' + a.next.name + (el ? ' · ' + ELEM[el][0] : ''); c.fillText(nt, a.x + 1, y + 18); c.fillStyle = u ? '#ff6a6a' : el ? ELEM[el][1] : '#7fe8ff'; c.fillText(nt, a.x, y + 17); }
+        if (a.drawn) { c.strokeStyle = 'rgba(95,216,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y, 20, 7, 0, 0, 7); c.stroke(); }
       }
     }
     if (T) { const a = T.list[T.i]; const y = a.y - 92 + Math.sin(t / 150) * 3; c.fillStyle = T.side === 'e' ? '#ffd34a' : '#46ff95'; c.beginPath(); c.moveTo(a.x - 7, y); c.lineTo(a.x + 7, y); c.lineTo(a.x, y + 9); c.fill(); }
@@ -512,6 +622,24 @@ const Battle = {
     // particles
     for (const p of B.fx) {
       const k = p.t / p.life;
+      if (p.orb) {
+        const R = p.kind === 'draw' ? 38 * (1 - k * .55) : 8 + 26 * k, col = p.kind === 'draw' ? '80,200,255' : '255,60,50';
+        c.save(); c.globalCompositeOperation = 'lighter';
+        const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, R); g.addColorStop(0, `rgba(255,255,255,${.9 * (1 - k)})`); g.addColorStop(.35, `rgba(${col},${.75 * (1 - k)})`); g.addColorStop(1, `rgba(${col},0)`);
+        c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, R, 0, 7); c.fill();
+        c.strokeStyle = `rgba(${col},${.85 * (1 - k)})`; c.lineWidth = 2;
+        for (let i = 0; i < 5; i++) { const q = p.kind === 'draw' ? 1 - ((k * 4 + i / 5) % 1) : ((k * 3 + i / 5) % 1); const r2 = R * (.4 + 1.6 * q), a0 = p.t / (p.kind === 'draw' ? 90 : -140) + i * 1.3;
+          c.beginPath(); c.arc(p.x, p.y, r2, a0, a0 + 1.8); c.stroke(); }
+        c.restore(); continue;
+      }
+      if (p.field) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.8 * (1 - k)})`; c.lineWidth = 2;
+        for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + p.t / 400; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 34, p.y + Math.sin(an) * 40); c.lineTo(p.x + Math.cos(an + Math.PI / 3) * 34, p.y + Math.sin(an + Math.PI / 3) * 40); c.stroke(); }
+        c.fillStyle = `rgba(70,255,140,${.12 * (1 - k)})`; c.beginPath(); c.ellipse(p.x, p.y, 34, 40, 0, 0, 7); c.fill(); c.restore(); continue; }
+      if (p.beam) {
+        c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+        c.strokeStyle = `rgba(255,60,50,${.8 * (1 - k)})`; c.lineWidth = 16 * (1 - k * .6); c.beginPath(); c.moveTo(p.x1, p.y1); c.lineTo(p.x2, p.y2); c.stroke();
+        c.strokeStyle = `rgba(255,240,230,${1 - k})`; c.lineWidth = 4 * (1 - k * .6); c.stroke(); c.restore(); continue;
+      }
       if (p.pillar) { const g = c.createLinearGradient(p.x, 0, p.x, p.y); g.addColorStop(0, 'rgba(70,255,140,0)'); g.addColorStop(1, `rgba(70,255,140,${.7 * (1 - k)})`); c.fillStyle = g; c.fillRect(p.x - 14 * (1 - k * .5), 0, 28 * (1 - k * .5), p.y); continue; }
       c.globalAlpha = 1 - k; c.fillStyle = p.col; c.fillRect(p.x + p.vx * p.t / 16, p.y + p.vy * p.t / 16 + k * k * 30, p.s, p.s);
     }

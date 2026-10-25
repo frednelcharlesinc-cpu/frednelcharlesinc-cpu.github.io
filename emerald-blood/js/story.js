@@ -7,7 +7,8 @@ Object.assign(CHAR, {
   maren: { name: 'Maren', sprite: 'maren' }, tobb: { name: 'Tobb', sprite: 'tobb' }, pip: { name: 'Pip', sprite: 'pip' }, pipmom: { name: "Pip's Mother", sprite: 'pipmom' },
   kess: { name: 'Kess', sprite: 'kess' }, kessE: { name: 'Kess', sprite: 'kess_eyes' }, voss: { name: 'Captain Voss', sprite: 'voss' }, guard: { name: 'Guard', sprite: 'guard' },
   rook: { name: 'Rook', sprite: 'rook' }, bandit: { name: 'Bandit', sprite: 'bandit' }, sable: { name: 'Sable', sprite: 'hunter' }, cassel: { name: 'Brother Cassel', sprite: 'cassel' },
-  hoshi: { name: 'Old Hoshi', sprite: 'hoshi' }, bram: { name: 'Bram', sprite: 'innkeep' },
+  hoshi: { name: 'Old Hoshi', sprite: 'hoshi' }, brom: { name: 'Guildmaster Brom', sprite: 'brom' }, sylwen: { name: 'Sylwen', sprite: 'sylwen' },
+  garrick: { name: 'Garrick', sprite: 'garrick' }, tilda: { name: 'Tilda', sprite: 'tilda' }, bram: { name: 'Bram', sprite: 'innkeep' },
   kairo: { name: 'Kairo', sprite: 'kairo_kid', kid: 1 }, kairoKB: { name: 'Kairo', sprite: 'kairo_kidb', kid: 1 },
   tamsinK: { name: 'Tamsin', sprite: 'tamsin_kid', kid: 1 }, boK: { name: 'Bo', sprite: 'bo_kid', kid: 1 }, larkK: { name: 'Lark', sprite: 'lark_kid', kid: 1 }, nixK: { name: 'Nix', sprite: 'nix_kid', kid: 1 },
   tamsin: { name: 'Tamsin', sprite: 'tamsin' }, liora: { name: 'Liora', sprite: 'liora_e' }, vane: { get name() { return G.S && G.S.f.vaneName ? 'Vane' : 'The Old Man'; }, sprite: 'vane' }, dace: { name: 'Dace', sprite: 'ge_dace' }, sefa: { name: 'Sefa', sprite: 'ge_sefa' }, wren: { name: 'Wren', sprite: 'ge_wren' }, corran: { name: 'Corran', sprite: 'ge_corran' }, bo: { name: 'Bo', sprite: 'bo' }, lark: { name: 'Lark', sprite: 'lark' }, kairoB: { name: 'Kairo', sprite: 'kairo_b' }, dread: { name: 'Dread', sprite: 'dread' }, rebel: { name: 'Green Eclipse', sprite: 'rebel' }
@@ -310,6 +311,9 @@ async function festival() {
   await say('kairo', 'anger', "GET AWAY FROM THEM!");
   await narr('Kairo comes out of a burning house with his sleeves on fire. Something green blazes in his fist — the stone from the mountain.');
   await narr('He drives it into Dread\'s arm. The light is blinding. For the first time, the giant takes a step BACK.');
+  await narr('For one heartbeat Kairo\'s burning arm is wrong — swollen, black-scaled, hooked claws where his fingers should be. The flames on his sleeve stop hurting him. Then it\'s just a boy\'s arm again.');
+  await say('dread', null, "…");
+  await narr('Behind the visor, something green flickers. Dread is looking at Kairo\'s arm. Not at the stone.');
   World.shake = 500; sfx('art');
   await say('dread', null, "…A DRAG STONE.");
   await say('kairo', 'anger', "RUN! Both of you, the bridge, NOW!");
@@ -327,9 +331,36 @@ async function festival() {
   await me('anger', "Let. Her. GO.");
   await say('halvard', 'happy', "Fratenaptor's blood doesn't sleep. One day it wakes — in her, in you — and the world burns. I am the firebreak.");
   await Battle.start({ enemies: ['halvard_pro'], allies: [], noFlee: true, bd: 'dusk', boss: true, intro: 'Inquisitor Halvard',
-    onTurn: async (B, Bt) => { if (B.turn >= 4) { await Bt.msg('Halvard: "Enough."', 1000); B.flash = 1.5; sfx('light'); await wait(500); B.actors.filter(a => a.side === 'p').forEach(a => { a.hp = 0; a.ko = true; a.anim = 'hurt'; a.frame = 5; }); Bt.hud(); await Bt.msg('PURGING LIGHT', 1400); return 'scripted'; } } });
+    onTurn: async (B, Bt) => {
+      const me = Bt.me(), h = B.actors.find(a => a.side === 'e');
+      if (B.awoke) {
+        if (B.cur === me && !B.myTurn) { B.myTurn = 1; return; }
+        if (B.tideUsed) { await Bt.msg('Halvard is on his back in the mud. His visor is cracked straight down the middle.', 1900); await Bt.msg('Halvard: "…It woke. In a CHILD."', 1700); }
+        return 'scripted';
+      }
+      if (B.turn >= 4) {
+        await Bt.msg('Halvard: "Enough."', 1000); B.flash = 1.5; sfx('light'); await wait(500);
+        me.hp = 1; me.anim = 'hurt'; me.frame = 5; Bt.hud(); await Bt.msg('PURGING LIGHT', 1400);
+        await Bt.msg('Through the white, Ilya is screaming your name. Getting further away.', 1900);
+        B.dim = .85; B.dimCol = '0,0,0'; Music.stop(); sfx('break');
+        await Bt.msg('Something behind your eyes cracks open.', 1700);
+        B.dimCol = '0,24,20';
+        await Bt.msg('The world goes slow. You can SEE it — threads of green light in the air, in the stones, running through Halvard like veins.', 2600);
+        await Bt.msg('Every thread is a current. And every current can be pulled… or thrown.', 2100);
+        B.flash = 1.3; sfx('art'); G.S.f.eye = true;
+        await Bt.msg('VERDANT EYE — AWAKENED', 1800);
+        me.hp = Math.round(me.maxHp * .35); me.mp = me.maxMp; me.arts = ['cast']; me.anim = 'combat'; me.frame = 0; B.dim = 0; Bt.hud(); Music.play('boss');
+        await Bt.msg('You don\'t know how. You just know. (Drag Arts → Verdant Tide: Cast)', 2400, true);
+        B.awoke = B.turn;
+        if (B.cur === me) { B.myTurn = 1; return; }
+        me.wait = -1; return 'skip';
+      }
+    } });
+  await narr('Halvard\'s acolytes are scattered across the bridge like dropped laundry. Halvard himself is crawling backwards, staring at you.');
+  await say('halvard', 'shock', "Its eyes— look at its EYES. Chain it— no. NO. Get the girl in the wagon. NOW. We leave NOW!");
+  await narr('You take one step after them. Warm wet runs down your cheeks. When you touch it, your fingers come away red. The green threads go dark.');
   await fadeOut(200); await fadeIn(200);
-  await narr('White light. Then nothing but the ringing in your ears.');
+  await narr('Your legs fold. Nothing but the ringing in your ears.');
   await say('ilya', null, "{SIB}!! {SIB}, GET UP!");
   await say('kairo', 'anger', "I've got you — I've got you, stop fighting me, we can't— they're too many—");
   await narr('The last thing you see is a scrap of green ribbon, reaching for you through the smoke. Then Kairo drags you into the dark.');
@@ -345,6 +376,9 @@ async function talkNanaAfter() {
   await say('nana', 'sad', "There you are. I thought… I thought they'd taken you too.");
   await me('sad', "They took Ilya. And Oren — Oren is—");
   await say('nana', 'sad', "I know. Hush. You were brave. Brave is not the same as able. That comes later.");
+  await say('nana', 'shock', "…Your eyes. There's blood under them. It woke, didn't it? I saw the light from here.");
+  await say('nana', 'neutral', "Every Drag carries a gift in the blood, child. Fratenaptor's last secret. It sleeps until grief turns the key — and no two gifts are ever the same.");
+  await say('nana', 'sad', "Mine woke the day my husband died. Yours woke tonight. I'm so sorry it had to be tonight.");
   await narr('Nana is sitting against the wall of her house. Her robe is dark at the side. Around her, the ground glitters with green dust.');
   await say('nana', 'neutral', "Listen to me now, because I won't get to say it twice. These mountains are not mountains. They are Fratenaptor's tomb.");
   await say('nana', 'neutral', "His body became the stone. And the stone remembers him — it drinks mana from the air itself and never runs dry. Drag stones.");
@@ -370,6 +404,8 @@ async function talkNanaAfter() {
   await say('kairoKB', null, "They burned children, {name}. While we sang. They didn't even look at our faces. Just our eyes.");
   await me('sad', "Kairo, your face—");
   await say('kairoKB', null, "Let it scar. I want to remember. Every time I look in water, I want to remember exactly what they are.");
+  await say('kairoKB', null, "…Something happened to me in there. In the fire. My arm changed, and then it stopped burning. Like my body learned the fire and decided it wasn't allowed to hurt me anymore.");
+  await say('kairoKB', null, "Your eyes did something on the bridge too. I saw. We're not what they say we are, {name}. We're MORE.");
   await say('kairoKB', null, "We're going up. Into the mountain, into the caves. We swore it — all of us, over the top. No grown-up is coming to save us. So we save ourselves.");
   const c = await ask('kairoKB', null, "Come with us. Please. You're my brother.", ["I'm going after Ilya.", "We should stay with Mei and Jun.", "Revenge won't bring them back."]);
   if (c === 0) await say('kairoKB', null, "…Of course you are. You always pick her.");
@@ -398,6 +434,7 @@ const FOLK_LINES = () => {
   const base = ['Fresh apples! Two coppers!', 'Did you hear? Cages on the north road.', 'Fine weather for a hanging, my uncle says.', 'Mind the guards, they\'re jumpy today.', 'The Inquisition pays silver for green eyes.', 'Pass the salt, Martha!', 'Bread\'s gone up again.', 'My cart wheel\'s cracked. Again.', 'Lovely day, isn\'t it?', 'Have you seen my goat?'];
   if (s >= 2) base.push('Someone saw green eyes by the fountain.', 'Lock your doors tonight.', 'Drags. In OUR town.');
   if (f.vossGone) base.push('Did you see Voss limping?');
+  base.push('The dwarf at the guild hall says anyone can register. ANYONE. Even elves.', 'My boy lit the barn with his first spark. Fire-born, like his grandad.', 'Elves live four hundred years and still can\'t haggle.', 'D-rank at sixteen! My daughter! Lightning!');
   base.push('Green Eclipse? Never heard of them. …Don\'t tell anyone I said that.', 'The Crown pays gold for green rocks now. Green ROCKS.');
   return base;
 };
@@ -444,6 +481,7 @@ SCENES.ashford = {
       await narr('Every one of them would turn and stare if they saw your eyes.');
       if (!G.S.hood) { G.S.hood = true; UI.hud(); }
       toast('Keep your hood up to blend in. Lower it, and people will react — some badly, some… not.', 5000);
+      if (!G.S.side) G.S.side = 'The Adventurers\' Guild (north-east house) registers anyone who can do the job. Registered adventurers travel without papers.';
     }
   }
 };
@@ -844,6 +882,8 @@ async function ending() {
   await say('halvard', 'shock', blazed ? 'That fire… and you aimed it at me, not at the town. Maybe I read the texts wrong.' : 'You never used it. The fire. Why?');
   await say('halvard', 'sad', "She isn't here. They moved the children at dawn. To Greyspire Citadel.");
   await say('halvard', 'happy', "And Drag — your valley wasn't found. It was sold. One of your own drew us the map to the bridge. Think on that.");
+  await say('halvard', 'neutral', "You want to know why we do it? I'll tell you what the Crown tells its inquisitors on the night they take the white. Not your eyes. Not your quick hands. The Dragonoid.");
+  await say('halvard', 'sad', "Somewhere in every one of you is the shape of the thing that nearly ended the world. One day, one of you will remember how to wear it. I have spent thirty years making sure it isn't today.");
   const c = await ask('halvard', 'neutral', 'Go on, Drag. Be what the stories say you are.', ['Spare him.', 'End him.']);
   if (c === 0) { f.halvardSpared = true; await me('anger', "No. I'm not your story."); await narr("You leave him kneeling in the dirt. He doesn't look up."); }
   else { f.halvardKilled = true; await narr("It's quick."); await narr('Somewhere in the trees, a bird stops singing. The stories, you realize, just got one chapter truer.'); }
@@ -945,7 +985,7 @@ async function kairoDuel() {
     onTurn: async (B, Bt) => {
       const e = B.actors.find(a => a.key === 'kairo_duel'), me = Bt.me();
       if (e && !e.t1 && e.hp < e.maxHp * .6) { e.t1 = 1; await Bt.msg('Kairo: "You learned to parry like THAT? From who?!"', 1800); }
-      if (e && e.hp < e.maxHp * .3) { await Bt.msg('Kairo drops to one knee.', 1300); return 'win'; }
+      if (e && e.exhausted && e.hp < e.maxHp * .3) { await Bt.msg('Kairo drops to one knee.', 1300); return 'win'; }
       if (me.hp < me.maxHp * .22) { await Bt.msg('Your blade hits the dirt.', 1300); return 'lose'; }
     } });
   Story.heal(true);
@@ -954,6 +994,7 @@ async function kairoDuel() {
     await say('kairoB', 'shock', "…Hah. Forty-two to one.");
     await say('kairoB', 'neutral', "You fight different. Like you're not trying to kill me. Who taught you that?");
     await me('neutral', "An old man with one arm.");
+    await say('kairoB', 'neutral', "And your eyes. You saw every move before I made it. That's your gift, isn't it. It woke on the bridge.");
     await say('kairoB', 'sad', "Fine. Ashford stands on its own feet. For now. Not because you're right — because you beat me. Remember the difference.");
     if (f.halvardSpared) await say('kairoB', 'anger', "Keep your priest, then. When he cages another child, I hope you're there to tell the child about 'together.'");
   } else {
@@ -962,6 +1003,11 @@ async function kairoDuel() {
     if (f.halvardSpared) { await narr('Kairo walks past you, into the mill. When he comes back out, his blade is wet. Halvard does not follow him.'); await say('kairoB', 'sad', "He caged children for thirty years. That was justice, not revenge. …Tell yourself whatever you need to."); f.halvardKilledByKairo = true; }
     await say('kairoB', 'neutral', "Ashford can wait. Freeing the cages comes first. It always comes first.");
   }
+  await me('shock', "Kairo — what WAS that? Your body—");
+  await say('kairoB', 'neutral', "Scar Bloom. That's what Sefa calls it. It's not the Dragonoid, before you ask. Nobody's seen that in three hundred years. This is just mine.");
+  await say('kairoB', 'neutral', "The fire taught my body one thing: never lose to the same thing twice. Hit me with something once, and the scales remember it.");
+  await say('kairoB', 'sad', "It only comes when I'm close to the end. It doesn't last. And afterwards I can't lift my own sword. …Don't tell Dace.");
+  await say('sefa', 'sad', "He tells everyone not to tell Dace. Dace knows.");
   await narr('Footsteps on the mill roof. Someone drops into the clearing, light as falling snow — white hair, a spear across her back.');
   await World.addNpc({ id: 'liora', sprite: 'liora_e', x: 20, y: 14, dir: 'left' });
   await say('kairoB', 'blush', "…Liora.");
@@ -1050,11 +1096,86 @@ async function innRest() {
   const c = await ask('bram_in', 'happy', 'Room for the night? 15 gold. Warm bed, no questions. (Restores HP & MP and saves.)', ['Rest (15g)', 'Not now']);
   if (c === 0) { if (G.S.gold >= 15) { G.S.gold -= 15; await fadeOut(600); Story.heal(true); save(); await fadeIn(600); await narr('You keep your hood on all night. You sleep badly, but you sleep. (Game saved.)'); } else await say('bram_in', 'neutral', "Coin first, friend."); }
 }
-['a_h1', 'a_h2', 'a_h3', 'a_h4', 'a_h5', 'a_h6'].forEach((k, i) => room(k, i % 2 ? 'in_cottage2' : 'in_cottage', 'A Home', { npcs: () => [resident(k + 'a', FK(10 + i), 5, 3, ASH_HOME[i % 3], { nm: 'Resident' }), resident(k + 'b', FK(16 + i), i % 2 ? 6 : 3, 6, ASH_HOME[(i + 1) % 3], { nm: 'Resident' })] }));
+['a_h1', 'a_h2', 'a_h3', 'a_h4', 'a_h5'].forEach((k, i) => room(k, i % 2 ? 'in_cottage2' : 'in_cottage', 'A Home', { npcs: () => [resident(k + 'a', FK(10 + i), 5, 3, ASH_HOME[i % 3], { nm: 'Resident' }), resident(k + 'b', FK(16 + i), i % 2 ? 6 : 3, 6, ASH_HOME[(i + 1) % 3], { nm: 'Resident' })] }));
 const innCheck = async () => { if (G.S.sus >= 3) return 'The innkeeper sees you through the window and slams the shutters.'; if (!G.S.hood) return 'The innkeeper takes one look at your eyes and taps the NO DRAGS carving on the doorframe.'; return null; };
 door('ashford', 9, 14, 'a_clinic', async () => F().marenKnows ? "Maren's clinic. The door stays closed to you. You don't knock." : null);
 door('ashford', 16, 14, 'a_pip'); door('ashford', 35, 14, 'a_shop'); door('ashford', 42, 14, 'a_inn', innCheck);
-door('ashford', 8, 30, 'a_h1'); door('ashford', 15, 31, 'a_h2'); door('ashford', 22, 36, 'a_h3'); door('ashford', 41, 31, 'a_h4'); door('ashford', 49, 31, 'a_h5'); door('ashford', 53, 10, 'a_h6');
+door('ashford', 8, 30, 'a_h1'); door('ashford', 15, 31, 'a_h2'); door('ashford', 22, 36, 'a_h3'); door('ashford', 41, 31, 'a_h4'); door('ashford', 49, 31, 'a_h5'); door('ashford', 53, 10, 'a_guild');
+
+/* ---- The Adventurers' Guild: tiers of mana mastery ---- */
+const RANKS = ['E', 'D', 'C', 'B', 'A', 'S'];
+const RANK_DESC = {
+  E: 'Feels mana, barely shapes it. Every adventurer starts here. Village errands, rats, lost goats.',
+  D: 'An element answers when called. A trained fighter. Beast culls, caravan guard.',
+  C: 'One element mastered, or two in hand. Worth a whole town militia.',
+  B: 'Towns pay a year\'s taxes for you. Elites, inquisitors, monster lairs.',
+  A: 'One in ten thousand. Armies notice when you arrive. Prodigies and warlords.',
+  S: 'Living legends. Maybe a dozen breathe today. The Sword Saint was one. Dread is one.' };
+Story.rankCheck = function () {
+  const S = G.S, f = S.f; if (!S.rank) return;
+  let r = 0; if (f.rookBeaten || f.vossBeaten || f.alphaBeaten) r = 1; if (f.halvardBeaten) r = 2; if (f.duel === 'won') r = 3;
+  if (r > RANKS.indexOf(S.rank)) { S.rank = RANKS[r]; sfx('level'); toast(`Guild rank up! You are now <b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>. Word travels fast in the Hollow.`, 4200); UI.hud(); }
+};
+setInterval(() => { try { if (G.S && G.mode === 'world' && !World.busy && !Dlg.open && Story.rankCheck) Story.rankCheck(); } catch (e) { } }, 1500);
+room('a_guild', 'in_inn', "Adventurers' Guild", { npcs: () => [
+  { id: 'brom', x: 3, y: 4, dir: 'down', talk: talkBrom },
+  { id: 'sylwen', x: 12, y: 7, dir: 'left', talk: talkSylwen, ai: 'turn', turns: ['left', 'down'] },
+  { id: 'garrick', x: 9, y: 7, dir: 'down', talk: talkGarrick },
+  { id: 'tilda', x: 2, y: 7, dir: 'right', talk: talkTilda }],
+  tiles: { '9,2': () => rankBoard(), '10,2': () => rankBoard() } });
+async function rankBoard() {
+  await narr('A slate board, chalked in a dwarf\'s square hand: TIERS OF MASTERY.');
+  for (const r of RANKS) await narr(`${r}-RANK — ${RANK_DESC[r]}`);
+  await narr('Scratched underneath, smaller: "Drag — ???"  Someone has tried to rub it out.');
+}
+async function talkBrom() {
+  const f = F(), S = G.S;
+  if (S.rank) { await say('brom', 'happy', `${S.rank}-rank, ${S.name}. ${RANK_DESC[S.rank]}`); if (S.rank !== 'S') await say('brom', 'neutral', 'Want the next letter? Do something worth writing down. The guild hears everything — usually before you\'ve finished bleeding.'); return; }
+  await say('brom', 'neutral', 'Adventurers\' Guild, Ashford chapter. I\'m Brom. Yes, I\'m a dwarf. Yes, I\'m short. No, it\'s not funny the fortieth time.');
+  await say('brom', 'neutral', 'Here\'s how it works. Every living thing feels mana. Humans, elves, dwarves, the beast-folk out east, the wolf in the hedge. Most feel it like weather. A few can grab hold.');
+  await say('brom', 'neutral', 'Grab hold, and an element answers. Fire, water, ice, lightning, earth, wind, light. Everyone\'s got one that comes easiest. Elves get two, the show-offs.');
+  await say('brom', 'neutral', 'How MUCH you can grab, and what you do with it — that\'s your tier. E at the bottom, S at the top. The board on the wall has the details. Read it, I\'m tired of saying it.');
+  await say('brom', 'happy', 'Registered adventurers travel the roads without papers. The Crown hates it. Which is the best reason I know to sign up.');
+  await narr('He thumps a cloudy crystal the size of a skull onto the counter.');
+  await say('brom', 'neutral', 'Hand on the stone. It lights up with your element — red for fire, blue for water, and so on. Then I write you down.');
+  const c = await ask('me', 'neutral', '(If it reads what you really are…)', ['Put your hand on it.', 'Tomb Breath first — hold everything down.']);
+  if (c === 0) {
+    await narr('The crystal doesn\'t turn red. Or blue. Or any colour on the board.');
+    await narr('It turns GREEN. Not a glow — a flood. Light pours up out of it, hums in the floorboards, makes every lantern in the hall lean toward you.');
+    await say('garrick', 'shock', 'What in the— that\'s not an element. That\'s not ANY element!');
+    await say('sylwen', 'neutral', '…No. It isn\'t. It\'s what the elements are made of.');
+    await say('brom', 'neutral', '…Huh. Crystal\'s cracked. Old thing. Happens.');
+    await narr('Brom drops a cloth over it. Under the cloth, it\'s still glowing.');
+    await say('brom', 'neutral', 'Listen, ' + (S.hood ? 'hood' : 'friend') + '. Dwarves never had a war with your people. We were too busy having one with the elves. The guild takes anyone who does the job.');
+    await say('brom', 'sad', 'But the Crown\'s eyes drink in this hall too. You never put your hand on that stone. Understood?');
+    Story.addSus(.5); f.crystalGreen = true;
+  } else {
+    await narr('You breathe the way Vane taught you. In. Hold it. Fold the current down, small and smaller, until it\'s a coal in your chest.');
+    await narr('The crystal flickers… and stays a dull, empty grey.');
+    await say('brom', 'neutral', 'Grey. No element at all? Hah. Well, the bottom of the barrel needs filling too.');
+    await say('sylwen', 'neutral', 'No colour at all… or every colour, held so tight none of it gets out. Interesting.');
+  }
+  S.rank = 'E'; sfx('level');
+  await say('brom', 'happy', 'There. E-RANK. Everyone starts at E — even the ones who obviously aren\'t. Earn the rest.');
+  toast('Registered at the <b>Adventurers\' Guild</b>: <b style="color:#9aa3a0">E-RANK</b>. Win the hard fights and your rank will climb.', 4800);
+  UI.hud();
+}
+async function talkSylwen() {
+  const f = F(); f.sylwenN = (f.sylwenN || 0) + 1;
+  const L = [['neutral', 'Sylwen. B-rank, wind and water. Elf, before you ask about the ears. Everyone asks about the ears.'],
+    ['neutral', 'Humans think an element is something you OWN. Elves know better. Fire, ice, lightning — they\'re just shapes mana is willing to take.'],
+    ['sad', 'Long ago there were people who didn\'t bother with shapes. They moved the mana itself. Fields of force. Raw light that cut through any element like it wasn\'t there. Elves called them the Unbound.'],
+    ['neutral', 'Humans call them something else now. With green in it. …I\'m four hundred and twelve, you know. I remember when they were heroes.'],
+    ['happy', 'If you ever want to spar, ' + (G.S.rank || 'E') + '-rank, find me. I\'d like to see what an empty grey crystal can do.']];
+  const [e, t] = L[Math.min(f.sylwenN - 1, L.length - 1)]; await say('sylwen', e, t);
+}
+async function talkGarrick() {
+  await say('garrick', F().crystalGreen ? 'anger' : 'neutral', F().crystalGreen ? 'I saw what I saw. …But Brom says I didn\'t. And I owe Brom money. So I didn\'t.' : 'Garrick. C-rank, earth. I hold the line so the B-ranks can show off behind it.');
+}
+async function talkTilda() {
+  await say('tilda', 'happy', pick(['Tilda! D-rank, fire! Brom\'s niece. I\'m going to be S-rank by thirty. Uncle says sixty. Uncle\'s a pessimist.',
+    'Dwarves don\'t use much magic. We use HAMMERS. And a little fire, for the hammers.', 'Did you know the Sword Saint was S-rank and NEVER registered? Uncle says he walked in once, looked at the board, laughed, and walked out.']));
+}
 
 /* ---- Green Eclipse: the people Kairo built after you left ---- */
 async function geTalk(id) {
@@ -1158,6 +1279,15 @@ async function vaneLesson() {
   toast('You learned <b style="color:#46ff95">Tomb Breath</b>. In the Realm, mana now restores you. New battle command: <b>Cultivate</b>.', 5000);
   Story.heal(true);
   await say('vane', 'happy', 'Hm. Faster than I was. Don\'t let it go to your head.');
+  await say('vane', 'neutral', '…No. That\'s not luck. That\'s the blood. I\'ve crossed swords with a few Drags in my life, pup. You people cheat.');
+  await say('vane', 'neutral', 'Your bodies waste nothing. Every muscle fires when it should and not a moment before. You see a strike once, and your body remembers it forever. A human needs ten years to learn what a Drag learns in one.');
+  await say('vane', 'neutral', 'That\'s why you dodge like water and parry like you read the blade\'s mind. That\'s why the Crown hates you. People always hate what learns faster than they do.');
+  await say('vane', 'neutral', 'And your eyes. When you breathe, they don\'t just glow. They LOOK. At the mana. You can see it moving, can\'t you?');
+  await me('shock', 'On the bridge… I saw threads. I threw one. It hurt him.');
+  await say('vane', 'neutral', 'So it woke. Grief does that. Every Drag has a gift sleeping in the blood, and none are the same twice. Yours sees the current — and moves it.');
+  await say('vane', 'sad', 'Throwing it nearly blinded you. Throwing is easy, pup. Any fool can throw. Learn to PULL first. Pulling teaches you where the current wants to go.');
+  if (!G.S.arts.includes('draw')) G.S.arts.push('draw');
+  sfx('level'); toast('Drag ability: <b style="color:#5fd8ff">Verdant Eye</b>. Learned <b style="color:#5fd8ff">Verdant Tide: Draw</b>. In battle you can now see each enemy\'s next move.', 5200);
   await say('vane', 'neutral', 'Now. Show me how you swing that stick.');
   await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Sparring: the old man', music: 'battle',
     onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man taps your forehead with two fingers. You fall over.', 1600); return 'scripted'; } } });
@@ -1179,6 +1309,8 @@ async function vaneYears() {
     '"You want to kill the men who burned Thornvale. They have sons. When the sons grow up, they\'ll come for you. Will you kill them too?"',
     '"I would."  "And their sons?"  "…I would."  "Then you\'re not ending anything, pup. You\'re just taking your turn."',
     'You hunted beasts that ate bears. You learned to read a blizzard like a sentence. You grew.',
+    'You learned to pull the snow out of the air and hold it in a ball. Later, to pull a charging wyrm off its feet. Later still, to throw the current without your eyes bleeding.',
+    'One night you asked him if there was anything beyond the gift. He was quiet for a long time. "The Dragonoid," he said finally. "Don\'t say that word outside this Realm. Not ever."',
     'Sometimes, on the trade winds, you heard a name: a burned-faced boy in the mountains, freeing cages, breaking Inquisition outposts, swearing that Drags would never bow again. Green Eclipse. You never answered the wind.',
     'Seven years.'
   ]);
@@ -1207,6 +1339,13 @@ async function vaneFinal() {
   await say('vane', 'neutral', 'But I\'ll tell you something I never told the Crown. He fought like a man who wanted to lose. And behind the visor — I would swear on what\'s left of my sword arm — his eyes were green.');
   await me('shock', '…Green? Dread is… a Drag?');
   await say('vane', 'neutral', 'I don\'t know what he is. Neither do you. Remember that before you decide what to do with him.');
+  await me('neutral', 'You told me once about the Dragonoid. You never told me what it is.');
+  await say('vane', 'sad', 'Because nobody knows, pup. That\'s the point of it. Every Drag can become one — that\'s what the old texts say. Not a gift. Past the gift. Fratenaptor\'s own shape, worn by a mortal.');
+  await say('vane', 'sad', 'Nobody has done it in three hundred years. The art is lost. Forbidden. The Crown burned every book that so much as named it, and then burned the people who\'d read them.');
+  await say('vane', 'neutral', 'You think the Crown cages you for your eyes? For your quick hands? No. They cage you because any one of you might be the one who remembers how. That\'s the fear under all the other fears.');
+  await say('vane', 'neutral', 'Now — throw it. The way I taught you. Not angry.');
+  if (!G.S.arts.includes('cast')) G.S.arts.push('cast');
+  sfx('level'); toast('Mastered <b style="color:#ff6a5a">Verdant Tide: Cast</b>. Draw pulls the current in; Cast throws it out.', 4600);
   await say('vane', 'happy', 'Now. Draw. If you can make me use the sleeve, you\'re ready.');
   const r = await Battle.start({ enemies: ['vane'], noFlee: true, boss: true, bd: 'snow', music: 'boss', intro: 'FINAL LESSON — Vane, the Sword Saint',
     onTurn: async (B, Bt) => { const e = B.actors.find(a => a.key === 'vane'), me = Bt.me();
