@@ -67,7 +67,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 
 /* ---------- dialog ---------- */
 #dlg{left:0;right:0;bottom:0;height:46%;min-height:150px;z-index:20;pointer-events:auto;display:flex;align-items:flex-end;justify-content:center;padding:0 max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
-.port{position:relative;flex:none;width:min(30vh,170px);height:min(33vh,186px);border-radius:12px;overflow:hidden;border:3px solid var(--line);background:radial-gradient(circle at 50% 40%,#21342a,#0b110d);transition:filter .2s,transform .2s,opacity .2s;align-self:flex-end}
+.port{position:relative;flex:none;width:min(40vh,200px);height:min(43vh,216px);border-radius:12px;overflow:hidden;border:3px solid var(--line);background:radial-gradient(circle at 50% 40%,#21342a,#0b110d);transition:filter .2s,transform .2s,opacity .2s;align-self:flex-end}
 .port canvas{width:100%;height:100%;image-rendering:pixelated}
 .port.dim{filter:brightness(.45) saturate(.6);transform:scale(.94)}
 .port.off{opacity:0}
@@ -266,6 +266,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/core.js"></script>
 <script src="js/world.js"></script>
 <script src="js/dialog.js"></script>
+<script src="js/portraits.js"></script>
 <script src="js/battle.js"></script>
 <script src="js/realm.js"></script>
 <script src="js/story.js"></script>

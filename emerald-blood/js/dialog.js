@@ -20,15 +20,14 @@ const Dlg = {
     const L = $('#portL'), R = $('#portR');
     if (who === 'me') {
       this.lastMe = expr || 'neutral';
-      playerPortrait(L.querySelector('canvas'), this.lastMe); L.querySelector('.tag').textContent = G.S.name;
+      drawPortrait(L.querySelector('canvas'), 'me', this.lastMe, 1); L.querySelector('.tag').textContent = G.S.name;
       L.classList.remove('dim', 'off'); R.classList.toggle('off', !this.partner); R.classList.add('dim');
     } else if (who) {
       const C = CHAR[who] || { name: who, sprite: who };
       this.partner = who;
-      const img = G.img[C.sprite || who];
-      if (img) portraitTo(R.querySelector('canvas'), img, expr, C.kid || (C.sprite || '').startsWith('kid') || C.sprite === 'pip' || C.sprite === 'ilya'); R.querySelector('.tag').textContent = C.name;
+      drawPortrait(R.querySelector('canvas'), who, expr, -1); R.querySelector('.tag').textContent = C.name;
       R.classList.remove('dim', 'off'); R.classList.toggle('shine', /^liora/.test(C.sprite || ''));
-      playerPortrait(L.querySelector('canvas'), this.lastMe); L.querySelector('.tag').textContent = G.S.name;
+      drawPortrait(L.querySelector('canvas'), 'me', this.lastMe, 1); L.querySelector('.tag').textContent = G.S.name;
       L.classList.remove('off'); L.classList.add('dim');
       if (C.noMe) L.classList.add('off');
     } else {
@@ -79,8 +78,7 @@ async function cutIn(title, a, b, lines) {
   const el = $('#cutin'); el.classList.remove('hide'); sfx('cutin');
   el.querySelector('.ttl').textContent = title;
   const ca = $('#ciA'), cb = $('#ciB');
-  if (a === 'me') playerPortrait(ca, 'anger'); else portraitTo(ca, G.img[CHAR[a].sprite], 'anger');
-  if (b === 'me') playerPortrait(cb, 'anger'); else portraitTo(cb, G.img[CHAR[b].sprite], 'anger');
+  drawPortrait(ca, a, 'anger', 1); drawPortrait(cb, b, 'anger', 1);
   ca.style.left = '-2%'; cb.style.right = '-2%'; cb.style.left = 'auto';
   ca.style.transform = 'translateX(-100%)'; cb.style.transform = 'translateX(100%) scaleX(-1)';
   await wait(30);
