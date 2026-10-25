@@ -106,7 +106,7 @@ const World = {
   onStep(e) {
     if (!e.isPlayer) return;
     G.S.x = e.x; G.S.y = e.y; G.S.dir = e.dir; G.S.steps++;
-    Realm.step();
+    Realm.step(); Stones.patrol();
     if (G.S.steps % 2 === 0) sfx('step');
     const ex = this.exitAt(e.x, e.y);
     if (ex && !ex.msg) { this.useExit(ex); return; }

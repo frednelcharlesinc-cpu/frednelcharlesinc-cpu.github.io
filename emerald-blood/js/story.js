@@ -332,9 +332,9 @@ async function festival() {
         await Cine.play(CINE.awaken());
         await Bt.msg('Every thread is a current. And every current can be pulled… or thrown.', 2100);
         B.flash = 1.3; sfx('art'); G.S.f.eye = true;
-        await Bt.msg('VERDANT EYE — AWAKENED', 1800);
-        me.hp = Math.round(me.maxHp * .35); me.mp = me.maxMp; me.arts = ['cast']; me.anim = 'combat'; me.frame = 0; B.dim = 0; Bt.hud(); Music.play('boss');
-        await Bt.msg('You don\'t know how. You just know. (Drag Arts → Verdant Tide: Cast)', 2400, true);
+        await Bt.msg('EMERALD SIGHT — AWAKENED', 1800);
+        me.hp = Math.round(me.maxHp * .35); me.mp = me.maxMp; me.arts = ['crimson']; me.sight = 3; me.anim = 'combat'; me.frame = 0; B.dim = 0; Bt.hud(); Music.play('boss');
+        await Bt.msg('You don\'t know how. You just know. (Drag Arts → Crimson Tide)', 2400, true);
         B.awoke = B.turn;
         if (B.cur === me) { B.myTurn = 1; return; }
         me.wait = -1; return 'skip';
@@ -539,9 +539,11 @@ async function talkTobb() {
     const tp = f.tobbKnows ? (f.crateDone ? 20 : 30) : (G.S.sus >= 3 ? 15 : 10), ep = tp + 6;
     const opts = [`Buy Tonic (${tp}g)`, `Buy Ether (${ep}g)`];
     if (f.hasCrate && !f.crateDone) opts.push('Return the crate'); else if (!f.crateQuest) opts.push('Any work?');
+    if (Stones.st().inv.length && !Stones.st().sealed && f.crateDone) opts.push('Forged Registry seals (60g)');
     opts.push('Leave');
     const c = await ask('tobb', f.tobbKnows ? 'shame' : 'happy', f.tobbKnows ? 'Well? Gold first. Customer… policy.' : `What can I get you? (You have ${G.S.gold}g)`, opts);
     const o = opts[c];
+    if (o.startsWith('Forged')) { if (G.S.gold >= 60) { G.S.gold -= 60; Stones.st().sealed = true; await say('tobb', 'shame', "Shh! Crown wax, Crown press, Crown ribbon. Perfect copies. My cousin works at the Registry. My OTHER cousin. Registry patrols will wave you through now."); } else await say('tobb', 'neutral', 'Sixty gold. Forgery is an art, friend.'); continue; }
     if (o.startsWith('Buy')) {
       const isT = o.includes('Tonic'), price = isT ? tp : ep;
       if (G.S.gold >= price) { G.S.gold -= price; G.S.items[isT ? 'tonic' : 'ether']++; sfx('coin'); UI.hud(); await say('tobb', 'happy', `Pleasure doing business! That's ${G.S.items[isT ? 'tonic' : 'ether']} in your bag.`); }
@@ -755,6 +757,8 @@ async function shrine() {
   await me('sad', '…I know, Ilya. I know.');
   sfx('art'); await narr('Your eyes flare on their own. Something old wakes in your blood.');
   if (!G.S.arts.includes('ruin')) G.S.arts.push('ruin');
+  await narr('In the stream beneath the stone, something sings. You reach into the cold water and come up holding a blue-green stone the size of a heart. A MEDIUM stone.');
+  Stones.give('riverheart');
   toast('New Drag Art learned: <b style="color:#46ff95">VERDANT RUIN</b> — hits every enemy.', 4000);
 }
 async function talkRook() {
@@ -781,7 +785,9 @@ async function crate() {
   if (!f.rookBeaten) { await say('rook', 'anger', 'Hands off. Talk to me first, hood.'); return; }
   if (f.crateTaken) { await narr('An empty patch of trampled grass where the crate was.'); return; }
   f.crateTaken = true; f.hasCrate = true; sfx('coin');
-  await narr("You hoist Tobb's crate onto your shoulder. Bottles clink inside.");
+  await narr("You hoist Tobb's crate onto your shoulder. Bottles clink inside — and under the bottles, wrapped in straw, two small stones that glow green.");
+  await me('shock', "…D-stones. Unregistered. That's a hanging offense. Tobb, you liar.");
+  Stones.give('fang'); Stones.give('echo');
   G.S.side = 'Bring the crate back to Tobb in Ashford Hollow (market stall).';
 }
 async function talkAlpha() {
@@ -848,7 +854,7 @@ async function halvardEvent() {
   const f = F(); if (f.halvardBeaten) return;
   World.player.dir = 'up';
   await say('halvard', 'happy', 'Green eyes in the dark. I wondered when you\'d come.');
-  await say('halvard', 'neutral', "The girl with the ribbon. Your sister. Seven years, and she never once took it off. Not when we asked. Not when we didn't ask.");
+  await say('halvard', 'neutral', "The girl with the ribbon. Your sister. Five years, and she never once took it off. Not when we asked. Not when we didn't ask.");
   await say('halvard', 'happy', "And the quiet boy — Nix. He prays now. Very sincerely. You'd hardly know him.");
   const c = await ask('halvard', 'neutral', "You think this is hatred. It isn't. Fratenaptor's blood doesn't sleep. One day it wakes — in her, in you — and the world burns. I am the firebreak.", ['Where is she?', "You're wrong about us."]);
   if (c === 0) await say('halvard', 'happy', "Somewhere you can't follow. Not with those eyes.");
@@ -858,6 +864,7 @@ async function halvardEvent() {
     onTurn: async (B, Bt) => { const h = B.actors.find(a => a.key === 'halvard'); if (h && !h.taunt && h.hp < h.maxHp * .3) { h.taunt = true; await Bt.msg('Halvard: "She bit me, you know. Your sister. Same fire."', 1800); } } });
   if (r === 'lose') { await Story.defeat(); return; }
   f.halvardBeaten = true; World.remove('halvard');
+  if (!Stones.has('heart')) { await narr('On Halvard\'s field desk, in a lead box stamped with the Crown Registry seal: a splinter of green stone the length of your hand. It is beating.'); await me('shock', '…A piece of the Heartstone. Nana\'s Heartstone.'); Stones.give('heart'); await narr('A LARGE stone. The moment you touch it your knees buckle. It will not answer you. Not yet.'); }
   await ending(r);
 }
 async function ending() {
@@ -928,9 +935,11 @@ async function talkScout() {
   const f = F(); CHAR.scout = { name: 'Lark', sprite: 'lark' };
   if (f.scoutMet) { await say('scout', 'neutral', G.S.hood ? "Still wearing the hood? Kairo says hoods are for people who've already lost." : "Better. Let them look."); return; }
   f.scoutMet = true;
-  await say('scout', 'happy', "{NAME}?! It IS you! Seven years! You got so TALL — wait, do you remember me? Lark! Small! Fit in cracks! I still fit in cracks!".replace('{NAME}', G.S.name.toUpperCase()));
+  await say('scout', 'happy', "{NAME}?! It IS you! Five years! You got so TALL — wait, do you remember me? Lark! Small! Fit in cracks! I still fit in cracks!".replace('{NAME}', G.S.name.toUpperCase()));
   await say('scout', 'neutral', "Kairo said you'd come this way. He said you'd be slow. He was right, you're very slow, I've been in this tree for TWO DAYS.");
   await say('scout', 'happy', "He also said if you got yourself killed in these woods, he'd dig you up just to beat you at something.");
+  await say('scout', 'neutral', "Oh! And he said give you this. 'So the idiot doesn't die before I find him.' It's a Scale Shard. Don't let the Registry see it.");
+  Stones.give('scale');
   const c = await ask('scout', 'neutral', "Green Eclipse is twenty strong now. Thirty by winter. You could be one of us.", ["Where is he?", "What is Green Eclipse doing?", "I have my own road."]);
   if (c === 0) await say('scout', 'neutral', "Everywhere the Inquisition is. You'll see him when he wants to be seen.");
   else if (c === 1) await say('scout', 'anger', "Burning wagons. Freeing cages. Teaching the Crown that green eyes look back.");
@@ -945,16 +954,16 @@ async function kairoDuel() {
   W.player.dir = 'down';
 
   await me('shock', "…Kairo.");
-  await say('kairoB', 'neutral', "Seven years, {name}. You got tall.");
+  await say('kairoB', 'neutral', "Five years, {name}. You got tall.");
   await say('kairoB', 'neutral', "Lark said you came out of the Realm of No Return. Nobody comes out of there. …I should've known you'd be the first.");
-  await say('tamsin', 'anger', "Kairo. That's the one who walked into the snow. Seven years without a word — we buried an empty box for you.");
+  await say('tamsin', 'anger', "Kairo. That's the one who walked into the snow. Five years without a word — we buried an empty box for you.");
   await say('bo', 'happy', "…Hi, {name}. We missed you. Some of us did. I did.");
   await say('kairoB', 'happy', "So you got here first. Of course you did. You always beat me to the places that matter.");
   if (f.halvardSpared) await say('kairoB', 'anger', "And you let HIM live. The man who tore her out of your hands. You let him keep breathing.");
   else await say('kairoB', 'neutral', "…Halvard's done, then. Good. That's one.");
   await say('kairoB', 'neutral', "Green Eclipse takes this mill tonight. Every cage opened. Every priest who locked one answers for it.");
   await say('kairoB', 'anger', "Then Ashford Hollow. Not to burn it — to make it kneel. They hanged a Drag at that fountain while the whole town watched. Every town that ever did that will learn who the strong ones are.");
-  await say('kairoB', 'anger', "And you — seven years gone, and the first thing you do is stand between a Drag and the man who caged Drag children. Whose side are you on, {name}?");
+  await say('kairoB', 'anger', "And you — five years gone, and the first thing you do is stand between a Drag and the man who caged Drag children. Whose side are you on, {name}?");
   const c = await ask('kairoB', 'anger', "So step aside, {name}.", ["Ashford has children in it, Kairo.", "Then you're no different from Halvard.", "I want a world where we live together. Both of us."]);
   if (c === 0) await say('kairoB', 'anger', "I'm not going to TOUCH their children. I'm going to make sure no Drag child there ever has to hide again. I'm not a monster, {name}. I'm the end of the monsters.");
   else if (c === 1) await say('kairoB', 'anger', "DON'T. Halvard wants us gone. I want us on TOP. I'll let them live — under us, the way we lived under them. That's more mercy than they ever gave.");
@@ -1011,7 +1020,8 @@ async function kairoDuel() {
   await say('kairoB', 'anger', "You know what.");
   await narr('Kairo tosses something into the dirt at your feet. A shard of green stone, humming softly.');
   await say('kairoB', 'neutral', "Halvard's staff. That's how his light burned so bright — a Drag stone. OUR stone. Take it. Greyspire's walls are thick.");
-  f.shard = true; sfx('art'); toast('You received a <b style="color:#46ff95">Drag Shard</b>: +1 MP every turn in battle.', 4200);
+  f.shard = true; Stones.give('verdict');
+  await narr('A MEDIUM stone. It is cold, and it does not like you. You can feel it deciding whether you are worth serving.');
   await say('kairoB', 'anger', "One more thing. Whoever sold Thornvale — I'll find them before you do. Pray I'm gentle about it.");
   await say('kairoB', 'sad', "…Nix is in Greyspire too. Whatever they've made him. We swore it, {name}. All of us, or nobody.");
   await say('kairoB', 'happy', "…See you at Greyspire, brother. Try to keep up.");
@@ -1312,8 +1322,8 @@ async function vaneLesson() {
   await me('shock', 'On the bridge… I saw threads. I threw one. It hurt him.');
   await say('vane', 'neutral', 'So it woke. Grief does that. Every Drag has a gift sleeping in the blood, and none are the same twice. Yours sees the current — and moves it.');
   await say('vane', 'sad', 'Throwing it nearly blinded you. Throwing is easy, pup. Any fool can throw. Learn to PULL first. Pulling teaches you where the current wants to go.');
-  if (!G.S.arts.includes('draw')) G.S.arts.push('draw');
-  sfx('level'); toast('Drag ability: <b style="color:#5fd8ff">Verdant Eye</b>. Learned <b style="color:#5fd8ff">Verdant Tide: Draw</b>. In battle you can now see each enemy\'s next move.', 5200);
+  ['azure', 'sight'].forEach(k => { if (!G.S.arts.includes(k)) G.S.arts.unshift(k); });
+  sfx('level'); toast('Learned <b style="color:#7dffb0">Emerald Sight</b> (open your eyes: 3 turns of easy dodges and parries) and <b style="color:#5fd8ff">Azure Tide</b> (the blue aura and its orb).', 5200);
   await say('vane', 'neutral', 'Now. Show me how you swing that stick.');
   await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Sparring: the old man', music: 'battle',
     onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man taps your forehead with two fingers. You fall over.', 1600); return 'scripted'; } } });
@@ -1324,26 +1334,61 @@ async function vaneLesson() {
   else if (c === 1) await say('vane', 'neutral', 'Good. Anger is honest. It\'s also stupid. It swings early and it swings wide.');
   else await say('vane', 'neutral', 'That\'s the first true thing you\'ve said. Keep it. We\'ll find out together.');
   await say('vane', 'neutral', 'Tomorrow, the same. And the day after. Until your arms stop shaking or fall off.');
+  await narr('Tomorrow becomes a year. A year becomes five.');
   await vaneYears();
 }
 async function vaneYears() {
-  const f = F();
+  const f = F(); f.resolve = f.resolve || 0;
+  const step = async (ms) => { await fadeOut(ms || 600); await fadeIn(ms || 600); };
+  // ---- YEAR 1: the hut, the breath, the first question ----
+  await Cine.play(CINE.years1(), { music: 'sad' });
+  const c1 = await ask('vane', 'neutral', 'Make who pay? Name them.', ['The Inquisition. All of them.', 'Halvard. And Dread.', 'Whoever sold us out.']);
+  if (c1 === 0) await say('vane', 'neutral', 'All of them. Thousands of men. Cooks, stable boys, the ones who joined because their village was starving. All of them?');
+  else if (c1 === 1) { await say('vane', 'neutral', 'Two names. Better. Smaller graves. Still graves.'); f.resolve++; }
+  else { await say('vane', 'sad', 'The traitor. Mm. Someone from your own valley, with your own eyes. When you find them, ask them why first. You may not like how much the answer sounds like you.'); f.resolve++; }
+  // ---- YEAR 2: the wolf-mother ----
+  await step(); await Cine.play(CINE.years2(), { music: 'sad' });
+  const c2 = await ask('me', 'anger', '(Your blade is already raised.)', ['Finish it. It\'s a monster.', 'Lower the sword.']);
+  if (c2 === 0) { await narr('You hesitate one heartbeat too long. The mother drags her cubs into the white and is gone.'); await say('vane', 'neutral', 'Your arm stopped on its own. Interesting. Your head said "monster." Your hand knew better.'); }
+  else { f.resolve += 2; await narr('You lower the sword. The mother stares at you for a long time. Then she licks her cubs and limps away into the snow.'); await say('vane', 'happy', 'Hm.'); }
+  await say('vane', 'neutral', 'She would have killed you to protect hers. So would you. Remember that the next time someone calls you a monster — and the next time you want to call someone one.');
+  // ---- YEAR 3: the stones, the sons ----
+  await step(); await Cine.play(CINE.years3(), { music: 'battle' });
+  await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Year Three — sparring between the stones', music: 'battle',
+    onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man takes a step back. Just one.', 1500); return 'scripted'; } } });
+  Story.heal(true);
+  await say('vane', 'neutral', 'You want to kill the men who burned your village. They have sons. When the sons grow up, they\'ll come for you. Will you kill them too?');
+  const c3 = await ask('me', 'anger', '…', ['I would.', '…I don\'t know.', 'No. Somebody has to stop.']);
+  if (c3 === 0) { await say('vane', 'neutral', 'And their sons?'); await me('anger', '…I would.'); await say('vane', 'sad', 'Then you\'re not ending anything, pup. You\'re just taking your turn.'); }
+  else if (c3 === 1) { f.resolve++; await say('vane', 'neutral', 'Good. "I don\'t know" is where every honest answer starts.'); }
+  else { f.resolve += 2; await say('vane', 'sad', 'Somebody. Easy word. It means the one who gets hit last and doesn\'t hit back. It\'s the hardest job there is.'); }
+  // ---- YEAR 4: the stones that have a will ----
+  await step(); await Cine.play(CINE.years4(), { music: 'night' });
+  await say('vane', 'neutral', 'D-stones. Pieces of the tomb you were born under. Every king alive would kill to own one, and most of them have.');
+  await say('vane', 'neutral', 'The small ones are tools. Set one in a blade, it bites deeper. In armor, it holds. In your Arts — it remembers them for you.');
+  await say('vane', 'neutral', 'The middle ones are not tools. They have a will. They choose who carries them. Most men who force one end up carried BY it.');
+  await say('vane', 'sad', 'And the great ones… I saw one once, in the Crown\'s vault. It was humming. Three soldiers were guarding it. All three were weeping and couldn\'t say why.');
+  await say('vane', 'neutral', 'That\'s why the Crown registers every stone. An unregistered stone is a hanging. They don\'t fear thieves, pup. They fear anyone strong enough to say no.');
+  await say('vane', 'neutral', 'Here. A small one. A Still Shard. It quiets the blood. You\'ll need it — yours runs hot.');
+  Stones.give('still');
+  await me('neutral', '…Revenge is like the middle ones, isn\'t it. You think you\'re carrying it.');
+  await say('vane', 'happy', '…Hm. You\'re getting annoying. That\'s how I know you\'re learning.'); f.resolve++;
+  // ---- YEAR 5: the lesson that isn't about the sword ----
+  await step(); await Cine.play(CINE.years5(), { music: 'sad' });
+  await say('vane', 'neutral', 'Out there, there\'s a whole generation of children with green eyes. Your age. Younger. Every one of them taught the same thing you were: hide, or hate.');
+  await say('vane', 'neutral', 'Your friend in the mountains — the burned boy. The winds say he\'s gathering them. He\'ll lead them to a war. They\'ll follow, because nobody else ever offered them anything.');
+  await say('vane', 'sad', 'I was the best killer of my generation, pup. Forty years. And when it was over, nothing I cut down had made one single thing better. I left nothing behind but a reputation and an empty sleeve.');
+  await say('vane', 'neutral', 'Don\'t be the best killer of yours. Be the one who leads them somewhere else. Somewhere that isn\'t a graveyard. A new beginning — for Drags, and for the ones who are afraid of them.');
+  const c5 = await ask('me', 'neutral', '…', ['I don\'t know how to lead anyone.', 'I\'ll still find Ilya first.', 'Then teach me how.']);
+  if (c5 === 0) await say('vane', 'happy', 'Nobody does. You start by refusing to hate the people in front of you. Then you see who follows.');
+  else if (c5 === 1) await say('vane', 'neutral', 'Of course you will. Find her. Just don\'t burn the world down on the way. She has to live in it afterwards.');
+  else { f.resolve++; await say('vane', 'happy', '…I can\'t. Nobody taught me. We\'ll have to find out together, you and I. Same as everything else.'); }
+  f.newDawn = f.resolve >= 4;
   await fadeOut(900);
-  await Cine.play(CINE.years([
-    'Days became seasons. Seasons became years.',
-    'Every dawn, Tomb Breath between the stones. Every noon, the stick. Every night, the old man\'s questions.',
-    '"You want to kill the men who burned Thornvale. They have sons. When the sons grow up, they\'ll come for you. Will you kill them too?"',
-    '"I would."  "And their sons?"  "…I would."  "Then you\'re not ending anything, pup. You\'re just taking your turn."',
-    'You hunted beasts that ate bears. You learned to read a blizzard like a sentence. You grew.',
-    'You learned to pull the snow out of the air and hold it in a ball. Later, to pull a charging wyrm off its feet. Later still, to throw the current without your eyes bleeding.',
-    'One night you asked him if there was anything beyond the gift. He was quiet for a long time. "The Dragonoid," he said finally. "Don\'t say that word outside this Realm. Not ever."',
-    'Sometimes, on the trade winds, you heard a name: a burned-faced boy in the mountains, freeing cages, breaking Inquisition outposts, swearing that Drags would never bow again. Green Eclipse. You never answered the wind.',
-    'Seven years.'
-  ]), { music: 'sad' });
   await Story.timeSkip();
   f.adultVane = true;
   await World.load('realm', 28, 15, 'right'); await fadeIn(900);
-  banner('Seven Years Later', 'The Realm of No Return');
+  banner('Five Years Later', 'The Realm of No Return');
   await vaneFinal();
 }
 async function vaneFinal() {
@@ -1354,7 +1399,7 @@ async function vaneFinal() {
   const c = await ask('vane', 'neutral', 'If you find the man who took your sister — and he\'s on his knees — what do you do?', ['I kill him.', 'I take her home. That\'s all.', 'I don\'t know yet.']);
   f.vaneAnswer = c;
   if (c === 0) { await say('vane', 'sad', 'Then you\'ve learned the sword and nothing else. Hatred is a debt, pup. Somebody always inherits it. Usually a child.'); await say('vane', 'neutral', 'Your friend in the mountains. The burned one. He wants to build a better world on top of the old one\'s bones. Bones grow the same weeds, pup.'); }
-  else if (c === 1) { await say('vane', 'happy', '…Hm. Seven years, and that\'s the first time you\'ve made me proud.'); await say('vane', 'neutral', 'Remember it when someone hands you a reason to forget.'); }
+  else if (c === 1) { await say('vane', 'happy', '…Hm. Five years, and that\'s the first time you\'ve made me proud.'); await say('vane', 'neutral', 'Remember it when someone hands you a reason to forget.'); }
   else { await say('vane', 'neutral', 'Good. A man who\'s sure is a man who\'s stopped looking.'); await say('vane', 'neutral', 'When you find out, make sure it\'s your answer. Not your anger\'s. Not your friend\'s.'); }
   await me('neutral', 'You never told me who you were. Who you really were.');
   await say('vane', 'sad', '…No. I didn\'t.');
@@ -1370,8 +1415,8 @@ async function vaneFinal() {
   await say('vane', 'sad', 'Nobody has done it in three hundred years. The art is lost. Forbidden. The Crown burned every book that so much as named it, and then burned the people who\'d read them.');
   await say('vane', 'neutral', 'You think the Crown cages you for your eyes? For your quick hands? No. They cage you because any one of you might be the one who remembers how. That\'s the fear under all the other fears.');
   await say('vane', 'neutral', 'Now — throw it. The way I taught you. Not angry.');
-  if (!G.S.arts.includes('cast')) G.S.arts.push('cast');
-  sfx('level'); toast('Mastered <b style="color:#ff6a5a">Verdant Tide: Cast</b>. Draw pulls the current in; Cast throws it out.', 4600);
+  if (!G.S.arts.includes('crimson')) G.S.arts.push('crimson');
+  sfx('level'); toast('Mastered <b style="color:#ff6a5a">Crimson Tide</b> — the red aura. Blue holds; red destroys.', 4600);
   await say('vane', 'happy', 'Now. Draw. If you can make me use the sleeve, you\'re ready.');
   const r = await Battle.start({ enemies: ['vane'], noFlee: true, boss: true, bd: 'snow', music: 'boss', intro: 'FINAL LESSON — Vane, the Sword Saint',
     onTurn: async (B, Bt) => { const e = B.actors.find(a => a.key === 'vane'), me = Bt.me();
@@ -1385,7 +1430,7 @@ async function vaneFinal() {
   await narr('A waterlogged Inquisition ledger. One line, in neat ink: "Girl, green-eyed, ribbon on wrist. Transfer via Ashford Hollow."');
   await me('shock', '…She\'s alive.');
   await say('vane', 'neutral', 'And this.');
-  await narr('He holds out his sword, hilt-first. The one that never left his side in seven years.');
+  await narr('He holds out his sword, hilt-first. The one that never left his side in five years.');
   await say('vane', 'neutral', 'Last Light. It was never sharp because of the steel. Don\'t fight to kill, pup. Fight so that it ends.');
   sfx('level'); toast('You received <b style="color:#46ff95">Last Light</b>, Vane\'s blade.', 4000);
   G.S.stats.atk += 3; G.S.f.vaneDone = true;
@@ -1396,6 +1441,6 @@ async function vaneFinal() {
 Story.timeSkip = async function () {
   G.S.kid = false; G.S.hood = true;
   const st = G.S.stats; G.S.lvl = Math.max(G.S.lvl, 4); st.maxHp = 80; st.maxMp = 24; st.atk = 16; st.def = 7; st.spd = 12; st.hp = st.maxHp; st.mp = st.maxMp;
-  $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Seven years pass…'; await wait(30);
+  $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Five years pass…'; await wait(30);
   G.A.portCache = {}; await buildPlayerSprites(); $('#loading').classList.add('hide');
 };

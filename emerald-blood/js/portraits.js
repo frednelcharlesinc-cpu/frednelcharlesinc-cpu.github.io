@@ -115,8 +115,37 @@ function autoSpec(sprite, kid) {
   return sp;
 }
 
+/* ---------- your art: AI-made portraits & cutscene paintings drop straight in ----------
+   assets/art.json = { "portraits": { "kairo": ["neutral","anger",...], ... }, "cuts": ["dread", ...] }
+   files: assets/portraits/<id>_<expr>.png and assets/cutscenes/cut_<scene>.png */
+const Art = { port: {}, cut: {}, left: new Set(), ready: false,
+  async load() {
+    try { const r = await fetch('assets/art.json', { cache: 'no-cache' }); if (!r.ok) return; const j = await r.json();
+      const jobs = [];
+      for (const [id, exprs] of Object.entries(j.portraits || {})) for (const e of exprs) jobs.push(loadImg(`assets/portraits/${id}_${e}.png`).then(im => { (this.port[id] = this.port[id] || {})[e] = im; }).catch(() => {}));
+      (j.facesLeft || []).forEach(id => this.left.add(id));
+      for (const id of j.cuts || []) jobs.push(loadImg(`assets/cutscenes/cut_${id}.png`).then(im => { this.cut[id] = im; }).catch(() => {}));
+      await Promise.all(jobs); this.ready = true;
+    } catch (e) { }
+  }
+};
+const ART_ID = { kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
+function artHas(who, expr) { const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : 'ren') : (ART_ID[who] || who); return !!(Art.port[id] && Art.port[id][expr]); }
+function artFor(who, expr) {
+  let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : (G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : (ART_ID[who] || who);
+  const set = Art.port[id]; if (!set) return null;
+  const alt = { sad: ['closed', 'shock'], shame: ['sad', 'closed'], blush: ['happy'], closed: ['sad'], shock: [], anger: [], happy: [] }[expr] || [];
+  for (const e of [expr || 'neutral', ...alt, 'neutral']) if (set[e]) return { img: set[e], left: Art.left.has(id) };
+  const k = Object.keys(set)[0]; return k ? { img: set[k], left: Art.left.has(id) } : null;
+}
 /* ---------- the painter ---------- */
 function drawPortrait(canvas, who, expr, facing) {
+  const af = artFor(who, expr || 'neutral'), art = af && af.img;
+  if (art) { if (af.left) facing = -facing; // a painted portrait: cover-fit, smooth scaling, mirrored for the right-hand box
+    canvas.width = 296; canvas.height = 320; canvas.style.imageRendering = 'auto'; const x = canvas.getContext('2d'); x.clearRect(0, 0, 296, 320);
+    const sc = Math.max(296 / art.width, 320 / art.height), w = art.width * sc, h = art.height * sc; x.save(); if (facing < 0) { x.translate(296, 0); x.scale(-1, 1); } x.drawImage(art, (296 - w) / 2, (320 - h) / 2, w, h); x.restore(); return;
+  }
+  canvas.style.imageRendering = '';
   const sp = specFor(who); expr = expr || 'neutral';
   const key = JSON.stringify(sp) + '|' + expr + '|' + facing;
   if (!PCache[key]) PCache[key] = paintBust(sp, expr, facing);

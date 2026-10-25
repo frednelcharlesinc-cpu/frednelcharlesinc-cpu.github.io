@@ -44,6 +44,7 @@ async function npcImg(name) {
 async function boot() {
   const bar = $('#loadBar'), txt = $('#loadTxt');
   const step = (p, t) => { bar.style.width = (p * 100) + '%'; if (t) txt.textContent = t; };
+  Art.load();
   step(0.05, 'Reading the old maps…');
   [G.man, G.props, G.maps] = await Promise.all([loadJSON('assets/manifest.json'), loadJSON('assets/props.json'), loadJSON('assets/maps.json')]);
   initBT();

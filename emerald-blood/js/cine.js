@@ -100,7 +100,9 @@ const Cine = {
     let sx = 0, sy = 0; if (s.shake > 0) { sx = (Math.random() - .5) * s.shake; sy = (Math.random() - .5) * s.shake; s.shake *= .92; }
     c.setTransform(k * z, 0, 0, k * z, cv.width / 2 - (camX + sx) * k * z, cv.height / 2 - (camY + sy) * k * z);
     c.imageSmoothingEnabled = false;
-    const bg = typeof s.bg === 'function' ? s.bg : BG[s.bg]; if (bg) bg(c, t, s);
+    const art = s.sceneId && typeof s.bg === 'string' && Art.cut[s.sceneId];
+    if (art) { c.imageSmoothingEnabled = true; const sc = Math.max(760 / art.width, 430 / art.height); c.drawImage(art, 320 - art.width * sc / 2, 180 - art.height * sc / 2, art.width * sc, art.height * sc); c.imageSmoothingEnabled = false; }
+    else { const bg = typeof s.bg === 'function' ? s.bg : BG[s.bg]; if (bg) bg(c, t, s); }
     // actors (y-sorted)
     const acts = (s.actors || []).map(a => ({ a, x: lerpK(a.path, t, 1) ?? a.x, y: lerpK(a.path, t, 2) ?? a.y })).sort((p, q) => (p.a.z || p.y) - (q.a.z || q.y));
     for (const { a, x, y } of acts) this.drawActor(c, a, x, y, t, s);
@@ -122,7 +124,7 @@ const Cine = {
     if (a.draw) { a.draw(c, x, y, t, s); c.globalAlpha = 1; return; }
     if (a.port) { // drawn bust portrait, for close-ups
       const key = a.port + a.expr + (a.facing || 1); a.__pc = a.__pc || {}; if (!a.__pc[key]) { const pc = document.createElement('canvas'); drawPortrait(pc, a.port, a.expr, a.facing || 1); a.__pc[key] = pc; }
-      const sc = lerpK(a.scaleK, t, 1) ?? a.scale ?? 2; c.drawImage(a.__pc[key], x - PW * sc / 2, y - PH * sc, PW * sc, PH * sc); c.globalAlpha = 1; return;
+      const sc = lerpK(a.scaleK, t, 1) ?? a.scale ?? 2, pc = a.__pc[key], k2 = PW / pc.width; c.imageSmoothingEnabled = pc.width > PW; c.drawImage(pc, x - PW * sc / 2, y - pc.height * k2 * sc, PW * sc, pc.height * k2 * sc); c.imageSmoothingEnabled = false; c.globalAlpha = 1; return;
     }
     let img = a.spr === 'me' ? playerImg() : G.img[a.spr]; if (!img) { c.globalAlpha = 1; return; }
     if (a.sil) img = tinted(img, a.sil === true ? '#07070b' : a.sil);
@@ -221,7 +223,44 @@ function citadel(c, x, y, s, col, lit, t) {
   if (lit) { for (let i = 0; i < 18; i++) { const r = rng(i + 3); c.fillStyle = `rgba(255,${200 + r() * 40 | 0},120,${.5 + Math.sin(t / 400 + i) * .3})`; c.fillRect(x + (r() * 200 - 100) * s, y - (90 + r() * 180) * s, 2, 3); } }
 }
 
+function yearTag(c, n, season) { c.save(); c.textAlign = 'left'; c.font = '700 13px "Press Start 2P"'; c.fillStyle = 'rgba(0,0,0,.55)'; c.fillText('YEAR ' + n + ' · ' + season, 22, 44); c.fillStyle = '#e8fff0'; c.fillText('YEAR ' + n + ' · ' + season, 20, 42); c.restore(); }
 const BG = {
+  hut(c, t) {
+    c.fillStyle = '#1a120c'; c.fillRect(-300, -300, 1240, 960);
+    for (let x = -300; x < 940; x += 34) { c.fillStyle = x % 68 ? '#2a1c12' : '#24170f'; c.fillRect(x, -300, 32, 600); }
+    c.fillStyle = '#3a2a1c'; c.fillRect(-300, 300, 1240, 200);
+    c.fillStyle = '#4a3a30'; c.fillRect(110, 200, 120, 110); c.fillStyle = '#120a06'; c.fillRect(130, 230, 80, 80);
+    flame(c, 170, 306, 22, 34, t, 2);
+    c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(170, 280, 10, 170, 280, 260); g.addColorStop(0, 'rgba(255,150,60,.35)'); g.addColorStop(1, 'rgba(255,150,60,0)'); c.fillStyle = g; c.fillRect(-100, 0, 600, 400); c.restore();
+    c.fillStyle = 'rgba(110,255,170,.12)'; c.fillRect(470, 90, 90, 120); c.fillStyle = '#120a06'; c.fillRect(512, 90, 6, 120); c.fillRect(470, 147, 90, 6);
+    yearTag(c, 1, 'WINTER');
+  },
+  spring(c, t) {
+    skyG(c, [[0, '#9ac8e8'], [1, '#e0f0f4']]); peaks(c, 61, 220, 130, '#6a7a90', '#ffffff');
+    c.fillStyle = '#e8f0f0'; c.fillRect(-300, 290, 1240, 140); c.fillStyle = '#7aa86a'; for (let i = 0; i < 26; i++) { const r = rng(i); c.fillRect(r() * 700 - 30, 296 + r() * 60, 8 + r() * 14, 3); }
+    for (let i = 0; i < 5; i++) deadTree(c, 40 + i * 140, 300, 1.1, '#5a6470');
+    yearTag(c, 2, 'SPRING THAW');
+  },
+  summerStones(c, t) {
+    skyG(c, [[0, '#5aa0e0'], [1, '#d8eef0']]); peaks(c, 63, 230, 120, '#5a7a8a', '#f4f8ff');
+    c.fillStyle = '#7aa86a'; c.fillRect(-300, 290, 1240, 140);
+    for (const x of [150, 210, 430, 490]) { c.fillStyle = '#5a5e66'; c.fillRect(x - 9, 226, 18, 66); c.fillStyle = '#787c84'; c.fillRect(x - 9, 226, 18, 5); }
+    yearTag(c, 3, 'SUMMER');
+  },
+  autumnShrine(c, t) {
+    skyG(c, [[0, '#e8a860'], [1, '#f4d8a8']]); peaks(c, 65, 240, 110, '#8a5a40', '#ffe8d0');
+    c.fillStyle = '#b8742a'; c.fillRect(-300, 290, 1240, 140);
+    c.fillStyle = '#6a5a50'; c.fillRect(420, 190, 16, 100); c.fillRect(520, 210, 16, 80); c.fillRect(410, 186, 140, 12); c.fillStyle = '#4a3e38'; c.beginPath(); c.arc(480, 270, 30, Math.PI, 0); c.fill();
+    c.save(); c.globalCompositeOperation = 'lighter'; orb(c, 480, 252, 4, 'rgba(90,255,150,.9)', 5); c.restore();
+    yearTag(c, 4, 'AUTUMN');
+  },
+  cliffAurora(c, t) {
+    skyG(c, [[0, '#020614'], [.7, '#0c1830'], [1, '#18284a']]); stars(c, 140, t, 33, 1, 240);
+    c.save(); c.globalCompositeOperation = 'lighter'; for (let b = 0; b < 3; b++) { c.beginPath(); for (let x = -100; x <= 740; x += 12) { const y = 60 + b * 26 + Math.sin(x / 80 + t / 1500 + b) * 18; x > -100 ? c.lineTo(x, y) : c.moveTo(x, y); } c.strokeStyle = `rgba(${b === 1 ? '80,200,255' : '80,255,160'},.22)`; c.lineWidth = 20; c.stroke(); } c.restore();
+    for (let i = 0; i < 7; i++) { c.fillStyle = `rgba(220,230,250,${.25 + i * .05})`; c.beginPath(); c.ellipse(((i * 130 + t / 40) % 900) - 120, 290 + (i % 3) * 14, 140, 22, 0, 0, 7); c.fill(); }
+    c.fillStyle = '#0a0c14'; c.beginPath(); c.moveTo(180, 400); c.lineTo(230, 300); c.lineTo(470, 296); c.lineTo(500, 400); c.fill();
+    yearTag(c, 5, 'DEEP WINTER');
+  },
   legend(c, t) {
     skyG(c, [[0, '#120203'], [.55, '#4a0c06'], [1, '#c8451a']]);
     orb(c, 320, 250, 46, 'rgba(255,120,40,.5)', 5);
@@ -415,7 +454,7 @@ const CINE = {
   leaving: () => [
     { bg: 'caveDawn', dur: 5600, cam: [[0, 200, 280, 1.3], [7000, 420, 260, 1.2]],
       actors: [['kairo_kidb', 0], ['tamsin_kid', 400], ['bo_kid', 800], ['lark_kid', 1200]].map(([sp, d], i) => ({ spr: sp, path: [[d, 40 - i * 20, 340], [5200 + d, 470, 300]], dir: 'right', dirs: sp === 'tamsin_kid' ? [[0, 'right'], [3600, 'left'], [4300, 'right']] : null, scale: 1.8, sil: '#1c1622' })),
-      lines: ['He turns, and the children turn with him — up the forbidden slope, into the mountain.', 'Tamsin looks back once. Then she doesn\'t.', 'That is the last time you see Kairo for seven years.'] }
+      lines: ['He turns, and the children turn with him — up the forbidden slope, into the mountain.', 'Tamsin looks back once. Then she doesn\'t.', 'That is the last time you see Kairo for five years.'] }
   ],
   realmWalk: () => [
     { bg: 'blizzard', fx: ['blizzard'], dur: 5200, cam: [[0, 320, 260, 1.4], [6000, 360, 260, 1.5]],
@@ -428,6 +467,21 @@ const CINE = {
       ev: [[3100, s => { s.flash = 1; sfx('crit'); }]],
       lines: ['A shadow steps out of the storm. One sleeve, pinned and empty. One hand on a blade so clean the snow slides off it.'] }
   ],
+  years1: () => [{ bg: 'hut', dur: 3000, cam: [[0, 320, 220, 1.1], [7000, 300, 230, 1.25]],
+    actors: [{ spr: 'vane', x: 250, y: 330, dir: 'right', scale: 2.2 }, { spr: 'me', x: 330, y: 332, dir: 'left', scale: 2.2 }],
+    lines: ['The first winter, you hate him.', 'He wakes you before dawn to breathe. He makes you carry water up the hill until your arms shake. He answers every question with another question.', ['vane', 'Why do you want to go back out there, pup?'], ['me', 'To find Ilya. And to make them pay.'], ['vane', '…Hm. Breathe first. Then we\'ll talk about paying.']] }],
+  years2: () => [{ bg: 'spring', fx: ['petals'], dur: 2600, cam: [[0, 330, 250, 1.3], [6000, 320, 250, 1.45]],
+    actors: [{ spr: 'rime_lupine', x: 260, y: 312, bt: 'hurt', loop: false, scale: 2.2, flip: false }, { spr: 'me', x: 380, y: 314, bt: 'combat', scale: 2.2 }, { spr: 'vane', sil: '#3a4050', x: 520, y: 300, dir: 'left', scale: 2 }],
+    lines: ['The second year, in the thaw, you corner the beast that has been stealing your snares.', 'It is a mother. Two cubs shiver behind her. She is bleeding, and she would still tear your throat out to protect them.'] }],
+  years3: () => [{ bg: 'summerStones', dur: 2400, cam: [[0, 320, 240, 1.15], [6000, 320, 250, 1.3]],
+    actors: [{ spr: 'vane', x: 270, y: 302, bt: 'slash', fms: 140, scale: 2.2 }, { spr: 'me', x: 380, y: 302, bt: 'slash', fms: 125, scale: 2.2 }],
+    lines: ['The third summer, you finally make him step back. One step. He laughs so hard he has to sit down.', 'That night he asks his worst question yet.'] }],
+  years4: () => [{ bg: 'autumnShrine', fx: ['mana'], dur: 2400, cam: [[0, 400, 240, 1.2], [6000, 440, 240, 1.4]],
+    actors: [{ spr: 'vane', x: 380, y: 300, dir: 'right', scale: 2.1 }, { spr: 'me', x: 450, y: 302, dir: 'left', scale: 2.2 }],
+    lines: ['In the fourth autumn, he takes you to a ruined shrine and opens his hand. In his palm sits a small green stone, breathing light.'] }],
+  years5: () => [{ bg: 'cliffAurora', fx: ['mana'], dur: 3000, cam: [[0, 330, 250, 1.2], [8000, 340, 240, 1.4]],
+    actors: [{ spr: 'vane', x: 300, y: 300, dir: 'up', scale: 2.1 }, { spr: 'me', x: 360, y: 300, dir: 'up', scale: 2.2 }],
+    lines: ['The fifth winter. The aurora is out, and the old man has not said a word all evening.', ['vane', 'Sit, pup. I have one more lesson, and it isn\'t about the sword.']] }],
   years: lines => [{ bg: 'seasons', yearMs: 2400, dur: 7 * 2400, cam: [[0, 320, 210, 1.15], [16800, 320, 230, 1.25]],
     actors: [{ spr: 'vane', x: 262, y: 300, bt: 'slash', fms: 140, scale: 2.2, flip: false }, { spr: 'me', x: 386, y: 300, bt: 'slash', fms: 130, scale: 2.2 }],
     slow: .9, lines }],
@@ -458,3 +512,6 @@ const CINE = {
       lines: ['Nine days north, on a cliff above a black sea: Greyspire Citadel.', 'Somewhere inside, a girl with half a green ribbon is waiting.', 'And so is Dread.'] }
   ]
 };
+
+// tag every shot with its scene id so painted cutscene art can replace the backdrop
+Object.keys(CINE).forEach(k => { const f = CINE[k]; CINE[k] = (...a) => { const sh = f(...a); sh.forEach(x => { if (!x.sceneId) x.sceneId = k; }); return sh; }; });

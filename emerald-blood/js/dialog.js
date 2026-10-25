@@ -78,7 +78,7 @@ async function cutIn(title, a, b, lines) {
   const el = $('#cutin'); el.classList.remove('hide'); sfx('cutin');
   el.querySelector('.ttl').textContent = title;
   const ca = $('#ciA'), cb = $('#ciB');
-  drawPortrait(ca, a, 'anger', 1); drawPortrait(cb, b, 'anger', 1);
+  drawPortrait(ca, a, artHas(a, 'shout') ? 'shout' : 'anger', 1); drawPortrait(cb, b, artHas(b, 'shout') ? 'shout' : 'anger', 1);
   ca.style.left = '-2%'; cb.style.right = '-2%'; cb.style.left = 'auto';
   ca.style.transform = 'translateX(-100%)'; cb.style.transform = 'translateX(100%) scaleX(-1)';
   await wait(30);

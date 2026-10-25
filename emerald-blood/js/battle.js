@@ -1,16 +1,17 @@
 'use strict';
 /* ================= BATTLE: CTB timeline + Expedition-33 style reactions ================= */
 const ARTS = {
-  fang: { name: 'Emerald Fang', mp: 4, desc: 'A blade edge of raw mana — no element, so nothing can resist it. Timed hit ×2.2. Makes your eyes blaze.', type: 'hit', hits: [{ anim: 'slash', m: 2.2, glow: 1 }], blaze: 1, brk: 14 },
-  ward: { name: 'Emerald Field', mp: 3, desc: 'An energy field of raw mana. Cuts damage by 60% for 2 turns — 90% against ELEMENTAL attacks, because Drags unmake elements. Makes your eyes blaze.', type: 'buff', blaze: 1 },
-  ruin: { name: 'Verdant Ruin', mp: 9, desc: 'The Seven Wardens\' barrage: a storm of raw mana blasts. Hits ALL enemies, 3 timed hits.', type: 'all', hits: [{ anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: 1.3 }], blaze: 1, brk: 10 },
-  cleave: { name: 'Forge Cleave', mp: 4, desc: 'Oren\'s two-handed overhead cut. ×2.', type: 'hit', hits: [{ anim: 'backslash', m: 2 }], brk: 12 },
-  needle: { name: 'Viper Needle', mp: 4, desc: 'Three fast stabs. Hard to parry.', type: 'hit', hits: [{ anim: 'slash', m: .8 }, { anim: 'slash', m: .8 }, { anim: 'slash', m: 1 }], brk: 8, pierce: 1 },
-  wyrm: { name: 'Wyrmpiercer', mp: 5, desc: 'A spear thrust forged to punch through dragon scale. ×2.6, pierces parries.', type: 'hit', hits: [{ anim: 'thrust', m: 2.6 }], brk: 18, pierce: 1 },
-  moonstep: { name: 'Moonstep', mp: 3, desc: 'Liora moves like moonlight on water: enemies lose track of her for 2 turns.', type: 'veil' },
-  draw: { name: 'Verdant Tide: Draw', mp: 5, desc: 'Your eyes find the current in everything — and pull it INWARD. Every enemy is dragged together: 2 timed hits to all, and for 2 turns they can\'t dodge or parry.', type: 'draw', hits: [{ m: .8 }, { m: 1 }], blaze: 1, brk: 12 },
-  cast: { name: 'Verdant Tide: Cast', mp: 7, desc: 'Push the current OUTWARD. A crimson burst hurls one enemy back. ×2.8, pierces everything, and knocks their next turn back.', type: 'cast', hits: [{ m: 2.8 }], blaze: 1, brk: 22 },
-  veil: { name: 'Smoke Veil', mp: 3, desc: 'Kess melts into shadow: enemies lose track of her for 2 turns.', type: 'veil' }
+  fang: { name: 'Emerald Fang', strain: 30, mp: 4, desc: 'A blade edge of raw mana — no element, so nothing can resist it. Timed hit ×2.2. Makes your eyes blaze.', type: 'hit', hits: [{ anim: 'slash', m: 2.2, glow: 1 }], blaze: 1, brk: 14 },
+  ward: { name: 'Emerald Field', strain: 20, mp: 3, desc: 'An energy field of raw mana. Cuts damage by 60% for 2 turns — 90% against ELEMENTAL attacks, because Drags unmake elements. Makes your eyes blaze.', type: 'buff', blaze: 1 },
+  ruin: { name: 'Verdant Ruin', strain: 60, mp: 9, desc: 'The Seven Wardens\' barrage: a storm of raw mana blasts. Hits ALL enemies, 3 timed hits.', type: 'all', hits: [{ anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: .9 }, { anim: 'spellcast', m: 1.3 }], blaze: 1, brk: 10 },
+  cleave: { name: 'Forge Cleave', strain: 30, mp: 4, desc: 'Oren\'s two-handed overhead cut. ×2.', type: 'hit', hits: [{ anim: 'backslash', m: 2 }], brk: 12 },
+  needle: { name: 'Viper Needle', strain: 30, mp: 4, desc: 'Three fast stabs. Hard to parry.', type: 'hit', hits: [{ anim: 'slash', m: .8 }, { anim: 'slash', m: .8 }, { anim: 'slash', m: 1 }], brk: 8, pierce: 1 },
+  wyrm: { name: 'Wyrmpiercer', strain: 40, mp: 5, desc: 'A spear thrust forged to punch through dragon scale. ×2.6, pierces parries.', type: 'hit', hits: [{ anim: 'thrust', m: 2.6 }], brk: 18, pierce: 1 },
+  moonstep: { name: 'Moonstep', strain: 25, mp: 3, desc: 'Liora moves like moonlight on water: enemies lose track of her for 2 turns.', type: 'veil' },
+  sight: { name: 'Emerald Sight', strain: 20, mp: 8, desc: 'Open your eyes all the way. For 3 turns dodging and parrying become FAR easier, and you see every enemy\'s next move. Drinks a lot of mana.', type: 'sight', blaze: 1 },
+  azure: { name: 'Azure Tide', strain: 35, mp: 6, desc: 'The blue aura. For 3 turns you move faster, and an Azure orb holds the field: it strikes alongside your Attacks and SWALLOWS enemy magic and aura attacks (up to 3).', type: 'azure', blaze: 1, brk: 6 },
+  crimson: { name: 'Crimson Tide', strain: 55, mp: 9, desc: 'The red aura, unleashed. A devastating crimson burst at one enemy: ×3.2, pierces every defense, hurls them back and delays their turn.', type: 'cast', hits: [{ m: 3.2 }], blaze: 1, brk: 26 },
+  veil: { name: 'Smoke Veil', strain: 25, mp: 3, desc: 'Kess melts into shadow: enemies lose track of her for 2 turns.', type: 'veil' }
 };
 const LINKS = {
   oren: { name: 'TWIN FANG', mp: [5, 4], desc: 'Link Art with Oren. 4 alternating timed hits.', lines: [['oren', 'Now, {name}! Like I taught you!'], ['me', "Right behind you, Oren!"]], hits: 4, m: 1.15 },
@@ -19,40 +20,40 @@ const LINKS = {
 const ENEMY = {
   lupine: { name: 'Ashen Lupine', hp: 38, atk: 10, def: 2, spd: 12, dodge: .2, parry: 0, brk: 40, xp: 14, gold: 6,
     skills: [{ name: 'Claw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Frenzy', w: .5, hits: [{ anim: 'slash', m: .55, w: 480 }, { anim: 'halfslash', m: .55, w: 300 }, { anim: 'slash', m: .7, w: 380 }] }] },
-  lupine_alpha: { name: 'Lupine Alpha', hp: 82, atk: 13, def: 3, spd: 13, dodge: .25, parry: .05, brk: 60, xp: 34, gold: 14,
+  lupine_alpha: { name: 'Lupine Alpha', howl: 1, trait: 'Pack leader — howls for help when wounded', hp: 82, atk: 13, def: 3, spd: 13, dodge: .25, parry: .05, brk: 60, xp: 34, gold: 14,
     skills: [{ name: 'Rending Claw', hits: [{ anim: 'slash', m: 1.1, w: 520 }, { anim: 'halfslash', m: .9, w: 340 }] }, { name: 'Howl Pounce', w: .4, hits: [{ anim: 'jump', m: 1.8, w: 760, unp: 1 }] }] },
   bandit: { name: 'Bandit', hp: 40, atk: 10, def: 2, spd: 11, dodge: .2, parry: .05, brk: 36, xp: 12, gold: 10,
     skills: [{ name: 'Stab', hits: [{ anim: 'thrust', m: 1, w: 520 }] }, { name: 'Twin Cut', w: .45, hits: [{ anim: 'slash', m: .7, w: 460 }, { anim: 'slash', m: .7, w: 280 }] }] },
-  rook: { name: 'Rook', hp: 70, atk: 11, def: 3, spd: 14, dodge: .3, parry: .1, brk: 50, xp: 28, gold: 22,
+  rook: { name: 'Rook', blind: 1, trait: 'Dirty fighter — blinding sand shrinks your timing', hp: 70, atk: 11, def: 3, spd: 14, dodge: .3, parry: .1, brk: 50, xp: 28, gold: 22,
     skills: [{ name: 'Twin Stab', hits: [{ anim: 'thrust', m: .75, w: 480 }, { anim: 'thrust', m: .75, w: 260 }] }, { name: 'Feint', w: .45, hits: [{ anim: 'slash', m: 1.3, w: 980 }] }, { name: 'Dirt in the Eyes', w: .3, hits: [{ anim: 'slash', m: 1.5, w: 560, unp: 1 }] }] },
-  acolyte: { name: 'Acolyte', hp: 50, atk: 11, def: 4, spd: 10, dodge: .05, parry: .25, brk: 44, xp: 16, gold: 9,
+  acolyte: { name: 'Acolyte', trait: 'Channels faith into the Inquisitor', hp: 50, atk: 11, def: 4, spd: 10, dodge: .05, parry: .25, brk: 44, xp: 16, gold: 9,
     skills: [{ name: 'Ember Verdict', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Litany of Blades', w: .5, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'halfslash', m: .6, w: 320 }, { anim: 'backslash', m: .8, w: 420 }] }] },
-  voss: { name: 'Captain Voss', hp: 125, atk: 12, def: 5, spd: 10, dodge: .05, parry: .35, brk: 70, xp: 40, gold: 0,
+  voss: { name: 'Captain Voss', shield: 3, trait: 'Phalanx — shields soak big hits; many small hits break them', hp: 125, atk: 12, def: 5, spd: 10, dodge: .05, parry: .35, brk: 70, xp: 40, gold: 0,
     skills: [{ name: 'Spear Thrust', hits: [{ anim: 'thrust', m: 1.1, w: 560 }] }, { name: 'Phalanx', w: .45, hits: [{ anim: 'thrust', m: .7, w: 500 }, { anim: 'thrust', m: .7, w: 300 }, { anim: 'thrust', m: .9, w: 520 }] }, { name: 'Shield Rush', w: .3, hits: [{ anim: 'run', m: 1.6, w: 700, unp: 1 }] }] },
-  halvard: { name: 'Inquisitor Halvard', hp: 280, atk: 14, def: 5, spd: 11, dodge: .08, parry: .25, brk: 90, xp: 90, gold: 60, boss: 1,
+  halvard: { name: 'Inquisitor Halvard', faith: 1, trait: 'Shielded by faith while an Acolyte lives', hp: 280, atk: 14, def: 5, spd: 11, dodge: .08, parry: .25, brk: 90, xp: 90, gold: 60, boss: 1,
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 300 }, { anim: 'thrust', m: 1.1, w: 460 }] },
       { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.4, w: 640 }] }, { name: 'Binding Psalm', psalm: 1 }, { name: 'Purging Light', w: 0, hits: [{ anim: 'spellcast', m: 2.4, w: 1100, unp: 1 }] }] },
   kairo_spar: { name: 'Kairo', drag: 1, hp: 80, atk: 7, def: 3, spd: 13, dodge: .15, parry: .15, brk: 50, xp: 20, gold: 0, img: 'kairo_kid',
     skills: [{ name: 'Quick Draw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Twin Cut', w: .45, hits: [{ anim: 'slash', m: .6, w: 520 }, { anim: 'slash', m: .6, w: 320 }] }, { name: 'Show-off Leap', w: .25, hits: [{ anim: 'jump', m: 1.1, w: 760, unp: 1 }] }] },
-  kairo_duel: { name: 'Kairo', drag: 1, hp: 260,
+  kairo_duel: { name: 'Kairo', trait: 'Scar Bloom — adapts to whatever hurts him', drag: 1, hp: 260,
     morph: { at: .55, turns: 4, name: 'SCAR BLOOM', lines: ['Kairo: "…You want to see what the fire left me?"', 'His scars split open. Something underneath them is MOVING.', 'Black scale. Claws. A crown of burning spines. It is still Kairo — and it isn\'t.'],
       hint: 'He adapts to anything that hurts him. Each attack works ONCE — change it up!', end: ['The scales crack and fall away like ash.', 'Kairo: "…Hah… it never… lasts…"'] }, atk: 14, def: 5, spd: 15, dodge: .25, parry: .25, brk: 85, xp: 70, gold: 0, img: 'kairo_b', boss: 1,
     skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'slash', m: 1.4, w: 340 }] },
       { name: 'Shard Flare', w: .25, hits: [{ anim: 'spellcast', m: 2, w: 1000, unp: 1 }] }] },
-  dread: { name: 'Dread', drag: 1, hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
+  dread: { name: 'Dread', fixed: 1, trait: 'Something you cannot beat. Yet.', drag: 1, hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
     skills: [{ name: 'Gravecleaver', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Black Sun Arc', w: .25, hits: [{ anim: 'slash', m: 1.6, w: 1000, unp: 1 }] }] },
   rime_lupine: { name: 'Rime Lupine', hp: 46, atk: 12, def: 3, spd: 13, dodge: .22, parry: 0, brk: 44, xp: 18, gold: 4,
     skills: [{ name: 'Frost Claw', hits: [{ anim: 'slash', m: 1, w: 520 }] }, { name: 'Whiteout Frenzy', w: .45, hits: [{ anim: 'slash', m: .55, w: 440 }, { anim: 'halfslash', m: .55, w: 280 }, { anim: 'slash', m: .7, w: 360 }] }] },
-  rime_alpha: { name: 'Rime Alpha', hp: 120, atk: 15, def: 4, spd: 13, dodge: .25, parry: .05, brk: 70, xp: 50, gold: 12, size: 1.3,
+  rime_alpha: { name: 'Rime Alpha', frost: 1, trait: 'Frost armor (+8 DEF) — Cast or a BREAK shatters it', hp: 120, atk: 15, def: 4, spd: 13, dodge: .25, parry: .05, brk: 70, xp: 50, gold: 12, size: 1.3,
     skills: [{ name: 'Glacier Rend', hits: [{ anim: 'slash', m: 1.1, w: 500 }, { anim: 'halfslash', m: .9, w: 320 }] }, { name: 'Avalanche Pounce', w: .35, hits: [{ anim: 'jump', m: 1.9, w: 800, unp: 1 }] }] },
-  mana_wyrm: { name: 'Mana Wyrm', hp: 58, atk: 13, def: 3, spd: 11, dodge: .12, parry: .1, brk: 50, xp: 24, gold: 8,
+  mana_wyrm: { name: 'Mana Wyrm', hunger: 1, trait: 'Drinks raw mana — Drag Arts HEAL it', hp: 58, atk: 13, def: 3, spd: 11, dodge: .12, parry: .1, brk: 50, xp: 24, gold: 8,
     skills: [{ name: 'Tail Lash', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Mana Breath', w: .4, hits: [{ anim: 'spellcast', m: 1.5, w: 900, unp: 1 }] }] },
-  vane_spar: { name: 'The Old Man', hp: 9999, atk: 5, def: 40, spd: 15, dodge: .45, parry: .55, brk: 9999, xp: 0, gold: 0, img: 'vane',
+  vane_spar: { name: 'The Old Man', fixed: 1, hp: 9999, atk: 5, def: 40, spd: 15, dodge: .45, parry: .55, brk: 9999, xp: 0, gold: 0, img: 'vane',
     skills: [{ name: 'Tap', hits: [{ anim: 'slash', m: .6, w: 480 }] }, { name: 'Three Snowflakes', w: .5, hits: [{ anim: 'slash', m: .4, w: 420 }, { anim: 'slash', m: .4, w: 260 }, { anim: 'slash', m: .4, w: 260 }] }] },
-  vane: { name: 'Vane, the Sword Saint', hp: 320, atk: 15, def: 6, spd: 16, dodge: .25, parry: .4, brk: 100, xp: 120, gold: 0, boss: 1,
+  vane: { name: 'Vane, the Sword Saint', stance: 1, trait: 'Empty Sleeve — in stance, plain attacks get countered', hp: 320, atk: 15, def: 6, spd: 16, dodge: .25, parry: .4, brk: 100, xp: 120, gold: 0, boss: 1,
     skills: [{ name: 'Snow Sever', hits: [{ anim: 'slash', m: 1.3, w: 320 }] }, { name: 'Thousand Flakes', w: .4, hits: [{ anim: 'slash', m: .45, w: 460 }, { anim: 'slash', m: .45, w: 230 }, { anim: 'slash', m: .45, w: 230 }, { anim: 'slash', m: .45, w: 300 }, { anim: 'slash', m: .7, w: 260 }] },
       { name: 'The Empty Sleeve', w: .3, hits: [{ anim: 'slash', m: 1.2, w: 1150 }] }, { name: 'Last Light', w: .15, hits: [{ anim: 'slash', m: 2.2, w: 900, unp: 1 }] }] },
-  halvard_pro: { name: 'Inquisitor Halvard', hp: 9999, atk: 16, def: 40, spd: 11, dodge: .5, parry: .5, brk: 9999, xp: 0, gold: 0, img: 'halvard',
+  halvard_pro: { name: 'Inquisitor Halvard', fixed: 1, hp: 9999, atk: 16, def: 40, spd: 11, dodge: .5, parry: .5, brk: 9999, xp: 0, gold: 0, img: 'halvard',
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 320 }] }, { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.3, w: 620 }] }] },
 };
 const TIER = { lupine: 'E', bandit: 'E', kairo_spar: 'E', acolyte: 'D', rook: 'D', lupine_alpha: 'D', rime_lupine: 'D', voss: 'C', mana_wyrm: 'C', rime_alpha: 'C',
@@ -63,6 +64,14 @@ const ELEM = { fire: ['Fire', '#ff7a3a'], water: ['Water', '#4aa8ff'], ice: ['Ic
 const SKILL_EL = { 'Ember Verdict': 'fire', 'Radiant Lance': 'light', 'Purging Light': 'light', 'Shield Rush': 'earth', 'Dirt in the Eyes': 'earth', 'Frost Claw': 'ice', 'Whiteout Frenzy': 'ice',
   'Avalanche Pounce': 'ice', 'Glacier Rend': 'ice', 'Mana Breath': 'lightning', 'Snow Sever': 'wind', 'Thousand Flakes': 'wind', 'Shard Flare': 'mana', 'Black Sun Arc': 'mana', 'Howl Pounce': 'wind' };
 const elOf = sk => SKILL_EL[sk.name];
+Object.assign(ENEMY, {
+  will_verdict: { name: 'Will of the Pale Verdict', hp: 150, atk: 14, def: 4, spd: 12, dodge: .1, parry: .3, brk: 70, xp: 40, gold: 0, img: 'halvard', spectral: '#fff3b0', boss: 1, trait: 'Made to burn Drags — its light seals your Arts',
+    skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 500 }, { anim: 'thrust', m: .8, w: 300 }] }, { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.4, w: 620 }] }, { name: 'Binding Psalm', w: .25, psalm: 1 }] },
+  will_river: { name: 'Will of Riverheart', hp: 170, atk: 12, def: 5, spd: 11, dodge: .3, parry: .2, brk: 80, xp: 40, gold: 0, img: 'mei', spectral: '#7fd8ff', boss: 1, patience: 1, trait: 'It respects patience — Guard or Cultivate first, then strike',
+    skills: [{ name: 'Undertow', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Flood', w: .35, hits: [{ anim: 'spellcast', m: 1.3, w: 800 }] }] },
+  stone_hunter: { name: 'Registry Hunter', hp: 62, atk: 12, def: 4, spd: 12, dodge: .2, parry: .2, brk: 50, xp: 30, gold: 22, img: 'hunter', trait: 'Crown Registry — Seal Lock silences your stones',
+    skills: [{ name: 'Spear Thrust', hits: [{ anim: 'thrust', m: 1, w: 520 }] }, { name: 'Seal Lock', w: .25, seal: 1 }, { name: 'Pinning Strike', w: .3, hits: [{ anim: 'thrust', m: .7, w: 460 }, { anim: 'thrust', m: .8, w: 300 }] }] }
+});
 const ALLY = {
   oren: { name: 'Oren', drag: 1, sprite: 'oren', color: '#a8592a', hp: 70, mp: 14, atk: 12, def: 5, spd: 9, arts: ['cleave'] },
   liora: { name: 'Liora', drag: 1, sprite: 'liora', color: '#b23a5a', hp: 72, mp: 20, atk: 17, def: 5, spd: 17, arts: ['wyrm', 'moonstep'], atkAnim: 'thrust' },
@@ -102,7 +111,7 @@ const SRC_NAME = s => s === 'attack' ? 'Attack' : s === 'link' ? 'Link Arts' : s
 const Battle = {
   B: null,
   // Drag reflex: Drag bodies move more efficiently — wider timing windows. The Verdant Eye widens them further.
-  reflex(a) { if (!a || a.side !== 'p') return 1; let k = 1; if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.isMe && G.S.f.eye) k *= 1.2; return k; },
+  reflex(a) { if (!a || a.side !== 'p') return 1; let k = a.blind ? .6 : 1; if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.sight) k *= 1.85; return k; },
   chooseSkill(e) { const pool = e.E.skills.filter(s => s.hits); let r = Math.random(), sk = pool[0]; for (const s of pool.slice(1)) { if (r < (s.w || .3)) { sk = s; break; } r -= (s.w || .3); } return sk; },
   async start(cfg) {
     if (typeof cfg === 'string') cfg = { enemies: [cfg] };
@@ -116,7 +125,8 @@ const Battle = {
     const pSlots = [[W - 150, 205], [W - 112, 262], [W - 188, 150]];
     const eSlots = [[150, 210], [96, 262], [196, 152], [70, 160]];
     const S = G.S.stats;
-    B.actors.push(this.mk({ side: 'p', id: 'me', name: G.S.name, color: '#1f8a4c', isMe: true, hp: S.hp, maxHp: S.maxHp, mp: S.mp, maxMp: S.maxMp, atk: S.atk, def: S.def, spd: S.spd, arts: G.S.arts, slot: pSlots[0] }));
+    const SB = Stones.bonus(); B.sb = SB;
+    B.actors.push(this.mk({ side: 'p', id: 'me', name: G.S.name, color: '#1f8a4c', isMe: true, hp: S.hp, maxHp: S.maxHp, mp: S.mp, maxMp: S.maxMp, atk: S.atk + SB.atk, def: S.def + SB.def, spd: S.spd, arts: G.S.arts, slot: pSlots[0], strainMax: 100 + SB.cap }));
     const allies = cfg.allies || G.S.party;
     for (let i = 0; i < allies.length; i++) {
       const id = allies[i], A = ALLY[id], st = G.S.allies[id] || {};
@@ -127,8 +137,8 @@ const Battle = {
     }
     cfg.enemies.forEach((k, i) => {
       const E = ENEMY[k]; const sc = cfg.scale || 1;
-      B.actors.push(this.mk({ side: 'e', id: k + i, key: k, name: E.name + (cfg.enemies.filter(x => x === k).length > 1 ? ' ' + 'ABCD'[i] : ''), hp: Math.round(E.hp * sc), maxHp: Math.round(E.hp * sc),
-        mp: 0, maxMp: 0, atk: E.atk, def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: eSlots[i], spr: E.img || k, size: E.size || 1 }));
+      B.actors.push(this.mk({ side: 'e', id: k + i, key: k, name: E.name + (cfg.enemies.filter(x => x === k).length > 1 ? ' ' + 'ABCD'[i] : ''), hp: Math.round(E.hp * sc * (E.fixed ? 1 : E.boss ? 1.4 : 1.3)), maxHp: Math.round(E.hp * sc * (E.fixed ? 1 : E.boss ? 1.4 : 1.3)),
+        mp: 0, maxMp: 0, atk: Math.round(E.atk * (E.fixed ? 1 : 1.18)), def: E.def + (E.frost ? 8 : 0), shield: E.shield || 0, frostOn: !!E.frost, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: eSlots[i], spr: E.img || k, size: E.size || 1 }));
     });
     for (const a of B.actors) if (a.side === 'e') { a.img = await npcImg(a.spr); if (a.key !== 'halvard') a.next = this.chooseSkill(a); }
     B.actors.forEach(a => { a.wait = 100 / a.spd * rnd(0.6, 1.0); });
@@ -150,7 +160,7 @@ const Battle = {
     this.B = null;
     return result;
   },
-  mk(o) { return Object.assign({ ko: false, anim: 'combat', frame: 0, at: 0, loopAnim: 'combat', x: o.slot[0], y: o.slot[1], hx: o.slot[0], hy: o.slot[1], ward: 0, guard: false, brk: 0, broken: 0, veil: 0, bind: 0, alpha: 1 }, o); },
+  mk(o) { return Object.assign({ strain: 0, strainMax: 100, fever: 0, ko: false, anim: 'combat', frame: 0, at: 0, loopAnim: 'combat', x: o.slot[0], y: o.slot[1], hx: o.slot[0], hy: o.slot[1], ward: 0, guard: false, brk: 0, broken: 0, veil: 0, bind: 0, alpha: 1 }, o); },
   me() { return this.B.actors.find(a => a.isMe); },
   alive(side) { return this.B.actors.filter(a => a.side === side && !a.ko); },
   ui(on) {
@@ -162,7 +172,8 @@ const Battle = {
     $('#bparty').innerHTML = B.actors.filter(a => a.side === 'p').map(a => `<div class="pcard ${a === B.cur ? 'act' : ''} ${a.ko ? 'ko' : ''}" style="--c:${a.color}">
       <div class="nm"><span>${esc(a.name)}</span>${a.ward ? '<span>🛡</span>' : ''}</div>
       <div class="row"><span class="ic h"></span><i><b style="width:${a.hp / a.maxHp * 100}%"></b></i><span>${a.hp}/${a.maxHp}</span></div>
-      <div class="row mp"><span class="ic m"></span><i><b style="width:${a.maxMp ? a.mp / a.maxMp * 100 : 0}%"></b></i><span>${a.mp}/${a.maxMp}</span></div></div>`).join('');
+      <div class="row mp"><span class="ic m"></span><i><b style="width:${a.maxMp ? a.mp / a.maxMp * 100 : 0}%"></b></i><span>${a.mp}/${a.maxMp}</span></div>
+      <div class="row st ${a.fever ? 'fev' : ''}"><span class="ic s">⚡</span><i><b style="width:${Math.min(100, a.strain / a.strainMax * 100)}%"></b></i><span>${a.fever ? 'FEVER' : Math.round(a.strain) + '%'}</span></div></div>`).join('');
     // timeline
     const order = this.preview(7), tl = $('#timeline'); tl.innerHTML = '';
     for (const a of order) {
@@ -185,8 +196,8 @@ const Battle = {
       B.cur = cur; B.turn++; this.hud();
       if (B.cfg.onTurn) { const r = await B.cfg.onTurn(B, this); if (r === 'skip') { cur.wait += 100 / cur.spd; continue; } if (r) return r; }
       if (cur.broken) { cur.broken--; await this.text(cur, 'STUNNED', '#ffd34a'); cur.wait += 100 / cur.spd; if (!cur.broken) { cur.brk = 0; } continue; }
-      if (cur.ward) cur.ward--; if (cur.veil) cur.veil--; if (cur.drawn) cur.drawn--; cur.guard = false;
-      if (cur.side === 'p') { const r = await this.playerTurn(cur); if (r) return r; }
+      if (cur.ward) cur.ward--; if (cur.veil) cur.veil--; if (cur.drawn) cur.drawn--; if (cur.blind) cur.blind--; cur.guard = false;
+      if (cur.side === 'p') { cur.calm = cur.calmNext || 0; cur.calmNext = 0; const r = await this.playerTurn(cur); if (r) return r; }
       else await this.enemyTurn(cur);
       cur.wait += 100 / cur.spd * (cur.delay || 1); cur.delay = 1;
       await this.adaptTick();
@@ -199,24 +210,30 @@ const Battle = {
   // ---------------- player turn ----------------
   playerTurn(a) {
     return new Promise(resolve => {
-      const B = this.B; a.mp = Math.min(a.maxMp, a.mp + 1 + (a.isMe && G.S.f.shard ? 1 : 0)); this.hud();
+      const B = this.B; a.mp = Math.min(a.maxMp, a.mp + 1 + (a.isMe ? B.sb.mp : 0));
+      a.strain = Math.max(0, a.strain - (12 + (a.isMe ? B.sb.cool : 0)));
+      if (a.sight) { a.sight--; if (!a.sight) this.text(a, 'Sight fades', '#7fbf9a', -30); }
+      if (a.azure) { a.azure--; if (!a.azure) { a.spd = a.baseSpd || a.spd; if (B.orb && B.orb.owner === a) { B.orb = null; this.text(a, 'The Azure orb dissolves', '#5fd8ff', -30); } } }
+      if (a.fever) { a.fever--; const d = Math.max(1, Math.round(a.maxHp * .06)); a.hp = Math.max(1, a.hp - d); this.text(a, 'BLOOD FEVER -' + d, '#ff5a3a', -20); if (!a.fever) a.strain = Math.min(a.strain, 50); }
+      this.hud();
       const partner = B.actors.find(x => x.side === 'p' && !x.isMe && !x.ko && LINKS[x.id]);
       const menu = () => {
         const L = [['Attack', 'Two timed strikes. Tap as the ring closes for a PERFECT.', () => this.pickTarget(a, t => this.doAttack(a, t).then(done))]];
         L.push([a.isMe ? 'Drag Arts' : 'Skills', a.isMe ? 'Draw on the dragon\'s blood. Powerful, but your eyes will blaze.' : 'Special techniques.', () => sub()]);
         if (a.isMe && partner) {
-          const Lk = LINKS[partner.id], ok = a.mp >= Lk.mp[0] && partner.mp >= Lk.mp[1];
-          L.push(['Link Art', `${Lk.name}: ${Lk.desc} (${G.S.name} ${Lk.mp[0]} MP + ${partner.name} ${Lk.mp[1]} MP)`, () => ok ? this.pickTarget(a, t => this.doLink(a, partner, t).then(done)) : toast('Not enough MP for a Link Art.'), !ok]);
+          const Lk = LINKS[partner.id], ok = a.mp >= Lk.mp[0] && partner.mp >= Lk.mp[1] && !a.fever && !partner.fever && a.strain + 40 <= a.strainMax && partner.strain + 40 <= partner.strainMax;
+          L.push(['Link Art', `${Lk.name}: ${Lk.desc} (${G.S.name} ${Lk.mp[0]} MP + ${partner.name} ${Lk.mp[1]} MP · Strain +40 each)`, () => ok ? this.pickTarget(a, t => this.doLink(a, partner, t).then(done)) : toast('Not enough MP — or your blood is running too hot.'), !ok]);
         }
-        if (a.isMe && G.S.f.cultivation) L.push(['Cultivate', 'Tomb Breath: drink the mana in the air. +5 MP, and your next strike is a guaranteed PERFECT.', () => { const g = 5 + (World.scene && World.scene.realm ? 3 : 0); a.mp = Math.min(a.maxMp, a.mp + g); a.focus = 1; sfx('heal'); this.spark(a.x, a.y - 30, '#46ff95', 22); this.text(a, '+' + g + ' MP · FOCUS', '#46ff95'); this.hud(); done(); }]);
-        L.push(['Guard', 'Halve damage until your next turn and recover 3 MP.', () => { a.guard = true; a.mp = Math.min(a.maxMp, a.mp + 3); this.text(a, 'GUARD', '#9ad1ff'); this.hud(); done(); }]);
+        if (a.isMe && G.S.f.cultivation) L.push(['Cultivate', 'Tomb Breath: drink the mana in the air. +5 MP, cool your blood (Strain -40), and your next strike is a guaranteed PERFECT.', () => { const g = 5 + (World.scene && World.scene.realm ? 3 : 0); a.mp = Math.min(a.maxMp, a.mp + g); a.focus = 1; a.calmNext = 1; a.strain = Math.max(0, a.strain - 40); sfx('heal'); this.spark(a.x, a.y - 30, '#46ff95', 22); this.text(a, '+' + g + ' MP · FOCUS', '#46ff95'); this.hud(); done(); }]);
+        L.push(['Guard', 'Halve damage until your next turn, recover 3 MP and steady your blood (Strain -30).', () => { a.guard = true; a.calmNext = 1; a.mp = Math.min(a.maxMp, a.mp + 3); a.strain = Math.max(0, a.strain - 30); this.text(a, 'GUARD', '#9ad1ff'); this.hud(); done(); }]);
         L.push([`Items`, `Tonic ×${G.S.items.tonic}  ·  Ether ×${G.S.items.ether}`, () => items()]);
         if (a.isMe && !B.cfg.noFlee) L.push(['Flee', 'Try to escape (70%).', async () => { this.closeMenu(); if (Math.random() < 0.7) { await this.msg('You slip away!', 900); resolve('flee'); } else { await this.msg("Can't escape!", 900); done(); } }]);
         this.openMenu(L, null);
       };
       const sub = () => {
-        const L = a.arts.map(k => { const A = ARTS[k], cost = A.mp + (a.bind ? 2 : 0); return [A.name, A.desc, () => this.useArt(a, k).then(done), a.mp < cost, cost]; });
-        if (a.isMe && a.arts.includes('draw') && a.arts.includes('cast')) L.push(['??? (Null Tide)', 'Draw and Cast, meeting in one point. You can feel the shape of it behind your eyes — but the two currents won\'t touch. Not yet.', () => {}, true]);
+        const L = a.arts.map(k => { const A = ARTS[k], cost = this.artCost(a, k), st = this.artStrain(a, k), hot = a.fever || a.strain + st > a.strainMax;
+          return [A.name, A.desc + `  ⚡ Strain +${st}` + (hot ? (a.fever ? '  — BLOOD FEVER: your arts are locked.' : '  — too hot! Guard or Cultivate to cool down.') : '') + (a.isMe && Stones.artBoost(k) > 1 ? `  ◆ Stone-boosted ×${Stones.artBoost(k).toFixed(2)}` : ''), () => this.useArt(a, k).then(done), a.mp < cost || hot, cost]; });
+        if (a.isMe && a.arts.includes('azure') && a.arts.includes('crimson')) L.push(['??? Eclipse Convergence', B.orb ? 'Blue holds the field. Red strains to answer it through the orb — the two currents pull toward each other until your bones ache. Your body cannot bear it. Not yet. (End-game technique)' : 'An ultimate that needs setup: Azure Tide\'s orb must hold the field before Crimson can be called THROUGH it. You can feel its shape. You cannot touch it yet. (End-game technique)', () => {}, true]);
         L.push(['◀ Back', 'Return.', menu]); this.openMenu(L, true);
       };
       const items = () => {
@@ -290,6 +307,7 @@ const Battle = {
     return res;
   },
   async dash(a, x, y, ms) { const fx = a.x, fy = a.y, t0 = performance.now(); a.anim = 'run'; a.loopAnim = 'run';
+    ms = Math.max(ms, Math.hypot(x - fx, y - fy) / .55);
     while (true) { const k = Math.min(1, (performance.now() - t0) / ms); a.x = lerp(fx, x, k); a.y = lerp(fy, y, k); if (k >= 1) break; await wait(16); }
     a.loopAnim = 'combat'; a.anim = 'combat'; },
   async home(a) { await this.dash(a, a.hx, a.hy, 260); },
@@ -316,10 +334,18 @@ const Battle = {
         return 'parried'; }
     }
     if (t.veil && t.side === 'p') { this.text(t, 'MISSED', '#9ad1ff'); return 'dodged'; }
+    if (t.side === 'e' && t.E.hunger && opts.src && (ARTS[opts.src] || opts.src === 'link')) { // raw mana feeds it
+      const h = Math.max(4, Math.round(a.atk * m * .8)); t.hp = Math.min(t.maxHp, t.hp + h); this.text(t, 'ABSORBED +' + h, '#46ff95', 0, true); this.spark(t.x, t.y - 30, '#46ff95', 18); sfx('heal'); this.hud(); return 'absorbed'; }
+    if (t.side === 'e' && t.stance && opts.src === 'attack') { this.text(t, 'EMPTY SLEEVE', '#cfe8ff', -10, true); sfx('parry'); t.stanceHit = 1; return 'parried'; }
+    if (t.side === 'e' && t.stance && opts.src && opts.src !== 'attack') { t.stance = 0; this.text(t, 'STANCE BROKEN', '#ffd34a', -24, true); }
+    if (t.side === 'e' && t.frostOn && (opts.src === 'crimson' || t.broken)) { t.frostOn = false; t.def -= 8; this.text(t, 'FROST ARMOR SHATTERED', '#9fe4ff', -34, true); sfx('break'); this.spark(t.x, t.y - 30, '#cfefff', 30); }
     let dmg = Math.max(1, Math.round((a.atk * m) * (grade === 'perfect' ? 1.5 : grade === 'good' ? 1 : 0.6) * rnd(.9, 1.1) - t.def * (t.broken ? 0 : 1)));
     if (t.broken) dmg = Math.round(dmg * 1.5);
     if (t.guard) dmg = Math.ceil(dmg / 2);
     if (t.ward) dmg = Math.ceil(dmg * .4);
+    if (t.side === 'e' && t.E.patience && a.side === 'p') { if (a.calm) { dmg = Math.round(dmg * 1.3); this.text(t, 'PATIENT STRIKE', '#7fd8ff', -30); } else { dmg = Math.ceil(dmg * .3); this.text(t, 'IMPATIENT', '#7fd8ff', -30); } }
+    if (t.side === 'e' && t.E.faith && this.alive('e').some(x => x.key === 'acolyte')) { dmg = Math.ceil(dmg * .5); this.text(t, 'FAITH WARD', '#fff3b0', -30); }
+    if (t.side === 'e' && t.shield > 0 && !opts.pierce) { dmg = Math.ceil(dmg * .2); t.shield--; this.text(t, t.shield ? 'SHIELD ' + '▮'.repeat(t.shield) : 'PHALANX BROKEN!', t.shield ? '#cfd8e8' : '#ffd34a', -30, !t.shield); sfx(t.shield ? 'parry' : 'break'); if (!t.shield) { t.brk += 25; } }
     if (t.morph > 0 && opts.src) { const n = t.adapt[opts.src] || 0; if (n) { dmg = Math.max(1, Math.round(dmg * [1, .35, .1][Math.min(n, 2)])); this.text(t, 'ADAPTED', '#ff8a6a', -30); } t.pendAdapt = t.pendAdapt || new Set(); t.pendAdapt.add(opts.src); }
     this.damage(t, dmg, grade === 'perfect');
     if (t.side === 'e' && !t.ko) { t.brk += (grade === 'perfect' ? 12 : grade === 'good' ? 6 : 2) + (opts.brk || 0); this.checkBreak(t); }
@@ -341,12 +367,17 @@ const Battle = {
     let parried = 0;
     for (const h of seq) { if (t.ko) break; const r = await this.strike(a, t, h, 1, { src: 'attack' }); if (r === 'parried') parried++; await wait(160); }
     a.glow = false;
+    if (B.orb && B.orb.owner === a && !t.ko) { B.fx.push({ beam: 1, blue: 1, x1: B.orb.x, y1: B.orb.y, x2: t.x, y2: t.y - 30, t: 0, life: 380 }); sfx('art'); this.spark(t.x, t.y - 30, '#5fd8ff', 18); this.text(t, 'AZURE ORB', '#5fd8ff', -50); this.resolveHit(a, t, .7, 'good', { unblockable: 1, src: 'azure' }); await wait(200); }
+    if (t.stanceHit) { t.stanceHit = 0; t.stance = 0; await this.msg(`${t.name}: "Too eager, pup."`, 1000); await this.enemyStrike(t, a, { name: 'Empty Sleeve', hits: [{ anim: 'slash', m: 1.6, w: 420 }] }, true); await this.home(a); return; }
     if (parried === seq.length && !t.ko) { await this.msg(`${t.name} reads every blow — COUNTER!`, 900); await this.enemyStrike(t, a, { name: 'Counter', hits: [{ anim: t.E.skills[0].hits[0].anim, m: 1.2, w: 520 }] }, true); }
     await this.home(a);
   },
   async useArt(a, k) {
-    const B = this.B, A = ARTS[k], cost = A.mp + (a.bind ? 2 : 0);
-    this.closeMenu(); a.mp -= cost; this.hud();
+    const B = this.B, A = ARTS[k], cost = this.artCost(a, k), boost = a.isMe ? Stones.artBoost(k) : 1;
+    this.closeMenu(); a.mp -= cost; a.strain += this.artStrain(a, k);
+    if (a.strain >= a.strainMax * .9 && !a.fever) { a.fever = 2; B.flash = .4; this.text(a, 'BLOOD FEVER!', '#ff5a3a', -60, true); sfx('alarm'); }
+    if (a.isMe && B.sb.verdict) { const d = Math.max(1, Math.round(a.maxHp * .04)); a.hp = Math.max(1, a.hp - d); this.text(a, 'VERDICT -' + d, '#fff3b0', -70); }
+    this.hud();
     if (A.blaze && a.isMe) { if (!B.blazed) { B.blazed = true; if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
     B.dim = .55; B.dimCol = a.isMe ? '10,40,20' : '30,10,40'; sfx('art');
     await this.msg(A.name, 700);
@@ -355,9 +386,19 @@ const Battle = {
     else if (A.type === 'hit') {
       await new Promise(r => this.pickTarget(a, r)).then(async t => {
         await this.dash(a, t.x + 52, t.y + 2, 240);
-        for (const h of A.hits) { if (t.ko) break; await this.strike(a, t, h, 1, { brk: A.brk || 0, pierce: A.pierce, unblockable: a.isMe, src: k }); if (h.glow) this.spark(t.x, t.y - 30, '#46ff95', 30); await wait(140); }
+        for (const h of A.hits) { if (t.ko) break; await this.strike(a, t, h, boost, { brk: A.brk || 0, pierce: A.pierce, unblockable: a.isMe, src: k }); if (h.glow) this.spark(t.x, t.y - 30, '#46ff95', 30); await wait(140); }
         a.glow = false; await this.home(a);
       });
+    } else if (A.type === 'sight') {
+      if (a.isMe) await Cine.play([{ bg: 'eyes', fx: ['mana'], dur: 1300, fadeIn: 120, tapEnds: true, cam: [[0, 320, 190, 1], [1300, 320, 178, 1.25]], vignette: 'rgba(0,30,10,.7)',
+        actors: [{ port: 'me', expr: artHas('me', 'sight') ? 'sight' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[650, s => { s.flash = .9; s.flashCol = '90,255,150'; sfx('art'); }]] }]);
+      await this.play(a, 'spellcast', 7, 70); a.sight = 3; B.flash = .5; sfx('art');
+      this.spark(a.x - 4, a.y - 50, '#46ff95', 30); this.text(a, 'EMERALD SIGHT', '#7dffb0', -40, true); await wait(300);
+    } else if (A.type === 'azure') {
+      await this.play(a, 'spellcast', 7, 80); sfx('chant');
+      a.azure = 3; if (!a.baseSpd) a.baseSpd = a.spd; a.spd = a.baseSpd * 1.45; a.wait *= .6;
+      B.orb = { owner: a, x: a.x - 30, y: a.y - 80, charges: 3, born: performance.now() };
+      this.text(a, 'AZURE TIDE', '#5fd8ff', -40, true); B.fx.push({ orb: 1, kind: 'draw', x: a.x - 30, y: a.y - 70, t: 0, life: 900 });
     } else if (A.type === 'draw') {
       B.dimCol = '0,20,40'; await this.play(a, 'spellcast', 7, 80);
       let es = this.alive('e'); const cx = es.reduce((s, t) => s + t.x, 0) / es.length, cy = es.reduce((s, t) => s + t.y, 0) / es.length;
@@ -366,7 +407,7 @@ const Battle = {
       for (const h of A.hits) {
         es = this.alive('e'); if (!es.length) break;
         const g = await this.qte(es[0], rnd(480, 620), '#5fd8ff', a); sfx('art'); B.flash = .3;
-        for (const t of es) { this.spark(t.x, t.y - 30, '#5fd8ff', 14); this.resolveHit(a, t, h.m, g, { brk: A.brk, unblockable: 1, src: k }); }
+        for (const t of es) { this.spark(t.x, t.y - 30, '#5fd8ff', 14); this.resolveHit(a, t, h.m * boost, g, { brk: A.brk, unblockable: 1, src: k }); }
         await wait(160);
       }
       for (const t of this.alive('e')) { t.drawn = 2; t.wait += 20; this.text(t, 'DRAWN IN', '#5fd8ff', -24); }
@@ -374,12 +415,14 @@ const Battle = {
     } else if (A.type === 'cast') {
       B.dimCol = '40,0,0';
       const t = await new Promise(r => this.pickTarget(a, r));
+      if (a.isMe && k === 'crimson') await Cine.play([{ bg: (c2) => { c2.fillStyle = '#1a0202'; c2.fillRect(-300, -300, 1240, 960); }, fx: ['embers'], dur: 1100, fadeIn: 100, tapEnds: true, cam: [[0, 320, 190, 1.1], [1100, 320, 180, 1.3]], vignette: 'rgba(120,0,0,.8)',
+        actors: [{ port: 'me', expr: artHas('me', 'shout') ? 'shout' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[500, s => { s.flash = .9; s.flashCol = '255,60,40'; s.shake = 16; sfx('crit'); }]] }]);
       await this.play(a, 'spellcast', 7, 70);
       B.fx.push({ orb: 1, kind: 'cast', x: a.x - 22, y: a.y - 36, t: 0, life: 700 }); sfx('chant');
       const g = await this.qte(t, rnd(420, 560), '#ff4a4a', a);
       B.fx.push({ beam: 1, x1: a.x - 22, y1: a.y - 36, x2: t.x, y2: t.y - 30, t: 0, life: 420 }); sfx('crit'); B.flash = .5; B.shake = 12;
       this.spark(t.x, t.y - 30, '#ff5a4a', 30);
-      this.resolveHit(a, t, A.hits[0].m, g, { brk: A.brk, unblockable: 1, pierce: 1, src: k }); B.tideUsed = 1;
+      this.resolveHit(a, t, A.hits[0].m * boost, g, { brk: A.brk, unblockable: 1, pierce: 1, src: k }); B.tideUsed = 1;
       if (!t.ko) { t.wait += 40; this.text(t, 'HURLED BACK', '#ff6a5a', -24); await this.slide(t, t.hx - 70, t.hy, 160); await wait(220); await this.slide(t, t.hx, t.hy, 320); }
     } else if (A.type === 'all') {
       await this.play(a, 'spellcast', 7, 90);
@@ -387,11 +430,20 @@ const Battle = {
         const es = this.alive('e'); if (!es.length) break;
         const g = await this.qte(es[0], rnd(500, 650), '#46ff95', a);
         sfx('art'); B.flash = .5;
-        for (const t of es) { this.pillar(t.x, t.y); this.resolveHit(a, t, h.m, g, { brk: A.brk, unblockable: 1, src: k }); }
+        for (const t of es) { this.pillar(t.x, t.y); this.resolveHit(a, t, h.m * boost, g, { brk: A.brk, unblockable: 1, src: k }); }
         await wait(200);
       }
     }
     B.dim = 0; a.alpha = a.veil ? .45 : 1; this.hud();
+  },
+  artCost(a, k) { return Math.max(1, ARTS[k].mp + (a.bind ? 2 : 0) - (a.isMe ? Stones.artMp(k) : 0)); },
+  artStrain(a, k) { return Math.max(5, (ARTS[k].strain || 30) - (a.isMe ? this.B.sb.calm : 0)); },
+  async summon(key, intro) {
+    const B = this.B, E = ENEMY[key], used = B.actors.filter(a => a.side === 'e' && !a.ko).map(a => a.hx);
+    const slots = [[150, 210], [96, 262], [196, 152], [70, 160]], sl = slots.find(s2 => !used.includes(s2[0])) || slots[3];
+    const a = this.mk({ side: 'e', id: key + B.actors.length, key, name: E.name, hp: Math.round(E.hp * 1.3), maxHp: Math.round(E.hp * 1.3), mp: 0, maxMp: 0, atk: Math.round(E.atk * 1.18), def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: sl, spr: E.img || key, size: E.size || 1 });
+    a.img = await npcImg(a.spr); a.next = this.chooseSkill(a); a.wait = 30; a.alpha = 0; B.actors.push(a);
+    for (let i = 0; i <= 10; i++) { a.alpha = i / 10; await wait(30); } if (intro) this.text(a, intro, '#ffb070', -40, true); this.hud();
   },
   async slide(a, x, y, ms) { const fx = a.x, fy = a.y, t0 = performance.now();
     while (true) { const k = Math.min(1, (performance.now() - t0) / ms), e = 1 - (1 - k) * (1 - k); a.x = lerp(fx, x, e); a.y = lerp(fy, y, e); if (k >= 1) break; await wait(16); } },
@@ -420,7 +472,7 @@ const Battle = {
   },
   async doLink(a, p, t) {
     const B = this.B, Lk = LINKS[p.id];
-    this.closeMenu(); a.mp -= Lk.mp[0]; p.mp -= Lk.mp[1]; this.hud();
+    this.closeMenu(); a.mp -= Lk.mp[0]; p.mp -= Lk.mp[1]; a.strain += 40; p.strain += 40; this.hud();
     B.dim = .7; B.dimCol = '60,10,10';
     await cutIn(Lk.name, 'me', p.id, Lk.lines);
     if (!B.blazed && a.isMe) { B.blazed = true; G.S.hood = false; }
@@ -448,13 +500,26 @@ const Battle = {
       if (E.morph && !e.morphed && e.hp < e.maxHp * E.morph.at) await this.morph(e);
       sk = e.next || this.chooseSkill(e); e.next = this.chooseSkill(e);
     }
-    const targets = this.alive('p').filter(p => !p.veil); const t = targets.length ? pick(targets) : pick(this.alive('p'));
+    e.turns = (e.turns || 0) + 1;
+    if (E.howl && !e.howled && e.hp < e.maxHp * .5) { e.howled = 1; await this.msg(`${e.name}: HOWL`, 900); sfx('alarm'); B.shake = 10; for (const x of this.alive('e')) { x.atk = Math.round(x.atk * 1.2); this.text(x, 'ATK UP', '#ff8a6a', -20); } await this.summon('lupine', 'ANSWERS THE HOWL'); }
+    if (E.shield && e.turns % 4 === 0 && e.shield < 3) { e.shield = 3; await this.msg(`${e.name} locks shields — PHALANX ×3`, 1000); sfx('parry'); return; }
+    if (E.faith && this.alive('e').some(x => x.key === 'acolyte')) { const h = Math.round(e.maxHp * .05); e.hp = Math.min(e.maxHp, e.hp + h); this.text(e, '+' + h + ' (FAITH)', '#fff3b0', -20); this.hud(); }
+    if (E.stance) { if (e.stance) e.stance = 0; else if (e.turns % 3 === 0) { e.stance = 1; await this.msg(`${e.name} sheathes his blade. The empty sleeve stirs. (Plain attacks will be countered)`, 1500); e.next = this.chooseSkill(e); return; } }
+    const targets = this.alive('p').filter(p => !p.veil); const pool = targets.length ? targets : this.alive('p');
+    const t = Math.random() < .4 ? pool.slice().sort((x, y) => x.hp / x.maxHp - y.hp / y.maxHp)[0] : pick(pool);
+    if (sk.seal) {
+      await this.msg(`${e.name}: Seal Lock`, 900); sfx('chant'); const me = this.me(), sb = B.sb;
+      if (sb.atk || sb.def || sb.mp || sb.cool || sb.calm || sb.cap || sb.verdict) { me.atk -= sb.atk; me.def -= sb.def; me.strainMax -= sb.cap; B.sb = Stones.empty(); B.sealedStones = 1; this.text(me, 'YOUR STONES GO DARK', '#c9a46a', -40, true); }
+      else this.text(me, 'Nothing to seal', '#999', -40);
+      this.hud(); return;
+    }
     if (sk.psalm) {
       await this.msg(`${e.name}: Binding Psalm`, 900); sfx('chant'); B.dim = .4; B.dimCol = '60,50,10';
       for (const p of this.alive('p')) { p.bind = 2; const d = Math.min(p.mp, 3); p.mp -= d; this.text(p, `-${d} MP · Arts cost +2`, '#ffd34a'); }
       await wait(900); B.dim = 0; this.hud(); return;
     }
     await this.enemyStrike(e, t, sk, false);
+    if (E.blind && sk.name === 'Dirt in the Eyes' && !t.ko) { t.blind = 2; this.text(t, 'BLINDED — timing shrinks', '#c9a46a', -30); }
     if (e.morph > 0 && !e.ko) { e.morph--; if (!e.morph) await this.unmorph(e); }
   },
   async enemyStrike(e, t, sk, isCounter) {
@@ -462,13 +527,18 @@ const Battle = {
     const el = elOf(sk); if (!isCounter) await this.msg(`${e.name}: ${sk.name}${el ? '  [' + ELEM[el][0] + ']' : ''}`, 750);
     if (sk.hits.some(h => h.unp)) { this.text(e, '!! UNPARRYABLE', '#ff5050', -50, true); sfx('alarm'); await wait(450); }
     const ranged = sk.hits[0].anim === 'spellcast';
+    if (B.orb && t.side === 'p' && (ranged || el) && !isCounter) {
+      await this.msg(`The Azure orb swallows ${sk.name}!`, 900); sfx('heal'); B.flash = .3; const o = B.orb.owner; o.mp = Math.min(o.maxMp, o.mp + 2);
+      B.fx.push({ orb: 1, kind: 'draw', x: B.orb.x, y: B.orb.y, t: 0, life: 700 }); this.text(o, 'ABSORBED +2 MP', '#5fd8ff', -40);
+      if (--B.orb.charges <= 0) { B.orb = null; this.text(o, 'The orb is full — it bursts', '#5fd8ff', -60); } this.hud(); return;
+    }
     if (!ranged) await this.dash(e, t.x - 54, t.y + 2, 280);
     $('#react').classList.remove('hide');
-    let parries = 0, n = 0;
+    let parries = 0, n = 0, streak = 0;
     for (const h of sk.hits) {
       if (t.ko) break; n++;
       const r = await this.defend(e, t, Object.assign({ el }, h));
-      if (r === 'parry' || r === 'pparry') parries++;
+      if (r === 'parry' || r === 'pparry') { parries++; streak++; if (streak >= 2) await this.clash(e, t, streak); } else streak = 0;
       await wait(120);
     }
     $('#react').classList.add('hide');
@@ -525,7 +595,7 @@ const Battle = {
       else if (res === 'dodge') { sfx('dodge'); this.text(t, 'DODGE', '#9ad1ff'); this.hop(t); }
       else if (res === 'pparry') { sfx('pparry'); this.text(t, 'PERFECT PARRY', '#ffe36a', -10, true); t.mp = Math.min(t.maxMp, t.mp + 2);
         if (h.el && h.el !== 'mana' && this.reflex(t) > 1) { t.mp = Math.min(t.maxMp, t.mp + 3); this.text(t, 'UNRAVELED! +3 MP', '#46ff95', -34); this.spark(t.x, t.y - 34, ELEM[h.el][1], 16); } this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 22); B.flash = .35; e.brk += 18; this.checkBreak(e); t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 40); }
-      else if (res === 'parry') { sfx('parry'); this.text(t, 'PARRY', '#ffe36a'); t.mp = Math.min(t.maxMp, t.mp + 1); this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 10); e.brk += 8; this.checkBreak(e); this.chip(e, t, m * .25); }
+      else if (res === 'parry') { sfx('parry'); this.text(t, 'PARRY', '#ffe36a'); t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 45); t.mp = Math.min(t.maxMp, t.mp + 1); this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 10); e.brk += 8; this.checkBreak(e); this.chip(e, t, m * .25); }
       else {
         if (res === 'unp') this.text(t, "CAN'T PARRY THAT!", '#ff6b6b', -20);
         if (res === 'early') this.text(t, 'TOO EARLY', '#bbb', -20);
@@ -534,6 +604,17 @@ const Battle = {
       this.hud();
       resolve(res);
     });
+  },
+  async clash(e, t, n) {
+    const B = this.B, mx = (e.x + t.x) / 2, my = (e.y + t.y) / 2 - 34;
+    sfx('pparry'); B.shake = 8 + n * 2; B.flash = .25;
+    this.text({ x: mx, y: my + 60 }, 'CLASH ×' + n, '#ffe36a', -30, true);
+    for (let i = 0; i < 3; i++) this.spark(mx + rnd(-6, 6), my + rnd(-6, 6), i ? '#fff3a0' : '#ffffff', 16);
+    B.fx.push({ clash: 1, x: mx, y: my, t: 0, life: 380 });
+    const ex = e.x, tx = t.x, d = Math.sign(tx - ex) || 1;
+    t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 40); e.anim = 'slash'; e.frame = 3;
+    for (let k = 0; k <= 6; k++) { const u = Math.sin(k / 6 * Math.PI); e.x = ex - d * 14 * u; t.x = tx + d * 14 * u; await wait(22); }
+    e.x = ex; t.x = tx;
   },
   chip(e, t, m, full, el) {
     let dmg = Math.max(1, Math.round(e.atk * m * rnd(.9, 1.1) - t.def * .6));
@@ -545,6 +626,7 @@ const Battle = {
     const B = this.B; sfx('win'); Music.stop();
     const es = B.actors.filter(a => a.side === 'e'); const xp = es.reduce((s, a) => s + a.E.xp, 0), gold = es.reduce((s, a) => s + a.E.gold, 0);
     G.S.gold += gold; const ups = Story.gainXp(xp);
+    if (es.some(a => a.key === 'mana_wyrm') && !G.S.f.wyrmDrop) { G.S.f.wyrmDrop = 1; setTimeout(() => Stones.give('breath'), 2200); }
     this.me().hp = Math.max(this.me().hp, 1);
     if (ups) { const me = this.me(); me.maxHp = G.S.stats.maxHp; me.maxMp = G.S.stats.maxMp; me.hp = me.maxHp; me.mp = me.maxMp; }
     await this.msg(`Victory!  +${xp} XP  +${gold} gold${ups ? '  ·  LEVEL UP! Lv ' + G.S.lvl : ''}`, ups ? 2200 : 1600);
@@ -624,8 +706,21 @@ const Battle = {
         drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
         if (!behind) paintGreatsword(c, px, py, ang, s * .95, t);
         c.save(); c.globalCompositeOperation = 'lighter'; const gx = a.x + 3 * s, gy = a.y - 43 * s, g = c.createRadialGradient(gx, gy, 0, gx, gy, 5 * s); g.addColorStop(0, 'rgba(90,255,150,.9)'); g.addColorStop(1, 'rgba(90,255,150,0)'); c.fillStyle = g; c.fillRect(gx - 7 * s, gy - 7 * s, 14 * s, 14 * s); c.restore();
+      } else if (a.E && a.E.spectral) {
+        const ga = c.globalAlpha; c.globalAlpha = ga * (.7 + Math.sin(t / 200) * .1); drawBT(c, tinted(a.img, a.E.spectral), a.anim, fr, a.x, a.y, s);
+        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = .35; drawBT(c, tinted(a.img, a.E.spectral), a.anim, fr, a.x, a.y - 2, s * 1.04); c.restore(); c.globalAlpha = ga;
       } else drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
       c.globalAlpha = 1;
+      // weapon trails: a crescent swoosh on the live frames of every swing
+      if (a.once && /slash|thrust/.test(a.anim) && !a.ko) {
+        const nF = { slash: 6, halfslash: 6, backslash: 13, thrust: 8 }[a.anim], u = a.frame / (nF - 1);
+        if (u > .2 && u < .85) { const dir = a.side === 'p' ? -1 : 1, sc2 = s, cx2 = a.x + dir * 26 * sc2, cy2 = a.y - 34 * sc2;
+          c.save(); c.globalCompositeOperation = 'lighter'; const col = a.isMe ? (a.glow ? '90,255,150' : '220,255,235') : a.key === 'dread' ? '90,255,150' : '255,220,200';
+          c.strokeStyle = `rgba(${col},${.75 * (1 - Math.abs(u - .5) * 1.6)})`; c.lineCap = 'round';
+          if (a.anim === 'thrust') { c.lineWidth = 3; c.beginPath(); c.moveTo(a.x + dir * 10 * sc2, cy2); c.lineTo(a.x + dir * 52 * sc2, cy2); c.stroke(); }
+          else { for (const [w, r] of [[6, 30], [2.5, 36]]) { c.lineWidth = w * sc2 * .5; c.beginPath(); const a0 = dir > 0 ? -1.3 + u * .8 : Math.PI + 1.3 - u * .8; c.arc(cx2 - dir * 10, cy2, r * sc2 * (a.size || 1), dir > 0 ? a0 : a0 - 1.6, dir > 0 ? a0 + 1.6 : a0); c.stroke(); } }
+          c.restore(); }
+      }
       if (a.side === 'e' && !a.ko) {
         const bw = 44, x = a.x - bw / 2, y = a.y - 76;
         c.fillStyle = 'rgba(0,0,0,.7)'; c.fillRect(x - 1, y - 1, bw + 2, 9);
@@ -633,10 +728,19 @@ const Battle = {
         c.fillStyle = a.broken ? '#fff' : '#ffd34a'; c.fillRect(x, y + 5, bw * Math.min(1, a.brk / a.brkMax), 2);
         c.font = '600 9px "Pixelify Sans"'; c.textAlign = 'center'; c.fillStyle = '#fff'; c.fillText(a.name, a.x - 7, y - 3);
         const tr = TIER[a.key]; if (tr) { const tx = a.x - 7 + c.measureText(a.name).width / 2 + 9; c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(tx - 6, y - 12, 12, 11); c.fillStyle = TIER_COL[tr]; c.font = '700 8px "Press Start 2P"'; c.fillText(tr, tx, y - 3); }
-        if (G.S.f.eye && a.next) { const u = a.next.hits.some(h => h.unp), el = elOf(a.next); c.font = '600 8px "Pixelify Sans"'; c.fillStyle = '#000'; const nt = '◉ ' + a.next.name + (el ? ' · ' + ELEM[el][0] : ''); c.fillText(nt, a.x + 1, y + 18); c.fillStyle = u ? '#ff6a6a' : el ? ELEM[el][1] : '#7fe8ff'; c.fillText(nt, a.x, y + 17); }
+        if (a.E.trait) { c.font = '600 7px "Pixelify Sans"'; c.fillStyle = 'rgba(0,0,0,.7)'; const tw = c.measureText(a.E.trait).width; c.fillRect(a.x - tw / 2 - 2, a.y + 6, tw + 4, 9); c.fillStyle = '#e8d8b0'; c.fillText(a.E.trait, a.x, a.y + 13); }
+        if (a.shield) { c.fillStyle = '#cfd8e8'; for (let i = 0; i < a.shield; i++) c.fillRect(a.x - 12 + i * 9, y - 22, 7, 5); }
+        if (a.stance) { c.fillStyle = '#cfe8ff'; c.font = '700 8px "Press Start 2P"'; c.fillText('STANCE', a.x, y - 24); }
+        if (a.frostOn) { c.strokeStyle = 'rgba(160,230,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30 * (a.size || 1), 20 * (a.size || 1), 34 * (a.size || 1), 0, 0, 7); c.stroke(); }
+        if (this.me() && this.me().sight && a.next) { const u = a.next.hits.some(h => h.unp), el = elOf(a.next); c.font = '600 8px "Pixelify Sans"'; c.fillStyle = '#000'; const nt = '◉ ' + a.next.name + (el ? ' · ' + ELEM[el][0] : ''); c.fillText(nt, a.x + 1, y + 18); c.fillStyle = u ? '#ff6a6a' : el ? ELEM[el][1] : '#7fe8ff'; c.fillText(nt, a.x, y + 17); }
         if (a.drawn) { c.strokeStyle = 'rgba(95,216,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y, 20, 7, 0, 0, 7); c.stroke(); }
       }
     }
+    if (B.orb) { const o = B.orb, ow = o.owner; o.x = lerp(o.x, ow.x - 34, .08); o.y = lerp(o.y, ow.y - 82 + Math.sin(t / 300) * 5, .08);
+      c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(o.x, o.y, 1, o.x, o.y, 22); g.addColorStop(0, 'rgba(230,250,255,.95)'); g.addColorStop(.35, 'rgba(80,200,255,.75)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.beginPath(); c.arc(o.x, o.y, 22, 0, 7); c.fill();
+      c.strokeStyle = 'rgba(120,220,255,.7)'; c.lineWidth = 1.5; for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(o.x, o.y, 12 + i * 4, t / (200 + i * 80) + i, t / (200 + i * 80) + i + 2); c.stroke(); } c.restore();
+      c.fillStyle = '#bfefff'; c.font = '700 7px "Press Start 2P"'; c.textAlign = 'center'; c.fillText('◆'.repeat(o.charges), o.x, o.y + 30); }
+    for (const a of B.actors) if (!a.ko && (a.sight || a.azure)) { c.save(); c.globalCompositeOperation = 'lighter'; const col = a.azure ? '80,200,255' : '70,255,140'; const g = c.createRadialGradient(a.x, a.y - 30, 6, a.x, a.y - 30, 46); g.addColorStop(0, `rgba(${col},.0)`); g.addColorStop(.7, `rgba(${col},${.16 + Math.sin(t / 180) * .06})`); g.addColorStop(1, `rgba(${col},0)`); c.fillStyle = g; c.fillRect(a.x - 50, a.y - 80, 100, 100); c.restore(); }
     if (T) { const a = T.list[T.i]; const y = a.y - 92 + Math.sin(t / 150) * 3; c.fillStyle = T.side === 'e' ? '#ffd34a' : '#46ff95'; c.beginPath(); c.moveTo(a.x - 7, y); c.lineTo(a.x + 7, y); c.lineTo(a.x, y + 9); c.fill(); }
     // rings
     for (const r of B.rings) {
@@ -660,12 +764,13 @@ const Battle = {
           c.beginPath(); c.arc(p.x, p.y, r2, a0, a0 + 1.8); c.stroke(); }
         c.restore(); continue;
       }
+      if (p.clash) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(255,240,180,${1 - k})`; c.lineWidth = 3 * (1 - k); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4 + .3; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 6, p.y + Math.sin(an) * 6); c.lineTo(p.x + Math.cos(an) * (10 + 30 * k), p.y + Math.sin(an) * (10 + 30 * k)); c.stroke(); } c.restore(); continue; }
       if (p.field) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.8 * (1 - k)})`; c.lineWidth = 2;
         for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + p.t / 400; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 34, p.y + Math.sin(an) * 40); c.lineTo(p.x + Math.cos(an + Math.PI / 3) * 34, p.y + Math.sin(an + Math.PI / 3) * 40); c.stroke(); }
         c.fillStyle = `rgba(70,255,140,${.12 * (1 - k)})`; c.beginPath(); c.ellipse(p.x, p.y, 34, 40, 0, 0, 7); c.fill(); c.restore(); continue; }
       if (p.beam) {
         c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
-        c.strokeStyle = `rgba(255,60,50,${.8 * (1 - k)})`; c.lineWidth = 16 * (1 - k * .6); c.beginPath(); c.moveTo(p.x1, p.y1); c.lineTo(p.x2, p.y2); c.stroke();
+        c.strokeStyle = p.blue ? `rgba(80,200,255,${.8 * (1 - k)})` : `rgba(255,60,50,${.8 * (1 - k)})`; c.lineWidth = (p.blue ? 8 : 16) * (1 - k * .6); c.beginPath(); c.moveTo(p.x1, p.y1); c.lineTo(p.x2, p.y2); c.stroke();
         c.strokeStyle = `rgba(255,240,230,${1 - k})`; c.lineWidth = 4 * (1 - k * .6); c.stroke(); c.restore(); continue;
       }
       if (p.pillar) { const g = c.createLinearGradient(p.x, 0, p.x, p.y); g.addColorStop(0, 'rgba(70,255,140,0)'); g.addColorStop(1, `rgba(70,255,140,${.7 * (1 - k)})`); c.fillStyle = g; c.fillRect(p.x - 14 * (1 - k * .5), 0, 28 * (1 - k * .5), p.y); continue; }

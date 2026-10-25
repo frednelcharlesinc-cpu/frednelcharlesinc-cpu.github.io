@@ -72,7 +72,7 @@ const UI = {
           px.putImageData(d, 0, 0); }
         $('#crNote').innerHTML = tab === 'me' ? "Every Drag's eyes glow green.<br>That part you can't change.<br><span style='color:#ffd88a'>Your story begins when you are ten.</span>"
           : tab === 'ilya' ? "Ilya. Your little sister.<br>Turning six. Unstoppable.<br><span style='color:#ffd88a'>She'll never take off her ribbon.</span>"
-          : "Kairo. Your best friend.<br>Your rival. Your brother.<br><span style='color:#ffd88a'>Shown as a kid, then seven years later — scarred.</span>";
+          : "Kairo. Your best friend.<br>Your rival. Your brother.<br><span style='color:#ffd88a'>Shown as a kid, then five years later — scarred.</span>";
       };
       const draw = t => {
         if ($('#creator').classList.contains('hide')) return;
@@ -149,7 +149,7 @@ const UI = {
     const s = loadSave(); if (!s) return; audioUnlock();
     G.S = s; $('#title').classList.add('hide');
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Waking up…';
-    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
+    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); G.S.arts = G.S.arts.map(k => k === 'draw' ? 'azure' : k === 'cast' ? 'crimson' : k); if (G.S.f.eye && !G.S.arts.includes('sight')) G.S.arts.unshift('sight'); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     G.mode = 'world'; await World.load(s.map, s.x, s.y, s.dir); this.controls(true); this.hud();
     await fadeIn(500); banner(SCENES[s.map].title || '', SCENES[s.map].subtitle || '');
   },
@@ -204,7 +204,7 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'arts', 'items', 'quests', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', arts: 'Arts', items: 'Items', quests: 'Quests', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'arts', 'stones', 'items', 'quests', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
       body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · Lv ${S.lvl}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>XP <b>${S.xp}/${S.lvl * 30}</b> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
@@ -212,12 +212,14 @@ const UI = {
     } else if (t === 'arts') {
       body = S.arts.map(k => `<div class="stat" style="margin-bottom:6px"><h3>${ARTS[k].name} <span class="muted">· ${ARTS[k].mp} MP</span></h3><p>${ARTS[k].desc}</p></div>`).join('') +
         `<div class="stat" style="margin-bottom:6px"><h3>Drag Reflex <span class="muted">· passive</span></h3><p>A Drag body wastes nothing. Your dodge, parry and timed-hit windows are wider than a human's. Drag enemies dodge and parry more often, and may RIPOSTE when they parry you.</p></div>` +
-        (S.f.eye ? `<div class="stat" style="margin-bottom:6px"><h3 style="color:#7fe8ff">Verdant Eye <span class="muted">· your Drag ability</span></h3><p>Your eyes see the current of mana in everything. In battle you see each enemy's NEXT move (◉ under their name), and every timing window widens further.</p></div>` : '') +
-        (S.arts.includes('draw') && S.arts.includes('cast') ? `<div class="stat" style="margin-bottom:6px"><h3>??? <span class="muted">· locked</span></h3><p>Draw and Cast, meeting at one point. The two currents won't touch. Not yet.</p></div>` : '') +
+        `<div class="stat" style="margin-bottom:6px"><h3>Strain ⚡</h3><p>Every Drag Art heats your blood. Strain cools a little each turn — Guard and Cultivate cool it fast. Let it climb past 90% and you fall into <b style="color:#ff6a5a">BLOOD FEVER</b>: Arts locked, HP burning, for 2 turns.</p></div>` +
+        (S.arts.includes('azure') && S.arts.includes('crimson') ? `<div class="stat" style="margin-bottom:6px"><h3>??? Eclipse Convergence <span class="muted">· locked</span></h3><p>Blue in the field, then red called through it. Two currents meeting at one point. You can feel its shape. You can't touch it yet.</p></div>` : '') +
         `<div class="stat"><h3>How to fight</h3><p>On your attacks, tap when the gold ring closes for a <b>PERFECT</b> hit (×1.5, can't be dodged or parried).</p><p>On enemy attacks: <b>DODGE</b> (wide window) or <b>PARRY</b> (tight window). Perfect timing earns MP. Parry <b>every</b> hit of an attack to COUNTER.</p><p>Red <b>!!</b> attacks can't be parried — dodge them. Fill an enemy's yellow bar to <b>BREAK</b> them.</p></div>`;
+    } else if (t === 'stones') {
+      body = stonesMenuHTML();
     } else if (t === 'items') {
       body = `<div class="grid2"><div class="stat"><h3>Tonic ×${S.items.tonic}</h3><p>Restores 45% HP.</p><button class="btn" id="useT" ${S.items.tonic && s.hp < s.maxHp ? '' : 'disabled'}>Use</button></div><div class="stat"><h3>Ether ×${S.items.ether}</h3><p>Restores 12 MP.</p><button class="btn" id="useE" ${S.items.ether && s.mp < s.maxMp ? '' : 'disabled'}>Use</button></div>
-        ${S.f.shard ? '<div class="stat"><h3>Drag Shard</h3><p>Green stone from Fratenaptor\'s tomb. It drinks mana from the air. +1 MP every turn in battle.</p></div>' : ''}<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.lioraPin ? '<div class="stat"><h3 style="color:#ff9ccc">Liora\'s hairpin</h3><p>A silver spear the length of your finger, tipped with a chip of green stone. Her mother\'s. You promised to give it back.</p></div>' : ''}${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
+<div class="stat"><h3>Ilya's ribbon</h3><p>Half a green silk ribbon, tied in a terrible knot. "So you can always find me."</p></div>${S.f.lioraPin ? '<div class="stat"><h3 style="color:#ff9ccc">Liora\'s hairpin</h3><p>A silver spear the length of your finger, tipped with a chip of green stone. Her mother\'s. You promised to give it back.</p></div>' : ''}${S.f.hoodGiven ? '<div class="stat"><h3>Grandfather\'s hood</h3><p>Mended a hundred times. No one ever saw his eyes.</p></div>' : ''}</div>`;
     } else if (t === 'quests') {
       body = `<div class="stat"><h3>Main</h3><p>${esc(S.quest || '—')}</p></div>` + (S.side ? `<div class="stat" style="margin-top:6px"><h3>Side</h3><p>${esc(S.side)}</p></div>` : '') +
         `<div class="stat" style="margin-top:6px"><h3>Suspicion ${Math.floor(S.sus)}/5</h3><p>How sure the Hollow is that a Drag walks among them. Every new person who sees your eyes adds to it. High suspicion closes doors, raises prices — and brings hunters.</p></div>`;
@@ -230,6 +232,7 @@ const UI = {
     $('#menuCard').innerHTML = `<h2>MENU</h2><div class="tabs">${tabs}<button id="mClose" style="margin-left:auto;border-color:#2f8a55;color:var(--green)">Close ✕</button></div>${body}`;
     $$('#menuCard .tabs button[data-t]').forEach(b => bindTap(b, () => { this.menuTab = b.dataset.t; sfx('blip'); this.renderMenu(); }));
     bindTap($('#mClose'), () => this.closeMenu());
+    if (t === 'stones') bindStonesMenu();
     const uT = $('#useT'), uE = $('#useE');
     if (uT) bindTap(uT, () => { if (!S.items.tonic) return; S.items.tonic--; s.hp = Math.min(s.maxHp, s.hp + Math.round(s.maxHp * .45)); sfx('heal'); this.renderMenu(); });
     if (uE) bindTap(uE, () => { if (!S.items.ether) return; S.items.ether--; s.mp = Math.min(s.maxMp, s.mp + 12); sfx('heal'); this.renderMenu(); });
