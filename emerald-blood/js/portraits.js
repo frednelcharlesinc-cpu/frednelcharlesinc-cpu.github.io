@@ -131,9 +131,11 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
 };
 const PFIT = { ren: .9, ren_hood: .9 };
 const ART_ID = { larkMB: 'lark', larkA: 'lark', inq: 'ivo',  kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
-function artHas(who, expr) { const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : 'ren') : (ART_ID[who] || who); return !!(Art.port[id] && Art.port[id][expr]); }
+// townsfolk and residents borrow the painted face of the sprite they walk around as
+function artId(who) { let id = ART_ID[who] || who; if (!Art.port[id] && CHAR[who] && CHAR[who].sprite && Art.port[CHAR[who].sprite]) id = CHAR[who].sprite; return id; }
+function artHas(who, expr) { const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : 'ren') : artId(who); return !!(Art.port[id] && Art.port[id][expr]); }
 function artFor(who, expr) {
-  let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : (G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : (ART_ID[who] || who);
+  let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : (G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : artId(who);
   const set = Art.port[id]; if (!set) return null;
   const alt = { sad: ['closed', 'shock'], shame: ['sad', 'closed'], blush: ['happy'], closed: ['sad'], shock: [], anger: [], happy: [] }[expr] || [];
   for (const e of [expr || 'neutral', ...alt, 'neutral']) if (set[e]) return { img: set[e], left: Art.left.has(id), id };
