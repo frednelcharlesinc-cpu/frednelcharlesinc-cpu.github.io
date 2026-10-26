@@ -21,7 +21,7 @@ const Veil = {
 async function rebuildPlayer() {
   if (!G.S || G.S.kid) return;
   // the Red Veil's outfit: black gi, red sash, charcoal hood, red scarf
-  const was = G.S.veil; G.S.veil = true; G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black', hood: 'charcoal' }), true); G.S.veil = was;
+  const was = G.S.veil; G.S.veil = true; G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black' }), false); // the costume: hood down, dreads out, red scarf over the face G.S.veil = was;
 }
 // painted cutscene shot: the art fills the frame, the camera drifts in
 const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes', dur, tapEnds: true, fadeIn: 120, lines, artCam: [[0, 320, (o && o.y) || 330, 1.02], [dur + 2500, 320, ((o && o.y) || 330) - 10, 1.12]] }, o || {});
@@ -30,7 +30,7 @@ const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes'
   const _pl = partList;
   partList = function (look, hooded) {
     const L = _pl(look, hooded);
-    if (hooded && G.S && G.S.veil && !G.S.kid && G.man.parts.veil_scarf) { const i = L.findIndex(p => p[0] === 'hood'); L.splice(i < 0 ? L.length : i, 0, ['veil_scarf', null]); }
+    if (G.S && G.S.veil && !G.S.kid && G.man.parts.veil_scarf) { const i = L.findIndex(p => p[0] === 'hood' || p[0].startsWith('hair_')); L.splice(i < 0 ? L.length : i, 0, ['veil_scarf', null]); }
     return L;
   };
   const _pi = playerImg;
@@ -42,7 +42,7 @@ const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes'
     if (G.mode !== 'world' || this.busy) return;
     if (!G.S.f.hoodGiven) { toast("You don't have a hood yet."); return; }
     sfx('hood');
-    if (Veil.got() && G.S.hood && !G.S.veil) { Veil.set(true); toast('<b style="color:#ff5a5a">The Red Veil.</b> Hood up, scarf over your face. Strangers see a masked stranger — Drags will still know you.', 3600); return; }
+    if (Veil.got() && G.S.hood && !G.S.veil) { Veil.set(true); toast('<b style="color:#ff5a5a">The Red Veil.</b> The costume goes on — red scarf over your face. Strangers see a masked stranger — Drags will still know you.', 3600); return; }
     if (G.S.veil) { G.S.veil = false; G.S.hood = false; toast('Hood down. Your eyes burn green for anyone to see.'); UI.hud(); save(); return; }
     G.S.hood = !G.S.hood; toast(G.S.hood ? 'Hood up. Your eyes are hidden.' : 'Hood down. Your eyes burn green for anyone to see.'); UI.hud(); save();
   };
