@@ -726,12 +726,24 @@ LEGENDS.push(
 
 /* ================= restart Chapter I ================= */
 const CH1_KEY = 'eb_ch1_start';
+const CH1_FLAGS = ['alphaBeaten', 'ashIntroDone', 'caelHeard', 'casselFight', 'chapter1Done', 'corranRules', 'coupHint', 'crateDone', 'crateQuest', 'crateTaken', 'crystalGreen', 'duel', 'fear', 'ge1', 'ge1lost', 'ge2', 'ge2lost', 'ge3', 'geKBmet', 'geTrust', 'gossip', 'granaryStands', 'halvardBeaten', 'halvardKilled', 'halvardKilledByKairo', 'halvardSpared', 'hasCrate', 'hollisTalk', 'hope', 'hoshiDone', 'kbHungry', 'kbIn', 'kbVisited', 'kessAsked', 'kessHelp', 'kessJoined', 'kessKnows', 'kessLeft', 'kessRefused', 'kessWait', 'larkMB', 'lead', 'learnedMill', 'lioraAff', 'lioraKairoTalk', 'lioraMet', 'lioraPin', 'lioraRevenge', 'marenKnows', 'mbIn', 'metCassel', 'metKess', 'metMaren', 'metPip', 'metTobb', 'millDone', 'millGuards', 'millIn', 'pipGone', 'ribbonSeen', 'roofDone', 'rookBeaten', 'rookSaw', 'sableBeaten', 'scoutMet', 'shard', 'shrineRead', 'sqBelfry', 'sqFlour', 'sqFlourPaid', 'sqGourd', 'sqHerb', 'sqWheel', 'sylwenN', 'tamsinGossip', 'tobbKnows', 'tobbReveal', 'vossBeaten', 'vossGone', 'vossKnows', 'woodsTip', 'ysoldeKnown', 'knifeKnown'];
 const Chapter = {
   snap() { if (!G.S) return; const s = JSON.parse(JSON.stringify(G.S)); s.map = 'ashford'; s.x = 29; s.y = 39; s.dir = 'up'; store(CH1_KEY, JSON.stringify(s)); },
-  has() { return !!store(CH1_KEY); },
+  has() { return !!store(CH1_KEY) || (G.S && G.S.chapter === 1 && !G.S.kid); },
+  // saves made before restart points existed: rebuild the start of Chapter I from the current save
+  rebuild() {
+    const s = JSON.parse(JSON.stringify(G.S)), f = s.f;
+    for (const k of CH1_FLAGS) delete f[k];
+    for (const k of Object.keys(f)) if (/^ge_(dace|sefa|wren|corran)$/.test(k) || /^(strongAsk|dragAsk)/.test(k)) delete f[k];
+    f.ashIntro = true;
+    if (s.st) { const drop = ['riverheart', 'fang', 'echo', 'heart', 'scale', 'verdict']; s.st.inv = s.st.inv.filter(x => !drop.includes(x));
+      for (const sl of Object.values(s.st.equip || {})) if (Array.isArray(sl)) sl.forEach((v, i) => { if (drop.includes(v)) sl[i] = null; }); }
+    Object.assign(s, { map: 'ashford', x: 29, y: 39, dir: 'up', sus: 0, seen: {}, hood: true, party: [], allies: {}, side: '', intel: [], quest: 'Ask around Ashford Hollow for where the Inquisition took Ilya.' });
+    if (s.arts) s.arts = s.arts.filter(k => k !== 'ruin');
+    return s;
+  },
   async restart(keep) {
-    const raw = store(CH1_KEY); if (!raw) return;
-    const old = G.S, s = JSON.parse(raw); s.name = old.name;
+    const raw = store(CH1_KEY); const old = G.S, s = raw ? JSON.parse(raw) : this.rebuild(); s.name = old.name;
     if (keep) for (const k of ['lvl', 'xp', 'stats', 'gold', 'items', 'arts', 'skills', 'sp', 'bonds', 'fams', 'fam', 'mounts', 'mount', 'pages', 'qitems', 'chests', 'kills']) if (old[k] !== undefined) s[k] = JSON.parse(JSON.stringify(old[k]));
     G.S = s; save(); $('#menu').classList.add('hide'); World.busy = false; G.mode = 'world';
     await fadeOut(500); await World.load(s.map, s.x, s.y, s.dir); UI.hud(); UI.controls(true); await fadeIn(500);
@@ -750,7 +762,7 @@ const Chapter = {
   const _rm = UI.renderMenu.bind(UI);
   UI.renderMenu = function () {
     _rm();
-    if (this.menuTab === 'settings' && G.S && G.S.chapter >= 1 && Chapter.has()) {
+    if (this.menuTab === 'settings' && G.S && G.S.chapter === 1 && !G.S.kid) {
       const row = $('#menuCard .btnrow'); if (!row) return;
       const b = document.createElement('button'); b.className = 'btn'; b.id = 'mRestart'; b.textContent = 'Restart Chapter I'; row.appendChild(b);
       bindTap(b, async () => { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); Story.run(() => Chapter.ask()); });
