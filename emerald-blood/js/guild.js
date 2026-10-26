@@ -176,5 +176,5 @@ async function tollMen() {
   await say('tollboss', null, 'Road belongs to the Gilded Hound, friend. Varro Kade sends his regards — and his prices. You\'re next.');
   const r = await Battle.start({ enemies: ['tollman', 'tollman'], bd: 'forest', intro: 'The Gilded Hound\'s collectors!' });
   if (r === 'lose') { await Story.defeat(); return; }
-  if (r === 'win') { await narr('The farmer gives you a sack of apples and a look you will remember for a long time. One of the toll-men drops a gold coin stamped with a hound\'s head.'); F().houndKnown = true; Guild.complete('toll'); }
+  if (r === 'win') { await narr('The farmer gives you a sack of apples and a look you will remember for a long time. One of the toll-men drops a gold coin stamped with a hound\'s head.'); F().houndKnown = true; await say('tollboss', null, '…That draw. Sheath, cut, sheath. The boss does that. Nobody ever taught him — he says it just came to him. Who the hell taught YOU?'); Guild.complete('toll'); }
 }
