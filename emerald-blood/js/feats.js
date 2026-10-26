@@ -28,7 +28,13 @@ const FEATS = [
   ['rankB', 'B', 'B-Rank', 'Reach grade B.', S => typeof Power !== 'undefined' && Power.now().i >= 3],
   ['halvard', '⚖', 'The Cages Open', 'Stop Halvard at the Old Mill.', S => !!S.f.millDone],
   ['ch1', '★', 'Chapter I', 'Finish Chapter I.', S => !!S.f.chapter1Done || (S.chapter || 1) >= 2],
-  ['hens', '🐔', 'Chicken Chaser', 'Scatter 20 chickens by running through them.', S => (S.f.hensScattered || 0) >= 20]
+  ['hens', '🐔', 'Chicken Chaser', 'Scatter 20 chickens by running through them.', S => (S.f.hensScattered || 0) >= 20],
+  ['mercy', '🕊', 'Mercy', 'Spare an enemy who begs.', S => (S.f.spared || 0) >= 1],
+  ['outcold', '💤', 'Out Cold', 'Knock out 5 enemies as the Red Veil.', S => (S.f.veilKO || 0) >= 5],
+  ['duel', '⚔', 'Read Like a Book', 'Win 5 duel exchanges.', S => (S.f.duelWins || 0) >= 5],
+  ['chain10', '⛓', 'Unbroken', 'Reach a ×10 CHAIN.', S => (S.f.bestChain || 0) >= 10],
+  ['wind', '♨', 'Not Yet', 'Survive a lethal blow with Second Wind.', S => !!S.f.secondWind],
+  ['awaken', '◉', 'The Blood Remembers', 'Awaken mid-battle.', S => (S.f.awakenings || 0) >= 1]
 ];
 const Feats = {
   got(id) { return !!(G.S && G.S.ach && G.S.ach[id]); },

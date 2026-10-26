@@ -259,7 +259,7 @@ async function barkeep(tk) {
       continue;
     }
     if (c === 3) { await barSeat(tk); continue; }
-    if (c === 4) { if (G.S.gold >= 15) { G.S.gold -= 15; await fadeOut(600); Story.heal(true); save(); Tav.drinks = 0; tipsy(0); await fadeIn(600); await narr('You keep your hood on all night. You sleep badly, but you sleep. (Game saved.)'); } else await say(K, 'neutral', 'Coin first, friend.'); return; }
+    if (c === 4) { if (G.S.gold >= 15) { G.S.gold -= 15; await fadeOut(600); Story.heal(true); if (typeof Wounds !== 'undefined') Wounds.clear(true); save(); Tav.drinks = 0; tipsy(0); await fadeIn(600); await narr('You keep your hood on all night. You sleep badly, but you sleep. (Game saved.)'); } else await say(K, 'neutral', 'Coin first, friend.'); return; }
   }
 }
 async function buyDrink(tk) {

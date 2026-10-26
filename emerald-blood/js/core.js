@@ -32,9 +32,12 @@ function resize() {
 }
 // the overworld is drawn from further back than battles, so you can see more of the town around you
 const WORLD_ZOOM = .74;
+// in battle, the bottom strip of the screen belongs to the command bar — the fight is laid out above it
+const BATTLE_STRIP = 92;
 function setView(mode) {
   const z = (mode === 'world' || mode === 'dialog') ? WORLD_ZOOM : 1;
-  G.view.scale = G.view.base * z; G.view.h = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
+  G.view.scale = G.view.base * z; G.view.fullH = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
+  G.view.h = mode === 'battle' ? G.view.fullH * (1 - BATTLE_STRIP / innerHeight) : G.view.fullH;
 }
 addEventListener('resize', resize); resize();
 

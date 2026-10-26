@@ -221,7 +221,31 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 .gbar{height:8px;background:#0e1a13;border-radius:5px;overflow:hidden;margin:6px 0;border:1px solid #2f5a40}.gbar i{display:block;height:100%}
 .tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.branch h4{margin:2px 0 6px;color:var(--green);font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:14px}
 .node{border:1px solid #2f5a40;border-radius:9px;padding:7px;margin-bottom:6px;display:flex;flex-direction:column;gap:4px;font-size:13px}.node b{color:#e8fff0}.node span{color:#9ab8a6}.node em{font-style:normal;font-size:12px;color:#7a9}
-.node.got{border-color:#46ff95;background:#123a22}.node.locked{opacity:.5}.node .btn{padding:4px 8px;font-size:12px}</style>
+.node.got{border-color:#46ff95;background:#123a22}.node.locked{opacity:.5}.node .btn{padding:4px 8px;font-size:12px}
+/* ---------- battle command strip (v3): the fight sits above, decisions live below ---------- */
+#bstrip{position:absolute;left:0;right:0;bottom:0;height:92px;background:linear-gradient(180deg,#101c15,#070c09);border-top:2px solid #2f6b43;box-shadow:0 -6px 18px rgba(0,0,0,.5);pointer-events:none}
+#timeline{bottom:calc(92px + 6px)!important}
+#bcmd{position:absolute;left:max(8px,env(safe-area-inset-left));right:calc(max(8px,env(safe-area-inset-right)) + 4px);bottom:max(4px,env(safe-area-inset-bottom));transform:none;width:auto;height:84px;display:block}
+#cmdBox{height:100%;display:flex;flex-direction:column;gap:4px;background:none;border:0;box-shadow:none;padding:2px 0 0}
+#cmdTip{display:flex;align-items:center;gap:8px;height:22px;min-height:0;padding:0 4px;margin:0;border:0;font-size:12.5px;line-height:22px;color:#b8d0c0}
+#cmdTipT{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cmdCost{position:static;display:none;flex:none;padding:0 9px;height:18px;line-height:18px;border-radius:999px;background:#12304a;border:1px solid #3d7fb8;color:#9fd8ff;font-size:11px;font-weight:800;white-space:nowrap}
+#cmdCost.on{display:block}
+#cmdList{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(96px,1fr);grid-template-rows:1fr;gap:6px;padding:0 0 2px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#cmdList::-webkit-scrollbar{display:none}
+#cmdList button{display:flex;align-items:center;gap:7px;text-align:left;height:100%;padding:0 8px 0 5px;font-size:13.5px;font-weight:800;color:#eaf5ee;background:linear-gradient(180deg,#1d3024,#142019);border:1.5px solid #2c4a37;border-radius:8px;box-shadow:0 2px 0 rgba(0,0,0,.5);transition:transform .06s,border-color .1s,background .1s}
+#cmdList button .ic{flex:none;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--cc,#2c4a37);color:#fff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+#cmdList button .lb{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cmdList button small{flex:none;font-size:10.5px;font-weight:800;margin:0;opacity:1;color:#9fd8ff}
+#cmdList button.sel{border-color:var(--cc,#46ff95);background:linear-gradient(180deg,#24432f,#183224);box-shadow:0 0 0 1px var(--cc,#46ff95),0 2px 0 rgba(0,0,0,.5)}
+#cmdList button.sel:before{content:none}
+#cmdList button.press{transform:scale(.96);background:#2a4a36}
+#cmdList button:disabled{opacity:.38;filter:grayscale(.6)}
+#cmdDesc{display:none!important}
+#react{bottom:max(-2px,env(safe-area-inset-bottom))!important}
+.rx{width:84px!important;height:84px!important}
+#tgtHint{bottom:30px!important}
+</style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -252,12 +276,13 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 
 <!-- battle UI -->
 <div id="bui" class="ui hide">
+  <div id="bstrip"></div>
   <div id="bparty"></div>
   <div id="timeline"></div>
   <div id="bmsg"></div>
   <div id="hitTap" class="hide"></div>
   <div id="cmdDesc" class="hide"><div class="scroll"></div></div>
-  <div id="bcmd" class="hide"><div class="scroll" id="cmdBox"><div id="cmdCost" class="scroll">MP 0</div><div id="cmdList"></div></div></div>
+  <div id="bcmd" class="hide"><div id="cmdBox"><div id="cmdTip"><span id="cmdTipT"></span><b id="cmdCost">MP 0</b></div><div id="cmdList"></div></div></div>
   <div id="react" class="hide">
     <button id="rxDodge" class="rx">DODGE<small>dodge</small></button>
     <button id="rxParry" class="rx">PARRY<small>parry</small></button>
@@ -291,35 +316,38 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <div id="rotate"><div class="ph"></div><div>Turn your phone sideways to play.</div></div>
 <div id="loading"><div style="font-family:'Press Start 2P';color:var(--green);font-size:14px">EMERALD BLOOD</div><div class="bar"><b id="loadBar"></b></div><div id="loadTxt">Loading…</div></div>
 
-<script src="js/core.js?v=56"></script>
-<script src="js/world.js?v=56"></script>
-<script src="js/dialog.js?v=56"></script>
-<script src="js/portraits.js?v=56"></script>
-<script src="js/cine.js?v=56"></script>
-<script src="js/battle.js?v=56"></script>
-<script src="js/monsters.js?v=56"></script>
-<script src="js/realm.js?v=56"></script>
-<script src="js/story.js?v=56"></script>
-<script src="js/stones.js?v=56"></script>
-<script src="js/lore.js?v=56"></script>
-<script src="js/guild.js?v=56"></script>
-<script src="js/progress.js?v=56"></script>
-<script src="js/dungeons.js?v=56"></script>
-<script src="js/quests.js?v=56"></script>
-<script src="js/worldmap.js?v=56"></script>
-<script src="js/events.js?v=56"></script>
-<script src="js/companions.js?v=56"></script>
-<script src="js/bonds.js?v=56"></script>
-<script src="js/bloodlust.js?v=56"></script>
-<script src="js/ui.js?v=56"></script>
-<script src="js/ch1.js?v=56"></script>
-<script src="js/passives.js?v=56"></script>
-<script src="js/veil.js?v=56"></script>
-<script src="js/leaf.js?v=56"></script>
-<script src="js/tavern.js?v=56"></script>
-<script src="js/ambient.js?v=56"></script>
-<script src="js/battlefx.js?v=56"></script>
-<script src="js/feats.js?v=56"></script>
+<script src="js/core.js?v=57"></script>
+<script src="js/world.js?v=57"></script>
+<script src="js/dialog.js?v=57"></script>
+<script src="js/portraits.js?v=57"></script>
+<script src="js/cine.js?v=57"></script>
+<script src="js/battle.js?v=57"></script>
+<script src="js/monsters.js?v=57"></script>
+<script src="js/realm.js?v=57"></script>
+<script src="js/story.js?v=57"></script>
+<script src="js/stones.js?v=57"></script>
+<script src="js/lore.js?v=57"></script>
+<script src="js/guild.js?v=57"></script>
+<script src="js/progress.js?v=57"></script>
+<script src="js/dungeons.js?v=57"></script>
+<script src="js/quests.js?v=57"></script>
+<script src="js/worldmap.js?v=57"></script>
+<script src="js/events.js?v=57"></script>
+<script src="js/companions.js?v=57"></script>
+<script src="js/bonds.js?v=57"></script>
+<script src="js/bloodlust.js?v=57"></script>
+<script src="js/ui.js?v=57"></script>
+<script src="js/ch1.js?v=57"></script>
+<script src="js/passives.js?v=57"></script>
+<script src="js/veil.js?v=57"></script>
+<script src="js/leaf.js?v=57"></script>
+<script src="js/tavern.js?v=57"></script>
+<script src="js/ambient.js?v=57"></script>
+<script src="js/combat2.js?v=57"></script>
+<script src="js/combat3.js?v=57"></script>
+<script src="js/combat4.js?v=57"></script>
+<script src="js/battlefx.js?v=57"></script>
+<script src="js/feats.js?v=57"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

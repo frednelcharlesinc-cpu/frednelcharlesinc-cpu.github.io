@@ -19,6 +19,18 @@ const LINKS = {
   oren: { name: 'TWIN FANG', mp: [5, 4], desc: 'Link Art with Oren. 4 alternating timed hits.', lines: [['oren', 'Now, {name}! Like I taught you!'], ['me', "Right behind you, Oren!"]], hits: 4, m: 1.15 },
   kess: { name: 'EMERALD ECLIPSE', mp: [6, 4], desc: 'Link Art with Kess. 5 timed hits from light and shadow.', lines: [['kess', "Twelve years I've hidden this fire…"], ['me', '…so let it burn. Together!']], hits: 5, m: 1.2 }
 };
+// command grid: an icon and an accent colour for every kind of choice
+function cmdIcon(label) {
+  const L = String(label), k = L.replace(/^[^A-Za-z?◀]+/, '');
+  const T = [[/^Attack/, '⚔', '#c8452e'], [/Duel/, '⚔', '#c9962a'], [/^(Drag Arts|Skills)/, '✦', '#2f9a5a'], [/^Link Art/, '❖', '#7a4ab0'], [/^Cultivate/, '☯', '#2f8a7a'],
+    [/^Guard/, '⛨', '#2f6a9a'], [/^Items/, '✚', '#2f8a8a'], [/^Flee/, '➜', '#5a6268'], [/^Spare/, '🕊', '#7a8a90'], [/^Veil Tricks/, '🧣', '#a8323a'], [/^Environment/, '✋', '#8a6a3a'],
+    [/^Stance/, '⇄', '#4a5a7a'], [/^◀ Back/, '◀', '#3a4a40'], [/^(Tonic|Ether)/, '⚗', '#2f8a8a'], [/^(Strike)/, '⚔', '#c8452e'], [/^(Feint)/, '↯', '#c9962a'], [/^RAGE/, '🔥', '#c8452e'], [/^CALM/, '≈', '#2f6a9a'],
+    [/^(Smoke Bomb)/, '☁', '#5a6268'], [/^(Scarf Lash)/, '〰', '#a8323a'], [/^(Knockout)/, '✊', '#a8323a'], [/^(Kick|Topple|Dive|Shake)/, '✋', '#8a6a3a'], [/^\?\?\?/, '?', '#3a3a50']];
+  const SHORT = { 'Sheathed': 'Sheath', 'Drag Arts': 'Arts', 'Veil Tricks': 'Veil', 'Environment': 'Terrain', 'Duel Exchange': 'Duel', 'Spare them': 'Spare', 'Link Art': 'Link' };
+  let disp = (k || L).replace(/^⚔\s*/, '').replace(/^◀\s*/, '').replace(/^Stance:\s*/, '').replace(/\s*[◐◑]?\s*⇄\s*$/, ''); disp = SHORT[disp] || disp;
+  for (const [re, ic, cc] of T) if (re.test(k) || re.test(L)) return [ic, cc, disp];
+  return ['✧', '#2f7a52', disp];
+}
 const BT_SCALE = 1.5; // fighters stand close to the camera so you can see them clearly
 const ENEMY = {
   lupine: { name: 'Ashen Lupine', hp: 38, atk: 10, def: 2, spd: 12, dodge: .2, parry: 0, brk: 40, xp: 14, gold: 6,
@@ -259,6 +271,7 @@ const Battle = {
         L.push(['Guard', 'Halve damage until your next turn, recover 3 MP and steady your blood (Strain -30).', () => { a.guard = true; a.calmNext = 1; a.mp = Math.min(a.maxMp, a.mp + 3); a.strain = Math.max(0, a.strain - 30); this.text(a, 'GUARD', '#9ad1ff'); this.hud(); done(); }]);
         L.push([`Items`, `Tonic ×${G.S.items.tonic}  ·  Ether ×${G.S.items.ether}`, () => items()]);
         if (a.isMe && !B.cfg.noFlee) L.push(['Flee', 'Try to escape (70%).', async () => { this.closeMenu(); if (Math.random() < 0.7) { await this.msg('You slip away!', 900); resolve('flee'); } else { await this.msg("Can't escape!", 900); done(); } }]);
+        if (typeof CombatX !== 'undefined') try { CombatX.menu(a, L, done, resolve, menu); } catch (e) { console.warn(e); }
         this.openMenu(L, null);
       };
       const sub = () => {
@@ -282,7 +295,8 @@ const Battle = {
     const box = $('#cmdList'); box.innerHTML = ''; this.menuL = L; this.menuSel = 0;
     $('#bcmd').classList.remove('hide'); $('#cmdDesc').classList.remove('hide');
     L.forEach((it, i) => {
-      const b = document.createElement('button'); b.innerHTML = esc(it[0]) + (it[4] !== undefined ? `<small>${it[4]} MP</small>` : '');
+      const b = document.createElement('button'); const [ic, cc, lb] = cmdIcon(it[0]); b.style.setProperty('--cc', cc);
+      b.innerHTML = `<span class="ic">${ic}</span><span class="lb">${esc(lb)}</span>` + (it[4] !== undefined ? `<small>${it[4]} MP</small>` : '');
       b.disabled = !!it[3];
       b.addEventListener('pointerenter', () => this.sel(i));
       bindTap(b, () => { if (it[3]) return; sfx('blip'); this.sel(i); it[2](); });
@@ -293,8 +307,8 @@ const Battle = {
   sel(i) {
     this.menuSel = i; const L = this.menuL; if (!L) return;
     $$('#cmdList button').forEach((b, k) => b.classList.toggle('sel', k === i));
-    $('#cmdDesc .scroll').textContent = L[i][1];
-    const c = $('#cmdCost'); c.classList.toggle('on', L[i][4] !== undefined); if (L[i][4] !== undefined) c.textContent = 'Cost  ' + L[i][4];
+    $('#cmdDesc .scroll').textContent = L[i][1]; const tip = $('#cmdTipT'); if (tip) tip.textContent = L[i][1];
+    const c = $('#cmdCost'); c.classList.toggle('on', L[i][4] !== undefined); if (L[i][4] !== undefined) c.textContent = L[i][4] + ' MP';
   },
   closeMenu() { $('#bcmd').classList.add('hide'); $('#cmdDesc').classList.add('hide'); this.menuL = null; },
   menuKey(dir) { if (!this.menuL) return false; const n = this.menuL.length; this.sel((this.menuSel + (dir === 'up' ? -1 : 1) + n) % n); sfx('blip'); return true; },
@@ -1023,7 +1037,7 @@ const Battle = {
 // canvas taps for targeting
 cv.addEventListener('pointerdown', e => {
   if (G.mode !== 'battle' || !Battle.B) return;
-  Battle.tapAt(e.clientX / innerWidth * G.view.w, e.clientY / innerHeight * G.view.h);
+  Battle.tapAt(e.clientX / innerWidth * G.view.w, e.clientY / innerHeight * (G.view.fullH || G.view.h));
 });
 $('#tgtHint').addEventListener('pointerdown', e => { e.preventDefault(); Battle.confirmTarget(); });
 addEventListener('keydown', e => {

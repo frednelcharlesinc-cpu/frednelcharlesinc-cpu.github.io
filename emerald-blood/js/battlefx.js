@@ -14,7 +14,7 @@
 
   /* ---------------- CHAIN ---------------- */
   const Chain = {
-    add(n, why) { const B = B_(); if (!B || B.cfg.leafTrain) return; B.chain = Math.min(10, (B.chain || 0) + (n || 1)); B.chainT = performance.now(); if (B.chain >= 3 && B.chain % 1 === 0) sfx('blip'); B.bestChain = Math.max(B.bestChain || 0, B.chain); },
+    add(n, why) { const B = B_(); if (!B || B.cfg.leafTrain) return; B.chain = Math.min(10, (B.chain || 0) + (n || 1)); B.chainT = performance.now(); if (B.chain >= 3 && B.chain % 1 === 0) sfx('blip'); B.bestChain = Math.max(B.bestChain || 0, B.chain); G.S.f.bestChain = Math.max(G.S.f.bestChain || 0, B.chain); },
     reset() { const B = B_(); if (!B) return; if ((B.chain || 0) >= 3) { B.chainBroke = performance.now(); B.chainWas = B.chain; } B.chain = 0; },
     mult() { const B = B_(); return 1 + Math.min(10, (B && B.chain) || 0) * .04; }
   };
@@ -51,7 +51,7 @@
     const B = this.B;
     // Second Wind — once per fight, never in fights you're meant to lose
     if (B && t.isMe && dmg >= t.hp && t.hp > 1 && !B.secondWind && !B.cfg.tutorial && !B.cfg.leafTrain && !B.actors.some(x => x.side === 'e' && x.E && x.E.fixed)) {
-      B.secondWind = 1; dmg = t.hp - 1;
+      B.secondWind = 1; dmg = t.hp - 1; G.S.f.secondWind = 1;
       const r = _dmg(t, dmg, big);
       const heal = Math.round(t.maxHp * .15); t.hp = Math.min(t.maxHp, t.hp + heal);
       this.text(t, 'NOT YET!', '#7dffb0', -70, true); this.text(t, `SECOND WIND +${heal}`, '#7dffb0', -50);
