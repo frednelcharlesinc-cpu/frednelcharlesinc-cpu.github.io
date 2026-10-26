@@ -21,7 +21,9 @@ const Veil = {
 async function rebuildPlayer() {
   if (!G.S || G.S.kid) return;
   // the Red Veil's outfit: black gi, red sash, charcoal hood, red scarf
-  const was = G.S.veil; G.S.veil = true; G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black' }), false); // the costume: hood down, dreads out, red scarf over the face G.S.veil = was;
+  // the costume: hood down, dreads out, red scarf over the face
+  const was = G.S.veil; G.S.veil = true;
+  try { G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black' }), false); } finally { G.S.veil = was; }
 }
 // painted cutscene shot: the art fills the frame, the camera drifts in
 const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes', dur, tapEnds: true, fadeIn: 120, lines, artCam: [[0, 320, (o && o.y) || 330, 1.02], [dur + 2500, 320, ((o && o.y) || 330) - 10, 1.12]] }, o || {});
@@ -36,6 +38,7 @@ const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes'
   const _pi = playerImg;
   playerImg = function () { return G.S && G.S.veil && G.A.pVeil ? G.A.pVeil : _pi(); };
   const _bps = buildPlayerSprites;
+  setInterval(() => { try { if (G.S && G.S.veil && !(G.S.f && G.S.f.veilGot)) { G.S.veil = false; UI.hud(); } } catch (e) { } }, 1000);
   buildPlayerSprites = async function () { await _bps(); try { await rebuildPlayer(); } catch (e) { } };
   // Hood button: Hood ▲ → Veil → Hood ▼
   World.toggleHood = function () {
