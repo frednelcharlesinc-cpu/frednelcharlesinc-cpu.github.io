@@ -27,8 +27,14 @@ const cv = $('#game'), ctx = cv.getContext('2d');
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 3);
   cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr);
-  G.view.scale = cv.height / VIEW_H; G.view.h = VIEW_H; G.view.w = cv.width / G.view.scale;
+  G.view.base = cv.height / VIEW_H; setView(G.mode);
   ctx.imageSmoothingEnabled = false;
+}
+// the overworld is drawn from further back than battles, so you can see more of the town around you
+const WORLD_ZOOM = .74;
+function setView(mode) {
+  const z = (mode === 'world' || mode === 'dialog') ? WORLD_ZOOM : 1;
+  G.view.scale = G.view.base * z; G.view.h = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
 }
 addEventListener('resize', resize); resize();
 
@@ -427,6 +433,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<':
 let lastT = 0;
 function loop(t) {
   const dt = Math.min(50, t - (lastT || t)); lastT = t; G.t = t;
+  if (G.view.mode !== G.mode) { G.view.mode = G.mode; setView(G.mode); }
   ctx.setTransform(G.view.scale, 0, 0, G.view.scale, 0, 0); ctx.imageSmoothingEnabled = false;
   try {
     if (G.mode === 'world' || G.mode === 'dialog') { World.update(dt); World.render(ctx, t); }
