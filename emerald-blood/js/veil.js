@@ -20,8 +20,11 @@ const Veil = {
 };
 async function rebuildPlayer() {
   if (!G.S || G.S.kid) return;
-  const was = G.S.veil; G.S.veil = true; G.A.pVeil = composeLook(G.S.look, true); G.S.veil = was;
+  // the Red Veil's outfit: black gi, red sash, charcoal hood, red scarf
+  const was = G.S.veil; G.S.veil = true; G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black', hood: 'charcoal' }), true); G.S.veil = was;
 }
+// painted cutscene shot: the art fills the frame, the camera drifts in
+const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes', dur, tapEnds: true, fadeIn: 120, lines, artCam: [[0, 320, (o && o.y) || 330, 1.02], [dur + 2500, 320, ((o && o.y) || 330) - 10, 1.12]] }, o || {});
 // the scarf sits over the face, under the hood
 (function () {
   const _pl = partList;
@@ -51,7 +54,7 @@ async function rebuildPlayer() {
   const _dp = drawPortrait;
   drawPortrait = function (canvas, who, expr, facing) {
     _dp(canvas, who, expr, facing);
-    if (who === 'me' && Veil.on()) paintVeil(canvas);
+    if (who === 'me' && Veil.on() && !Art.port.ren_veil) paintVeil(canvas);
   };
 })();
 // a red scarf drawn over the lower half of Ren's face, the hood's shadow over the top
@@ -78,6 +81,7 @@ function paintVeil(cv) {
   Battle.start = async function (cfg) {
     if (!Veil.on()) return _st(cfg);
     const c = typeof cfg === 'string' ? { enemies: [cfg] } : Object.assign({}, cfg); c.witness = 0;
+    if (c.noFlee && Art.cut.veil_rain && !(Battle.B)) await Cine.play([paintShot('veil_rain', 2400, [['Red Veil', c.veilLine || 'Nobody needs to know my name tonight.', '#ff7a7a']], { y: 340 })]);
     const p = _st(c);
     setTimeout(() => { const me = Battle.B && Battle.me(); if (me) me.name = 'Red Veil'; }, 50);
     return p;

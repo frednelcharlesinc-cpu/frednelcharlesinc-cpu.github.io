@@ -230,6 +230,11 @@ const Cuts = {
   },
   async ascension(foe) {
     const nm = G.S.name, fk = foe ? Battle.faceOf(foe) : null, kai = foe && foe.key === 'kairo_duel';
+    if (typeof Veil !== 'undefined' && Veil.on() && Art.cut.veil_eyes) {
+      await Cine.play([paintShot('veil_eyes', 2200, [['Red Veil', '(Under the scarf, the whole world goes quiet.)', '#ff7a7a']], { y: 370 }),
+        paintShot('veil_asc', 2600, [['Red Veil', 'I can see all of it now.', '#9dffc8']], { y: 330, bigText: ['EMERALD ASCENSION', 600], ev: [[400, s => { s.flash = 1; s.flashCol = '220,255,235'; s.shake = 10; sfx('art'); }]] })]);
+      return;
+    }
     const shots = [
       { bg: 'eyes', fx: ['mana'], dur: 2000, fadeIn: 100, tapEnds: true, cam: [[0, 320, 200, 1], [2000, 320, 150, 1.6]], vignette: 'rgba(0,30,10,.75)',
         actors: [{ port: 'me', expr: artHas('me', 'asc') ? 'asc' : 'sight', x: 320, y: 470, scale: 4.4, facing: 1 }], lines: [[nm, '(Five breaths. In. Hold. …Then the whole world goes quiet.)', '#7dffb0']], ev: [[1200, s => { s.flash = .8; s.flashCol = '90,255,150'; sfx('art'); }]] },
@@ -243,6 +248,7 @@ const Cuts = {
       ev: [[500, s => { s.flash = 1; s.flashCol = '220,255,235'; s.shake = 10; sfx('art'); }]],
       actors: [{ port: 'me', expr: artHas('me', 'sight') ? 'sight' : 'anger', x: 320, y: 470, scale: 4.2, facing: 1, fade: [[0, 0], [400, 1]] }],
       lines: [[nm, 'I can see all of it now.', '#7dffb0']] });
+    if (Art.cut.asc_storm) shots.push(paintShot('asc_storm', 2200, [[nm, 'Five breaths. That was all it ever took.', '#9dffc8']], { y: 330, ev: [[300, s => { s.flash = .8; s.flashCol = '120,255,170'; sfx('art'); }]] }));
     await Cine.play(shots);
   }
 };
