@@ -75,6 +75,34 @@ Object.assign(ENEMY, {
   stone_hunter: { name: 'Registry Hunter', hp: 62, atk: 12, def: 4, spd: 12, dodge: .2, parry: .2, brk: 50, xp: 30, gold: 22, img: 'hunter', trait: 'Crown Registry — Seal Lock silences your stones',
     skills: [{ name: 'Spear Thrust', hits: [{ anim: 'thrust', m: 1, w: 520 }] }, { name: 'Seal Lock', w: .25, seal: 1 }, { name: 'Pinning Strike', w: .3, hits: [{ anim: 'thrust', m: .7, w: 460 }, { anim: 'thrust', m: .8, w: 300 }] }] }
 });
+/* ---------- things that fly: arrows, bolts, knives, hatchets, stones, spells — and Vane's leaves ---------- */
+const PROJ = {
+  arrow: { ms: 430, arc: 14, sfx: 'bowshot' }, bolt: { ms: 330, arc: 4, sfx: 'bowshot' }, knife: { ms: 420, arc: 10, spin: 1, sfx: 'throw' }, axe: { ms: 540, arc: 22, spin: 1, sfx: 'throw' },
+  stone: { ms: 480, arc: 26, sfx: 'throw' }, seed: { ms: 420, arc: 18, sfx: 'throw' }, spear: { ms: 470, arc: 16, sfx: 'throw' },
+  fire: { ms: 560, col: '255,120,40', orb: 1, sfx: 'chant' }, light: { ms: 440, col: '255,240,170', orb: 1, sfx: 'light' }, water: { ms: 560, col: '90,170,255', orb: 1, sfx: 'chant' },
+  ice: { ms: 500, col: '170,235,255', orb: 1, sfx: 'chant' }, lightning: { ms: 300, col: '255,230,80', orb: 1, sfx: 'chant' }, mana: { ms: 520, col: '90,255,150', orb: 1, sfx: 'chant' },
+  shadow: { ms: 520, col: '176,138,255', orb: 1, sfx: 'chant' }, wind: { ms: 380, col: '200,255,225', orb: 1, sfx: 'throw' }, earth: { ms: 500, arc: 20, sfx: 'throw' },
+  leaf: { ms: 1150, arc: -18, leaf: 1, sfx: 'throw' }
+};
+const projKind = h => h.proj || (h.anim === 'spellcast' ? (h.el && PROJ[h.el] ? h.el : 'mana') : null);
+function projPos(p, u) { const k = PROJ[p.proj] || {}, arc = p.arc ?? (k.arc || 0); let x = lerp(p.x0, p.x1, u), y = lerp(p.y0, p.y1, u) - arc * 4 * u * (1 - u); if (k.leaf) { x += Math.sin(u * 9) * 7; y += Math.sin(u * 13) * 3; } return [x, y, Math.atan2((p.y1 - p.y0) - arc * 4 * (1 - 2 * u), p.x1 - p.x0)]; }
+function paintProj(c, kind, x, y, ang, now, sc) {
+  const k = PROJ[kind] || {}; sc = (sc || 1) * (k.leaf ? 1.7 : 1.15);
+  c.save(); c.translate(x, y);
+  if (k.orb) { c.globalCompositeOperation = 'lighter'; const r = 9 * sc, g = c.createRadialGradient(0, 0, 0, 0, 0, r * 1.9); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(.35, `rgba(${k.col},.85)`); g.addColorStop(1, `rgba(${k.col},0)`); c.fillStyle = g; c.beginPath(); c.arc(0, 0, r * 1.9, 0, 7); c.fill();
+    if (kind === 'ice') { c.rotate(ang); c.fillStyle = 'rgba(220,250,255,.95)'; c.beginPath(); c.moveTo(12 * sc, 0); c.lineTo(-4 * sc, -4 * sc); c.lineTo(-10 * sc, 0); c.lineTo(-4 * sc, 4 * sc); c.fill(); }
+    if (kind === 'lightning') { c.strokeStyle = 'rgba(255,250,200,.9)'; c.lineWidth = 1.5; c.beginPath(); for (let i = 0; i < 4; i++) { const a = now / 30 + i * 1.7; c.moveTo(0, 0); c.lineTo(Math.cos(a) * 14 * sc, Math.sin(a) * 14 * sc); } c.stroke(); }
+    c.restore(); return; }
+  c.rotate(k.spin ? now / 45 : k.leaf ? Math.sin(now / 110) * 1.1 : ang); c.scale(sc, sc); c.lineCap = 'round';
+  if (kind === 'arrow') { c.strokeStyle = '#6b4a2a'; c.lineWidth = 2; c.beginPath(); c.moveTo(-15, 0); c.lineTo(9, 0); c.stroke(); c.fillStyle = '#c8ccd4'; c.beginPath(); c.moveTo(14, 0); c.lineTo(8, -3); c.lineTo(8, 3); c.fill(); c.fillStyle = '#e8f0e8'; c.beginPath(); c.moveTo(-15, 0); c.lineTo(-19, -3.5); c.lineTo(-12, 0); c.lineTo(-19, 3.5); c.fill(); }
+  else if (kind === 'bolt') { c.strokeStyle = '#3a2a1c'; c.lineWidth = 3; c.beginPath(); c.moveTo(-9, 0); c.lineTo(6, 0); c.stroke(); c.fillStyle = '#9aa0a8'; c.beginPath(); c.moveTo(11, 0); c.lineTo(5, -3.5); c.lineTo(5, 3.5); c.fill(); }
+  else if (kind === 'knife') { c.fillStyle = '#dfe4ea'; c.beginPath(); c.moveTo(10, 0); c.lineTo(0, -2.2); c.lineTo(0, 2.2); c.fill(); c.fillStyle = '#2a1e18'; c.fillRect(-6, -1.5, 6, 3); }
+  else if (kind === 'axe') { c.strokeStyle = '#5a3c22'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(-9, 0); c.lineTo(8, 0); c.stroke(); c.fillStyle = '#b8bcc4'; c.beginPath(); c.moveTo(5, -1); c.quadraticCurveTo(13, -9, 10, 0); c.quadraticCurveTo(13, 9, 5, 1); c.fill(); }
+  else if (kind === 'spear') { c.strokeStyle = '#6b4a2a'; c.lineWidth = 2; c.beginPath(); c.moveTo(-22, 0); c.lineTo(10, 0); c.stroke(); c.fillStyle = '#cfd4dc'; c.beginPath(); c.moveTo(17, 0); c.lineTo(9, -3); c.lineTo(9, 3); c.fill(); }
+  else if (kind === 'leaf') { c.fillStyle = '#c9a24a'; c.beginPath(); c.moveTo(-9, 0); c.quadraticCurveTo(0, -7, 9, 0); c.quadraticCurveTo(0, 7, -9, 0); c.fill(); c.strokeStyle = '#7a5a22'; c.lineWidth = .8; c.beginPath(); c.moveTo(-9, 0); c.lineTo(9, 0); c.stroke(); }
+  else { c.fillStyle = kind === 'seed' ? '#6a8a3a' : '#8a8478'; c.beginPath(); c.arc(0, 0, 3.6, 0, 7); c.fill(); c.fillStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.arc(-1, -1, 1.3, 0, 7); c.fill(); }
+  c.restore();
+}
 const ALLY = {
   oren: { name: 'Oren', drag: 1, sprite: 'oren', color: '#a8592a', hp: 70, mp: 14, atk: 12, def: 5, spd: 9, arts: ['cleave'] },
   liora: { name: 'Liora', drag: 1, sprite: 'liora', color: '#b23a5a', hp: 72, mp: 20, atk: 17, def: 5, spd: 17, arts: ['wyrm', 'moonstep'], atkAnim: 'thrust' },
@@ -118,7 +146,7 @@ const Battle = {
   chooseSkill(e) { const pool = e.E.skills.filter(s => s.hits); let r = Math.random(), sk = pool[0]; for (const s of pool.slice(1)) { if (r < (s.w || .3)) { sk = s; break; } r -= (s.w || .3); } return sk; },
   async start(cfg) {
     if (typeof cfg === 'string') cfg = { enemies: [cfg] };
-    const prevMode = G.mode; G.mode = 'battle'; Dlg.close(); UI.controls(false); $('#hud').classList.add('hide'); $('#hudR').classList.add('hide');
+    const prevMode = G.mode; G.mode = 'battle'; G.view.mode = 'battle'; setView('battle'); Dlg.close(); UI.controls(false); $('#hud').classList.add('hide'); $('#hudR').classList.add('hide');
     const bdKey = cfg.bd || (SCENES[G.S.map] && SCENES[G.S.map].bd) || 'field';
     G.img['bd_' + bdKey] = G.img['bd_' + bdKey] || await loadImg('assets/bd_' + bdKey + '.jpg');
     const B = this.B = { cfg, bd: G.img['bd_' + bdKey], actors: [], fx: [], texts: [], rings: [], st: { perf: 0, pp: 0, pd: 0, hurt: 0 }, flash: 0, shake: 0, dim: 0, dimCol: '0,0,0', timeScale: 1,
@@ -615,7 +643,7 @@ const Battle = {
     const B = this.B;
     const el = elOf(sk); if (!isCounter) this.facePop(e, ['shout', 'power', 'anger']); if (!isCounter) await this.msg(`${e.name}: ${sk.name}${el ? '  [' + ELEM[el][0] + ']' : ''}`, 750);
     if (sk.hits.some(h => h.unp)) { this.text(e, '!! UNPARRYABLE', '#ff5050', -50, true); sfx('alarm'); await wait(450); }
-    const ranged = sk.hits[0].anim === 'spellcast';
+    const ranged = sk.hits[0].anim === 'spellcast' || sk.hits.every(h => h.proj);
     if (B.orb && t.side === 'p' && (ranged || el) && !isCounter) {
       await this.msg(`The Azure orb swallows ${sk.name}!`, 900); sfx('heal'); B.flash = .3; const o = B.orb.owner; o.mp = Math.min(o.maxMp, o.mp + 2);
       B.fx.push({ orb: 1, kind: 'draw', x: B.orb.x, y: B.orb.y, t: 0, life: 700 }); this.text(o, 'ABSORBED +2 MP', '#5fd8ff', -40);
@@ -641,7 +669,7 @@ const Battle = {
     $('#react').classList.add('hide'); Input.on('dodge', null); Input.on('parry', null); B.presses = null;
     const allParried = parries === n && n > 0 && !sk.hits.some(h => h.unp);
     if (!ranged) await this.home(e);
-    if (allParried && !t.ko && !e.ko) {
+    if (allParried && !t.ko && !e.ko && !B.leafTrain) {
       await this.msg('COUNTERATTACK!', 600); sfx('counter'); B.dim = .5; B.dimCol = '60,50,10';
       await this.dash(t, e.x + 52, e.y + 2, 180);
       t.anim = t.isMe ? 'backslash' : 'slash'; this.play(t, t.anim, t.isMe ? 13 : 6, 40);
@@ -670,11 +698,16 @@ const Battle = {
       if (own) { B.presses = []; B.cut = 0; const lp = k => () => { B.presses.push([k, performance.now()]); const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 110); }; Input.on('dodge', lp('dodge')); Input.on('parry', lp('parry')); }
       // animate swing so the impact frame lands on T
       const nF = { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[h.anim] || 6, imp = Math.floor(nF / 2);
-      const swingAt = T - imp * 60;
+      const pk = projKind(h); let P = null;
+      if (pk && t.isMe && !B.leafTrain) G.S.f.projSeen = 1;
+      if (pk) { const es = BT_SCALE * (e.size || 1), dir = t.x > e.x ? 1 : -1, travel = Math.min(dur * .85, (PROJ[pk].ms || 500) / B.timeScale);
+        P = { proj: pk, x0: e.x + dir * 16 * es, y0: e.y - 36 * es, x1: t.x - dir * 4, y1: t.y - 30 * BT_SCALE, ts: T - travel, te: T, t: 0, life: 1e9 }; B.fx.push(P); }
+      const swingAt = (P ? P.ts : T) - imp * 60; let launched = false;
       const lateEnd = T + 75 * rk / B.timeScale;
       while (performance.now() < lateEnd) {
         const now = performance.now();
-        if (now >= swingAt && e.fms > 1e8) { e.fms = 60; e.at = 0; e.frame = 0; e.fn = nF; sfx('swing'); }
+        if (now >= swingAt && e.fms > 1e8) { e.fms = 60; e.at = 0; e.frame = 0; e.fn = nF; if (!P) sfx('swing'); }
+        if (P && !launched && now >= P.ts) { launched = true; sfx(PROJ[pk].sfx || 'throw'); }
         await wait(10);
       }
       // the first press after the previous hit's window closed belongs to this hit
@@ -687,19 +720,27 @@ const Battle = {
         const d = (pressed[1] - T) * B.timeScale || (pressed[1] - T);
         const dd = (pressed[1] - T) * (slow ? 0.38 : 1);
         if (pressed[0] === 'dodge') { if (dd >= -110 * rk && dd <= 45 * rk) res = 'pdodge'; else if (dd >= -290 * rk && dd <= 75 * rk) res = 'dodge'; else res = 'early'; }
+        else if (P && !h.unp) { // cutting something in flight: only Ren, and only once Vane's Leaf Cut is his — a tighter window than a blade
+          if (!LeafCut.can(t)) res = 'noleaf'; else { const lk = LeafCut.window(t); if (dd >= -48 * rk * lk && dd <= 24 * rk * lk) res = 'pparry'; else if (dd >= -125 * rk * lk && dd <= 42 * rk * lk) res = 'parry'; else res = 'early'; } }
         else { if (h.unp) res = 'unp'; else if (dd >= -70 * rk && dd <= 35 * rk) res = 'pparry'; else if (dd >= -175 * rk && dd <= 60 * rk) res = 'parry'; else res = 'early'; }
       }
       const m = h.m;
       if (e.morph > 0 && (res === 'pdodge' || res === 'pparry')) { e.tempo = Math.max(.68, (e.tempo || 1) * .9); this.text(e, 'ADAPTING TO YOUR TIMING', '#ff8a6a', -40); }
       if (t.side === 'p') { if (res === 'pdodge') B.st.pd++; if (res === 'pparry') B.st.pp++; }
       if (t.isMe && (res === 'pdodge' || res === 'pparry')) { t.flow = (t.flow || 0) + 1; if (t.flow === 5 && t.arts && t.arts.includes('sight') && !t.sight) { this.text(t, 'IN THE FLOW — ASCENSION READY', '#e8fff4', -70, true); sfx('art'); } }
-      if (res === 'pdodge') { sfx('pdodge'); this.text(t, 'PERFECT DODGE', '#6ad7ff', -10, true); this.hop(t); t.mp = Math.min(t.maxMp, t.mp + 1); t.afterimg = 400; }
+      if (P) { B.fx = B.fx.filter(x => x !== P); const now = performance.now();
+        if (res === 'dodge' || res === 'pdodge') B.fx.push({ proj: pk, x0: P.x1, y0: P.y1, x1: P.x1 + (P.x1 - P.x0) * .7, y1: P.y1 + 18, ts: now, te: now + 260, t: 0, life: 300, arc: 0 });
+        else if (res === 'parry' || res === 'pparry') { if (B.leafTrain) B.leafCuts = (B.leafCuts || 0) + 1; LeafCut.split(this, pk, P, t, e, res === 'pparry'); }
+        else this.spark(P.x1, P.y1, PROJ[pk].col ? `rgb(${PROJ[pk].col})` : '#ffffff', 10); }
+      if (P && (res === 'parry' || res === 'pparry')) { /* Leaf Cut handled above */ }
+      else if (res === 'pdodge') { sfx('pdodge'); this.text(t, 'PERFECT DODGE', '#6ad7ff', -10, true); this.hop(t); t.mp = Math.min(t.maxMp, t.mp + 1); t.afterimg = 400; }
       else if (res === 'dodge') { sfx('dodge'); this.text(t, 'DODGE', '#9ad1ff'); this.hop(t); }
       else if (res === 'pparry') { sfx('pparry'); this.text(t, 'PERFECT PARRY', '#ffe36a', -10, true); t.mp = Math.min(t.maxMp, t.mp + 2);
         if (h.el && h.el !== 'mana' && this.reflex(t) > 1) { t.mp = Math.min(t.maxMp, t.mp + 3); this.text(t, 'UNRAVELED! +3 MP', '#46ff95', -34); this.spark(t.x, t.y - 34, ELEM[h.el][1], 16); } this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 22); B.flash = .35; e.brk += 18; this.checkBreak(e); t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 40); }
       else if (res === 'parry') { sfx('parry'); this.text(t, 'PARRY', '#ffe36a'); t.anim = 'halfslash'; this.play(t, 'halfslash', 6, 45); t.mp = Math.min(t.maxMp, t.mp + 1); this.spark((t.x + e.x) / 2, t.y - 34, '#fff3a0', 10); e.brk += 8; this.checkBreak(e); this.chip(e, t, m * .25); }
       else {
         if (res === 'unp') this.text(t, "CAN'T PARRY THAT!", '#ff6b6b', -20);
+        if (res === 'noleaf') { this.text(t, t.isMe ? "CAN'T CUT IT IN FLIGHT — DODGE!" : 'ONLY A DODGE STOPS THAT', '#ff9a6b', -20); if (t.isMe) { G.S.f.leafMiss = (G.S.f.leafMiss || 0) + 1; B.leafMiss = 1; } }
         if (res === 'early') this.text(t, 'TOO EARLY', '#bbb', -20);
         this.chip(e, t, m, true, h.el);
       }
@@ -917,6 +958,14 @@ const Battle = {
     }
     // particles
     for (const p of B.fx) {
+      if (p.proj) { const now = performance.now(); if (now < p.ts) continue; const u = clamp((now - p.ts) / (p.te - p.ts), 0, 1), [px, py, pa] = projPos(p, u), K = PROJ[p.proj] || {};
+        if (!K.orb && !K.leaf) { c.save(); c.globalAlpha = .25; c.strokeStyle = '#ffffff'; c.lineWidth = 1; c.beginPath(); const [qx, qy] = projPos(p, Math.max(0, u - .12)); c.moveTo(qx, qy); c.lineTo(px, py); c.stroke(); c.restore(); }
+        if (K.orb) for (let i = 4; i >= 1; i--) { const [qx, qy] = projPos(p, Math.max(0, u - i * .045)); c.save(); c.globalAlpha = .18 * (5 - i) / 4; paintProj(c, p.proj, qx, qy, pa, now, .7); c.restore(); }
+        c.save(); if (p.life < 1e8) c.globalAlpha = Math.max(0, 1 - p.t / p.life); paintProj(c, p.proj, px, py, pa, now, p.sc || 1); c.restore(); continue; }
+      if (p.half) { const k2 = p.t / p.life; c.save(); c.globalAlpha = 1 - k2; c.translate(p.x + p.vx * p.t / 16, p.y + p.vy * p.t / 16 + k2 * k2 * 20); c.rotate(p.r0 + p.vr * p.t / 16);
+        c.beginPath(); c.rect(-30, p.top ? -30 : 0, 60, 30); c.clip(); paintProj(c, p.kind, 0, 0, 0, 0, 1); c.restore();
+        if (p.t < 90) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(230,255,240,${1 - p.t / 90})`; c.lineWidth = 2; c.beginPath(); c.moveTo(p.x - 16, p.y + 6); c.lineTo(p.x + 16, p.y - 6); c.stroke(); c.restore(); }
+        continue; }
       const k = p.t / p.life;
       if (p.orb) {
         const R = p.kind === 'draw' ? 38 * (1 - k * .55) : 8 + 26 * k, col = p.kind === 'draw' ? '80,200,255' : '255,60,50';

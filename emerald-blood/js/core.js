@@ -373,6 +373,9 @@ function sfx(t) {
       case 'cutin': tone(150, .5, 'sawtooth', .05, 900); noise(.5, .05, 2000); break;
       case 'slowmo': tone(1200, 1.1, 'sine', .06, 90); tone(600, 1.2, 'triangle', .05, 45, .08); noise(1, .05, 500); tone(80, 1.3, 'sine', .08, 40, .1); break;
       case 'light': tone(1500, .6, 'sine', .05, 400); noise(.5, .06, 3000); break;
+      case 'throw': noise(.16, .06, 2200); tone(420, .12, 'sine', .02, 220); break;
+      case 'bowshot': tone(220, .1, 'triangle', .06, 110); noise(.18, .05, 3500, .02); break;
+      case 'leafcut': tone(1900, .22, 'sine', .05, 2600); tone(2850, .2, 'triangle', .025, 3800, .03); noise(.05, .05, 6000); break;
     }
   } catch (e) {}
 }
