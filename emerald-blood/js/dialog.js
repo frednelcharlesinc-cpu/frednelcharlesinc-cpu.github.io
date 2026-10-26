@@ -1,3 +1,8 @@
+// every speaker gets their own name colour, so you always know who is talking
+const SPEAKER_COL = { me: '#5dff9a', kairo: '#a9c4ff', kairoKB: '#a9c4ff', kairoB: '#a9c4ff', ilya: '#ff9ad5', liora: '#ff6b8b', vane: '#d9e2ec', nana: '#9be37a', oren: '#ffb070', kess: '#c99bff', kessE: '#c99bff',
+  tamsin: '#ff9a52', tamsinK: '#ff9a52', bo: '#c8a27a', boK: '#c8a27a', lark: '#ffe066', larkK: '#ffe066', nix: '#e8e8ff', nixK: '#e8e8ff', dace: '#ff7a3a', sefa: '#7fe8c0',
+  halvard: '#ffd700', voss: '#c0c8d0', dread: '#7dffb0', seraphine: '#d6a8ff', brom: '#ffbf80', sylwen: '#b8f0ff', caspian: '#cfe0ff', varro: '#ffcf4a', cael: '#e8f4ff' };
+function speakerCol(who) { if (!who) return '#ffd88a'; if (SPEAKER_COL[who]) return SPEAKER_COL[who]; let h = 0; for (const ch of String(who)) h = (h * 31 + ch.charCodeAt(0)) % 360; return `hsl(${h},75%,72%)`; }
 'use strict';
 /* ================= DIALOG: side portraits with expressions + cut-ins ================= */
 const CHAR = {}; // filled by story.js: id -> {name, sprite, color}
@@ -40,7 +45,7 @@ const Dlg = {
       this.show();
       this.setPortraits(who, expr);
       const C = who && who !== 'me' ? (CHAR[who] || { name: who }) : null;
-      const nm = $('#dlgName'); nm.textContent = who === 'me' ? G.S.name : C ? C.name : ''; nm.className = who && who !== 'me' ? 'npc' : '';
+      const nm = $('#dlgName'); nm.textContent = who === 'me' ? G.S.name : C ? C.name : ''; nm.className = who && who !== 'me' ? 'npc' : ''; nm.style.color = speakerCol(who);
       const tx = $('#dlgText'); tx.className = who ? '' : 'narr';
       text = this.fmt(text); tx.textContent = ''; $('#dlgChoices').innerHTML = ''; $('#dlgMore').style.visibility = 'hidden';
       this.full = text; this.res = res; this.choices = choices; this.typing = true;
