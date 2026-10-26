@@ -67,7 +67,7 @@ const WORLD = {
     ]
   },
   guild: {
-    title: 'The Adventurers\' Guild', blurb: 'The only power the Crown has never managed to own. Every member, from E to SSS, answers to one woman. Beneath her stand the Seven — the Guild\'s highest-ranked adventurers, all SSS. Combat power alone makes you SSS; the colour shows how far into it you have grown. Green is new to the tier. Yellow is seasoned. Red is the peak. In the whole world, only one person has reached SSS red: the Headmaster herself.',
+    title: 'The Adventurers\' Guild', blurb: 'The only power the Crown has never managed to own. Every member, from E to SSS, answers to one woman. Beneath her stand the Seven — the Guild\'s highest-ranked adventurers, all SSS. In the Guild\'s whole history, not one of the Seven has ever been a Drag. Combat power alone makes you SSS; the colour shows how far into it you have grown. Green is new to the tier. Yellow is seasoned. Red is the peak. In the whole world, only one person has reached SSS red: the Headmaster herself.',
     people: [
       { id: 'seraphine', band: 2, name: 'Seraphine Hale', tag: 'Headmaster · "the Unbroken Bell"', tier: 'SSS', element: 'Lightning', need: 'seraphineMet',
         text: 'A half-elf two centuries old who wrote the Guild\'s neutrality pact with her own blood — and enforced it, once, against an entire Imperial legion. When she rings the great bell in the Guild Citadel, wars stop to listen.',
