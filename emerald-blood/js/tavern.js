@@ -312,3 +312,101 @@ innRest = async function () { await barkeep('ashford'); };
     return h + `<div class="stat" style="margin-top:6px"><h3 style="color:#ffd27a">Overheard in taverns</h3>${L.map(e => `<p><b style="color:#ffd27a">◆ ${nm[e.tk] || ''}</b> <span class="muted">—</span> ${esc(e.t)}</p>`).join('')}</div>`;
   };
 })();
+
+/* ---------- never leave the player on a black screen ---------- */
+(function () {
+  const _ue = World.useExit.bind(World);
+  World.useExit = async function (ex) {
+    try { return await _ue(ex); }
+    catch (e) { console.warn('exit failed', e); G.S.f.lastErr = String(e && e.message || e).slice(0, 200); try { await fadeIn(300); } catch (x) { } this.busy = false; this.loading = false; }
+  };
+  const _go = World.go.bind(World);
+  World.go = async function (...a) {
+    try { return await _go(...a); }
+    catch (e) { console.warn('go failed', e); G.S.f.lastErr = String(e && e.message || e).slice(0, 200); try { await fadeIn(300); } catch (x) { } this.busy = false; this.loading = false; }
+  };
+  // watchdog: a black screen with a dialogue hidden under it, or a black screen nobody is using
+  let since = 0;
+  setInterval(() => {
+    const fd = $('#fade'); if (!fd || !fd.classList.contains('on')) { since = 0; return; }
+    const now = performance.now(); if (!since) since = now;
+    const cineOn = typeof Cine !== 'undefined' && Cine.on;
+    if (Dlg.open && now - since > 900) { fd.style.transitionDuration = '300ms'; fd.classList.remove('on'); since = 0; return; }
+    if (!cineOn && !Dlg.open && G.mode === 'world' && now - since > 6000) { fd.style.transitionDuration = '400ms'; fd.classList.remove('on'); since = 0; if (World.busy && !World.loading) setTimeout(() => { if (!Dlg.open && G.mode === 'world') World.busy = false; }, 1500); }
+  }, 300);
+})();
+
+/* ---------- the tavern buildings: bigger, a hanging beer sign, lanterns, a barrel out front, and a 🍺 you can spot from across town ---------- */
+const TAV_HOUSE = { ashford: [40, 14, 'The Crooked Lantern'], millbrook: [13, 11, 'The Drowned Duck'], kettlebrook: [26, 9, 'The Sheaf & Sickle'] };
+const TAV_SCALE = 1.2;
+function paintMug(x, cx, cy, s) {
+  x.save(); x.translate(cx, cy); x.scale(s, s);
+  x.fillStyle = '#e8a52a'; x.strokeStyle = '#3a220c'; x.lineWidth = 1.6;
+  x.beginPath(); x.roundRect ? x.roundRect(-9, -8, 16, 20, 2) : x.rect(-9, -8, 16, 20); x.fill(); x.stroke();          // glass
+  x.fillStyle = '#ffd36a'; x.fillRect(-7, -5, 4, 15);                                                                    // shine
+  x.beginPath(); x.arc(9, 2, 5.5, -1.3, 1.3); x.lineWidth = 3; x.strokeStyle = '#3a220c'; x.stroke(); x.lineWidth = 1.6;  // handle
+  x.fillStyle = '#fffaf0'; x.beginPath(); x.arc(-6, -9, 4.2, 0, 7); x.arc(-1, -11, 4.8, 0, 7); x.arc(4, -9, 4.2, 0, 7); x.fill(); // foam
+  x.strokeStyle = '#c8b8a0'; x.lineWidth = .8; x.beginPath(); x.arc(-1, -11, 4.8, 3.6, 6); x.stroke();
+  x.restore();
+}
+function buildTavernArt() {
+  const P = G.props, atlas = G.img.props; if (!atlas || P.tav_houseA) return;
+  const kinds = ['houseA', 'houseA_red'].filter(k => P[k]);
+  const s = TAV_SCALE, W = Math.round(256 * s), H = Math.round(224 * s);
+  const out = document.createElement('canvas'); out.width = Math.max(atlas.width, W * kinds.length); out.height = atlas.height + H + 4;
+  const x = out.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(atlas, 0, 0);
+  kinds.forEach((k, i) => {
+    const md = P[k], ox = i * W, oy = atlas.height + 2, [sx, sy, sw, sh] = md.r;
+    x.drawImage(atlas, sx, sy, sw, sh, ox, oy, W, H);
+    const door = (md.door + .5) * 32 * s, base = oy + H;
+    // lanterns either side of the door
+    for (const lx of [door - 34, door + 34]) {
+      const ly = base - 92;
+      const g = x.createRadialGradient(ox + lx, ly + 6, 1, ox + lx, ly + 6, 22); g.addColorStop(0, 'rgba(255,200,90,.55)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; x.fillRect(ox + lx - 22, ly - 16, 44, 44);
+      x.fillStyle = '#2a1e14'; x.fillRect(ox + lx - 1, ly - 10, 2, 6); x.fillRect(ox + lx - 6, ly - 4, 12, 3);
+      x.fillStyle = '#ffd36a'; x.fillRect(ox + lx - 4, ly - 1, 8, 11); x.fillStyle = '#fff2c0'; x.fillRect(ox + lx - 2, ly + 1, 4, 6);
+      x.strokeStyle = '#2a1e14'; x.lineWidth = 1.5; x.strokeRect(ox + lx - 4.5, ly - 1.5, 9, 12); x.fillStyle = '#2a1e14'; x.fillRect(ox + lx - 5, ly + 10, 10, 2);
+    }
+    // the hanging sign: iron arm out of the wall, two chains, a painted board
+    const ax = ox + door + 52, ay = base - 128;
+    x.fillStyle = '#26201c'; x.fillRect(ax - 4, ay - 3, 54, 4); x.beginPath(); x.moveTo(ax - 4, ay + 1); x.lineTo(ax + 14, ay + 1); x.lineTo(ax - 4, ay + 16); x.fill();
+    x.strokeStyle = '#3a3430'; x.lineWidth = 1.4; x.beginPath(); x.moveTo(ax + 8, ay + 1); x.lineTo(ax + 8, ay + 12); x.moveTo(ax + 44, ay + 1); x.lineTo(ax + 44, ay + 12); x.stroke();
+    const bx = ax - 2, by = ay + 11, bw = 58, bh = 44;
+    x.fillStyle = 'rgba(0,0,0,.35)'; x.fillRect(bx + 3, by + 3, bw, bh);
+    x.fillStyle = '#5a3a1e'; x.fillRect(bx, by, bw, bh); x.fillStyle = '#6e4826'; for (let r = 0; r < bh; r += 8) x.fillRect(bx + 2, by + r + 1, bw - 4, 3);
+    x.strokeStyle = '#d9a640'; x.lineWidth = 2.5; x.strokeRect(bx + 1.5, by + 1.5, bw - 3, bh - 3);
+    paintMug(x, bx + bw / 2 - 2, by + bh / 2 + 3, 1.15);
+    // a barrel and a bench out front
+    const rx = ox + door - 70, ry = base - 30;
+    x.fillStyle = '#5a3a1e'; x.fillRect(rx, ry, 18, 24); x.fillStyle = '#7a5230'; x.fillRect(rx + 3, ry, 4, 24); x.fillStyle = '#2a1e14'; x.fillRect(rx, ry + 4, 18, 2); x.fillRect(rx, ry + 17, 18, 2);
+    x.fillStyle = '#c99a3a'; x.beginPath(); x.ellipse(rx + 9, ry, 9, 3, 0, 0, 7); x.fill();
+    paintMug(x, rx + 9, ry - 6, .45);
+  });
+  G.img.props = out;
+  kinds.forEach((k, i) => { const md = P[k]; P['tav_' + k] = Object.assign({}, md, { r: [i * W, atlas.height + 2, W, H], ax: Math.round((md.door + .5) * 32 * s - (md.door + .5) * 32), ay: H - 1 }); });
+}
+(function () {
+  const _b = World.buildPropList.bind(World);
+  World.buildPropList = function () {
+    try { buildTavernArt(); const T = TAV_HOUSE[G.S && G.S.map]; if (T && this.map) for (const p of this.map.props) if (p.x === T[0] && p.y === T[1] && /^houseA/.test(p.k) && G.props['tav_' + p.k]) p.k = 'tav_' + p.k; } catch (e) { console.warn(e); }
+    return _b();
+  };
+  // a bobbing 🍺 over the roof, with the tavern's name when you're close
+  const _r = World.render.bind(World);
+  World.render = function (c, t) {
+    _r(c, t);
+    try {
+      const T = TAV_HOUSE[G.S && G.S.map]; if (!T || !this.map || !this.player || this.loading || G.mode === 'battle') return;
+      const cx = Math.round(this.cam.x), cy = Math.round(this.cam.y);
+      const doorX = (T[0] + 2) * 32 + 16, top = T[1] * 32 + 31 - Math.round(224 * TAV_SCALE);
+      const x = doorX - cx, base = T[1] * 32 + 31 - cy, y = Math.min(base - 150, Math.max(46, top - cy + 18)) + Math.sin(t / 380) * 4;
+      if (base < -10 || x < -40 || x > G.view.w + 40) return;
+      c.save(); c.globalAlpha = .9; c.fillStyle = 'rgba(20,14,8,.78)'; c.beginPath(); c.arc(x, y, 15, 0, 7); c.fill();
+      c.strokeStyle = '#ffcf5a'; c.lineWidth = 2; c.stroke(); c.globalAlpha = 1;
+      c.font = '18px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🍺', x, y + 1);
+      const d = Math.abs(this.player.x - (T[0] + 2)) + Math.abs(this.player.y - T[1]);
+      if (d <= 9) { c.font = '900 12px "Nunito"'; c.textBaseline = 'alphabetic'; c.lineWidth = 3; c.strokeStyle = 'rgba(0,0,0,.85)'; c.strokeText(T[2], x, y - 21); c.fillStyle = '#ffd88a'; c.fillText(T[2], x, y - 21); }
+      c.restore();
+    } catch (e) { }
+  };
+})();
