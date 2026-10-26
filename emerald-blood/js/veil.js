@@ -197,3 +197,21 @@ GOSSIP.veil = { label: 'The Red Veil', talks: [
     return h + `<div class="stat" style="margin-top:6px"><h3 style="color:#ff6a6a">The Red Veil — ${nm}</h3><p class="muted">${d} Wear it with the <b>Hood</b> button (Hood ▲ → Veil → Hood ▼). The public can't pin the Red Veil's deeds on you, and your eyes stay hidden. Drags always know who's under it.</p></div>`;
   };
 })();
+
+/* ---------- making sure the scarf reaches you ----------
+   If Kess is already travelling with you (or Chapter I is behind you), she hands it over the moment you're back in the world.
+   Otherwise: talk to Kess in Ashford with your hood DOWN, or Sister Aud in Millbrook. */
+(function () {
+  const _l = World.load.bind(World);
+  World.load = async function (name, x, y, dir) {
+    const r = await _l(name, x, y, dir);
+    try {
+      const f = G.S && G.S.f;
+      if (f && !f.veilGot && !G.S.kid && f.hoodGiven && f.vaneDone && (f.kessJoined || f.kessHelp || f.millDone || f.chapter1Done) && !World.busy)
+        setTimeout(() => Story.run(async () => { if (F().veilGot) return; if (G.S.party.includes('kess') || !f.kessRefused) await veilScene('kess'); else await veilScene('aud'); }), 900);
+    } catch (e) { }
+    return r;
+  };
+  const _q = questsMenuHTML;
+  questsMenuHTML = function () { let h = _q(); if (G.S && !G.S.kid && !Veil.got() && G.S.f.vaneDone) h += `<div class="stat" style="margin-top:6px"><h3 style="color:#ff6a6a">A second face</h3><p class="muted">Talk to Kess in Ashford Hollow with your hood DOWN (or Sister Aud in Millbrook). They have a red scarf for you — the Red Veil.</p></div>`; return h; };
+})();
