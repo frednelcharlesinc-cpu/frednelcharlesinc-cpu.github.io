@@ -137,7 +137,7 @@ const UI = {
     if (loadSave() && !confirm('Start a new game? Your current save will be replaced.')) return;
     audioUnlock();
     // character creation is switched off for now: Ren, Ilya and Kairo use the looks from the portrait art
-    $('#title').classList.add('hide'); G.S = newState(defaultLook(), 'Ren'); sfx('start');
+    $('#title').classList.add('hide'); const nm = await askName(); G.S = newState(defaultLook(), nm); sfx('start');
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Forging your Drag…'; $('#loadBar').style.width = '60%';
     await wait(30); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     $('#fade').classList.add('on');
@@ -236,7 +236,7 @@ const UI = {
       const st = G.settings;
       body = `<div class="grid2"><div class="stat"><h3>Sound effects</h3><button class="btn" data-s="sfx">${st.sfx ? 'On' : 'Off'}</button></div><div class="stat"><h3>Music</h3><button class="btn" data-s="music">${st.music ? 'On' : 'Off'}</button></div>
         <div class="stat"><h3>Timing ring</h3><p>Shows when enemy hits land.</p><button class="btn" data-s="ring">${st.ring ? 'On' : 'Off'}</button></div><div class="stat"><h3>Text speed</h3><button class="btn" data-s="text">${['Slow', 'Normal', 'Fast'][st.text ?? 1]}</button></div></div>
-        <div class="btnrow"><button class="btn" id="mSave">Save now</button><button class="btn" id="mCredits">Credits</button><button class="btn" id="mTitle">Title screen</button></div>`;
+        <div class="btnrow"><button class="btn" id="mName">Rename hero</button><button class="btn" id="mSave">Save now</button><button class="btn" id="mCredits">Credits</button><button class="btn" id="mTitle">Title screen</button></div>`;
     }
     $('#menuCard').innerHTML = `<h2>MENU</h2><div class="tabs">${tabs}<button id="mClose" style="margin-left:auto;border-color:#2f8a55;color:var(--green)">Close ✕</button></div>${body}`;
     $$('#menuCard .tabs button[data-t]').forEach(b => bindTap(b, () => { this.menuTab = b.dataset.t; sfx('blip'); this.renderMenu(); }));
@@ -249,6 +249,7 @@ const UI = {
     if (uT) bindTap(uT, () => { if (!S.items.tonic) return; S.items.tonic--; s.hp = Math.min(s.maxHp, s.hp + Math.round(s.maxHp * .45)); sfx('heal'); this.renderMenu(); });
     if (uE) bindTap(uE, () => { if (!S.items.ether) return; S.items.ether--; s.mp = Math.min(s.maxMp, s.mp + 12); sfx('heal'); this.renderMenu(); });
     $$('#menuCard [data-s]').forEach(b => bindTap(b, () => { const k = b.dataset.s; if (k === 'text') G.settings.text = ((G.settings.text ?? 1) + 1) % 3; else G.settings[k] = !G.settings[k]; saveSettings(); if (k === 'music') { const m = World.scene && World.scene.music; Music.stop(); if (G.settings.music && m) Music.play(typeof m === 'function' ? m() : m); } this.renderMenu(); }));
+    const mn = $('#mName'); if (mn) bindTap(mn, async () => { const v = await askName(); G.S.name = v; save(); UI.hud(); toast(`You are now <b>${esc(v)}</b>.`); this.renderMenu(); });
     const ms = $('#mSave'); if (ms) bindTap(ms, () => { save(); toast('Game saved.'); });
     const mc = $('#mCredits'); if (mc) bindTap(mc, () => this.credits());
     const mt = $('#mTitle'); if (mt) bindTap(mt, () => { save(); $('#menu').classList.add('hide'); World.busy = false; this.title(); });
@@ -276,3 +277,19 @@ for (let i = 1; i <= 4; i++) Input.on('choice' + i, () => Dlg.choose(i - 1));
 bindTap($('#tNew'), () => UI.newGame());
 bindTap($('#tContinue'), () => UI.cont());
 bindTap($('#tCredits'), () => UI.credits());
+
+/* ---------- choose the hero's name at the start ---------- */
+function askName() {
+  return new Promise(res => {
+    const ov = document.createElement('div'); ov.className = 'ov'; ov.style.cssText = 'z-index:60;background:radial-gradient(ellipse at center,#10301c,#050806);flex-direction:column;gap:14px';
+    ov.innerHTML = `<div style="font-family:'Press Start 2P';color:var(--green);font-size:clamp(12px,2.2vw,16px);text-shadow:0 0 12px #46ff95">WHAT IS YOUR NAME?</div>
+      <input id="nmIn" maxlength="12" value="${esc((G.S && G.S.name) || 'Ren')}" autocomplete="off" spellcheck="false" style="font:600 22px 'Pixelify Sans',sans-serif;text-align:center;width:min(70vw,320px);padding:10px;border-radius:10px;border:2px solid #2f8a55;background:#0c1a12;color:#e8fff0;outline:none">
+      <div class="muted" style="font-size:13px">You can change it later in Settings.</div>
+      <div class="btnrow"><button class="btn" id="nmDef">Keep "Ren"</button><button class="btn" id="nmGo" style="border-color:#46ff95;color:#46ff95">Begin ▶</button></div>`;
+    document.body.appendChild(ov);
+    const inp = ov.querySelector('#nmIn'); setTimeout(() => { inp.focus(); inp.select(); }, 60);
+    const go = v => { v = (v || '').replace(/[<>{}]/g, '').trim().slice(0, 12) || 'Ren'; ov.remove(); res(v); };
+    bindTap(ov.querySelector('#nmGo'), () => go(inp.value)); bindTap(ov.querySelector('#nmDef'), () => go('Ren'));
+    inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(inp.value); });
+  });
+}

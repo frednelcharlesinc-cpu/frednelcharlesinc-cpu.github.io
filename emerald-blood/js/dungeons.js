@@ -85,7 +85,7 @@ async function spawnExtras(W, name) {
       if (tier === 'gold' && D && !S.f['clear_' + name]) { await narr('The great chest is sealed by a ward that pulses in time with something deeper in the dungeon. Defeat what guards it first.'); return; }
       S.chests[key] = 1; ent.img = Pick.sheet(`chest_${tier}_o`); sfx('blip');
       await grantLoot(LOOT[tier]()); Quests.event('chest', name);
-      const pg = PAGE_AT[mk]; S.pages = S.pages || []; if (pg !== undefined && !S.pages.includes(pg) && (tier === 'gold' || !D)) { S.pages.push(pg); sfx('level'); setTimeout(() => toast(`Under the coins: a <b style="color:#c8a0ff">burned page</b> of an old chronicle. (${S.pages.length}/${PAGES.length} — Menu → World)`, 4200), 1400); }
+      const pg = PAGE_AT[mk]; S.pages = S.pages || []; if (pg !== undefined && !S.pages.includes(pg) && (tier === 'gold' || !D)) { S.pages.push(pg); sfx('level'); if (mk === 'in_nana') setTimeout(() => toast('The page is folded inside a note in a woman\'s careful handwriting: <i>"For my children, when they are old enough to be angry about it. — Mama"</i>', 5200), 5800); setTimeout(() => toast(`Under the coins: a <b style="color:#c8a0ff">burned page</b> of an old chronicle. (${S.pages.length}/${PAGES.length} — Menu → World)`, 4200), 1400); }
       save();
     } });
     W.ents.push(e);

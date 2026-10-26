@@ -172,7 +172,7 @@ async function talkIlya(e) {
   }
   if (f.dusk) { await say('ilya', null, "Come sit by the fire! Jun says he'll make the sparks dance!"); return; }
   if (!f.ribbon) { await say('ilya', null, "Nana's house! Come ON, {sib}!"); return; }
-  const l = ["Do you think dragons have birthdays?", "When I grow up I'm going to see the ocean. Nana says it's bigger than the sky.", "Oren says you're good with a sword. I'm good with a stick.", "My ribbon matches your eyes. That was on purpose."];
+  const l = ["Do you think dragons have birthdays? Mama's notes say dragons used to come to OUR festivals. Nobody believes me.", "When I grow up I'm going to be a historian. Like Mama. I'm going to find out what REALLY happened and write it in a big book.", "Did you know the old shrine on the ridge is older than the Empire? I counted the moss. That's science.", "My ribbon matches your eyes. That was on purpose.", "Nana says Mama could read seven languages. I can read one and a half. The half is dragon runes.", "Historians don't believe things just because grown-ups say them. Mama wrote that on the first page of every book. I'm going to write it in mine too.", "The Empire's history book says the Seven Elders were BAD. But the songs say they were heroes. Both can't be true. So somebody's lying. I'm going to find out who.", "I'm making a museum! It has one rock, one feather and one very old spoon. The spoon is probably from before the Empire. Probably.", "When I'm a real historian I'll go to Aurel. Mama said the big library there has a door nobody's allowed to open. I'm going to open it.", "Amara Thornvale. That was Mama's name. When I write my big book I'm putting her name on the cover next to mine."];
   await say('ilya', null, l[G.S.steps % l.length]);
 }
 async function talkNana() {
@@ -196,6 +196,11 @@ async function talkNana() {
   if (c === 0) { await me('happy', "I'll always find you, Ilya. Pinky promise."); await say('ilya', null, "Dragon law!"); }
   else { await me('happy', "This is the worst knot I've ever seen."); await say('ilya', null, "It's a DRAGON knot. It's supposed to look like that."); }
   await say('nana', 'sad', "…The two of you. Your mother would have laughed until she cried.");
+  await say('ilya', null, "Nana, after the festival can I read Mama's books? The ones in the chest? I'm going to be a historian, just like her. I'm going to write down everything that REALLY happened. Not the Empire's version.");
+  await say('nana', 'sad', "…Your mother said those exact words when she was your age, little one. Word for word.");
+  await say('nana', 'neutral', "Amara went to read the old records in Ashford — and then further, to Aurel — and never came home. She wrote down too much, I think. — When you're older. I promise.");
+  await say('ilya', null, "I'm already older. I got older TODAY. …Fine. But I'm writing that down: 'Nana promised.' Historians keep records.");
+  F().mamaBooks = 1;
   await say('nana', 'neutral', "{name}. Oren wants you at the forge before the festival. Something about a blade.");
   Story.quest("See Oren at the forge (the brick house east of Nana's).");
 }
@@ -260,7 +265,7 @@ async function festival() {
   await say('ilya', null, "{Sib}… can I ask you something?");
   await say('ilya', null, "Why do we have to hide? Our eyes are pretty. Nana says people out there think we're monsters.");
   const c = await ask('ilya', null, "Are we monsters?", ["No. People are just afraid of what they don't understand.", "Some people need a monster to blame.", "I don't know, Ilya."]);
-  if (c === 0) await say('ilya', null, "Then we just have to make them understand! I'll do it. I'm very convincing.");
+  if (c === 0) await say('ilya', null, "Then we just have to make them understand! I'll do it — I'll be a historian like Mama and find the TRUE story, and then everyone will have to read it. I'm very convincing.");
   else if (c === 1) await say('ilya', null, "…That's sad. I'd rather be blamed than be the one doing the blaming.");
   else await say('ilya', null, "That's okay. You can not-know with me. We'll figure it out together.");
   await say('nana', 'sad', "Fratenaptor nearly ended the world four hundred years ago. And people decided our eyes meant we'd finish the job.");

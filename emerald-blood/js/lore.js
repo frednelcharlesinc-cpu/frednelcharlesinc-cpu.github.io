@@ -51,7 +51,7 @@ const WORLD = {
         agenda: 'To bring the Crown down by any means. Everything Kairo could become, twenty years older.', under: 'The Cinder Brigade · Old Mags' },
       { id: 'saint', band: 0, name: 'Abbot Merrow', tag: 'the Hollow Saint', race: 'Drag', tier: 'SSS', territory: 'The Dustveil Wastes', need: 'kingsKnown',
         text: 'A Drag who believes his people are Fratenaptor\'s children — and that the chains the Seven Elders forged are the real crime. He says the "Father" speaks to him in dreams, from beneath the sand. (Fratenaptor\'s tomb is in the eastern mountains. The Dustveil is in the far south-west. Nobody has ever pointed this out to him.) His followers are the only people alive who truly worship the dragon. Every Drag hanged in a market square was hanged because men like him exist.',
-        agenda: 'To feed enough D-stones to the tomb-mountains that the dragon wakes and "frees its children." Ren\'s darkest mirror.', under: 'The Ashen Choir · Brother Hask' },
+        agenda: 'To feed enough D-stones to the tomb-mountains that the dragon wakes and "frees its children." Your darkest mirror.', under: 'The Ashen Choir · Brother Hask' },
       { id: 'grimtusk', band: 1, name: 'Hrok Grimtusk', tag: 'the Tusk King', race: 'Beast-folk (exiled)', tier: 'SSS', territory: 'The Fanglands — the northern steppe', need: 'kingsKnown',
         text: 'A tusked beast-folk warlord whose people were burned off the green steppe by the Crown and pushed into the frozen north. Has a code of honor older than the Empire. Respects strength, despises cowards, keeps every promise.',
         agenda: 'To take back the steppe. The enemy of his enemy might be a Drag.', under: 'The Howling Hundred · his daughter Kesra' },
@@ -122,9 +122,9 @@ const SIGS = {
   ursa: { el: 'fire', stone: 'The Halfmoon (worn at her chest)', will: 'Gentleness. It refuses to work in anger — Ursa must fight calm.', art: 'Moonmother', artText: 'Heals her whole party and stores the healing as rage: her next punch hits as hard as the HP she restored.' },
   borrik: { el: 'lightning', stone: 'The Rune-Root (in his hammer)', will: 'Curiosity. It wants to learn every rune ever carved. He is still a little afraid of it.', art: 'Deep Writ', artText: 'Hammers a glowing rune-circle into the ground: allies inside gain DEF, enemies inside lose it. Newest to SSS; it takes him two turns to finish.' },
   mara: { el: 'water', stone: 'The Reef-Heart', will: 'Homesick. It sings for the drowned islands, and it obeys whoever promises to take it home.', art: 'Undertow', artText: 'A living water serpent coils around a target and drags them to the back of the turn order.' },
-  cael: { el: 'light', stone: 'Pale Mercy — the mother-stone of every Verdict-stone', will: 'Hatred of Drags as deep as his own. That is why it chose him.', art: 'Drag-Breaker', artText: 'The halberd drinks green mana out of the air. Against Drags: cancels Emerald Sight and Azure Tide on hit, and every Drag Art used near him costs HP. The rival built to beat Ren.' },
+  cael: { el: 'light', stone: 'Pale Mercy — the mother-stone of every Verdict-stone', will: 'Hatred of Drags as deep as his own. That is why it chose him.', art: 'Drag-Breaker', artText: 'The halberd drinks green mana out of the air. Against Drags: cancels Emerald Sight and Azure Tide on hit, and every Drag Art used near him costs HP. The rival built to beat you.' },
   odo: { el: 'wind', stone: 'The Thirteenth Card', will: 'Luck. Or mischief. Odo isn\'t sure there\'s a difference.', art: 'Dealer\'s Choice', artText: 'Throws a storm of glowing cards; the effect is random every time — from a harmless sting to the strongest single hit in the Guild.' },
-  vane: { el: 'wind', stone: '(none — his was taken)', will: 'His stone was torn from his sword the day Dread took his arm. He has fought forty years of stories without it — and his sword is still faster than most stones.', art: 'The Sheathed Draw', artText: 'The style Ren carries now. A sword is loudest in its sheath.' }
+  vane: { el: 'wind', stone: '(none — his was taken)', will: 'His stone was torn from his sword the day Dread took his arm. He has fought forty years of stories without it — and his sword is still faster than most stones.', art: 'The Sheathed Draw', artText: 'The style you carry now. A sword is loudest in its sheath.' }
 };
 /* ---------- legends & the Unwritten History (fragments found in the world) ---------- */
 const LEGENDS = [
@@ -133,7 +133,7 @@ const LEGENDS = [
   { name: 'The Seven Elders', need: null,
     text: 'Seven Drags who stood against Fratenaptor four hundred years ago and chained it beneath the tomb-mountains. The Empire\'s histories call them "the dragon\'s penitent servants." The Drags\' own songs call them heroes. Strangely, no two histories agree on what the chains were made of.' }
 ];
-const PAGES = [ // fragments of an old Drag chronicle, scattered and half-burned
+const PAGES = [ // fragments of an old Drag chronicle, scattered and half-burned — Ren and Ilya's mother spent her life hunting them
   '"…and the dragon was our guardian before it was anyone\'s terror. It kept the old roads safe and asked only for songs. Then the gold king came to court it, with a gift in his hands…"',
   '"…he was the first of men to learn that a stone can be cut from a living dragon, and that whoever wears the stone wears the dragon\'s will. He set it in a crown and named the crown CHAINS, and laughed at his own joke…"',
   '"…for a hundred days the sky was gold. Then the dragon wept fire on every city that would not kneel. The world called it the Cataclysm. The world blamed the dragon. The dragon could not speak to tell them…"',
@@ -147,7 +147,7 @@ function legendsHTML() {
   const f = G.S.f, pages = G.S.pages || [];
   let h = `<div class="stat" style="margin-bottom:6px"><h3>Legends</h3></div>`;
   for (const L of LEGENDS) if (!L.need || f[L.need]) h += `<div class="stat lore" style="margin-bottom:6px"><h3 style="color:#ffd88a">${L.name}</h3><p>${L.text}</p></div>`;
-  h += `<div class="stat lore" style="margin-bottom:6px"><h3 style="color:#c8a0ff">The Unwritten History <span class="muted">· ${pages.length}/${PAGES.length} fragments</span></h3><p class="muted">Burned pages of an old Drag chronicle, hidden in chests across the land. Someone wanted them gone. Someone else wanted them found.</p>${pages.length ? pages.slice().sort((a, b) => a - b).map(i => `<p><b style="color:#c8a0ff">${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][i]}.</b> ${PAGES[i]}</p>`).join('') : '<p class="muted">No fragments found yet.</p>'}</div>`;
+  h += `<div class="stat lore" style="margin-bottom:6px"><h3 style="color:#c8a0ff">The Unwritten History <span class="muted">· ${pages.length}/${PAGES.length} fragments</span></h3><p class="muted">Burned pages of an old Drag chronicle, hidden in chests across the land. Someone wanted them gone. Someone else wanted them found. One was copied out by your mother, Amara — a historian who went to Aurel to read the records the Empire keeps locked, and never came home. Ilya wants to finish her work.</p>${pages.length ? pages.slice().sort((a, b) => a - b).map(i => `<p><b style="color:#c8a0ff">${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][i]}.</b> ${PAGES[i]}</p>`).join('') : '<p class="muted">No fragments found yet.</p>'}</div>`;
   return h;
 }
 function worldMenuHTML() {
