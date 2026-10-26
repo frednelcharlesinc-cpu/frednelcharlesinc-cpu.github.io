@@ -129,7 +129,7 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
     } catch (e) { }
   }
 };
-const PFIT = { ren: .9, ren_hood: .9, ren_v2: .96, kairo_v2: .96 };
+const PFIT = { ren: .9, ren_hood: .9, ren_v2: .96, kairo_v2: .96, ren_veil: .96 };
 const ART_ID = { larkMB: 'lark', larkA: 'lark', inq: 'ivo',  kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
 // townsfolk and residents borrow the painted face of the sprite they walk around as
 function artId(who) { let id = ART_ID[who] || who; if (!Art.port[id] && CHAR[who] && CHAR[who].sprite && Art.port[CHAR[who].sprite]) id = CHAR[who].sprite; return styled(id); }
@@ -154,16 +154,17 @@ function drawPortrait(canvas, who, expr, facing) {
     const z = PFIT[af.id];
     if (z) { // tight head-shots: pull the camera back so the whole face sits in frame, feathered over a soft backdrop of itself
       x.save(); if (facing < 0) { x.translate(296, 0); x.scale(-1, 1); }
-      const sc0 = Math.max(296 / art.width, 320 / art.height) * 1.15; x.globalAlpha = .55; x.drawImage(art, (296 - art.width * sc0) / 2, (320 - art.height * sc0) / 2, art.width * sc0, art.height * sc0);
-      x.globalAlpha = 1; x.fillStyle = 'rgba(10,16,12,.55)'; x.fillRect(0, 0, 296, 320);
+      const bgG = x.createRadialGradient(148, 140, 20, 148, 160, 230); bgG.addColorStop(0, '#5f8f78'); bgG.addColorStop(.55, '#2f5244'); bgG.addColorStop(1, '#16271f'); x.fillStyle = bgG; x.fillRect(0, 0, 296, 320);
+      const rim = x.createRadialGradient(148, 130, 10, 148, 130, 150); rim.addColorStop(0, 'rgba(220,255,235,.35)'); rim.addColorStop(1, 'rgba(220,255,235,0)'); x.fillStyle = rim; x.fillRect(0, 0, 296, 320);
+      x.filter = 'brightness(1.12) contrast(1.05) saturate(1.08)';
       const sc = Math.min(296 / art.width, 320 / art.height) * z, w = art.width * sc, h = art.height * sc;
       const k = document.createElement('canvas'); k.width = Math.ceil(w); k.height = Math.ceil(h); const kx = k.getContext('2d'); kx.drawImage(art, 0, 0, w, h);
       kx.globalCompositeOperation = 'destination-in';
       const fx = kx.createLinearGradient(0, 0, w, 0); fx.addColorStop(0, 'rgba(0,0,0,0)'); fx.addColorStop(.1, '#000'); fx.addColorStop(.9, '#000'); fx.addColorStop(1, 'rgba(0,0,0,0)'); kx.fillStyle = fx; kx.fillRect(0, 0, w, h);
       const fy = kx.createLinearGradient(0, 0, 0, h); fy.addColorStop(0, 'rgba(0,0,0,0)'); fy.addColorStop(.08, '#000'); fy.addColorStop(1, '#000'); kx.fillStyle = fy; kx.fillRect(0, 0, w, h);
-      x.drawImage(k, (296 - w) / 2, 320 - h); x.restore(); return;
+      x.drawImage(k, (296 - w) / 2, 320 - h); x.filter = 'none'; x.restore(); return;
     }
-    const sc = Math.max(296 / art.width, 320 / art.height), w = art.width * sc, h = art.height * sc; x.save(); if (facing < 0) { x.translate(296, 0); x.scale(-1, 1); } x.drawImage(art, (296 - w) / 2, (320 - h) / 2, w, h); x.restore(); return;
+    const sc = Math.max(296 / art.width, 320 / art.height), w = art.width * sc, h = art.height * sc; x.save(); x.filter = 'brightness(1.08) saturate(1.05)'; if (facing < 0) { x.translate(296, 0); x.scale(-1, 1); } x.drawImage(art, (296 - w) / 2, (320 - h) / 2, w, h); x.filter = 'none'; x.restore(); return;
   }
   // drawn portraits are painted at 3x, smooth-shaded, with a soft ink outline (cleaner faces for everyone without painted art)
   canvas.style.imageRendering = 'auto';
