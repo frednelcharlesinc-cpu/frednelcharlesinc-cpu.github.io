@@ -205,7 +205,7 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'skills', 'arts', 'stones', 'items', 'quests', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', skills: 'Skills', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'skills', 'arts', 'stones', 'items', 'quests', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', skills: 'Skills', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
       body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · ${Power.badge()}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>EXP <b>${Power.xp()}/${Power.now().hi}</b> · <span style="color:${BAND_COL[Power.now().band]}">${BAND_NAME[Power.now().band]}</span> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
@@ -220,6 +220,10 @@ const UI = {
       body = skillsMenuHTML();
     } else if (t === 'world') {
       body = worldMenuHTML();
+    } else if (t === 'map') {
+      body = mapMenuHTML();
+    } else if (t === 'companions') {
+      body = companionsMenuHTML();
     } else if (t === 'stones') {
       body = stonesMenuHTML();
     } else if (t === 'items') {
@@ -239,6 +243,8 @@ const UI = {
     bindTap($('#mClose'), () => this.closeMenu());
     if (t === 'stones') bindStonesMenu();
     if (t === 'skills') bindSkillsMenu();
+    if (t === 'map') bindMapMenu();
+    if (t === 'companions') bindCompanionsMenu();
     const uT = $('#useT'), uE = $('#useE');
     if (uT) bindTap(uT, () => { if (!S.items.tonic) return; S.items.tonic--; s.hp = Math.min(s.maxHp, s.hp + Math.round(s.maxHp * .45)); sfx('heal'); this.renderMenu(); });
     if (uE) bindTap(uE, () => { if (!S.items.ether) return; S.items.ether--; s.mp = Math.min(s.maxMp, s.mp + 12); sfx('heal'); this.renderMenu(); });

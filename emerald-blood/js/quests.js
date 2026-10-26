@@ -100,7 +100,7 @@ const Quests = {
   done(id) {
     const Q = QDEF[id], q = this.st()[id]; if (!q || q.s === 'done') return; q.s = 'done';
     if (Q.goal.kind === 'item') G.S.qitems[Q.goal.item] -= Q.goal.n;
-    Guild.award(Q.rp, Q.gold, 'Quest complete: ' + Q.name); if (Q.xp) setTimeout(() => Story.gainXp(Q.xp), 600);
+    Guild.award(Q.rp + (Q.xp || 0), Q.gold, 'Quest complete: ' + Q.name);
     save();
   },
   check() {
@@ -222,7 +222,7 @@ async function questBoard() {
     if (Guild.rankIdx(Q.rank) > ri) { await narr(`"${Q.name}" — ${Q.rank}-rank or higher. Brom will tear your card in half if he catches you.`); continue; }
     if (Quests.state(id) === 'done') { await narr(`"${Q.name}" — stamped COMPLETE.`); continue; }
     if (Quests.state(id) === 'on') { await narr(`${Q.name}: ${Q.desc}  — Progress: ${Quests.progress(id)}`); const a = await ask(null, null, 'Keep this quest?', ['Keep it', 'Abandon it']); if (a === 1) { delete qx[id]; toast('Quest abandoned.'); } continue; }
-    const a = await ask(null, null, `${Q.type.toUpperCase()} · ${Q.name}: ${Q.desc}  Reward: ${Q.rp} RP, ${Q.gold}g, ${Q.xp} EXP.`, ['Accept', 'Leave it']);
+    const a = await ask(null, null, `${Q.type.toUpperCase()} · ${Q.name}: ${Q.desc}  Reward: ${Q.rp + Q.xp} EXP, ${Q.gold}g.`, ['Accept', 'Leave it']);
     if (a === 0) Quests.accept(id);
   }
 }

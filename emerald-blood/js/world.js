@@ -89,9 +89,9 @@ const World = {
         if (ex && ex.msg) { if (G.t - (this.lastMsg || 0) > 2500) { this.lastMsg = G.t; toast(ex.msg); } }
         else if (this.free(nx, ny, p)) {
           const run = G.input.run || G.input.runToggle || G.input.mag > 0.92;
-          p.startMove(nx, ny, run ? 125 : 205);
+          p.startMove(nx, ny, Mounts.speed(run));
           this.trail.unshift([p.x, p.y, p.dir]); this.trail.length = Math.min(this.trail.length, 8);
-          this.followers.forEach((f, i) => { const t = this.trail[i]; if (t) f.startMove(t[0], t[1], run ? 125 : 205, t[2]); });
+          this.followers.forEach((f, i) => { const t = this.trail[i]; if (t) f.startMove(t[0], t[1], Mounts.speed(run), t[2]); });
         } else if (ex && !ex.msg) this.useExit(ex);
       }
     }
