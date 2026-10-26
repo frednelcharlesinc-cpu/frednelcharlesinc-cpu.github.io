@@ -193,9 +193,10 @@ const UI = {
           <p>Kairo: <b>${f.duel === 'won' ? 'duel won · Ashford spared' : 'duel lost'}${f.halvardKilledByKairo ? ' · he executed Halvard' : ''}</b></p>
           <p>Liora: <b>${f.lioraMet ? 'fought beside you — hunting Dread alone' : 'a stranger on the mill roof'}</b></p>
           <p>Tobb: <b>${f.crateDone ? (f.tobbKnows ? 'prejudiced — but softening' : 'thinks you are a saint') : 'never helped'}</b></p><p>The binding stone: <b>${f.shrineRead ? 'you know the truth' : 'unread'}</b></p></div>
-        </div><p class="muted" style="margin-top:10px">These choices carry into Chapter II: Greyspire.</p>
-        <div class="btnrow"><button class="btn pri" id="eKeep">Keep exploring</button><button class="btn" id="eTitle">Title screen</button></div>`;
+        </div>${typeof ch1Summary === 'function' ? `<div class="stat" style="margin-top:6px">${ch1Summary()}</div>` : ''}<p class="muted" style="margin-top:10px">These choices carry into Chapter II: Greyspire. Don't like how it went? Replay the chapter.</p>
+        <div class="btnrow"><button class="btn pri" id="eKeep">Keep exploring</button><button class="btn" id="eReplay">Replay Chapter I</button><button class="btn" id="eTitle">Title screen</button></div>`;
       bindTap($('#eKeep'), () => { $('#menu').classList.add('hide'); this.controls(true); res(); });
+      const rp = $('#eReplay'); if (rp) { if (typeof Chapter === 'undefined' || !Chapter.has()) rp.remove(); else bindTap(rp, () => { $('#menu').classList.add('hide'); res(); setTimeout(() => Story.run(() => Chapter.ask()), 300); }); }
       bindTap($('#eTitle'), () => { $('#menu').classList.add('hide'); res(); this.title(); });
     });
   },
@@ -208,7 +209,7 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'skills', 'arts', 'stones', 'items', 'quests', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', skills: 'Skills', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'skills', 'passives', 'arts', 'stones', 'items', 'quests', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', skills: 'Skills', passives: 'Passives', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
       body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · ${Power.badge()}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>EXP <b>${Power.xp()}/${Power.now().hi}</b> · <span style="color:${BAND_COL[Power.now().band]}">${BAND_NAME[Power.now().band]}</span> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
@@ -219,6 +220,8 @@ const UI = {
         `<div class="stat" style="margin-bottom:6px"><h3>Strain ⚡</h3><p>Every Drag Art heats your blood. Strain cools a little each turn — Guard and Cultivate cool it fast. Let it climb past 90% and you fall into <b style="color:#ff6a5a">BLOOD FEVER</b>: Arts locked, HP burning, for 2 turns.</p></div>` +
         (S.arts.includes('azure') && S.arts.includes('crimson') ? `<div class="stat" style="margin-bottom:6px"><h3>??? Eclipse Convergence <span class="muted">· locked</span></h3><p>Blue in the field, then red called through it. Two currents meeting at one point. You can feel its shape. You can't touch it yet.</p></div>` : '') +
         `<div class="stat"><h3>How to fight</h3><p>On your attacks, tap when the gold ring closes for a <b>PERFECT</b> hit (×1.5, can't be dodged or parried).</p><p>On enemy attacks: <b>DODGE</b> (wide window) or <b>PARRY</b> (tight window). Perfect timing earns MP. Parry <b>every</b> hit of an attack to COUNTER.</p><p>Red <b>!!</b> attacks can't be parried — dodge them. Fill an enemy's yellow bar to <b>BREAK</b> them.</p></div>`;
+    } else if (t === 'passives') {
+      body = typeof passivesMenuHTML === 'function' ? passivesMenuHTML() : '';
     } else if (t === 'skills') {
       body = skillsMenuHTML();
     } else if (t === 'world') {
@@ -246,6 +249,7 @@ const UI = {
     bindTap($('#mClose'), () => this.closeMenu());
     if (t === 'stones') bindStonesMenu();
     if (t === 'skills') bindSkillsMenu();
+    if (t === 'passives' && typeof bindPassivesMenu === 'function') bindPassivesMenu();
     if (t === 'map') bindMapMenu();
     if (t === 'companions') bindCompanionsMenu();
     const uT = $('#useT'), uE = $('#useE');

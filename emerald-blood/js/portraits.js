@@ -129,13 +129,14 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
     } catch (e) { }
   }
 };
+const PFIT = { ren: .9, ren_hood: .9 };
 const ART_ID = { kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
 function artHas(who, expr) { const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : 'ren') : (ART_ID[who] || who); return !!(Art.port[id] && Art.port[id][expr]); }
 function artFor(who, expr) {
   let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : (G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : (ART_ID[who] || who);
   const set = Art.port[id]; if (!set) return null;
   const alt = { sad: ['closed', 'shock'], shame: ['sad', 'closed'], blush: ['happy'], closed: ['sad'], shock: [], anger: [], happy: [] }[expr] || [];
-  for (const e of [expr || 'neutral', ...alt, 'neutral']) if (set[e]) return { img: set[e], left: Art.left.has(id) };
+  for (const e of [expr || 'neutral', ...alt, 'neutral']) if (set[e]) return { img: set[e], left: Art.left.has(id), id };
   const k = Object.keys(set)[0]; return k ? { img: set[k], left: Art.left.has(id) } : null;
 }
 /* ---------- the painter ---------- */
@@ -143,14 +144,52 @@ function drawPortrait(canvas, who, expr, facing) {
   const af = artFor(who, expr || 'neutral'), art = af && af.img;
   if (art) { if (af.left) facing = -facing; // a painted portrait: cover-fit, smooth scaling, mirrored for the right-hand box
     canvas.width = 296; canvas.height = 320; canvas.style.imageRendering = 'auto'; const x = canvas.getContext('2d'); x.clearRect(0, 0, 296, 320);
+    const z = PFIT[af.id];
+    if (z) { // tight head-shots: pull the camera back so the whole face sits in frame, feathered over a soft backdrop of itself
+      x.save(); if (facing < 0) { x.translate(296, 0); x.scale(-1, 1); }
+      const sc0 = Math.max(296 / art.width, 320 / art.height) * 1.15; x.globalAlpha = .55; x.drawImage(art, (296 - art.width * sc0) / 2, (320 - art.height * sc0) / 2, art.width * sc0, art.height * sc0);
+      x.globalAlpha = 1; x.fillStyle = 'rgba(10,16,12,.55)'; x.fillRect(0, 0, 296, 320);
+      const sc = Math.min(296 / art.width, 320 / art.height) * z, w = art.width * sc, h = art.height * sc;
+      const k = document.createElement('canvas'); k.width = Math.ceil(w); k.height = Math.ceil(h); const kx = k.getContext('2d'); kx.drawImage(art, 0, 0, w, h);
+      kx.globalCompositeOperation = 'destination-in';
+      const fx = kx.createLinearGradient(0, 0, w, 0); fx.addColorStop(0, 'rgba(0,0,0,0)'); fx.addColorStop(.1, '#000'); fx.addColorStop(.9, '#000'); fx.addColorStop(1, 'rgba(0,0,0,0)'); kx.fillStyle = fx; kx.fillRect(0, 0, w, h);
+      const fy = kx.createLinearGradient(0, 0, 0, h); fy.addColorStop(0, 'rgba(0,0,0,0)'); fy.addColorStop(.08, '#000'); fy.addColorStop(1, '#000'); kx.fillStyle = fy; kx.fillRect(0, 0, w, h);
+      x.drawImage(k, (296 - w) / 2, 320 - h); x.restore(); return;
+    }
     const sc = Math.max(296 / art.width, 320 / art.height), w = art.width * sc, h = art.height * sc; x.save(); if (facing < 0) { x.translate(296, 0); x.scale(-1, 1); } x.drawImage(art, (296 - w) / 2, (320 - h) / 2, w, h); x.restore(); return;
   }
-  canvas.style.imageRendering = '';
+  // drawn portraits are painted at 3x, smooth-shaded, with a soft ink outline (cleaner faces for everyone without painted art)
+  canvas.style.imageRendering = 'auto';
   const sp = specFor(who); expr = expr || 'neutral';
-  const key = JSON.stringify(sp) + '|' + expr + '|' + facing;
-  if (!PCache[key]) PCache[key] = paintBust(sp, expr, facing);
-  canvas.width = PW; canvas.height = PH;
-  const x = canvas.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, PW, PH); x.drawImage(PCache[key], 0, 0);
+  const key = JSON.stringify(sp) + '|' + expr + '|' + facing + '|hi';
+  if (!PCache[key]) PCache[key] = paintBustHi(sp, expr, facing);
+  canvas.width = PW * RS; canvas.height = PH * RS;
+  const x = canvas.getContext('2d'); x.clearRect(0, 0, canvas.width, canvas.height); x.drawImage(PCache[key], 0, 0);
+}
+const RS = 3;
+function paintBustHi(sp, expr, facing) {
+  const W = PW * RS, H = PH * RS;
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  x.HI = true; x.scale(RS, RS); x.lineJoin = 'round'; x.lineCap = 'round';
+  const fill = col => { x.fillStyle = col; }, stroke = col => { x.strokeStyle = col; };
+  if (sp.special === 'dread') paintDread(x, fill, stroke, expr); else paintPerson(x, sp, expr, fill, stroke);
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  // light from the upper right, shadow pooling lower left — painted only onto the figure
+  x.globalCompositeOperation = 'source-atop';
+  let g = x.createLinearGradient(W * .85, H * .05, W * .1, H * .95);
+  g.addColorStop(0, 'rgba(255,244,222,.16)'); g.addColorStop(.45, 'rgba(255,244,222,0)'); g.addColorStop(1, 'rgba(24,14,48,.30)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  g = x.createRadialGradient(W * .5, H * .42, W * .05, W * .5, H * .42, W * .62); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(10,8,20,.18)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'source-over';
+  // ink outline: the silhouette, darkened, stamped around the figure
+  const o = document.createElement('canvas'); o.width = W; o.height = H; const ox = o.getContext('2d');
+  ox.drawImage(c, 0, 0); ox.globalCompositeOperation = 'source-in'; ox.fillStyle = '#0d0a12'; ox.fillRect(0, 0, W, H);
+  const out = document.createElement('canvas'); out.width = W; out.height = H; const q = out.getContext('2d');
+  for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2], [1.5, 1.5], [-1.5, 1.5], [1.5, -1.5], [-1.5, -1.5]]) q.drawImage(o, dx, dy);
+  q.drawImage(c, 0, 0);
+  if (facing < 0) { const m = document.createElement('canvas'); m.width = W; m.height = H; const mx = m.getContext('2d'); mx.translate(W, 0); mx.scale(-1, 1); mx.drawImage(out, 0, 0); return m; }
+  return out;
 }
 function paintBust(sp, expr, facing) {
   const c = document.createElement('canvas'); c.width = PW; c.height = PH; const x = c.getContext('2d');
@@ -182,7 +221,7 @@ function paintPerson(x, sp, expr, fill, stroke) {
   paintClothes(x, sp, C, C2, S, sh, kid, fill, stroke);
   /* neck */
   fill(S[2]); x.fillRect(X(-7), Y(14), 15 * s, 22 * s);
-  fill(S[3]); x.fillRect(X(-1), Y(18), 8 * s, 18 * s);
+  if (x.HI) x.globalAlpha = .45; fill(S[3]); x.fillRect(X(-1), Y(18), 8 * s, 18 * s); x.globalAlpha = 1;
   if (!sp.hood) { fill(S[1]); E(x, X(1), Y(21), 8 * s, 3 * s); x.fill(); }
   if (sp.cloth !== 'robe' && sp.cloth !== 'plate' && sp.cloth !== 'tabard') paintCollar(x, sp, C, C2, S, sh, kid, fill, stroke);
   if (sp.necklace) { stroke('#e8c560'); x.lineWidth = 1; x.beginPath(); x.moveTo(X(-7), Y(30)); x.quadraticCurveTo(X(1), Y(40), X(9), Y(30)); x.stroke(); fill('#3ccf6e'); E(x, X(1), Y(39), 1.6, 2.2); x.fill(); }
@@ -199,7 +238,7 @@ function paintPerson(x, sp, expr, fill, stroke) {
   x.fill();
   // shading on the far (left) side and under the hairline
   x.save(); x.clip();
-  fill(S[2]); P(x, [[X(-18), Y(-16)], [X(-11), Y(-16)], [X(-13), Y(2), X(-10), Y(chinY)], [X(-18), Y(chinY + 2)]]); x.fill();
+  if (x.HI) x.globalAlpha = .6; fill(S[2]); P(x, [[X(-18), Y(-16)], [X(-11), Y(-16)], [X(-13), Y(2), X(-10), Y(chinY)], [X(-18), Y(chinY + 2)]]); x.fill(); x.globalAlpha = 1;
   fill(S[4]); E(x, X(9), Y(6), 5 * s, 4 * s); x.fill();
   if (sp.plump) { fill(S[2]); E(x, X(-1), Y(chinY - 1), 11 * s, 2.4 * s); x.fill(); }
   if (sp.gaunt) { fill(S[2]); P(x, [[X(10), Y(6)], [X(14), Y(5)], [X(12), Y(15)]]); x.fill(); }
@@ -213,6 +252,11 @@ function paintPerson(x, sp, expr, fill, stroke) {
   const blush = expr === 'blush' || (expr === 'shame' && fem) || (sp.beauty && expr === 'happy');
   if (blush) { fill('#ff7a8a'); x.globalAlpha = .55; E(x, X(-10), Y(8), 4.5 * s, 2 * s); x.fill(); E(x, X(12), Y(8), 4 * s, 2 * s); x.fill(); x.globalAlpha = 1;
     stroke('#e0485e'); x.lineWidth = .8; for (const ox of [-12, -9, -6, 10, 13]) { x.beginPath(); x.moveTo(X(ox), Y(9.5)); x.lineTo(X(ox + 1.5), Y(6.5)); x.stroke(); } }
+  if (x.HI) { // soft cheeks, a shadowed nose, a little light on the bridge
+    x.globalAlpha = kid ? .22 : fem ? .18 : .1; fill('#ff8a8a'); E(x, X(-10), Y(8), 5 * s, 2.6 * s); x.fill(); E(x, X(12), Y(8), 4.4 * s, 2.4 * s); x.fill();
+    x.globalAlpha = .45; fill(S[2]); P(x, [[X(t + 1.5), Y(kid ? 5 : 2)], [X(t + 4.6), Y(kid ? 8.4 : 9.4)], [X(t + 1.6), Y(kid ? 8.8 : 9.8)]]); x.fill();
+    x.globalAlpha = .55; fill(S[5]); E(x, X(t + 4), Y(kid ? 5.5 : 5), .7 * s, 1.6 * s); x.fill(); x.globalAlpha = 1;
+  }
   // nose
   stroke(S[1]); x.lineWidth = 1; x.beginPath(); x.moveTo(X(t + 3), Y(kid ? 5 : 3)); x.lineTo(X(t + 4.5), Y(kid ? 8 : 9)); x.lineTo(X(t + 2.5), Y(kid ? 8.5 : 9.5)); x.stroke();
   paintEyes(x, sp, expr, X, Y, s, t, eyeC, H, S, fill, stroke, kid, fem, !!hood);
@@ -293,9 +337,11 @@ function paintEyes(x, sp, expr, X, Y, s, t, eyeC, H, S, fill, stroke, kid, fem, 
     x.save(); E(x, cx, cy, w / 2, hh / 2); x.clip();
     fill(I[2]); E(x, cx + look, cy + lookY, w * .34 * ir, h * .5 * ir); x.fill();
     fill(I[3]); E(x, cx + look, cy + lookY + h * .12, w * .27 * ir, h * .34 * ir); x.fill();
+    if (x.HI) { const gi = x.createLinearGradient(0, cy - h * .5, 0, cy + h * .5); gi.addColorStop(0, I[1]); gi.addColorStop(.55, I[3]); gi.addColorStop(1, I[5]); x.fillStyle = gi; E(x, cx + look, cy + lookY, w * .32 * ir, h * .47 * ir); x.fill(); x.globalAlpha = .35; fill(I[0]); E(x, cx + look, cy + lookY - h * .3, w * .34 * ir, h * .18 * ir); x.fill(); x.globalAlpha = 1; }
     fill(I[0]); E(x, cx + look, cy + lookY, w * .13 * ir, h * .22 * ir); x.fill();
+    if (x.HI && expr !== 'shock') { fill('#ffffff'); E(x, cx + look - w * .12, cy - hh * .18, .9 * s, .9 * s); x.fill(); x.globalAlpha = .7; E(x, cx + look + w * .1, cy + hh * .14, .45 * s, .45 * s); x.fill(); x.globalAlpha = 1; }
     if (sp.eye === 'green' || sp.beauty) { fill(I[5]); E(x, cx + look, cy + lookY + h * .28, w * .2 * ir, h * .1 * ir); x.fill(); }
-    if (expr !== 'shock') { fill('#ffffff'); x.fillRect(Math.round(cx + look - w * .2), Math.round(cy - hh * .3), Math.max(1, Math.round(1.6 * s)), Math.max(1, Math.round(1.6 * s))); if (kid || sp.beauty) x.fillRect(Math.round(cx + look + w * .12), Math.round(cy + hh * .12), 1, 1); }
+    if (expr !== 'shock' && !x.HI) { fill('#ffffff'); x.fillRect(Math.round(cx + look - w * .2), Math.round(cy - hh * .3), Math.max(1, Math.round(1.6 * s)), Math.max(1, Math.round(1.6 * s))); if (kid || sp.beauty) x.fillRect(Math.round(cx + look + w * .12), Math.round(cy + hh * .12), 1, 1); }
     x.restore();
     // upper lid (thick), slanted by expression
     stroke(lineC); x.lineWidth = (kid ? 1.7 : 1.9) * s; x.beginPath();
@@ -367,9 +413,10 @@ function paintHairFront(x, sp, H, X, Y, s, t, fill, stroke, kid) {
   const st = sp.hair;
   if (st === 'bald') return;
   const cap = (top = -33, edge = -14) => { fill(H[3]); P(x, [[X(-19), Y(edge)], [X(-20), Y(top + 6), X(0), Y(top)], [X(20), Y(top + 6), X(19), Y(edge)], [X(10), Y(edge - 6), X(-10), Y(edge - 4)]]); x.fill(); };
-  const shine = (y0 = -28) => { fill(H[5]); P(x, [[X(-6), Y(y0)], [X(2), Y(y0 - 2), X(10), Y(y0 + 1)], [X(10), Y(y0 + 3)], [X(2), Y(y0), X(-6), Y(y0 + 2)]]); x.fill(); };
+  const shine = (y0 = -28) => { fill(H[5]); P(x, [[X(-6), Y(y0)], [X(2), Y(y0 - 2), X(10), Y(y0 + 1)], [X(10), Y(y0 + 3)], [X(2), Y(y0), X(-6), Y(y0 + 2)]]); x.fill();
+    if (x.HI) { x.globalAlpha = .5; stroke(H[4]); x.lineWidth = .7; for (const a of [-14, -8, 4, 12]) { x.beginPath(); x.moveTo(X(a), Y(y0 + 2)); x.quadraticCurveTo(X(a * 1.1), Y(y0 + 8), X(a * 1.15), Y(y0 + 13)); x.stroke(); } x.globalAlpha = 1; } };
   const bangs = (list, col = H[3]) => { fill(col); for (const [a, b, tx, ty, cu] of list) strand(x, X(a), Y(-20), X(b), Y(-20), X(tx), Y(ty), (cu || 0) * s); };
-  if (st === 'balding') { fill(H[3]); P(x, [[X(-18), Y(-12)], [X(-21), Y(-6), X(-20), Y(3)], [X(-17), Y(-1)], [X(-17), Y(-8)]]); x.fill(); fill(H[4]); x.fillRect(X(-20), Y(-8), 1, 4); fill('#ffffff'); x.globalAlpha = .35; E(x, X(5), Y(-27), 6 * s, 2 * s); x.fill(); x.globalAlpha = 1; return; }
+  if (st === 'balding') { fill(H[3]); P(x, [[X(-18), Y(-12)], [X(-21), Y(-6), X(-20), Y(3)], [X(-17), Y(-1)], [X(-17), Y(-8)]]); x.fill(); fill(H[4]); x.fillRect(X(-20), Y(-8), 1, 4); if (!x.HI) { fill('#ffffff'); x.globalAlpha = .35; E(x, X(5), Y(-27), 6 * s, 2 * s); x.fill(); x.globalAlpha = 1; } else { fill('#ffffff'); x.globalAlpha = .18; E(x, X(6), Y(-19), 5 * s, 1.6 * s, -.2); x.fill(); x.globalAlpha = 1; } return; }
   if (st === 'buzz' || st === 'cornrows') { fill(H[3]); x.globalAlpha = st === 'buzz' ? .85 : 1; P(x, [[X(-19), Y(-13)], [X(-20), Y(-31), X(0), Y(-33)], [X(20), Y(-31), X(19), Y(-13)], [X(0), Y(-19), X(-19), Y(-13)]]); x.fill(); x.globalAlpha = 1;
     if (st === 'cornrows') { stroke(H[1]); x.lineWidth = 1; for (let i = -3; i <= 3; i++) { x.beginPath(); x.moveTo(X(i * 5), Y(-17)); x.quadraticCurveTo(X(i * 5.6), Y(-28), X(i * 3), Y(-33)); x.stroke(); } }
     else { fill(H[4]); x.fillRect(X(-4), Y(-30), 10 * s, 2); } return; }

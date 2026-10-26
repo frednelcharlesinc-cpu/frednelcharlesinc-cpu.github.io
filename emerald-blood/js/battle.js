@@ -19,6 +19,7 @@ const LINKS = {
   oren: { name: 'TWIN FANG', mp: [5, 4], desc: 'Link Art with Oren. 4 alternating timed hits.', lines: [['oren', 'Now, {name}! Like I taught you!'], ['me', "Right behind you, Oren!"]], hits: 4, m: 1.15 },
   kess: { name: 'EMERALD ECLIPSE', mp: [6, 4], desc: 'Link Art with Kess. 5 timed hits from light and shadow.', lines: [['kess', "Twelve years I've hidden this fire…"], ['me', '…so let it burn. Together!']], hits: 5, m: 1.2 }
 };
+const BT_SCALE = .98; // the battle camera sits a step further back
 const ENEMY = {
   lupine: { name: 'Ashen Lupine', hp: 38, atk: 10, def: 2, spd: 12, dodge: .2, parry: 0, brk: 40, xp: 14, gold: 6,
     skills: [{ name: 'Claw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Frenzy', w: .5, hits: [{ anim: 'slash', m: .55, w: 480 }, { anim: 'halfslash', m: .55, w: 300 }, { anim: 'slash', m: .7, w: 380 }] }] },
@@ -322,7 +323,7 @@ const Battle = {
     const B = this.B, fx = a.x, fy = a.y, d = Math.hypot(x - fx, y - fy); if (d < 2) return;
     const r = this.rankOf(a), drag = a.isMe || (ALLY[a.id] && ALLY[a.id].drag) || a.key === 'dread';
     const col = drag && r >= 3 ? '#7dffb0' : r >= 7 ? '#ff6a8a' : r >= 5 ? '#ffd36a' : r >= 3 ? '#9fd8ff' : '#ffffff';
-    const dur = Math.max(r >= 7 ? 110 : 150, Math.min(520, d / (.6 + r * .35))), s = 1.15 * (a.size || 1), dir = Math.sign(x - fx) || 1;
+    const dur = Math.max(r >= 7 ? 110 : 150, Math.min(520, d / (.6 + r * .35))), s = BT_SCALE * (a.size || 1), dir = Math.sign(x - fx) || 1;
     const H = 12 + r * 3, LEAN = dir * (.12 + r * .025), img = a.isMe ? playerImg() : a.img;
     // crouch
     a.loopAnim = 'jump'; a.anim = 'jump'; a.frame = 0; a.fn = 99; a.fms = 1e9; a.once = true; await wait(Math.max(40, 110 - r * 10));
@@ -385,7 +386,7 @@ const Battle = {
     return 'hit';
   },
   // the painted face pops in at the edge of the screen: hurt, power, shout
-  faceOf(a) { if (a.isMe) return 'me'; if (a.side === 'p') return a.id; const b = (a.key || '').split('_')[0]; return Art.port[ART_ID[b] || b] ? b : null; },
+  faceOf(a) { if (a.isMe) return 'me'; if (a.side === 'p') return a.id; if (a.key === 'kairo_duel') return 'kairoB'; const gr = typeof GE_RIVAL !== 'undefined' && GE_RIVAL[a.key]; if (gr) return Art.port[gr] ? gr : null; const b = (a.key || '').split('_')[0]; return Art.port[ART_ID[b] || b] ? b : null; },
   facePop(a, exprs) {
     const who = this.faceOf(a); if (!who) return; const e = exprs.find(x => artHas(who, x)); if (!e) return;
     const now = performance.now(); if (now - (this.lastPop || 0) < 1300) return; this.lastPop = now;
@@ -442,7 +443,7 @@ const Battle = {
       const g = await this.qte(es[0], 0, '#ffffff', a);
       const far = Math.min(...es.map(t => t.x)) - 70, ly = es.reduce((m, t) => m + t.y, 0) / es.length - 34;
       sfx('swing'); this.play(a, 'slash', 6, 28); B.fx.push({ hline: 1, x1: x0 - 10, x2: far, y: ly, t: 0, life: 650 });
-      for (let i = 1; i <= 4; i++) B.fx.push({ ghost: 1, x: lerp(x0, far, i / 5), y: y0, t: 0, life: 380 + i * 40, img: playerImg(), anim: 'slash', fr: 3, s: 1.15 });
+      for (let i = 1; i <= 4; i++) B.fx.push({ ghost: 1, x: lerp(x0, far, i / 5), y: y0, t: 0, life: 380 + i * 40, img: playerImg(), anim: 'slash', fr: 3, s: BT_SCALE });
       await this.slide(a, far, y0, 120); a.flip = true; a.anim = 'combat';
       await wait(380); sfx('parry'); this.text(a, '— click —', '#cfe8ff', -50);
       await wait(260);
@@ -454,17 +455,17 @@ const Battle = {
       const g = await this.qte(t, 0, '#7dffb0', a);
       const spots = [[t.x - 52, t.y + 2, true], [t.x + 52, t.y + 4, false], [t.x - 8, t.y - 8, false]];
       for (let i = 0; i < 3 && !t.ko; i++) {
-        B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 420, img: playerImg(), anim: a.anim, fr: 0, s: 1.15, flip: a.flip });
+        B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 420, img: playerImg(), anim: a.anim, fr: 0, s: BT_SCALE, flip: a.flip });
         this.spark(a.x, a.y - 30, '#7dffb0', 10); a.alpha = 0; sfx('dodge'); await wait(110);
         a.x = spots[i][0]; a.y = spots[i][1]; a.flip = spots[i][2]; a.alpha = 1; B.fx.push({ blinkIn: 1, x: a.x, y: a.y - 30, t: 0, life: 260 });
         this.play(a, 'slash', 6, 32); sfx('swing'); await wait(90);
         this.resolveHit(a, t, A.hits[i].m * boost, i === 0 ? g : (g === 'miss' ? 'miss' : 'good'), { brk: A.brk / 3, unblockable: g === 'perfect' ? 1 : 0, src: k });
         this.spark(t.x, t.y - 34, '#ffffff', 14); await wait(230);
       }
-      B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 400, img: playerImg(), anim: 'combat', fr: 0, s: 1.15, flip: a.flip }); a.alpha = 0; await wait(150);
+      B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 400, img: playerImg(), anim: 'combat', fr: 0, s: BT_SCALE, flip: a.flip }); a.alpha = 0; await wait(150);
       a.x = a.hx; a.y = a.hy; a.flip = false; a.alpha = 1; sfx('parry'); this.text(a, '— click —', '#cfe8ff', -50);
     } else if (A.type === 'sight') {
-      if (a.isMe) await Cine.play([{ bg: 'eyes', fx: ['mana'], dur: 1300, fadeIn: 120, tapEnds: true, cam: [[0, 320, 190, 1], [1300, 320, 178, 1.25]], vignette: 'rgba(0,30,10,.7)',
+      if (a.isMe && !B.skipSightCine) await Cine.play([{ bg: 'eyes', fx: ['mana'], dur: 1300, fadeIn: 120, tapEnds: true, cam: [[0, 320, 190, 1], [1300, 320, 178, 1.25]], vignette: 'rgba(0,30,10,.7)',
         actors: [{ port: 'me', expr: artHas('me', 'sight') ? 'sight' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[650, s => { s.flash = .9; s.flashCol = '90,255,150'; sfx('art'); }]] }]);
       await this.play(a, 'spellcast', 7, 70); const was = a.sight; a.flow = 0; a.sight = 3 + (Skills.has('me', 'e1') ? 1 : 0); B.flash = .8; B.flashCol = '220,255,235'; sfx('art'); B.shake = 8;
       if (!was) { a.sightSpd = a.spd * .4; a.spd += a.sightSpd; a.sightAtk = Math.round(a.atk * .3); a.atk += a.sightAtk; a.wait *= .5; }
@@ -653,7 +654,7 @@ const Battle = {
     const B = this.B;
     return new Promise(async resolve => {
       let w = (h.w || 520) * (e.tempo || 1); const rk = this.reflex(t);
-      let slow = false;
+      let slow = !!B.dilate;
       if (B.tutorial) {
         if (B.tutorial.dodge) { B.tutorial.dodge = 0; slow = true; await this.msg('Press DODGE as the ring closes!', 1300, true); }
         else if (B.tutorial.parry && !h.unp) { B.tutorial.parry = 0; slow = true; await this.msg('Now PARRY: tighter timing. Parry EVERY hit to counter!', 1600, true); }
@@ -785,7 +786,7 @@ const Battle = {
       if (!a.isMe && !a.img) continue;
       const lift = a.lift || 0, lean = a.lean || 0, sh = Math.max(.35, 1 - lift / 60);
       c.fillStyle = `rgba(0,0,0,${.28 * sh})`; c.beginPath(); c.ellipse(a.x, a.y, 15 * sh, 5 * sh, 0, 0, 7); c.fill();
-      const s = 1.15 * (a.size || 1);
+      const s = BT_SCALE * (a.size || 1);
       if (lift || lean) { c.save(); c.translate(a.x, a.y - lift); c.rotate(lean); c.translate(-a.x, -a.y); }
       if (a.aura) { c.save(); c.globalCompositeOperation = 'lighter'; const ag = c.createRadialGradient(a.x, a.y - 30 * s, 2, a.x, a.y - 30 * s, 34 * s); ag.addColorStop(0, a.aura + 'aa'); ag.addColorStop(1, a.aura + '00'); c.fillStyle = ag; c.beginPath(); c.ellipse(a.x, a.y - 30 * s, 26 * s, 38 * s, 0, 0, 7); c.fill(); c.restore(); }
       const fr = Math.min(a.frame, (G.man.bt.anims.find(x => x[0] === a.anim) || [0, 2])[1] - 1);
@@ -807,20 +808,23 @@ const Battle = {
         if (a.flip) { c.save(); c.translate(a.x, 0); c.scale(-1, 1); c.translate(-a.x, 0); }
         const drawn = anim === 'slash' || G.S.kid;
         if (!drawn) { // the katana rests in its scabbard at the hip — Vane's way
-          const hx = a.x + 2 * s, hy = a.y - 21 * s; c.save(); c.lineCap = 'round';
+          const dyP = anim === 'hurt' ? Math.min(fr, 4) * 2.4 : anim === 'jump' ? -2 : 0;
+          const hx = a.x + 2 * s, hy = a.y - (21 - dyP) * s; c.save(); c.lineCap = 'round';
           c.strokeStyle = '#1a120c'; c.lineWidth = 3.4 * s; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx + 19 * s, hy + 7 * s); c.stroke();
           c.strokeStyle = '#3a2a1c'; c.lineWidth = 1.4 * s; c.beginPath(); c.moveTo(hx + 1, hy - 1); c.lineTo(hx + 18 * s, hy + 6 * s); c.stroke();
           c.fillStyle = '#b8b0a0'; c.fillRect(hx + 17 * s, hy + 5.4 * s, 2.6 * s, 2.6 * s); c.restore();
         }
-        const hilt = () => { if (drawn) return; const hx = a.x + 2 * s, hy = a.y - 21 * s; c.save(); c.lineCap = 'round';
+        const hilt = () => { if (drawn) return; const dyP = anim === 'hurt' ? Math.min(fr, 4) * 2.4 : anim === 'jump' ? -2 : 0; const hx = a.x + 2 * s, hy = a.y - (21 - dyP) * s; c.save(); c.lineCap = 'round';
           c.strokeStyle = '#2a2a34'; c.lineWidth = 2.6 * s; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx - 8 * s, hy - 2.2 * s); c.stroke();
           c.fillStyle = '#e8e4d8'; for (let q = 1; q < 4; q++) c.fillRect(hx - q * 2.1 * s, hy - q * .6 * s - .5, 1.3, 1.3);
           c.fillStyle = '#c9a24a'; c.beginPath(); c.ellipse(hx + .5, hy, 1.4 * s, 2.6 * s, .4, 0, 7); c.fill(); c.restore(); };
-        if (!G.S.kid && drawn) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, fr, a.x, a.y, s);
-        drawBT(c, playerImg(), anim, fr, a.x, a.y, s);
+        // the katana's slash frame 2 flips the blade through his body — skip it so the draw reads as one clean arc
+        const frS = anim === 'slash' && !G.S.kid ? [0, 1, 3, 3, 4, 5][fr] ?? fr : fr;
+        if (!G.S.kid && drawn) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, frS, a.x, a.y, s);
+        drawBT(c, playerImg(), anim, frS, a.x, a.y, s);
         hilt();
-        if (G.S.kid || !drawn) {} else if (!glow) drawBT(c, G.A.sword, anim, fr, a.x, a.y, s);
-        else { c.save(); c.globalCompositeOperation = 'lighter'; drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); c.restore(); drawBT(c, G.A.glow, anim, fr, a.x, a.y, s); }
+        if (G.S.kid || !drawn) {} else if (!glow) drawBT(c, G.A.sword, anim, frS, a.x, a.y, s);
+        else { c.save(); c.globalCompositeOperation = 'lighter'; drawBT(c, G.A.glow, anim, frS, a.x, a.y, s); c.restore(); drawBT(c, G.A.glow, anim, frS, a.x, a.y, s); }
         if (!G.S.hood) { const g = c.createRadialGradient(a.x - 4, a.y - 50, 0, a.x - 4, a.y - 50, 8); g.addColorStop(0, 'rgba(70,255,140,.4)'); g.addColorStop(1, 'rgba(70,255,140,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(a.x - 20, a.y - 66, 32, 32); c.restore(); }
         if (a.flip) c.restore();
         if (a.ward) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.25 + Math.sin(t / 200) * .1})`; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30, 26, 36, 0, 0, 7); c.stroke(); c.restore(); }

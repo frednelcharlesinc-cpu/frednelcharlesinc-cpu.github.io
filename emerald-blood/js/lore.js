@@ -167,7 +167,7 @@ function worldMenuHTML() {
   if (G.S.f.kairoMet || G.S.f.millDone || G.S.f.kairoB || true) {
     const GE = [['tamsin', 'Tamsin'], ['dace', 'Dace'], ['corran', 'Corran'], ['sefa', 'Sefa'], ['bo', 'Bo'], ['lark', 'Lark'], ['wren', 'Wren']];
     h += `<div class="stat lore" style="margin-bottom:6px"><h3 style="color:#a9c4ff">The Green Eclipse</h3><p class="muted">Kairo's revolution. Kairo has always matched you step for step — and in Scar Bloom he goes a full rank beyond. His founders trail him by a colour or two.</p>
-      <p><b>Kairo</b> ${stepBadge(Rivals.kairo())} · <span class="muted">Scar Bloom:</span> ${stepBadge(Rivals.kairo(true))}</p>${GE.map(([k, n]) => `<p><b>${n}</b> ${stepBadge(Rivals.ge(k))}</p>`).join('')}</div>`;
+      <p><b>Kairo</b> ${stepBadge(Rivals.kairo())} · <span class="muted">Scar Bloom:</span> ${stepBadge(Rivals.kairo(true))}</p>${GE.map(([k, n]) => `<p><b>${n}</b> ${stepBadge(Rivals.ge(k))}</p>`).join('')}<p class="muted" style="margin-top:6px">Uniform: black coat, forest-green tabard and sash — the cape is worn once the Crown knows your face.${typeof Notoriety !== 'undefined' ? ` Notoriety: <b style="color:#a9c4ff">${Notoriety.name()}</b>.` : ''}</p>${G.S.f.coupHint ? `<p><b style="color:#ff9a6a">Kairo's plan: ???</b> <span class="muted">Greyspire is only the door. Green Eclipse is preparing to move against the Empire itself. Nobody outside Kairo knows the target or the reason. His three rules: cages first; never a child; never someone who is already kneeling.</span></p>` : ''}</div>`;
   }
   h += legendsHTML();
   return h;

@@ -419,7 +419,7 @@ Story.prologueEnd = async function () {
 /* ---------------- ASHFORD HOLLOW ---------------- */
 const FOLK_LINES = () => {
   const s = G.S.sus, f = F();
-  const base = ['Fresh apples! Two coppers!', 'Did you hear? Cages on the north road.', 'Fine weather for a hanging, my uncle says.', 'Mind the guards, they\'re jumpy today.', 'The Inquisition pays silver for green eyes.', 'Pass the salt, Martha!', 'Bread\'s gone up again.', 'My cart wheel\'s cracked. Again.', 'Lovely day, isn\'t it?', 'Have you seen my goat?'];
+  const base = ['Fresh apples! Two coppers!', 'Did you hear? Cages on the river road.', 'Fine weather for a hanging, my uncle says.', 'Mind the guards, they\'re jumpy today.', 'The Inquisition pays silver for green eyes.', 'Pass the salt, Martha!', 'Bread\'s gone up again.', 'My cart wheel\'s cracked. Again.', 'Lovely day, isn\'t it?', 'Have you seen my goat?'];
   if (s >= 2) base.push('Someone saw green eyes by the fountain.', 'Lock your doors tonight.', 'Drags. In OUR town.');
   if (f.vossGone) base.push('Did you see Voss limping?');
   base.push('The dwarf at the guild hall says anyone can register. ANYONE. Even elves.', 'My boy lit the barn with his first spark. Fire-born, like his grandad.', 'Elves live four hundred years and still can\'t haggle.', 'D-rank at sixteen! My daughter! Lightning!');
@@ -447,9 +447,10 @@ SCENES.ashford = {
   },
   exits: [
     { x: 28, x2: 31, y: 0, to: 'mill', tx: 17, ty: 25, dir: 'up', msg: 'Captain Voss blocks the north road.', when: () => !F().vossGone },
-    { x: 28, x2: 31, y: 0, to: 'mill', tx: 17, ty: 25, dir: 'up', when: () => F().vossGone },
+    { x: 28, x2: 31, y: 0, msg: 'The north road climbs into empty hills. Without knowing where the cages went, you could search them for a month.', when: () => F().vossGone && !F().learnedMill },
+    { x: 28, x2: 31, y: 0, to: 'mill', tx: 17, ty: 25, dir: 'up', when: () => F().vossGone && F().learnedMill },
     { x: 59, y: 20, y2: 23, to: 'woods', tx: 2, ty: 17, dir: 'right' },
-    { x: 28, x2: 31, y: 41, msg: "Turning back isn't an option. Ilya is somewhere ahead." }
+    { x: 28, x2: 31, y: 41, check: async () => { if (typeof valeRoads === 'function') return valeRoads(); return false; } }
   ],
   tiles: {
     '9,14': async () => narr(F().marenKnows ? "Maren's clinic. The door is shut. You don't knock." : "Maren's clinic. You hear coughing inside."),
@@ -503,7 +504,7 @@ async function talkMaren() {
     if (c === 0) await say('maren', 'shame', "Because I have six patients inside who'd rather bleed out than share a roof with you. I hate that. But I choose who I can save, every single day.");
     else await say('maren', 'sad', "Don't thank me. Kindness with a closed door isn't much kindness.");
     await say('maren', 'neutral', "I won't tell anyone what you are. That much I can do.");
-    if (!f.learnedMill) await marenMill();
+    if (!f.lead) await marenMill();
     return;
   }
   if (!f.metMaren) {
@@ -518,14 +519,17 @@ async function talkMaren() {
   if (f.marenKnows) await say('maren', G.S.sus >= 3 ? 'sad' : 'neutral', G.S.sus >= 3 ? "The whole town's whispering about green eyes. It wasn't me. I need you to know that." : 'Porch again. Sit. …There. Good as I can make you.');
   else await say('maren', 'happy', ['Patched up again. Try not to bleed so much.', 'Beasts again? Hold still.', "There. And eat something — you're all bones."][G.S.steps % 3]);
   toast('HP & MP restored.');
-  if (!f.learnedMill) { const c = await ask('maren', 'neutral', 'Anything else?', ['Seen any Inquisition wagons?', 'No. Thank you.']); if (c === 0) await marenMill(); }
+  if (!f.lead) { const c = await ask('maren', 'neutral', 'Anything else?', ['Seen any Inquisition wagons?', 'No. Thank you.']); if (c === 0) await marenMill(); }
 }
 async function marenMill() {
-  F().learnedMill = true;
+  const f = F(); if (f.lead >= 1) { await say('maren', 'neutral', "Millbrook, child. West along the river road — the ferryman counts every wheel that crosses his bridge."); return; }
+  f.lead = 1;
   await say('maren', 'sad', "…The Inquisition's wagons came through two nights back. Cages on the back. Children in some of them.");
-  await say('maren', 'neutral', "They took the north road to the old mill. Captain Voss closed the gate behind them.");
-  await say('maren', 'sad', "Whatever you're planning, child — this town already has enough ghosts.");
-  Story.quest('The wagons went north to the Old Mill. Get past Captain Voss at the north road.');
+  await say('maren', 'shame', "Which way they went after, I couldn't tell you. I don't look at cages, child. I've learned not to.");
+  await say('maren', 'neutral', "But they came IN on the west river road, from Millbrook. The ferryman there — Oswin — counts every wheel that crosses his bridge. He'll know where they were bound.");
+  await say('maren', 'sad', "Whatever you're planning — this town already has enough ghosts.");
+  Story.quest('Follow the wagons\' trail: take the south gate, then the west river road to Millbrook. Ask the ferryman, Oswin.');
+  if (typeof Intel !== 'undefined') Intel.add('you', 'Maren: the cage-wagons came into Ashford on the river road from Millbrook. The ferryman, Oswin, counts every wheel.');
 }
 async function talkTobb() {
   const f = F();
@@ -596,6 +600,8 @@ async function talkPip(e) {
 async function talkKess() {
   const f = F();
   if (f.kessRefused) { await say('kess', 'anger', "Get away from me. You've done enough."); return; }
+  if (f.kessHelp && !f.vossGone) { await say(G.S.hood ? 'kess' : 'kessE', 'neutral', "The north road. Talk to Voss. I'll handle the rest — go."); return; }
+  if (G.S.hood && f.kessWait && f.learnedMill && !f.kessHelp) { await say('kess', 'neutral', "…You found it, didn't you. I can see it on you. Not here — lower the hood and look at me, so I know it's really you asking."); return; }
   if (G.S.hood) {
     if (!f.metKess) {
       f.metKess = true;
@@ -604,19 +610,31 @@ async function talkKess() {
     } else await say('kess', 'neutral', 'Still here? People who linger get noticed. Trust me.');
     return;
   }
+  if (f.kessWait && !f.kessHelp) {
+    if (!f.learnedMill) { await say('kessE', 'neutral', "Not yet? Then stop standing at my door with your eyes out. WHERE, {name}. Find where."); return; }
+  } else {
   f.kessKnows = true;
   await say('kess', 'shock', 'Are you INSANE? Cover your—');
   await narr('She grabs your sleeve and drags you behind the house. Then she lowers her glasses.');
   await narr('Her eyes are green. Dim, like coals she\'s spent years smothering.');
   await say('kessE', 'anger', 'Twelve years. Twelve years I\'ve kept my head down in this town. And you stroll in burning like a lighthouse.');
+  }
   if (G.S.sus >= 3) {
     f.kessRefused = true;
     await say('kessE', 'anger', "Everyone's talking about green eyes. Now they'll check every face in the Hollow — mine too. I can't help you. Get away from me.");
     Story.quest('Get past Captain Voss at the north road — any way you can.'); return;
   }
+  if (!f.kessWait || !f.learnedMill || !f.kessAsked) { f.kessAsked = true;
   const c = await ask('kessE', 'neutral', 'What do you want?', ['My sister. The Inquisition took her.', 'I want to stop hiding.']);
-  if (c === 1) await say('kessE', 'anger', "Hiding is how I'm still breathing. Don't you dare make it sound cowardly.");
-  await say('kessE', 'sad', '…The cages went to the old mill, north. Halvard runs it. He\'s not like the others. He believes.');
+  if (c === 1) await say('kessE', 'anger', "Hiding is how I'm still breathing. Don't you dare make it sound cowardly."); }
+  if (!f.learnedMill) {
+    f.kessWait = true;
+    await say('kessE', 'sad', "…The cages don't stay in the Hollow. Halvard — the Inquisitor who runs them — never keeps them anywhere twice. He's not like the others. He believes.");
+    await say('kessE', 'neutral', "Find out WHERE. When you know, come back, and I'll get you past whoever's standing in the road. Once.");
+    Story.quest(f.lead >= 1 ? G.S.quest : 'Find where the cages went. Maren the healer might know something.');
+    return;
+  }
+  await say('kessE', 'sad', f.kessWait ? "…The Old Mill. North road. Of course — right under Voss's nose." : '…The cages went to the old mill, north. Halvard runs it. He\'s not like the others. He believes.');
   await say('kessE', 'neutral', "Voss guards the north road. He's not cruel — just obedient. I can pull him away. Once.");
   const c2 = await ask('kessE', 'neutral', "And then you're on your own.", ['Come with me.', 'Thank you. That\'s enough.']);
   if (c2 === 0) {
@@ -624,11 +642,11 @@ async function talkKess() {
     await me('neutral', "You know this town. You know how to hide. And you're tired of it — I can see it.");
     await say('kessE', 'sad', "…");
     await say('kessE', 'happy', "Fine. Not for you. For the kid with the ribbon. And because if I stay here, I'll still be hiding when I'm Maren's age.");
-    f.kessJoined = true; f.learnedMill = true; f.kessHelp = true;
+    f.kessJoined = true; f.kessHelp = true;
     await Story.join('kess');
     Story.quest('Kess will distract Captain Voss. Go to the north road and talk to him.');
   } else {
-    f.kessHelp = true; f.learnedMill = true;
+    f.kessHelp = true;
     await say('kessE', 'neutral', "Don't make me regret this. Go to the north road. When you talk to Voss, I'll do the rest.");
     Story.quest('Kess will distract Captain Voss. Go to the north road and talk to him.');
   }
@@ -707,7 +725,7 @@ async function talkVoss() {
     return fightVoss();
   }
   const c = await ask('voss', 'neutral', 'Road\'s closed. Inquisition business. Turn around, traveler.', ["What's up north?", 'Let me through.', '[Force your way past]']);
-  if (c === 0) await say('voss', 'neutral', 'The old mill. Not my concern. Not yours either.');
+  if (c === 0) await say('voss', 'neutral', F().learnedMill ? 'You already know, or you wouldn\'t be asking like that. Not my concern. Not yours either.' : 'Hills. Sheep. Inquisition business. Not my concern, not yours either.');
   else if (c === 1) await say('voss', 'sad', "I've got orders. Orders don't care what I think — and I've stopped thinking.");
   else return fightVoss();
 }
@@ -1015,26 +1033,34 @@ async function kairoDuel() {
   await say('sefa', 'sad', "He tells everyone not to tell Dace. Dace knows.");
   await narr('Footsteps on the mill roof. Someone drops into the clearing, light as falling snow — white hair, a spear across her back.');
   await World.addNpc({ id: 'liora', sprite: 'liora_e', x: 20, y: 14, dir: 'left' });
-  await say('kairoB', 'blush', "…Liora.");
-  await say('tamsin', 'neutral', "Oh, here we go.");
+  await say('kairoB', 'neutral', "…Liora. You're late. Did you get eyes on the Greyspire wagons?");
+  await say('bo', 'happy', "(whispering) He says hello to her like she's a scouting report.");
+  await say('tamsin', 'shame', "(…He says hello to ME like I'm a scouting report too, Bo. Shut up.)");
   await say('liora', 'neutral', "Your cages were empty before you got here, Kairo. Dread moved the children to Greyspire. And he'll be there himself in nine days.");
   await say('kairoB', 'neutral', "Then come with us. Greyspire's walls won't fall to one spear.");
   await say('liora', 'neutral', "I don't join, Kairo. I help, when it suits me. Tonight it suited me.");
   await say('liora', 'neutral', "Greyspire's undercity belongs to the Velvet Knife — Lysandra Voe. One of the Eight. If anyone knows which cell your sister's in, it's her. Her price will be ugly."); f.knifeKnown = true;
-  if (f.duel === 'won') { await narr('She looks at the ash still flaking off Kairo\'s arms. For a heartbeat her face does something soft and unguarded.'); await say('liora', 'sad', "You used it again. The Bloom. You promised me you'd stop doing that to yourself."); await say('kairoB', 'blush', "…You were counting?"); await say('liora', 'anger', "Somebody has to."); }
+  if (f.duel === 'won') { await narr('She looks at the ash still flaking off Kairo\'s arms. For a heartbeat her face does something soft and unguarded.'); await say('liora', 'sad', "You used it again. The Bloom. You promised me you'd stop doing that to yourself."); await say('kairoB', 'neutral', "…You were counting? Tamsin counts too. Everyone's counting. Nine days, Liora. Can we count THOSE?"); await say('liora', 'anger', "Somebody has to count the other thing.");
+    await narr('Tamsin is already beside him, wrapping his ash-flaked arm in a strip torn from her own sleeve. He doesn\'t look down. He\'s reading the wagon roads off a map in his head.');
+    await say('kairoB', 'neutral', "Thanks, Tam."); await say('tamsin', 'blush', "…Yeah. Sure. Don't mention it."); await say('sefa', 'sad', "(She never does mention it. That's the problem.)"); }
   if (F().lioraMet) await say('liora', 'happy', "And you, Sword Saint's student. Still alive. Good. At Greyspire, stay out of my way — or keep up.");
   else await say('liora', 'neutral', "Who's this? …Another Drag with a hood and a grudge. Wonderful. Stay out of my way at Greyspire.");
   await narr("She's gone over the mill roof as quietly as she came.");
   World.remove('liora');
-  await say('kairoB', 'anger', "…Don't.");
+  await say('kairoB', 'neutral', "…Don't.");
   await me('shock', "Don't what?");
-  await say('kairoB', 'anger', "You know what.");
+  await say('kairoB', 'happy', "Don't think I didn't see your face. Same face you made at Mei's honey cakes when we were six.");
+  await say('kairoB', 'neutral', "Fine. She's not a prize and she'd gut us both for talking like she was one. But if she ever picks one of us — may the better brother win. Forty-two to one, {name}. I'm still ahead.");
+  await say('kairoB', 'neutral', "After Greyspire, though. Cages first. Always cages first.");
   await narr('Kairo tosses something into the dirt at your feet. A shard of green stone, humming softly.');
   await say('kairoB', 'neutral', "Halvard's staff. That's how his light burned so bright — a Drag stone. OUR stone. Take it. Greyspire's walls are thick.");
   f.shard = true; Stones.give('verdict');
   await narr('A MEDIUM stone. It is cold, and it does not like you. You can feel it deciding whether you are worth serving.');
   await say('kairoB', 'anger', "One more thing. Whoever sold Thornvale — I'll find them before you do. Pray I'm gentle about it.");
   await say('kairoB', 'sad', "…Nix is in Greyspire too. Whatever they've made him. We swore it, {name}. All of us, or nobody.");
+  await say('kairoB', 'neutral', "And Greyspire's only step one. There's a step two. A bigger one. You'll hate it when you hear it.");
+  await say('kairoB', 'neutral', "…You'll also understand it. Eventually. Cages first. Never a child. Never someone kneeling. I haven't forgotten whose brother I am.");
+  f.coupHint = (f.coupHint || 0) + 1;
   await say('kairoB', 'happy', "…See you at Greyspire, brother. Try to keep up.");
   await narr('Green Eclipse melts back into the trees. In a heartbeat, the clearing is empty again.');
   W.remove('kairo'); ['reb1', 'reb2', 'reb3', 'reb4', 'reb5'].forEach(r => W.remove(r)); f.millDone = true;
@@ -1067,7 +1093,8 @@ async function millRoof() {
     else await say('liora', 'neutral', "There is no after. There's Dread, and then there's whatever's left of me. I don't plan for it.");
   } else if (b === 1) {
     await say('liora', 'sad', "I know. Kairo carried me out of a burning fort when I was fifteen. He was bleeding worse than me and he wouldn't put me down.");
-    await say('liora', 'neutral', "He's loud, and angry, and he'd burn the whole world for anyone with green eyes. …Some days that's exactly what I love about him. Some days it's what scares me.");
+    await say('liora', 'neutral', "He's loud, and angry, and his whole heart is pointed at one thing: the cages. There's no room left in it for anything else. …I stopped waiting for there to be.");
+    await say('liora', 'happy', "And everyone on this continent can see Tamsin's in love with him except Kairo. The man can read a patrol route through a forest at night and he can't read THAT.");
     await say('liora', 'blush', "…And then someone like you climbs a ladder. Ugh. Forget I said any of this.");
     Story.heart(1); f.lioraKairoTalk = true;
   } else { await narr('She doesn\'t move away. After a while, her shoulder rests against yours. Neither of you mentions it.'); await say('liora', 'blush', "…Just tonight. Don't make it a thing."); Story.heart(2); }
@@ -1077,7 +1104,7 @@ async function millRoof() {
     f.lioraPin = true; sfx('level'); toast("You received <b style=\"color:#ff9ccc\">Liora's hairpin</b>. A promise to come back.", 4200);
   } else await say('liora', 'neutral', "Go sleep, Sword Saint's student. Greyspire won't care how tired you are.");
   await narr('Below the roof, at the edge of the trees, a pair of green eyes is watching. Then they turn away into the dark.');
-  if (f.lioraAff >= 5) await say('kairoB', 'sad', "(…Of everyone in the world, brother. It had to be you.)");
+  if (f.lioraAff >= 5) await say('kairoB', 'happy', "(…Up a ladder in the dark. Smooth, brother. Real smooth. Fine — that one's yours. Forty-two to two.)");
   Music.play('sad');
 }
 

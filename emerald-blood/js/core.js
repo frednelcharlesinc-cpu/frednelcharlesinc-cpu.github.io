@@ -365,6 +365,7 @@ function sfx(t) {
       case 'alarm': tone(880, .08, 'square', .03); tone(660, .1, 'square', .03, null, .1); break;
       case 'break': noise(.3, .15, 200); tone(120, .4, 'sawtooth', .07, 40); break;
       case 'cutin': tone(150, .5, 'sawtooth', .05, 900); noise(.5, .05, 2000); break;
+      case 'slowmo': tone(1200, 1.1, 'sine', .06, 90); tone(600, 1.2, 'triangle', .05, 45, .08); noise(1, .05, 500); tone(80, 1.3, 'sine', .08, 40, .1); break;
       case 'light': tone(1500, .6, 'sine', .05, 400); noise(.5, .06, 3000); break;
     }
   } catch (e) {}
