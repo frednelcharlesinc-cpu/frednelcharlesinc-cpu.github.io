@@ -250,7 +250,7 @@ const World = {
       if (e || it) {
         const hx = (e ? e.px : tx * TILE + 16) - cx, hy = (e ? e.py - 62 : ty * TILE - 6) - cy + Math.sin(t / 200) * 2;
         c.fillStyle = 'rgba(0,0,0,.75)'; c.beginPath(); c.arc(hx, hy, 7, 0, 7); c.fill();
-        c.fillStyle = '#46ff95'; c.font = '700 10px "Pixelify Sans"'; c.textAlign = 'center'; c.fillText(e ? '…' : '?', hx, hy + 3.5);
+        c.fillStyle = '#46ff95'; c.font = '800 12px "Nunito"'; c.textAlign = 'center'; c.fillText(e ? '…' : '?', hx, hy + 3.5);
       }
     }
     // bubbles
@@ -329,7 +329,7 @@ class Ent {
   }
   drawBubble(c, cx, cy) {
     const b = this.bubble, x = Math.round(this.px - cx), y = Math.round(this.py - cy - 66 * (this.size || 1));
-    c.font = '600 10px "Pixelify Sans"'; c.textAlign = 'center';
+    c.font = '800 12px "Nunito"'; c.textAlign = 'center';
     const tw = Math.min(170, c.measureText(b.text).width + 12), a = Math.min(1, b.t / 300);
     c.globalAlpha = a;
     c.fillStyle = b.icon === '!' ? 'rgba(80,10,10,.9)' : 'rgba(250,248,236,.95)';

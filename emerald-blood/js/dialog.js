@@ -45,7 +45,7 @@ const Dlg = {
       this.show();
       this.setPortraits(who, expr);
       const C = who && who !== 'me' ? (CHAR[who] || { name: who }) : null;
-      const nm = $('#dlgName'); nm.textContent = who === 'me' ? G.S.name : C ? C.name : ''; nm.className = who && who !== 'me' ? 'npc' : ''; nm.style.color = speakerCol(who);
+      const nm = $('#dlgName'); nm.textContent = who === 'me' ? (G.S.veil ? 'Red Veil' : G.S.name) : C ? C.name : ''; nm.className = who && who !== 'me' ? 'npc' : ''; nm.style.color = speakerCol(who);
       const tx = $('#dlgText'); tx.className = who ? '' : 'narr';
       text = this.fmt(text); tx.textContent = ''; $('#dlgChoices').innerHTML = ''; $('#dlgMore').style.visibility = 'hidden';
       this.full = text; this.res = res; this.choices = choices; this.typing = true;

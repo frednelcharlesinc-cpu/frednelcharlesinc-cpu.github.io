@@ -196,7 +196,7 @@ function bindPassivesMenu() { $$('#menuCard [data-pv]').forEach(b => bindTap(b, 
   BT.render = function (c, t) {
     _rd(c, t); const B = this.B; if (!B) return;
     for (const a of B.actors) if (a.side === 'e' && !a.ko && a.passTxt) {
-      c.font = '600 9px "Pixelify Sans"'; c.textAlign = 'center'; const tw = c.measureText(a.passTxt).width, lx = Math.max(tw / 2 + 5, Math.min(G.view.w - tw / 2 - 5, a.x)), y = a.y + (a.E.trait ? 22 : 8);
+      c.font = '800 10px "Nunito"'; c.textAlign = 'center'; const tw = c.measureText(a.passTxt).width, lx = Math.max(tw / 2 + 5, Math.min(G.view.w - tw / 2 - 5, a.x)), y = a.y + (a.E.trait ? 22 : 8);
       c.fillStyle = 'rgba(30,18,0,.8)'; c.fillRect(lx - tw / 2 - 3, y, tw + 6, 12); c.fillStyle = '#ffd88a'; c.fillText(a.passTxt, lx, y + 9);
     }
   };

@@ -197,10 +197,13 @@ async function geBridge() {
   await say('wren', 'neutral', "Registry wagon crosses the bridge at dusk. Three Drag kids in a strongbox cage. A chest of seized stones. Four guards and a captain.");
   await say('dace', 'anger', "We take it. Kids go free. And the captain swings from the Hound's pretty bridge with a green ribbon round his neck — so every Registry clerk in the vale learns to be afraid of us.");
   await say('wren', 'sad', "He's the one who signs the cage orders in this valley. Forty-one signatures I know of. I learned to read on them.");
-  const c = await ask('dace', 'neutral', "So, brother. In, out, or in the way?", ["I'll help free them — but nobody hangs.", "This isn't my fight. (Ignore it.)", "No hanging. I'll stop you if I have to."]);
+  const opts = ["I'll help free them — but nobody hangs.", "This isn't my fight. (Ignore it.)", "No hanging. I'll stop you if I have to."];
+  if (typeof Veil !== 'undefined' && Veil.on()) opts.push('(Red Veil) I\'ll hit the wagon myself — masked, fast, nobody hangs.');
+  const c = await ask('dace', 'neutral', "So, brother. In, out, or in the way?", opts);
+  if (c === 3) return veilBridge();
   if (c === 0) {
     await say('dace', 'anger', "…Kairo said you'd say exactly that. Fine. We do it your way. But if he draws on a kid, he's mine.");
-    await fadeOut(800); await narr('Dusk. The wagon rolls onto the bridge. Wren drops from the rail onto the driver. Dace walks out of the reeds like he owns the river.'); await fadeIn(800);
+    await fadeOut(800); await wait(250); await fadeIn(800); await narr('Dusk. The wagon rolls onto the bridge. Wren drops from the rail onto the driver. Dace walks out of the reeds like he owns the river.');
     const r = await Battle.start({ enemies: ['reg_captain', 'guard_r', 'acolyte'].map(k => k === 'guard_r' ? 'bandit' : k), allies: ['dace'], noFlee: true, bd: 'town', intro: 'The Registry escort turns on you!' });
     if (r === 'lose') { await Story.defeat(); return; }
     await narr('The captain is on his knees on the bridge. Dace has the green ribbon wrapped around his fist.');
@@ -213,7 +216,7 @@ async function geBridge() {
     Intel.add('ge', 'Green Eclipse and you freed three Drag children from a Registry wagon on the Millbrook bridge. Nobody died.');
   } else if (c === 1) {
     await say('dace', 'neutral', "Suit yourself. Watch from the inn, then. Bring snacks.");
-    await fadeOut(800); await narr('At dusk you hear it from the Drowned Duck: hooves, a scream, the crack of a cage lock.'); await narr('In the morning the children are gone, free — and the Registry captain hangs from the Hound\'s bridge with a green ribbon tied around his neck.'); await fadeIn(800);
+    await fadeOut(800); await wait(250); await fadeIn(800); await narr('At dusk you hear it from the Drowned Duck: hooves, a scream, the crack of a cage lock.'); await narr('In the morning the children are gone, free — and the Registry captain hangs from the Hound\'s bridge with a green ribbon tied around his neck.');
     await narr('Mothers walk their children the long way round, past the ferry. Nobody will cut him down.');
     f.ge1 = 'ignore'; Opinion.add('fear', 2);
     Intel.add('ge', 'Green Eclipse freed three Drag children at Millbrook — and hanged the Registry captain from the bridge.');
@@ -383,10 +386,14 @@ async function geGranary() {
   await say('corran', 'neutral', "…Everyone sees it but him, kid. Don't bring it up.");
   if (!f.corranRules) { f.corranRules = true; f.coupHint = (f.coupHint || 0) + 1; await say('corran', 'sad', "And before you ask what this is all FOR — I don't know the whole of it either. Kairo's building toward something bigger than cages. Something aimed at the Crown itself."); await say('corran', 'neutral', "But he has rules. Cages first. Never a child. Never someone who's already on their knees. I've seen him break his own arm before he'd break one of those."); }
   await say('corran', 'neutral', "Now — are you in?");
-  const c = await ask('tamsin', 'neutral', "In, out, or in my way?", ["In — but the village grain comes out first.", "It's your fight. (Ignore it.)", "You're not burning their winter. I'll stop you."]);
+  const gopts = ["In — but the village grain comes out first.", "It's your fight. (Ignore it.)", "You're not burning their winter. I'll stop you."];
+  if (typeof Veil !== 'undefined' && Veil.on()) gopts.push('(Red Veil) Let me do it — no fire. Halvard\'s grain goes in the river.');
+  const c = await ask('tamsin', 'neutral', "In, out, or in my way?", gopts);
+  if (c === 3) await veilGranary();
+  else
   if (c === 0) {
     await say('tamsin', 'anger', "…Fine. FINE. Bo, you're carrying sacks. Don't eat them.");
-    await fadeOut(800); await narr('Midnight. You and Bo haul the village\'s sacks out the back, one by one, to the reeve\'s barn. Bo only drops one. He only eats a little of it.'); await fadeIn(800);
+    await fadeOut(800); await wait(250); await fadeIn(800); await narr('Midnight. You and Bo haul the village\'s sacks out the back, one by one, to the reeve\'s barn. Bo only drops one. He only eats a little of it.');
     await narr('A bell clangs. Clerk Ivo and two acolytes come running with torches.');
     const r = await Battle.start({ enemies: ['inq_clerk', 'acolyte', 'acolyte'], allies: ['tamsin'], noFlee: true, bd: 'field', intro: 'Clerk Ivo raises the alarm!' });
     if (r === 'lose') { await Story.defeat(); return; }
@@ -397,7 +404,7 @@ async function geGranary() {
     await say('tamsin', 'sad', "(…He'll laugh at that. He never laughs at anything I tell him.)");
   } else if (c === 1) {
     await say('tamsin', 'neutral', "Your loss. Watch the sky tonight.");
-    await fadeOut(800); await narr('At midnight the whole east end of Kettlebrook lights up green and orange. By dawn the granary is a black skeleton. Inquisition grain — and the village\'s winter with it.'); await fadeIn(800);
+    await fadeOut(800); await wait(250); await fadeIn(800); await narr('At midnight the whole east end of Kettlebrook lights up green and orange. By dawn the granary is a black skeleton. Inquisition grain — and the village\'s winter with it.');
     await narr('At the north road, Lark is waiting, swinging her legs on a fence.');
     await say('larkMB', 'happy', "Kairo said to let you have a copy. Says it's no fun racing someone who can't find the track.");
     f.ge2 = 'ignore'; Opinion.add('fear', 2); f.kbHungry = true;
@@ -648,9 +655,17 @@ async function gePosters() {
   const f = F();
   await say('larkA', 'happy', "Psst! {name}! Look what I've got. Green paint. A LOT of green paint.");
   await say('larkA', 'neutral', "Tonight Green Eclipse paints green eyes on every WANTED poster in the Hollow. Smiling ones. Every single one. Kairo says fear only works if it goes both ways.");
-  const c = await ask('larkA', 'happy', "Wanna help? You can do the one on the guardhouse door. It's the biggest.", ["Hand me a brush.", "I'll stay out of it.", "Don't — they'll search every house for Drags. Kess. Maren's patients."]);
+  const popts = ["Hand me a brush.", "I'll stay out of it.", "Don't — they'll search every house for Drags. Kess. Maren's patients."];
+  if (typeof Veil !== 'undefined' && Veil.on()) popts.push('(Red Veil) Paint a red veil on every poster instead. Let them hunt a ghost.');
+  const c = await ask('larkA', 'happy', "Wanna help? You can do the one on the guardhouse door. It's the biggest.", popts);
+  if (c === 3) {
+    await say('larkA', 'happy', "…Is that a SCARF? Oh my gosh. You're a SECRET IDENTITY. Kairo is going to lose his MIND.");
+    await fadeOut(700); await wait(250); await fadeIn(700);
+    await narr('By morning, every WANTED poster in Ashford has a little red scarf painted across the face. Underneath, in neat letters: WHO?');
+    f.ge3 = 'veil'; Veil.addFame(1, 'Ashford woke up to a red scarf on every wanted poster.'); World.remove('larkA'); return;
+  }
   if (c === 0) {
-    await fadeOut(700); await narr('Midnight. You paint a very large, very cheerful pair of green eyes onto the guardhouse WANTED notice. Lark adds eyelashes. And a moustache.'); await fadeIn(700);
+    await fadeOut(700); await wait(250); await fadeIn(700); await narr('Midnight. You paint a very large, very cheerful pair of green eyes onto the guardhouse WANTED notice. Lark adds eyelashes. And a moustache.');
     await narr('By morning, half of Ashford is laughing behind their hands. The other half is checking their locks.');
     f.ge3 = 'help'; Story.addSus(.5); Opinion.add('hope', .5); Opinion.add('fear', .5); f.geTrust = (f.geTrust || 0) + 1;
     await say('larkA', 'happy', "That's the best moustache I've ever done. I'm telling Kairo you did the eyelashes.");
@@ -683,7 +698,7 @@ async function gePosters() {
       if (x < -20 || x > G.view.w + 20 || y < -20 || y > G.view.h + 20) continue;
       c.save();
       c.fillStyle = 'rgba(0,0,0,.55)'; c.beginPath(); c.ellipse(x, y + 1, 8, 9, 0, 0, 7); c.fill();
-      c.font = '700 17px "Pixelify Sans"'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = '800 18px "Nunito"'; c.textAlign = 'center'; c.textBaseline = 'middle';
       c.lineWidth = 3.5; c.strokeStyle = '#1a1206'; c.strokeText(q, x, y + 1);
       c.fillStyle = q === '!' ? '#ffd34a' : '#9fd8ff'; c.fillText(q, x, y + 1);
       c.restore();

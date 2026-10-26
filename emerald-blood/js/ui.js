@@ -290,7 +290,7 @@ function askName() {
   return new Promise(res => {
     const ov = document.createElement('div'); ov.className = 'ov'; ov.style.cssText = 'z-index:60;background:radial-gradient(ellipse at center,#10301c,#050806);flex-direction:column;gap:14px';
     ov.innerHTML = `<div style="font-family:'Press Start 2P';color:var(--green);font-size:clamp(12px,2.2vw,16px);text-shadow:0 0 12px #46ff95">WHAT IS YOUR NAME?</div>
-      <input id="nmIn" maxlength="12" value="${esc((G.S && G.S.name) || 'Ren')}" autocomplete="off" spellcheck="false" style="font:600 22px 'Pixelify Sans',sans-serif;text-align:center;width:min(70vw,320px);padding:10px;border-radius:10px;border:2px solid #2f8a55;background:#0c1a12;color:#e8fff0;outline:none">
+      <input id="nmIn" maxlength="12" value="${esc((G.S && G.S.name) || 'Ren')}" autocomplete="off" spellcheck="false" style="font:600 22px 'Nunito',sans-serif;text-align:center;width:min(70vw,320px);padding:10px;border-radius:10px;border:2px solid #2f8a55;background:#0c1a12;color:#e8fff0;outline:none">
       <div class="muted" style="font-size:13px">You can change it later in Settings.</div>
       <div class="btnrow"><button class="btn" id="nmDef">Keep "Ren"</button><button class="btn" id="nmGo" style="border-color:#46ff95;color:#46ff95">Begin ▶</button></div>`;
     document.body.appendChild(ov);

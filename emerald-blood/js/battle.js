@@ -155,7 +155,7 @@ const Battle = {
     const me = this.me();
     S.hp = Math.max(1, me.hp); S.mp = me.mp;
     for (const a of B.actors) if (a.side === 'p' && !a.isMe && G.S.party.includes(a.id)) G.S.allies[a.id] = { hp: Math.max(1, a.hp), mp: a.mp };
-    if (B.blazed) { G.S.hood = false; if (cfg.witness) Story.addSus(cfg.witness); }
+    if (B.blazed && !G.S.veil) { G.S.hood = false; if (cfg.witness) Story.addSus(cfg.witness); }
     if (result === 'win' && Story.rankCheck) setTimeout(() => Story.rankCheck(), 50);
     this.ui(false);
     G.mode = prevMode === 'battle' ? 'world' : 'world'; UI.controls(true); UI.hud();
@@ -425,7 +425,7 @@ const Battle = {
     if (a.strain >= a.strainMax * .9 && !a.fever) { a.fever = 2; B.flash = .4; this.text(a, 'BLOOD FEVER!', '#ff5a3a', -60, true); sfx('alarm'); }
     if (a.isMe && B.sb.verdict) { const d = Math.max(1, Math.round(a.maxHp * .04)); a.hp = Math.max(1, a.hp - d); this.text(a, 'VERDICT -' + d, '#fff3b0', -70); }
     this.hud();
-    if (A.blaze && a.isMe && !A.sword) { if (!B.blazed) { B.blazed = true; if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
+    if (A.blaze && a.isMe && !A.sword) { if (!B.blazed) { B.blazed = true; if (G.S.veil) { if (!G.S.f.veilDrag) G.S.f.veilDrag = 1; this.text(a, 'Green fire behind the red scarf!', '#ff8a8a', -50); } else if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
     B.dim = .55; B.dimCol = a.isMe ? '10,40,20' : '30,10,40'; sfx('art');
     await this.msg(A.name, 700);
     if (A.type === 'buff') { await this.play(a, 'spellcast', 7, 80); a.ward = 3; this.spark(a.x, a.y - 30, '#46ff95', 26); this.text(a, 'EMERALD FIELD', '#46ff95'); B.fx.push({ field: 1, x: a.x, y: a.y - 30, t: 0, life: 900 }); }
@@ -878,13 +878,13 @@ const Battle = {
         c.fillStyle = 'rgba(0,0,0,.7)'; c.fillRect(x - 1, y - 1, bw + 2, 9);
         c.fillStyle = '#e04848'; c.fillRect(x, y, bw * a.hp / a.maxHp, 4);
         c.fillStyle = a.broken ? '#fff' : '#ffd34a'; c.fillRect(x, y + 5, bw * Math.min(1, a.brk / a.brkMax), 2);
-        c.font = '700 11px "Pixelify Sans"'; c.textAlign = 'center'; c.lineJoin = 'round'; c.strokeStyle = '#000'; c.lineWidth = 3; c.strokeText(a.name, a.x - 7, y - 3); c.fillStyle = '#ffb4a8'; c.fillText(a.name, a.x - 7, y - 3);
+        c.font = '800 12px "Nunito"'; c.textAlign = 'center'; c.lineJoin = 'round'; c.strokeStyle = '#000'; c.lineWidth = 3; c.strokeText(a.name, a.x - 7, y - 3); c.fillStyle = '#ffb4a8'; c.fillText(a.name, a.x - 7, y - 3);
         const tr = TIER[a.key]; if (tr) { const tx = a.x - 7 + c.measureText(a.name).width / 2 + 9; c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(tx - 6, y - 12, 12, 11); c.fillStyle = TIER_COL[tr]; c.font = '700 8px "Press Start 2P"'; c.fillText(tr, tx, y - 3); }
-        if (a.E.trait) { c.font = '600 10px "Pixelify Sans"'; c.fillStyle = 'rgba(0,0,0,.78)'; const tw = c.measureText(a.E.trait).width, lx = Math.max(tw / 2 + 5, Math.min(W - tw / 2 - 5, a.x)); c.fillRect(lx - tw / 2 - 3, a.y + 6, tw + 6, 13); c.fillStyle = '#f2e6c4'; c.fillText(a.E.trait, lx, a.y + 16); }
+        if (a.E.trait) { c.font = '800 12px "Nunito"'; c.fillStyle = 'rgba(0,0,0,.78)'; const tw = c.measureText(a.E.trait).width, lx = Math.max(tw / 2 + 5, Math.min(W - tw / 2 - 5, a.x)); c.fillRect(lx - tw / 2 - 3, a.y + 6, tw + 6, 13); c.fillStyle = '#f2e6c4'; c.fillText(a.E.trait, lx, a.y + 16); }
         if (a.shield) { c.fillStyle = '#cfd8e8'; for (let i = 0; i < a.shield; i++) c.fillRect(a.x - 12 + i * 9, y - 22, 7, 5); }
         if (a.stance) { c.fillStyle = '#cfe8ff'; c.font = '700 8px "Press Start 2P"'; c.fillText('STANCE', a.x, y - 24); }
         if (a.frostOn) { c.strokeStyle = 'rgba(160,230,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30 * (a.size || 1), 20 * (a.size || 1), 34 * (a.size || 1), 0, 0, 7); c.stroke(); }
-        if (this.me() && this.me().sight && a.next) { const u = a.next.hits.some(h => h.unp), el = elOf(a.next); c.font = '600 8px "Pixelify Sans"'; c.fillStyle = '#000'; const nt = '◉ ' + a.next.name + (el ? ' · ' + ELEM[el][0] : ''); c.fillText(nt, a.x + 1, y + 18); c.fillStyle = u ? '#ff6a6a' : el ? ELEM[el][1] : '#7fe8ff'; c.fillText(nt, a.x, y + 17); }
+        if (this.me() && this.me().sight && a.next) { const u = a.next.hits.some(h => h.unp), el = elOf(a.next); c.font = '800 10px "Nunito"'; c.fillStyle = '#000'; const nt = '◉ ' + a.next.name + (el ? ' · ' + ELEM[el][0] : ''); c.fillText(nt, a.x + 1, y + 18); c.fillStyle = u ? '#ff6a6a' : el ? ELEM[el][1] : '#7fe8ff'; c.fillText(nt, a.x, y + 17); }
         if (a.drawn) { c.strokeStyle = 'rgba(95,216,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y, 20, 7, 0, 0, 7); c.stroke(); }
       }
       if (lift || lean) c.restore();

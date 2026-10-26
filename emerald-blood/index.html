@@ -13,11 +13,11 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 :root{--bg:#070a08;--panel:rgba(12,18,14,.94);--panel2:#16211a;--line:#2d4434;--text:#eef4ef;--muted:#93ab9b;--green:#46ff95;--green2:#1f7a47;--hp:#ef4b54;--mp:#3fa0ff;--gold:#f2c14e;--scroll:#f3d65c;--scroll2:#e0b93a;--ink:#2a1d0c}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Pixelify Sans',ui-rounded,system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Nunito',ui-rounded,system-ui,sans-serif;font-weight:700;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-touch-callout:none}
 button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
 #game{position:fixed;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;background:#000}
 .ui{position:fixed;z-index:5}
@@ -95,7 +95,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 #toast{left:50%;top:max(44px,calc(env(safe-area-inset-top) + 40px));transform:translateX(-50%);max-width:70vw;background:rgba(9,13,11,.94);border:2px solid #2f6b43;padding:6px 14px;border-radius:10px;font-size:14px;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;z-index:30}
 #toast.on{opacity:1}
 #banner{left:0;right:0;top:34%;text-align:center;font-family:'Press Start 2P';font-size:clamp(13px,2.4vw,20px);color:#fff;text-shadow:0 3px 0 #000,0 0 18px #000;opacity:0;transition:opacity .7s;pointer-events:none;z-index:25}
-#banner small{display:block;font-family:'Pixelify Sans';font-size:14px;margin-top:8px;color:#cfe8d6}
+#banner small{display:block;font-family:'Nunito';font-size:14px;margin-top:8px;color:#cfe8d6}
 #banner.on{opacity:1}
 #fade{inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .5s;z-index:40}
 #fade.on{opacity:1;pointer-events:auto}
@@ -130,19 +130,19 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 #cmdDesc .scroll{display:inline-block;padding:6px 12px;font-size:14px;max-width:100%;background:#fdf6dc;border-color:#8a6a22}
 #react{position:absolute;right:calc(max(10px,env(safe-area-inset-right)) + 54px);bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:12px;pointer-events:auto}
 .rx{touch-action:none;-webkit-user-select:none;user-select:none;width:96px;height:96px;border-radius:50%;font-family:'Press Start 2P';font-size:11px;color:#fff;border:3px solid #000;box-shadow:0 6px 0 #000,0 0 18px #0009;transition:transform .06s,filter .06s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px}
-.rx small{font-family:'Pixelify Sans';font-size:11px;opacity:.85}
+.rx small{font-family:'Nunito';font-size:11px;opacity:.85}
 #rxDodge{background:radial-gradient(circle at 40% 35%,#6ad7ff,#1b6ea8)}
 #rxParry{background:radial-gradient(circle at 40% 35%,#ffe36a,#c07a14)}
 .rx:active,.rx.on{transform:scale(.93);filter:brightness(1.25)}
 #hitTap{position:absolute;inset:0;pointer-events:auto}
-#bmsg{position:absolute;left:50%;top:14%;transform:translateX(-50%);font-family:'Pixelify Sans',sans-serif;font-weight:600;font-size:clamp(14px,2.4vw,19px);line-height:1.3;color:#fff;text-align:center;background:rgba(8,12,16,.86);border:2px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 14px;max-width:78vw;text-shadow:0 1px 0 #000;opacity:0;transition:opacity .2s;pointer-events:none}#bmsg b{font-weight:700}
+#bmsg{position:absolute;left:50%;top:14%;transform:translateX(-50%);font-family:'Nunito',sans-serif;font-weight:600;font-size:clamp(14px,2.4vw,19px);line-height:1.3;color:#fff;text-align:center;background:rgba(8,12,16,.86);border:2px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 14px;max-width:78vw;text-shadow:0 1px 0 #000;opacity:0;transition:opacity .2s;pointer-events:none}#bmsg b{font-weight:700}
 #bmsg.on{opacity:1}
 #tgtHint{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-60%);font-size:14px;background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:5px 12px;pointer-events:auto}
 #facePop{position:fixed;bottom:4%;z-index:30;width:min(30vh,150px);height:min(32vh,162px);pointer-events:none;opacity:0;transition:transform .22s ease-out,opacity .22s;filter:drop-shadow(0 0 10px rgba(0,0,0,.8))}#facePop canvas{width:100%;height:100%}#facePop.l{left:1%;transform:translateX(-60%)}#facePop.r{right:12%;transform:translateX(60%)}#facePop.on{opacity:1;transform:translateX(0)}
 .wmap{position:relative;width:100%;border-radius:10px;overflow:hidden;border:2px solid #5a4a30}.wmap img{width:100%;display:block}
 .pin{position:absolute;transform:translate(-50%,-50%);background:none;border:0;padding:0;color:var(--pc);font-size:clamp(11px,1.6vw,16px);line-height:1;cursor:pointer;text-shadow:0 0 3px #000,0 0 6px #000;display:flex;flex-direction:column;align-items:center}
 .pin span{display:grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;background:rgba(20,14,8,.72);border:1.5px solid var(--pc)}
-.pin.big span{width:1.8em;height:1.8em}.pin em{font-style:normal;font-family:'Pixelify Sans';font-weight:700;font-size:.72em;color:#fff3dc;white-space:nowrap;margin-top:1px}
+.pin.big span{width:1.8em;height:1.8em}.pin em{font-style:normal;font-family:'Nunito';font-weight:700;font-size:.72em;color:#fff3dc;white-space:nowrap;margin-top:1px}
 .pin.on span{background:var(--pc);color:#000}.pin i{font-style:normal;font-size:.6em;background:#46e070;color:#000;border-radius:4px;padding:0 3px;margin-top:1px}
 .comp{display:flex;gap:10px;align-items:center}.comp canvas{width:64px;height:64px;image-rendering:pixelated;background:rgba(0,0,0,.25);border-radius:8px;flex:none}
 #cutin{position:fixed;inset:0;z-index:35;display:flex;flex-direction:column;pointer-events:none;background:#000}
@@ -156,7 +156,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 /* ---------- menus ---------- */
 .ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
 .card{background:var(--panel);border:3px solid var(--line);border-radius:14px;padding:12px 16px;max-height:100%;overflow:auto;width:min(720px,100%)}
-.card h2{font-family:'Press Start 2P';font-size:13px;color:var(--green);margin:2px 0 10px}
+.card h2{font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:17px;color:var(--green);margin:2px 0 10px}
 .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .tabs button{padding:6px 12px;border-radius:8px;background:var(--panel2);border:2px solid var(--line);font-size:14px}
 .tabs button.on{border-color:var(--green);color:var(--green)}
@@ -185,8 +185,8 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 #crCv{width:min(44vh,240px);height:min(44vh,240px);image-rendering:pixelated;background:radial-gradient(circle,#24402e,#0b120e 70%);border-radius:50%;border:3px solid var(--line)}
 #crPort{width:min(22vh,120px);height:min(24vh,132px);image-rendering:pixelated;border:3px solid var(--line);border-radius:10px;background:#0b120e}
 #crOpts{flex:1;max-height:100%;overflow:auto;padding-right:4px}
-#crOpts .crTabs{display:flex;gap:6px;margin:2px 0 8px}#crOpts .crTabs button{flex:1;font-family:'Press Start 2P';font-size:10px;padding:9px 4px;border-radius:9px;border:2px solid var(--line);background:#0e1a13;color:#cfe;cursor:pointer}#crOpts .crTabs button.on{background:#1f8a4c;color:#fff;border-color:#46ff95}
-#crOpts h2{font-family:'Press Start 2P';font-size:13px;color:var(--green);margin:4px 0 8px}
+#crOpts .crTabs{display:flex;gap:6px;margin:2px 0 8px}#crOpts .crTabs button{flex:1;font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:14px;padding:9px 4px;border-radius:9px;border:2px solid var(--line);background:#0e1a13;color:#cfe;cursor:pointer}#crOpts .crTabs button.on{background:#1f8a4c;color:#fff;border-color:#46ff95}
+#crOpts h2{font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:17px;color:var(--green);margin:4px 0 8px}
 .opt{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:15px}
 .opt label{width:92px;color:var(--muted);flex:none}
 .opt .val{flex:1;text-align:center;background:var(--panel2);border:2px solid var(--line);border-radius:8px;padding:5px;font-size:15px}
@@ -206,11 +206,11 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 #cine{z-index:70 !important}#cine .cbar{position:absolute;left:0;right:0;height:9%;background:#000;z-index:2}#cine .cbar.top{top:0}#cine .cbar.bot{bottom:0}
 #cineCap{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);width:min(86%,760px);z-index:3;text-align:center;opacity:0;transition:opacity .25s;
   font-size:clamp(14px,2.3vw,19px);line-height:1.4;color:#f4f1e8;text-shadow:0 2px 4px #000,0 0 10px #000;background:linear-gradient(transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent);padding:8px 16px}
-#cineCap.on{opacity:1}#cineCap b{display:block;font-family:'Press Start 2P';font-size:clamp(9px,1.5vw,12px);margin-bottom:4px;letter-spacing:1px}#cineCap.narr span{font-style:italic;color:#e0e6dc}
+#cineCap.on{opacity:1}#cineCap b{display:block;font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:clamp(13px,2vw,16px);margin-bottom:4px;letter-spacing:1px}#cineCap.narr span{font-style:italic;color:#e0e6dc}
 #cineSkip{position:absolute;top:max(8px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:4;background:rgba(0,0,0,.55);color:#cfe;border:1px solid #46ff9566;border-radius:8px;padding:6px 12px;font-size:13px;font-family:inherit}
 .sockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.sockrow b{min-width:58px}.sock{border:1px dashed #3a5a46;border-radius:7px;padding:3px 8px;font-size:13px;color:#8aa}.sock.on{border-style:solid;color:#e8fff0}.sock.small{border-color:#7fe8a8}.sock.medium{border-color:#ffd88a}.stat.lore.locked{opacity:.55}.grade{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 6px;border-radius:7px;font-family:'Press Start 2P';font-size:11px;color:#0b120e;background:var(--gc);box-shadow:0 0 8px var(--gc)}
 .gbar{height:8px;background:#0e1a13;border-radius:5px;overflow:hidden;margin:6px 0;border:1px solid #2f5a40}.gbar i{display:block;height:100%}
-.tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.branch h4{margin:2px 0 6px;color:var(--green);font-family:'Press Start 2P';font-size:10px}
+.tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.branch h4{margin:2px 0 6px;color:var(--green);font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:14px}
 .node{border:1px solid #2f5a40;border-radius:9px;padding:7px;margin-bottom:6px;display:flex;flex-direction:column;gap:4px;font-size:13px}.node b{color:#e8fff0}.node span{color:#9ab8a6}.node em{font-style:normal;font-size:12px;color:#7a9}
 .node.got{border-color:#46ff95;background:#123a22}.node.locked{opacity:.5}.node .btn{padding:4px 8px;font-size:12px}</style>
 </head>
@@ -282,29 +282,30 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <div id="rotate"><div class="ph"></div><div>Turn your phone sideways to play.</div></div>
 <div id="loading"><div style="font-family:'Press Start 2P';color:var(--green);font-size:14px">EMERALD BLOOD</div><div class="bar"><b id="loadBar"></b></div><div id="loadTxt">Loading…</div></div>
 
-<script src="js/core.js?v=42"></script>
-<script src="js/world.js?v=42"></script>
-<script src="js/dialog.js?v=42"></script>
-<script src="js/portraits.js?v=42"></script>
-<script src="js/cine.js?v=42"></script>
-<script src="js/battle.js?v=42"></script>
-<script src="js/monsters.js?v=42"></script>
-<script src="js/realm.js?v=42"></script>
-<script src="js/story.js?v=42"></script>
-<script src="js/stones.js?v=42"></script>
-<script src="js/lore.js?v=42"></script>
-<script src="js/guild.js?v=42"></script>
-<script src="js/progress.js?v=42"></script>
-<script src="js/dungeons.js?v=42"></script>
-<script src="js/quests.js?v=42"></script>
-<script src="js/worldmap.js?v=42"></script>
-<script src="js/events.js?v=42"></script>
-<script src="js/companions.js?v=42"></script>
-<script src="js/bonds.js?v=42"></script>
-<script src="js/bloodlust.js?v=42"></script>
-<script src="js/ui.js?v=42"></script>
-<script src="js/ch1.js?v=42"></script>
-<script src="js/passives.js?v=42"></script>
+<script src="js/core.js?v=43"></script>
+<script src="js/world.js?v=43"></script>
+<script src="js/dialog.js?v=43"></script>
+<script src="js/portraits.js?v=43"></script>
+<script src="js/cine.js?v=43"></script>
+<script src="js/battle.js?v=43"></script>
+<script src="js/monsters.js?v=43"></script>
+<script src="js/realm.js?v=43"></script>
+<script src="js/story.js?v=43"></script>
+<script src="js/stones.js?v=43"></script>
+<script src="js/lore.js?v=43"></script>
+<script src="js/guild.js?v=43"></script>
+<script src="js/progress.js?v=43"></script>
+<script src="js/dungeons.js?v=43"></script>
+<script src="js/quests.js?v=43"></script>
+<script src="js/worldmap.js?v=43"></script>
+<script src="js/events.js?v=43"></script>
+<script src="js/companions.js?v=43"></script>
+<script src="js/bonds.js?v=43"></script>
+<script src="js/bloodlust.js?v=43"></script>
+<script src="js/ui.js?v=43"></script>
+<script src="js/ch1.js?v=43"></script>
+<script src="js/passives.js?v=43"></script>
+<script src="js/veil.js?v=43"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
