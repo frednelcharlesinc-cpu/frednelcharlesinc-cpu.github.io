@@ -844,7 +844,7 @@ SCENES.mill = {
     if (f.millGuards && !f.halvardBeaten && y <= 13) { Story.run(halvardEvent); return true; }
   },
   tiles: { '11,11': () => cage(), '23,11': () => cage(), '11,14': () => cage(), '17,8': async () => narr(F().halvardBeaten ? 'The mill is empty now. Straw, chains, and the smell of old fear.' : 'The door is barred from the inside.') },
-  async onEnter() { if (!F().millIn) { F().millIn = true; await narr('The air smells of smoke and incense. Somewhere ahead, someone is singing a hymn.'); } }
+  async onEnter() { if (!F().millIn) { F().millIn = true; await narr('The air smells of smoke and incense. Somewhere ahead, someone is singing a hymn: "…glory to the First Sun, who sleeps beneath the gold, and shall rise when the chains are broken…"'); } }
 };
 async function cage() { await narr('An empty cage. Tiny scratch marks on the bars, low down — the height of a child.'); if (!F().ribbonSeen) await narr('In one corner, scratched very carefully: a little dragon.'); }
 async function millGuards() {
@@ -1081,7 +1081,7 @@ async function talkKids(e) {
   const M = {
     tamsinK: f.dusk ? "Kairo dances like a drunk goat. Don't tell him I said that. …Okay, tell him." : f.kairo ? "You lost to Kairo AGAIN? …Okay, you didn't? Huh. He's gonna be grumpy all night." : "I'm not playing hide-and-seek. It's for babies. I'm practicing being a warrior. Like Kairo.",
     boK: f.dusk ? "I ate four honey cakes. Five. Don't count." : "Hi, {name}! I found a frog. His name is Frog. I'm gonna keep him forever. Or till lunch.",
-    larkK: f.dusk ? "Did you know if you jump over the fire you get luck for a year? I made that up. But it's probably true!" : "Ilya's hiding SO good, I checked under every bucket — did you know there's forty-one buckets in Thornvale? I counted. Forty-two if you count Bo's head. Ha!",
+    larkK: f.dusk ? "Nana taught us a skipping song! ♪ Gold king, gold king, under the sand — counting his coins with a bone for a hand. Don't say his name and don't touch his crown — or he'll wake up and the sky comes down! ♪ …It's just a song. I think." : "Ilya's hiding SO good, I checked under every bucket — did you know there's forty-one buckets in Thornvale? I counted. Forty-two if you count Bo's head. Ha!",
     nixK: f.dusk ? "…The fire is the same green as our eyes. Do you think that's on purpose?" : "…I'm watching the ridge. Somebody keeps walking along the top of it. Asha says it's goats. Goats don't carry lanterns."
   };
   await say(id, null, M[id]);
@@ -1203,7 +1203,9 @@ async function talkBrom() {
   await say('brom', 'happy', 'There. E-RANK. Everyone starts at E — even the ones who obviously aren\'t. Earn the rest.');
   await say('brom', 'neutral', 'Board\'s on the back wall. Bounties, trials, the Proving Bouts when you\'re D-rank. Every job pays in coin and in rank points. Enough points and the letter on your card changes.');
   await say('brom', 'sad', 'And mind the roads. Outside the Crown\'s walls the land belongs to the Eight — the bandit kings. Every one of them SSS. The Gilded Hound owns the toll-roads round here. Don\'t owe him money. Don\'t owe him anything.');
-  F().kingsKnown = true;
+  await say('brom', 'happy', 'And if you\'re the dreaming sort — every rookie asks. Yes, Auremund is real. The City That Swallowed the Sun. Gold streets, gem walls, the treasure of a whole lost kingdom, somewhere under the Dustveil sand.');
+  await say('brom', 'neutral', 'Forty expeditions in my lifetime. Thirty-nine came back with nothing. One didn\'t come back. …And the Crown made searching for it a hanging offence two hundred years ago. Funny thing for a Crown to be scared of. A pile of gold.');
+  F().kingsKnown = true; F().auremundHeard = 1;
   toast('Registered at the <b>Adventurers\' Guild</b>: <b style="color:#9aa3a0">E-RANK</b>. Win the hard fights and your rank will climb.', 4800);
   UI.hud();
 }
@@ -1383,6 +1385,7 @@ async function vaneYears() {
   await say('vane', 'neutral', 'The small ones are tools. Set one in a blade, it bites deeper. In armor, it holds. In your Arts — it remembers them for you.');
   await say('vane', 'neutral', 'The middle ones are not tools. They have a will. They choose who carries them. Most men who force one end up carried BY it.');
   await say('vane', 'sad', 'And the great ones… I saw one once, in the Crown\'s vault. It was humming. Three soldiers were guarding it. All three were weeping and couldn\'t say why.');
+  await say('vane', 'neutral', 'One of them told me afterwards it wasn\'t humming at all. It was counting. Like coins. …He hanged himself that winter. I never understood it.');
   await say('vane', 'neutral', 'That\'s why the Crown registers every stone. An unregistered stone is a hanging. They don\'t fear thieves, pup. They fear anyone strong enough to say no.');
   await say('vane', 'neutral', 'Here. A small one. A Still Shard. It quiets the blood. You\'ll need it — yours runs hot.');
   Stones.give('still');

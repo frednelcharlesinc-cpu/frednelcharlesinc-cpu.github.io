@@ -18,7 +18,7 @@ const WORLD = {
     title: 'The Empire of Veyl', blurb: 'The Crown rules from Aurel, the white capital. Its army answers to one Grand General, and beneath him stand the Four Pillars — each one SSS, each one a nation\'s worth of power in one body.',
     people: [
       { id: 'emperor', name: 'Emperor Lucan Aurel', tag: 'Third of his name · "the Sun That Does Not Set"', tier: '?',
-        text: 'Young for an emperor, brilliant, and patient. He inherited a throne that shares the continent with the Guild and the Eight, and he has never accepted it. Nobody has seen him fight. Nobody knows his tier.',
+        text: 'Young for an emperor, brilliant, and patient. The Aurel line claims descent from the First Sun, the hero-king who "founded the Empire on the ashes of the Cataclysm" — though no portrait of him survives, and his tomb has never been found. He inherited a throne that shares the continent with the Guild and the Eight, and he has never accepted it. Nobody has seen him fight. Nobody knows his tier.',
         agenda: 'To end the balance. Crush the Eight, swallow the Guild, and own every D-stone in the world. The Registry, the stone quarries and the hunt for the Dragonoid are all one plan — his.' },
       { id: 'dread', name: 'Dread', tag: 'Grand General · "the Black Sun"', tier: 'SSSS', need: 'raid',
         text: 'Commander of every Imperial army. Never speaks above a few words. Carries Gravecleaver, a black greatsword longer than a man. Vane swears his eyes are green.' },
@@ -50,7 +50,7 @@ const WORLD = {
         text: 'Hid his green eyes behind tinted lenses for twenty years and rose to captain in the Imperial army. The night he was ordered to burn a Drag village, he burned his own fortress instead and walked out through the fire. Furious, fire-scarred, and loved by the miners he freed.',
         agenda: 'To bring the Crown down by any means. Everything Kairo could become, twenty years older.', under: 'The Cinder Brigade · Old Mags' },
       { id: 'saint', band: 0, name: 'Abbot Merrow', tag: 'the Hollow Saint', race: 'Drag', tier: 'SSS', territory: 'The Dustveil Wastes', need: 'kingsKnown',
-        text: 'A Drag who believes his people are Fratenaptor\'s children — and that the chains the Seven Elders forged are the real crime. His followers are the only people alive who truly worship the dragon. Every Drag hanged in a market square was hanged because men like him exist.',
+        text: 'A Drag who believes his people are Fratenaptor\'s children — and that the chains the Seven Elders forged are the real crime. He says the "Father" speaks to him in dreams, from beneath the sand. (Fratenaptor\'s tomb is in the eastern mountains. The Dustveil is in the far south-west. Nobody has ever pointed this out to him.) His followers are the only people alive who truly worship the dragon. Every Drag hanged in a market square was hanged because men like him exist.',
         agenda: 'To feed enough D-stones to the tomb-mountains that the dragon wakes and "frees its children." Ren\'s darkest mirror.', under: 'The Ashen Choir · Brother Hask' },
       { id: 'grimtusk', band: 1, name: 'Hrok Grimtusk', tag: 'the Tusk King', race: 'Beast-folk (exiled)', tier: 'SSS', territory: 'The Fanglands — the northern steppe', need: 'kingsKnown',
         text: 'A tusked beast-folk warlord whose people were burned off the green steppe by the Crown and pushed into the frozen north. Has a code of honor older than the Empire. Respects strength, despises cowards, keeps every promise.',
@@ -101,7 +101,7 @@ const WORLD = {
 /* ---- every SSS fighter carries a LARGE D-stone. Large stones have a will of their own and choose their bearer;
         refuse its will and the stone stays dead in your hand — or burns the hand off. ---- */
 const SIGS = {
-  emperor: { el: 'light', stone: 'The Crown Sun', will: 'Wants to rule. It has chosen every emperor of Veyl — and abandoned the ones who were weak.', art: 'Edict', artText: 'Speaks a single command. Every D-stone on the battlefield — friend or foe — obeys it for one breath.' },
+  emperor: { el: 'light', stone: 'The Crown Sun', will: 'Wants to rule. It has chosen every emperor of Veyl — and abandoned the ones who were weak. Court physicians record that every emperor who carried it began to talk in their sleep. Always about gold.', art: 'Edict', artText: 'Speaks a single command. Every D-stone on the battlefield — friend or foe — obeys it for one breath.' },
   dread: { el: 'shadow', stone: 'The Black Heart (set in Gravecleaver)', will: 'Silent. Nobody has ever heard it speak. Some say it was once green.', art: 'Black Sun Arc', artText: 'A greatsword swing that carves a crescent of black light across the whole field. What it touches stops healing.' },
   caspian: { el: 'wind', stone: 'Gale Sovereign (katana guard)', will: 'Pride. It serves only someone who believes they are the best alive.', art: 'Unbowed Draw', artText: 'Vane\'s sheathed draw, stolen and made his own: the cut lands before the wind it makes. Cannot be parried by anyone who has not seen it before.' },
   ysolde: { el: 'fire', stone: 'The Last Lantern', will: 'Mercy, twisted. It believes burning is a kindness.', art: 'Absolution', artText: 'The lantern opens. Every Drag who looks at the light feels their mana go quiet — Drag Arts cost double while it shines.' },
@@ -126,6 +126,30 @@ const SIGS = {
   odo: { el: 'wind', stone: 'The Thirteenth Card', will: 'Luck. Or mischief. Odo isn\'t sure there\'s a difference.', art: 'Dealer\'s Choice', artText: 'Throws a storm of glowing cards; the effect is random every time — from a harmless sting to the strongest single hit in the Guild.' },
   vane: { el: 'wind', stone: '(none — his was taken)', will: 'His stone was torn from his sword the day Dread took his arm. He has fought forty years of stories without it — and his sword is still faster than most stones.', art: 'The Sheathed Draw', artText: 'The style Ren carries now. A sword is loudest in its sheath.' }
 };
+/* ---------- legends & the Unwritten History (fragments found in the world) ---------- */
+const LEGENDS = [
+  { name: 'Auremund, the City That Swallowed the Sun', need: 'auremundHeard',
+    text: 'The dream of every adventurer alive: a city of gold streets and gem walls, the treasury of a kingdom older than the Empire, sunk somewhere beneath the Dustveil sand. Tavern songs say its king was so rich he paved his throne room with crowns. Forty Guild expeditions have looked for it. The Crown made the search a hanging offence two hundred years ago, and nobody remembers why.' },
+  { name: 'The Seven Elders', need: null,
+    text: 'Seven Drags who stood against Fratenaptor four hundred years ago and chained it beneath the tomb-mountains. The Empire\'s histories call them "the dragon\'s penitent servants." The Drags\' own songs call them heroes. Strangely, no two histories agree on what the chains were made of.' }
+];
+const PAGES = [ // fragments of an old Drag chronicle, scattered and half-burned
+  '"…and the dragon was our guardian before it was anyone\'s terror. It kept the old roads safe and asked only for songs. Then the gold king came to court it, with a gift in his hands…"',
+  '"…he was the first of men to learn that a stone can be cut from a living dragon, and that whoever wears the stone wears the dragon\'s will. He set it in a crown and named the crown CHAINS, and laughed at his own joke…"',
+  '"…for a hundred days the sky was gold. Then the dragon wept fire on every city that would not kneel. The world called it the Cataclysm. The world blamed the dragon. The dragon could not speak to tell them…"',
+  '"…seven of the dragon\'s own blood, whose eyes were green as its heart, went into the burning city. Not to slay the dragon. To free it. They broke the crown into seven…"',
+  '"…the dragon, freed, could not bear what it had done, and asked to sleep. The Seven laid it beneath the mountains and set the broken crown in the stone around it, so no hand could gather it again. And the king they sealed alive in his own treasury, and poured the sand over it, and every one of his coins…"',
+  '"…but he had a son, and the son had a pen. In a generation the story was written backwards: a demon dragon, its wicked green-eyed servants, and a hero-king who died saving the world. The son built a white city and named it after his father…"',
+  '"…the dead do not stay dead in a city that is never forgotten. Every stone pried from the mountains loosens the seal. Every coin dreamed of is a prayer. He waits. He counts. When the last piece of the crown comes home, he will wear it again…"'
+];
+const PAGE_AT = { 'in_nana': 0, 'd_warren': 1, 'd_crypt': 2, 'realm': 3, 'd_mire': 4, 'in_shop': 5, 'd_crystal': 6 };
+function legendsHTML() {
+  const f = G.S.f, pages = G.S.pages || [];
+  let h = `<div class="stat" style="margin-bottom:6px"><h3>Legends</h3></div>`;
+  for (const L of LEGENDS) if (!L.need || f[L.need]) h += `<div class="stat lore" style="margin-bottom:6px"><h3 style="color:#ffd88a">${L.name}</h3><p>${L.text}</p></div>`;
+  h += `<div class="stat lore" style="margin-bottom:6px"><h3 style="color:#c8a0ff">The Unwritten History <span class="muted">· ${pages.length}/${PAGES.length} fragments</span></h3><p class="muted">Burned pages of an old Drag chronicle, hidden in chests across the land. Someone wanted them gone. Someone else wanted them found.</p>${pages.length ? pages.slice().sort((a, b) => a - b).map(i => `<p><b style="color:#c8a0ff">${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][i]}.</b> ${PAGES[i]}</p>`).join('') : '<p class="muted">No fragments found yet.</p>'}</div>`;
+  return h;
+}
 function worldMenuHTML() {
   const f = G.S.f;
   const known = p => !p.need || f[p.need];
@@ -140,5 +164,6 @@ function worldMenuHTML() {
       h += `<div class="stat lore" style="margin-bottom:6px"><h3>${p.name} <span style="color:${TIER_COL[p.tier] || '#ffd88a'}">· ${p.tier}</span>${p.band != null ? ` <span class="grade" style="--gc:${BAND_COL[p.band]}">${BAND_NAME[p.band]}</span>` : ''}</h3><p class="muted">${p.tag}${p.race ? ' · ' + p.race : ''}${p.element ? ' · ' + p.element : ''}${p.territory ? '<br>Territory: ' + p.territory : ''}</p><p>${p.text}</p>${p.agenda ? `<p><b>Agenda:</b> ${p.agenda}</p>` : ''}${p.under ? `<p class="muted"><b>Underlings:</b> ${p.under}</p>` : ''}${p.secret && f[p.secret.need] ? `<p style="color:#ffd88a"><b>Secret:</b> ${p.secret.text}</p>` : ''}${(() => { const g = SIGS[p.id]; if (!g) return ''; const E = ELEM[g.el]; return `${E ? `<p><b style="color:${E[1]}">◆ ${E[0]}</b>${['brine', 'ash', 'saint', 'dread'].includes(p.id) ? ' <span class="muted">— raw Drag mana, given an element by the stone</span>' : ''}</p>` : ''}<p><b style="color:#ff8a9a">Large D-stone:</b> ${g.stone}<br><span class="muted"><b>Its will:</b> ${g.will}</span></p><p><b style="color:#7dffb0">${g.art}:</b> ${g.artText}</p>${g.secret && f[g.secret.need] ? `<p style="color:#ffd88a"><b>Secret:</b> ${g.secret.text}</p>` : ''}`; })()}</div>`;
     }
   }
+  h += legendsHTML();
   return h;
 }

@@ -393,7 +393,7 @@ const BG = {
 const CINE = {
   legend: () => [
     { bg: 'legend', fx: ['embers', 'smoke'], dur: 2500, cam: [[0, 320, 200, 1.15], [9000, 320, 170, 1]], vignette: 'rgba(0,0,0,.7)', ev: [[600, () => sfx('break')]],
-      lines: ['Four hundred years ago, the demon dragon Fratenaptor nearly ended the world. Even the dragons curse his name.'] },
+      lines: ['Four hundred years ago, the demon dragon Fratenaptor nearly ended the world. Even the dragons curse his name.', 'They say the sky turned gold for a hundred days before it burned. Nobody remembers why gold.'] },
     { bg: 'wardens', fx: ['embers'], dur: 3600, cam: [[0, 320, 220, 1.05], [6000, 320, 190, 1]], vignette: 'rgba(0,0,0,.7)',
       actors: [0, 1, 2, 3, 4, 5, 6].map(i => ({ spr: (G.man.dfolk || [])[i] || 'folk0', sil: true, x: 60 + i * 87, y: 334, dir: 'up', scale: 1.4, glowEyes: [0, -30], glowR: 3 })),
       lines: ['Seven with green eyes stood against him. History forgot what they did.', 'The people say the Drags worshipped him. That his fire lives in their blood. That you can always know a Drag by their eyes — green, and glowing.', 'They say a lot of things.'] },

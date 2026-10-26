@@ -24,6 +24,7 @@ const MAPLOC = [
   { id: 'cataclysm', name: 'The Cataclysm', kind: 'landmark', x: .20, y: .67, text: 'A burning wound in the world where Fratenaptor once fell. The most dangerous land alive: monsters no Guild rank can list — and dragons. Real ones.' },
   { id: 'tomb', name: 'The Tomb of Fratenaptor', kind: 'landmark', x: .85, y: .58, text: 'The tomb-mountains where the Seven Elders chained the demon dragon. Every D-stone ever found was broken from these peaks. Thornvale hid in their shadow.' },
   { id: 'realm', name: 'The Realm of No Return', kind: 'landmark', x: .80, y: .41, text: 'The forbidden frozen forest where the mana is poison and maps stop working. Vane taught you here for five years. Nobody else has ever come back.', scene: ['realm', 22, 14, 'down'] },
+  { id: 'auremund', name: 'Auremund (legend)', kind: 'landmark', x: .27, y: .92, text: 'Somewhere under the Dustveil sand, if the songs are true: the City That Swallowed the Sun. Every adventurer\'s dream. Searching for it is a hanging offence.' },
   // ---- villages & places you have been
   { id: 'thornvale', name: 'Thornvale (ruins)', kind: 'village', x: .82, y: .66, text: 'Your village. A hidden Drag valley in the Tomb Mountains. Burned by Dread and the Inquisition.' },
   { id: 'ashford', name: 'Ashford Hollow', kind: 'village', x: .70, y: .70, text: 'A market village on the Ashen River with a Guild branch hall, an inn, and a lot of people who hate green eyes.', scene: ['ashford', 53, 12, 'down'] },

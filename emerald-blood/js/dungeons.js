@@ -84,7 +84,9 @@ async function spawnExtras(W, name) {
       if (S.chests[key]) { await narr('Empty. Someone — you — got here first.'); return; }
       if (tier === 'gold' && D && !S.f['clear_' + name]) { await narr('The great chest is sealed by a ward that pulses in time with something deeper in the dungeon. Defeat what guards it first.'); return; }
       S.chests[key] = 1; ent.img = Pick.sheet(`chest_${tier}_o`); sfx('blip');
-      await grantLoot(LOOT[tier]()); Quests.event('chest', name); save();
+      await grantLoot(LOOT[tier]()); Quests.event('chest', name);
+      const pg = PAGE_AT[mk]; S.pages = S.pages || []; if (pg !== undefined && !S.pages.includes(pg) && (tier === 'gold' || !D)) { S.pages.push(pg); sfx('level'); setTimeout(() => toast(`Under the coins: a <b style="color:#c8a0ff">burned page</b> of an old chronicle. (${S.pages.length}/${PAGES.length} — Menu → World)`, 4200), 1400); }
+      save();
     } });
     W.ents.push(e);
   }
@@ -168,7 +170,7 @@ async function dungeonBoss(id) {
     d_warren: ['A goblin twice the size of the others sits on a throne of stolen cart wheels, wearing a bent copper pot as a crown.', ['Gutrot', 'MINE. All of it. The sheep, the shoes, the shiny. And now YOUR shiny. Get \'im, lads!']],
     d_crypt: ['In the deepest vault, a skeleton in burned priest\'s robes turns to face you. Pale fire flickers in its eye sockets.', ['Morvane', 'They burned my chapel for "harbouring Drags." They were right to. Now I harbour only the dead. Join them.']],
     d_mire: ['The water heaves. Something enormous, green and dripping rises out of the flooded shaft — and smiles.', ['Old Mother Bogg', 'Fresh meat walked into my larder all by itself. Such GOOD manners.']],
-    d_crystal: ['The cavern ceiling moves. Crystal scales unfold from the rock — a wyrm, sleeping in the stone for a thousand years, opens one blue eye.', ['The Crystal Wyrm', '…Dragon… blood… I smell… the old master… in you…']]
+    d_crystal: ['The cavern ceiling moves. Crystal scales unfold from the rock — a wyrm, sleeping in the stone for a thousand years, opens one blue eye.', ['The Crystal Wyrm', '…Dragon… blood… in you. Not… HIS blood. Not the gold one\'s. …Good. Then I may kill you… cleanly.']]
   }[id];
   await narr(intro[0]); CHAR._boss = { name: intro[1][0], sprite: B.img || d.boss }; await say('_boss', null, intro[1][1]);
   const r = await Battle.start({ enemies: [d.boss], boss: true, noFlee: true, bd: d.bd, intro: B.name.toUpperCase() });

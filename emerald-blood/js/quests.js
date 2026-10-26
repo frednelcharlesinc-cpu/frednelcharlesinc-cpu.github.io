@@ -67,7 +67,7 @@ const QNPC = {
   witness3: { name: 'Sleepless Widow', sprite: null, map: 'ashford', at: [12, 21] }
 };
 const WITNESS = {
-  witness1: 'A tall man in red bought bread at midnight. Paid in old coin — Imperial, two hundred years old. His hands were cold as a cellar.',
+  witness1: 'A tall man in red bought bread at midnight. Paid in old coin — so old the king\'s face on it had been scratched out, every one. His hands were cold as a cellar.',
   witness2: 'I followed him to the ruined chapel. He walked through the rubble like it was a door. Then the candles in the crypt went out, all at once.',
   witness3: 'He stood under my window and asked to be invited in. Very polite. I said no. My husband said yes. …My husband sleeps all day now.'
 };

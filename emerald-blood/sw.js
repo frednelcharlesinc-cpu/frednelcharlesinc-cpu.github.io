@@ -1,5 +1,5 @@
 // network-first so updates arrive immediately; cache keeps the game playable offline
-const C = 'emerald-blood-v27';
+const C = 'emerald-blood-v28';
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(clients.claim()));
 self.addEventListener('fetch', e => {
