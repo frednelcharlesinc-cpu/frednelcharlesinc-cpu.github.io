@@ -63,7 +63,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 #cmdList button.press{background:rgba(106,74,18,.35);transform:translateX(3px)}
 .sb{padding:9px 12px;border-radius:12px;background:rgba(12,18,14,.85);border:2px solid var(--line);font-size:14px;min-width:78px}
 .sb.on{border-color:var(--green);color:var(--green);box-shadow:0 0 12px #46ff9555}
-#bA{grid-column:2;grid-row:2/4}#bMount{grid-column:1;grid-row:1}#bHood{grid-column:1;grid-row:2}#bRun{grid-column:1;grid-row:3}
+#bA{grid-column:2;grid-row:2/4}#bMount{grid-column:1;grid-row:1}#bBlood{grid-column:2;grid-row:1}#bHood{grid-column:1;grid-row:2}#bRun{grid-column:1;grid-row:3}
 
 /* ---------- dialog ---------- */
 #dlg{left:0;right:0;bottom:0;height:46%;min-height:150px;z-index:20;pointer-events:auto;display:flex;align-items:flex-end;justify-content:center;padding:0 max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
@@ -227,6 +227,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <div id="stick" class="hide"><b></b></div>
 <div id="stickHint" class="ui hide">drag to<br>move</div>
 <div id="pad" class="ui hide">
+  <button id="bBlood" class="sb hide" style="border-color:#7a1a1a;color:#ff8a7a">Bloodlust</button>
   <button id="bMount" class="sb hide">Mount</button>
   <button id="bHood" class="sb">Hood ▲</button>
   <button id="bA" class="rb">A</button>
@@ -281,26 +282,27 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <div id="rotate"><div class="ph"></div><div>Turn your phone sideways to play.</div></div>
 <div id="loading"><div style="font-family:'Press Start 2P';color:var(--green);font-size:14px">EMERALD BLOOD</div><div class="bar"><b id="loadBar"></b></div><div id="loadTxt">Loading…</div></div>
 
-<script src="js/core.js?v=32"></script>
-<script src="js/world.js?v=32"></script>
-<script src="js/dialog.js?v=32"></script>
-<script src="js/portraits.js?v=32"></script>
-<script src="js/cine.js?v=32"></script>
-<script src="js/battle.js?v=32"></script>
-<script src="js/monsters.js?v=32"></script>
-<script src="js/realm.js?v=32"></script>
-<script src="js/story.js?v=32"></script>
-<script src="js/stones.js?v=32"></script>
-<script src="js/lore.js?v=32"></script>
-<script src="js/guild.js?v=32"></script>
-<script src="js/progress.js?v=32"></script>
-<script src="js/dungeons.js?v=32"></script>
-<script src="js/quests.js?v=32"></script>
-<script src="js/worldmap.js?v=32"></script>
-<script src="js/events.js?v=32"></script>
-<script src="js/companions.js?v=32"></script>
-<script src="js/bonds.js?v=32"></script>
-<script src="js/ui.js?v=32"></script>
+<script src="js/core.js?v=34"></script>
+<script src="js/world.js?v=34"></script>
+<script src="js/dialog.js?v=34"></script>
+<script src="js/portraits.js?v=34"></script>
+<script src="js/cine.js?v=34"></script>
+<script src="js/battle.js?v=34"></script>
+<script src="js/monsters.js?v=34"></script>
+<script src="js/realm.js?v=34"></script>
+<script src="js/story.js?v=34"></script>
+<script src="js/stones.js?v=34"></script>
+<script src="js/lore.js?v=34"></script>
+<script src="js/guild.js?v=34"></script>
+<script src="js/progress.js?v=34"></script>
+<script src="js/dungeons.js?v=34"></script>
+<script src="js/quests.js?v=34"></script>
+<script src="js/worldmap.js?v=34"></script>
+<script src="js/events.js?v=34"></script>
+<script src="js/companions.js?v=34"></script>
+<script src="js/bonds.js?v=34"></script>
+<script src="js/bloodlust.js?v=34"></script>
+<script src="js/ui.js?v=34"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

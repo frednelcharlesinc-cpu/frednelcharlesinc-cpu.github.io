@@ -20,6 +20,7 @@ const UI = {
     $('#sus').innerHTML = S.f.hoodGiven ? Array.from({ length: 5 }, (_, i) => `<i class="eye ${i < Math.floor(S.sus) ? 'on' : ''}"></i>`).join('') : '<span class="muted" style="font-size:11px">Thornvale</span>';
     $('#gold').textContent = S.gold + 'g';
     $('#obj').innerHTML = S.quest ? '<b>▸</b> ' + esc(S.quest) : ''; $('#obj').style.display = S.quest ? '' : 'none';
+    const bb = $('#bBlood'); if (bb && typeof Bloodlust !== 'undefined') { bb.classList.toggle('hide', !Bloodlust.unlocked()); bb.classList.toggle('on', Bloodlust.on()); bb.textContent = Bloodlust.on() ? 'Bloodlust ●' : 'Bloodlust'; }
     const mb = $('#bMount'); if (mb && typeof Mounts !== 'undefined') { const own = Object.keys(Mounts.owned()); mb.classList.toggle('hide', !own.length || !Mounts.allowedHere()); mb.textContent = S.riding ? 'Dismount' : 'Mount'; mb.classList.toggle('on', !!S.riding); }
     const hb = $('#bHood'); hb.classList.toggle('on', !S.hood && S.f.hoodGiven); hb.textContent = S.f.hoodGiven ? (S.hood ? 'Hood ▲' : 'Hood ▼') : 'Hood —';
   },

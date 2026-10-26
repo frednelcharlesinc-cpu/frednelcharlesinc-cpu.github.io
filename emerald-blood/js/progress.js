@@ -49,8 +49,8 @@ const TREES = {
       { id: 'b4', name: 'Last Light', desc: 'PERFECT hits deal ×1.8 instead of ×1.5.', cost: 2, req: 'b3' },
       { id: 'b5', name: 'Mirage Step', desc: 'The teleport slash. Vanish and strike from three directions. Needs power grade B. (New Art)', cost: 3, req: 'b3', minGrade: 'B', art: 'mirage' }],
     Eye: [
-      { id: 'e1', name: 'Steady Gaze', desc: 'Emerald Sight lasts 4 turns instead of 3.', cost: 1, req: 'art:sight' },
-      { id: 'e2', name: 'Clear Sight', desc: 'Emerald Sight costs 3 less MP.', cost: 1, req: 'e1' },
+      { id: 'e1', name: 'Steady Gaze', desc: 'Emerald Ascension lasts 4 turns instead of 3.', cost: 1, req: 'art:sight' },
+      { id: 'e2', name: 'Clear Sight', desc: 'Emerald Ascension costs 3 less MP to force awake.', cost: 1, req: 'e1' },
       { id: 'e3', name: 'Read the Blade', desc: 'Dodge and parry windows are 20% wider — always, not just with Sight.', cost: 2, req: 'e2' }],
     Tide: [
       { id: 't1', name: 'Deep Azure', desc: 'The Azure orb can swallow 4 attacks instead of 3.', cost: 1, req: 'art:azure' },

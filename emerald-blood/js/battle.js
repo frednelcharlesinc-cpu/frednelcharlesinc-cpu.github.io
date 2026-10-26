@@ -8,9 +8,9 @@ const ARTS = {
   needle: { name: 'Viper Needle', strain: 30, mp: 4, desc: 'Three fast stabs. Hard to parry.', type: 'hit', hits: [{ anim: 'slash', m: .8 }, { anim: 'slash', m: .8 }, { anim: 'slash', m: 1 }], brk: 8, pierce: 1 },
   wyrm: { name: 'Wyrmpiercer', strain: 40, mp: 5, desc: 'A spear thrust forged to punch through dragon scale. ×2.6, pierces parries.', type: 'hit', hits: [{ anim: 'thrust', m: 2.6 }], brk: 18, pierce: 1 },
   moonstep: { name: 'Moonstep', strain: 25, mp: 3, desc: 'Liora moves like moonlight on water: enemies lose track of her for 2 turns.', type: 'veil' },
-  sight: { name: 'Emerald Sight', strain: 20, mp: 8, desc: 'Open your eyes all the way. For 3 turns dodging and parrying become FAR easier, and you see every enemy\'s next move. Drinks a lot of mana.', type: 'sight', blaze: 1 },
+  sight: { name: 'Emerald Ascension', strain: 20, mp: 8, desc: 'TRANSFORMATION. Your eyes open all the way and your body stops thinking — it just moves. For 3 turns: dodging and perfect parries become effortless, +40% speed, +30% attack power, every other Art costs 40% less MP, and you see every enemy\'s next move. To awaken it you must either be IN THE FLOW — 5 perfect dodges or parries in a row without being touched (then it costs nothing) — or burn HALF your max MP.', type: 'sight', blaze: 1 },
   azure: { name: 'Azure Tide', strain: 35, mp: 6, desc: 'The blue aura. For 3 turns you move faster, and an Azure orb holds the field: it strikes alongside your Attacks and SWALLOWS enemy magic and aura attacks (up to 3).', type: 'azure', blaze: 1, brk: 6 },
-  crimson: { name: 'Crimson Tide', strain: 55, mp: 9, desc: 'The red aura, unleashed. A devastating crimson burst at one enemy: ×3.2, pierces every defense, hurls them back and delays their turn.', type: 'cast', hits: [{ m: 3.2 }], blaze: 1, brk: 26 },
+  crimson: { name: 'Crimson Tide', strain: 55, mp: 9, desc: 'The red aura, gathered into a blazing sphere over your palm and hurled across the field — you never leave your spot. One enemy: ×3.2, pierces every defense, hurls them back and delays their turn.', type: 'cast', hits: [{ m: 3.2 }], blaze: 1, brk: 26 },
   horizon: { name: 'Horizon Draw', sword: 1, strain: 35, mp: 7, desc: 'Vane\'s sheathed style. Stillness — then one horizontal draw-cut that flashes past the WHOLE enemy line. The blade is back in its sheath before the cuts land. ×1.6 to all.', type: 'iai', hits: [{ m: 1.6 }], brk: 14 },
   mirage: { name: 'Mirage Step', sword: 1, strain: 50, mp: 9, desc: 'Vanish. Reappear behind them. Cut. Vanish again. Three strikes from three directions, faster than they can turn — each one draws and sheathes the blade.', type: 'blink', hits: [{ m: 1 }, { m: 1 }, { m: 1.4 }], brk: 22 },
   veil: { name: 'Smoke Veil', strain: 25, mp: 3, desc: 'Kess melts into shadow: enemies lose track of her for 2 turns.', type: 'veil' }
@@ -113,14 +113,14 @@ const SRC_NAME = s => s === 'attack' ? 'Attack' : s === 'link' ? 'Link Arts' : s
 const Battle = {
   B: null,
   // Drag reflex: Drag bodies move more efficiently — wider timing windows. The Verdant Eye widens them further.
-  reflex(a) { if (!a || a.side !== 'p') return 1; let k = (a.blind ? .6 : 1) * Skills.reflex(a.isMe ? 'me' : a.id); if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.sight) k *= 1.85; return k; },
+  reflex(a) { if (!a || a.side !== 'p') return 1; let k = (a.blind ? .6 : 1) * Skills.reflex(a.isMe ? 'me' : a.id); if (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) k *= 1.25; if (a.sight) k *= 2.4; return k; },
   chooseSkill(e) { const pool = e.E.skills.filter(s => s.hits); let r = Math.random(), sk = pool[0]; for (const s of pool.slice(1)) { if (r < (s.w || .3)) { sk = s; break; } r -= (s.w || .3); } return sk; },
   async start(cfg) {
     if (typeof cfg === 'string') cfg = { enemies: [cfg] };
     const prevMode = G.mode; G.mode = 'battle'; Dlg.close(); UI.controls(false); $('#hud').classList.add('hide'); $('#hudR').classList.add('hide');
     const bdKey = cfg.bd || (SCENES[G.S.map] && SCENES[G.S.map].bd) || 'field';
     G.img['bd_' + bdKey] = G.img['bd_' + bdKey] || await loadImg('assets/bd_' + bdKey + '.jpg');
-    const B = this.B = { cfg, bd: G.img['bd_' + bdKey], actors: [], fx: [], texts: [], rings: [], flash: 0, shake: 0, dim: 0, dimCol: '0,0,0', timeScale: 1,
+    const B = this.B = { cfg, bd: G.img['bd_' + bdKey], actors: [], fx: [], texts: [], rings: [], st: { perf: 0, pp: 0, pd: 0, hurt: 0 }, flash: 0, shake: 0, dim: 0, dimCol: '0,0,0', timeScale: 1,
       blazed: false, over: null, turn: 0, tutorial: cfg.tutorial ? { dodge: 1, parry: 1, hit: 1 } : null, log: [], press: [] };
     // party
     const W = G.view.w;
@@ -214,7 +214,7 @@ const Battle = {
     return new Promise(resolve => {
       const B = this.B; a.mp = Math.min(a.maxMp, a.mp + 1 + (a.isMe ? B.sb.mp : 0));
       a.strain = Math.max(0, a.strain - (12 + (a.isMe ? B.sb.cool + (Skills.has('me', 't3') ? 4 : 0) : 0)));
-      if (a.sight) { a.sight--; if (!a.sight) this.text(a, 'Sight fades', '#7fbf9a', -30); }
+      if (a.sight) { a.sight--; if (!a.sight) { a.spd -= a.sightSpd || 0; a.atk -= a.sightAtk || 0; a.sightSpd = a.sightAtk = 0; this.text(a, 'Ascension fades — your body feels heavy again', '#7fbf9a', -30); } }
       if (a.azure) { a.azure--; if (!a.azure) { a.spd = a.baseSpd || a.spd; if (B.orb && B.orb.owner === a) { B.orb = null; this.text(a, 'The Azure orb dissolves', '#5fd8ff', -30); } } }
       if (a.fever) { a.fever--; const d = Math.max(1, Math.round(a.maxHp * .06)); a.hp = Math.max(1, a.hp - d); this.text(a, 'BLOOD FEVER -' + d, '#ff5a3a', -20); if (!a.fever) a.strain = Math.min(a.strain, 50); }
       this.hud();
@@ -235,7 +235,7 @@ const Battle = {
       const sub = () => {
         const L = a.arts.map(k => { const A = ARTS[k], cost = this.artCost(a, k), st = this.artStrain(a, k), hot = a.fever || a.strain + st > a.strainMax;
           if (B.cfg.noArts && a.isMe && !A.sword) return [A.name, 'Proving Bouts rules: no Drag Arts. One blaze of your eyes and the whole Guild sees what you are.', () => {}, true, cost];
-          return [A.name, A.desc + `  ⚡ Strain +${st}` + (hot ? (a.fever ? '  — BLOOD FEVER: your arts are locked.' : '  — too hot! Guard or Cultivate to cool down.') : '') + (a.isMe && Stones.artBoost(k) > 1 ? `  ◆ Stone-boosted ×${Stones.artBoost(k).toFixed(2)}` : ''), () => this.useArt(a, k).then(done), a.mp < cost || hot, cost]; });
+          return [A.name, A.desc + `  ⚡ Strain +${st}` + (hot ? (a.fever ? '  — BLOOD FEVER: your arts are locked.' : '  — too hot! Guard or Cultivate to cool down.') : '') + (a.isMe && Stones.artBoost(k) > 1 ? `  ◆ Stone-boosted ×${Stones.artBoost(k).toFixed(2)}` : '') + (k === 'sight' && a.isMe ? `  ◉ Flow ${Math.min(5, a.flow || 0)}/5${(a.flow || 0) >= 5 ? ' — FREE' : ''}` : ''), () => this.useArt(a, k).then(done), a.mp < cost || hot || (k === 'sight' && a.sight), cost]; });
         if (a.isMe && a.arts.includes('azure') && a.arts.includes('crimson')) L.push(['??? Eclipse Convergence', B.orb ? 'Blue holds the field. Red strains to answer it through the orb — the two currents pull toward each other until your bones ache. Your body cannot bear it. Not yet. (End-game technique)' : 'An ultimate that needs setup: Azure Tide\'s orb must hold the field before Crimson can be called THROUGH it. You can feel its shape. You cannot touch it yet. (End-game technique)', () => {}, true]);
         L.push(['◀ Back', 'Return.', menu]); this.openMenu(L, true);
       };
@@ -355,6 +355,7 @@ const Battle = {
   },
   resolveHit(a, t, m, grade, opts) {
     const B = this.B; if (t.ko) return 'ko';
+    if (a.side === 'p' && grade === 'perfect' && !(opts && opts.src === 'counter')) B.st.perf++;
     this.text(a, grade === 'perfect' ? 'PERFECT!' : grade === 'good' ? 'GOOD' : 'MISS', grade === 'perfect' ? '#ffd34a' : grade === 'good' ? '#c9f7d6' : '#999', -40);
     sfx(grade === 'perfect' ? 'perfect' : grade === 'good' ? 'good' : 'miss');
     // enemy defense (they can dodge/parry you unless PERFECT)
@@ -394,6 +395,8 @@ const Battle = {
     clearTimeout(this.popT); this.popT = setTimeout(() => el.classList.remove('on'), 1050);
   },
   damage(t, dmg, big) {
+    if (t.side === 'p' && dmg > 0 && this.B && this.B.st) this.B.st.hurt += dmg;
+    if (t.isMe && dmg > 0) t.flow = 0;
     const M = t.E && t.E.morph;
     t.hp = Math.max(M && !t.exhausted ? 1 : 0, t.hp - dmg); if (M && !t.morphed && t.hp < t.maxHp * M.at) t.pendMorph = 1;
     this.text(t, String(dmg), t.side === 'e' ? '#fff' : '#ff8080', 0, big); if (t.side === 'p' && t.hp > 0 && dmg >= t.maxHp * .18) this.facePop(t, ['hurt']);
@@ -434,7 +437,7 @@ const Battle = {
       });
     } else if (A.type === 'iai') {
       // HORIZON DRAW: stillness, one flash across the whole line, sheathe — then the cuts land
-      const es = this.alive('e'), y0 = a.y, x0 = a.x; B.dim = .7; B.dimCol = '0,0,0';
+      const es = await this.aoePick(a), y0 = a.y, x0 = a.x; B.dim = .7; B.dimCol = '0,0,0'; if (!es.length) return;
       a.anim = 'combat'; this.text(a, '…', '#ffffff', -46); await wait(550);
       const g = await this.qte(es[0], 0, '#ffffff', a);
       const far = Math.min(...es.map(t => t.x)) - 70, ly = es.reduce((m, t) => m + t.y, 0) / es.length - 34;
@@ -463,8 +466,10 @@ const Battle = {
     } else if (A.type === 'sight') {
       if (a.isMe) await Cine.play([{ bg: 'eyes', fx: ['mana'], dur: 1300, fadeIn: 120, tapEnds: true, cam: [[0, 320, 190, 1], [1300, 320, 178, 1.25]], vignette: 'rgba(0,30,10,.7)',
         actors: [{ port: 'me', expr: artHas('me', 'sight') ? 'sight' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[650, s => { s.flash = .9; s.flashCol = '90,255,150'; sfx('art'); }]] }]);
-      await this.play(a, 'spellcast', 7, 70); a.sight = 3 + (Skills.has('me', 'e1') ? 1 : 0); B.flash = .5; sfx('art');
-      this.spark(a.x - 4, a.y - 50, '#46ff95', 30); this.text(a, 'EMERALD SIGHT', '#7dffb0', -40, true); await wait(300);
+      await this.play(a, 'spellcast', 7, 70); const was = a.sight; a.flow = 0; a.sight = 3 + (Skills.has('me', 'e1') ? 1 : 0); B.flash = .8; B.flashCol = '220,255,235'; sfx('art'); B.shake = 8;
+      if (!was) { a.sightSpd = a.spd * .4; a.spd += a.sightSpd; a.sightAtk = Math.round(a.atk * .3); a.atk += a.sightAtk; a.wait *= .5; }
+      B.fx.push({ burst: 1, x: a.x, y: a.y - 30, t: 0, life: 900 });
+      this.spark(a.x - 4, a.y - 50, '#e8fff4', 40); this.text(a, 'EMERALD ASCENSION', '#e8fff4', -50, true); await wait(400);
     } else if (A.type === 'azure') {
       await this.play(a, 'spellcast', 7, 80); sfx('chant');
       a.azure = 3; if (!a.baseSpd) a.baseSpd = a.spd; a.spd = a.baseSpd * 1.45; a.wait *= .6;
@@ -488,17 +493,23 @@ const Battle = {
       const t = await new Promise(r => this.pickTarget(a, r));
       if (a.isMe && k === 'crimson') await Cine.play([{ bg: (c2) => { c2.fillStyle = '#1a0202'; c2.fillRect(-300, -300, 1240, 960); }, fx: ['embers'], dur: 1100, fadeIn: 100, tapEnds: true, cam: [[0, 320, 190, 1.1], [1100, 320, 180, 1.3]], vignette: 'rgba(120,0,0,.8)',
         actors: [{ port: 'me', expr: artHas('me', 'shout') ? 'shout' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[500, s => { s.flash = .9; s.flashCol = '255,60,40'; s.shake = 16; sfx('crit'); }]] }]);
-      await this.play(a, 'spellcast', 7, 70);
-      B.fx.push({ orb: 1, kind: 'cast', x: a.x - 22, y: a.y - 36, t: 0, life: 700 }); sfx('chant');
+      // Ren never moves: he gathers the red aura into a sphere over his palm and hurls it across the field
+      a.anim = 'spellcast'; a.frame = 3; a.once = false; a.loopAnim = 'spellcast';
+      const sp = { sphere: 1, x: a.x - 34, y: a.y - 46, r: 4, t: 0, life: 99999 }; B.fx.push(sp); sfx('chant');
+      for (let i = 0; i < 40; i++) { sp.r = 4 + i * .55; if (i % 6 === 0) this.spark(sp.x + rnd(-30, 30), sp.y + rnd(-30, 30), '#ff5a4a', 2); await wait(16); }
       const g = await this.qte(t, rnd(420, 560), '#ff4a4a', a);
-      B.fx.push({ beam: 1, x1: a.x - 22, y1: a.y - 36, x2: t.x, y2: t.y - 30, t: 0, life: 420 }); sfx('crit'); B.flash = .5; B.shake = 12;
-      this.spark(t.x, t.y - 30, '#ff5a4a', 30);
+      sfx('crit'); const x0 = sp.x, y0 = sp.y, t1 = performance.now();
+      while (true) { const k2 = Math.min(1, (performance.now() - t1) / 340); sp.x = lerp(x0, t.x, k2); sp.y = lerp(y0, t.y - 30, k2) - Math.sin(k2 * Math.PI) * 26; if (k2 >= 1) break; await wait(16); }
+      sp.life = 0; a.loopAnim = 'combat'; a.anim = 'combat';
+      B.fx.push({ burst: 1, red: 1, x: t.x, y: t.y - 30, t: 0, life: 700 }); B.flash = .6; B.flashCol = '255,60,40'; B.shake = 14;
+      this.spark(t.x, t.y - 30, '#ff5a4a', 34);
       this.resolveHit(a, t, A.hits[0].m * boost, g, { brk: A.brk, unblockable: 1, pierce: 1, src: k }); B.tideUsed = 1;
       if (!t.ko) { t.wait += 40; this.text(t, 'HURLED BACK', '#ff6a5a', -24); await this.slide(t, t.hx - 70, t.hy, 160); await wait(220); await this.slide(t, t.hx, t.hy, 320); }
     } else if (A.type === 'all') {
+      const pick = this.aoeOk(a) ? null : await new Promise(r => this.pickTarget(a, r));
       await this.play(a, 'spellcast', 7, 90);
       for (const h of A.hits) {
-        const es = this.alive('e'); if (!es.length) break;
+        const es = pick ? (pick.ko ? [] : [pick]) : this.alive('e'); if (!es.length) break;
         const g = await this.qte(es[0], rnd(500, 650), '#46ff95', a);
         sfx('art'); B.flash = .5;
         for (const t of es) { this.pillar(t.x, t.y); this.resolveHit(a, t, h.m * boost, g, { brk: A.brk, unblockable: 1, src: k }); }
@@ -507,7 +518,12 @@ const Battle = {
     }
     B.dim = 0; a.alpha = a.veil ? .45 : 1; this.hud();
   },
-  artCost(a, k) { return Math.max(1, ARTS[k].mp + (a.bind ? 2 : 0) - (a.isMe ? Stones.artMp(k) + (k === 'sight' && Skills.has('me', 'e2') ? 3 : 0) : 0)); },
+  aoeOk(a) { if (a && a.side === 'e') return true; const p = Power.now(); return p.i > 4 || (p.i === 4 && p.band >= 1); },
+  async aoePick(a) { if (this.aoeOk(a)) return this.alive('e'); const t = await new Promise(r => this.pickTarget(a, r)); return t ? [t] : []; },
+  artCost(a, k) {
+    // Emerald Sight: awaken it by flowing — 5 perfect dodges/parries in a row without being touched — or by burning half your MP
+    if (k === 'sight' && a.isMe) return (a.flow || 0) >= 5 ? 0 : Math.max(1, Math.ceil(a.maxMp / 2) - (Skills.has('me', 'e2') ? 3 : 0));
+    return Math.max(1, Math.round((ARTS[k].mp + (a.bind ? 2 : 0) - (a.isMe ? Stones.artMp(k) + (k === 'sight' && Skills.has('me', 'e2') ? 3 : 0) : 0)) * (a.sight && k !== 'sight' ? .6 : 1))); },
   artStrain(a, k) { return Math.max(5, (ARTS[k].strain || 30) - (a.isMe ? this.B.sb.calm + (Skills.has('me', 't3') ? 8 : 0) : 0)); },
   async summon(key, intro) {
     const B = this.B, E = ENEMY[key], used = B.actors.filter(a => a.side === 'e' && !a.ko).map(a => a.hx);
@@ -529,7 +545,7 @@ const Battle = {
     }
   },
   async morph(e) {
-    const B = this.B, M = e.E.morph; e.morphed = 1; e.adapt = {}; e.tempo = 1; e.wheel = 0; e.wheelAng = 0;
+    const B = this.B, M = e.E.morph; e.morphed = 1; if (e.key === 'kairo_duel') { e.atk = Math.round(e.atk * 1.25); e.spd *= 1.15; this.text(e, 'RANK UP — ' + TIER.kairo_duel, '#ff6a5a', -70, true); } e.adapt = {}; e.tempo = 1; e.wheel = 0; e.wheelAng = 0;
     B.dim = .65; B.dimCol = '45,0,0'; sfx('break'); B.shake = 14;
     for (const l of M.lines) await this.msg(l, 1600);
     B.flash = 1.3; sfx('crit'); e.morph = M.turns; e.size = 1.32; e.atk = Math.round(e.E.atk * 1.3); e.spd = e.E.spd + 3; e.def = e.E.def + 4; e.brk = 0; e.broken = 0;
@@ -674,6 +690,8 @@ const Battle = {
       }
       const m = h.m;
       if (e.morph > 0 && (res === 'pdodge' || res === 'pparry')) { e.tempo = Math.max(.68, (e.tempo || 1) * .9); this.text(e, 'ADAPTING TO YOUR TIMING', '#ff8a6a', -40); }
+      if (t.side === 'p') { if (res === 'pdodge') B.st.pd++; if (res === 'pparry') B.st.pp++; }
+      if (t.isMe && (res === 'pdodge' || res === 'pparry')) { t.flow = (t.flow || 0) + 1; if (t.flow === 5 && t.arts && t.arts.includes('sight') && !t.sight) { this.text(t, 'IN THE FLOW — ASCENSION READY', '#e8fff4', -70, true); sfx('art'); } }
       if (res === 'pdodge') { sfx('pdodge'); this.text(t, 'PERFECT DODGE', '#6ad7ff', -10, true); this.hop(t); t.mp = Math.min(t.maxMp, t.mp + 1); t.afterimg = 400; }
       else if (res === 'dodge') { sfx('dodge'); this.text(t, 'DODGE', '#9ad1ff'); this.hop(t); }
       else if (res === 'pparry') { sfx('pparry'); this.text(t, 'PERFECT PARRY', '#ffe36a', -10, true); t.mp = Math.min(t.maxMp, t.mp + 2);
@@ -707,12 +725,29 @@ const Battle = {
   },
   async victory() {
     const B = this.B; sfx('win'); Music.stop();
-    const es = B.actors.filter(a => a.side === 'e'); const xp = es.reduce((s, a) => s + a.E.xp, 0), gold = es.reduce((s, a) => s + a.E.gold, 0);
+    const es = B.actors.filter(a => a.side === 'e'); const base = es.reduce((s, a) => s + a.E.xp, 0), gold = es.reduce((s, a) => s + a.E.gold, 0);
+    const R8 = ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'SSSS'], me8 = Power.now().i;
+    const foe = Math.max(0, ...es.map(a => R8.indexOf(TIER[a.key] || 'E'))), gap = foe - me8;
+    // 1) rank gap: farming weaklings two ranks below you is nearly worthless; punching up pays
+    const gapM = gap <= -2 ? .1 : gap === -1 ? .55 : gap === 0 ? 1 : gap === 1 ? 1.35 : 1.7;
+    // 2) the grind: from rank B on, raw EXP thins out
+    const grind = [1, 1, .85, .6, .45, .35, .28, .22, .18][me8] || .18;
+    // 3) battle quality: perfect hits, perfect parries & dodges, and above all — not being touched
+    const st = B.st, qk = me8 >= 3 ? 1.5 : 1, clean = st.hurt === 0 && gap >= -1;
+    let q = Math.min(.5, st.perf * .04) + Math.min(.6, st.pp * .07) + Math.min(.4, st.pd * .05);
+    if (clean) q += gap >= 0 ? .8 : .3;
+    q *= qk; if (gap <= -2) q *= .25;
+    const xp = Math.max(1, Math.round(base * gapM * grind * (1 + q)));
     G.S.gold += gold; const ups = Story.gainXp(xp);
+    const parts = [];
+    if (gap <= -2) parts.push('far below your rank ×0.1'); else if (gap === -1) parts.push('below your rank'); else if (gap >= 1) parts.push(gap >= 2 ? 'far above your rank!' : 'above your rank');
+    if (st.perf) parts.push(`${st.perf} perfect hit${st.perf > 1 ? 's' : ''}`); if (st.pp) parts.push(`${st.pp} perfect parr${st.pp > 1 ? 'ies' : 'y'}`); if (st.pd) parts.push(`${st.pd} perfect dodge${st.pd > 1 ? 's' : ''}`);
+    if (clean) parts.push(gap >= 0 ? 'FLAWLESS ×1.8' : 'flawless');
+    if (parts.length) setTimeout(() => toast(`EXP ${xp}: ` + parts.join(' · ') + (q > 0 ? ` (style +${Math.round(q * 100)}%)` : ''), 3600), 300);
     if (es.some(a => a.key === 'mana_wyrm') && !G.S.f.wyrmDrop) { G.S.f.wyrmDrop = 1; setTimeout(() => Stones.give('breath'), 2200); }
     this.me().hp = Math.max(this.me().hp, 1);
     if (ups) { const me = this.me(); me.maxHp = G.S.stats.maxHp; me.maxMp = G.S.stats.maxMp; me.hp = me.maxHp; me.mp = me.maxMp; }
-    await this.msg(`Victory!  +${xp} EXP  +${gold} gold${ups ? '  ·  POWER UP — ' + Power.now().grade + ' (' + BAND_NAME[Power.now().band] + ')' : ''}`, ups ? 2200 : 1600);
+    await this.msg(`${st.hurt === 0 && gap >= 0 ? 'FLAWLESS VICTORY!' : 'Victory!'}  +${xp} EXP  +${gold} gold${ups ? '  ·  POWER UP — ' + Power.now().grade + ' (' + BAND_NAME[Power.now().band] + ')' : ''}`, ups ? 2200 : 1600);
     return 'win';
   },
   // ---------------- fx ----------------
@@ -757,6 +792,16 @@ const Battle = {
       c.globalAlpha = a.ko && a.side === 'e' ? Math.max(0, 1 - (a.at / 900)) : (a.alpha ?? 1);
       if (a.hurtT > 0 && Math.floor(a.hurtT / 50) % 2) c.globalAlpha *= .4;
       if (a.afterimg > 0) { a.afterimg -= 16; c.save(); c.globalAlpha = .3; drawBT(c, a.isMe ? playerImg() : a.img, a.anim, fr, a.x + 18, a.y, s); c.restore(); }
+      if (a.isMe && a.sight) {
+        const now = performance.now(), img = playerImg(); c.save(); c.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < 3; i++) { const fl = Math.sin(now / (90 + i * 37) + i) * .5 + .5;
+          c.globalAlpha = (.32 + .2 * fl) * (i === 0 ? 1 : .85); drawBT(c, tinted(img, i === 1 ? '#7dffb0' : '#f2fffa'), a.anim, fr, a.x + Math.sin(now / 70 + i) * 1.5, a.y - 2 - i * 3 - fl * 4, s * (1.12 + i * .09 + fl * .04)); }
+        for (let i = 0; i < 6; i++) { const ph = (now / 420 + i / 6) % 1, fx = a.x + Math.sin(i * 2.1 + now / 300) * 18 * s, fy = a.y - 10 - ph * 70 * s; c.globalAlpha = .55 * (1 - ph); c.fillStyle = i % 2 ? '#7dffb0' : '#ffffff'; c.beginPath(); c.moveTo(fx - 3, fy + 8); c.quadraticCurveTo(fx, fy - 10, fx + 3, fy + 8); c.fill(); }
+        const g = c.createRadialGradient(a.x, a.y - 34 * s, 4, a.x, a.y - 34 * s, 58 * s); g.addColorStop(0, 'rgba(230,255,245,.28)'); g.addColorStop(.5, 'rgba(120,255,180,.12)'); g.addColorStop(1, 'rgba(120,255,180,0)');
+        c.globalAlpha = 1; c.fillStyle = g; c.beginPath(); c.ellipse(a.x, a.y - 34 * s, 40 * s, 62 * s, 0, 0, 7); c.fill();
+        if (Math.random() < .5) B.fx.push({ x: a.x + rnd(-16, 16), y: a.y - rnd(0, 60), vx: rnd(-.3, .3), vy: rnd(-2.2, -1), life: rnd(400, 800), t: 0, col: Math.random() < .5 ? '#e8fff4' : '#7dffb0', s: rnd(1.2, 2.4) });
+        c.restore();
+      }
       if (a.isMe) {
         const anim = a.anim, glow = a.glow && anim === 'slash';
         if (a.flip) { c.save(); c.translate(a.x, 0); c.scale(-1, 1); c.translate(-a.x, 0); }
@@ -890,6 +935,13 @@ const Battle = {
       if (p.field) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.8 * (1 - k)})`; c.lineWidth = 2;
         for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + p.t / 400; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 34, p.y + Math.sin(an) * 40); c.lineTo(p.x + Math.cos(an + Math.PI / 3) * 34, p.y + Math.sin(an + Math.PI / 3) * 40); c.stroke(); }
         c.fillStyle = `rgba(70,255,140,${.12 * (1 - k)})`; c.beginPath(); c.ellipse(p.x, p.y, 34, 40, 0, 0, 7); c.fill(); c.restore(); continue; }
+      if (p.sphere) { if (p.life === 0) continue; c.save(); c.globalCompositeOperation = 'lighter'; const R = p.r;
+        const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, R * 1.9); g.addColorStop(0, 'rgba(255,240,230,1)'); g.addColorStop(.3, 'rgba(255,70,50,.95)'); g.addColorStop(.7, 'rgba(170,10,20,.5)'); g.addColorStop(1, 'rgba(120,0,0,0)');
+        c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, R * 1.9, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,140,110,.8)'; c.lineWidth = 2;
+        for (let i = 0; i < 3; i++) { const a0 = performance.now() / (120 + i * 40) + i * 2; c.beginPath(); c.arc(p.x, p.y, R * (1.1 + i * .25), a0, a0 + 2.2); c.stroke(); } c.restore(); continue; }
+      if (p.burst) { c.save(); c.globalCompositeOperation = 'lighter'; const R = 20 + k * (p.red ? 120 : 90), col = p.red ? '255,70,50' : '220,255,240';
+        c.strokeStyle = `rgba(${col},${1 - k})`; c.lineWidth = 6 * (1 - k) + 1; c.beginPath(); c.arc(p.x, p.y, R, 0, 7); c.stroke();
+        const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, R); g.addColorStop(0, `rgba(${col},${.6 * (1 - k)})`); g.addColorStop(1, `rgba(${col},0)`); c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, R, 0, 7); c.fill(); c.restore(); continue; }
       if (p.beam) {
         c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
         c.strokeStyle = p.blue ? `rgba(80,200,255,${.8 * (1 - k)})` : `rgba(255,60,50,${.8 * (1 - k)})`; c.lineWidth = (p.blue ? 8 : 16) * (1 - k * .6); c.beginPath(); c.moveTo(p.x1, p.y1); c.lineTo(p.x2, p.y2); c.stroke();

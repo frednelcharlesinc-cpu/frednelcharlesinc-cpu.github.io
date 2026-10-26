@@ -337,7 +337,7 @@ async function festival() {
         await Cine.play(CINE.awaken());
         await Bt.msg('Every thread is a current. And every current can be pulled… or thrown.', 2100);
         B.flash = 1.3; sfx('art'); G.S.f.eye = true;
-        await Bt.msg('EMERALD SIGHT — AWAKENED', 1800);
+        await Bt.msg('EMERALD ASCENSION — AWAKENED', 1800);
         me.hp = Math.round(me.maxHp * .35); me.mp = me.maxMp; me.arts = ['crimson']; me.sight = 3; me.anim = 'combat'; me.frame = 0; B.dim = 0; Bt.hud(); Music.play('boss');
         await Bt.msg('You don\'t know how. You just know. (Drag Arts → Crimson Tide)', 2400, true);
         B.awoke = B.turn;
@@ -1339,7 +1339,7 @@ async function vaneLesson() {
   await say('vane', 'neutral', 'So it woke. Grief does that. Every Drag has a gift sleeping in the blood, and none are the same twice. Yours sees the current — and moves it.');
   await say('vane', 'sad', 'Throwing it nearly blinded you. Throwing is easy, pup. Any fool can throw. Learn to PULL first. Pulling teaches you where the current wants to go.');
   ['azure', 'sight'].forEach(k => { if (!G.S.arts.includes(k)) G.S.arts.unshift(k); });
-  sfx('level'); toast('Learned <b style="color:#7dffb0">Emerald Sight</b> (open your eyes: 3 turns of easy dodges and parries) and <b style="color:#5fd8ff">Azure Tide</b> (the blue aura and its orb).', 5200);
+  sfx('level'); toast('Learned <b style="color:#7dffb0">Emerald Ascension</b> (your transformation: 3 turns of effortless dodges and parries, more speed and power) and <b style="color:#5fd8ff">Azure Tide</b> (the blue aura and its orb).', 5200);
   await say('vane', 'neutral', 'Now. Show me how you swing that stick.');
   await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Sparring: the old man', music: 'battle',
     onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man taps your forehead with two fingers. You fall over.', 1600); return 'scripted'; } } });

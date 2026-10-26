@@ -309,6 +309,7 @@ const Input = {
 function bindTap(el, fn) { el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); audioUnlock(); fn(e); }); }
 bindTap($('#bA'), () => Input.press('a'));
 bindTap($('#bHood'), () => Input.press('hood'));
+bindTap($('#bBlood'), () => { if (typeof Bloodlust !== 'undefined') Bloodlust.toggle(); });
 bindTap($('#bMount'), () => { if (typeof Mounts !== 'undefined') Mounts.toggle(); });
 bindTap($('#bRun'), () => { G.input.runToggle = !G.input.runToggle; $('#bRun').classList.toggle('on', G.input.runToggle); });
 bindTap($('#btnMenu'), () => Input.press('menu'));

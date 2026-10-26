@@ -115,7 +115,7 @@ const World = {
     // encounters
     if (this.scene.encounters && this.grass.has(e.x + ',' + e.y) && G.S.steps - this.lastEnc > 6 && Math.random() < (this.scene.encRate ?? 0.11)) {
       this.lastEnc = G.S.steps;
-      const enc = this.scene.encounters();
+      const enc = typeof Bloodlust !== 'undefined' ? Bloodlust.filter(this.scene.encounters()) : this.scene.encounters();
       if (enc) Story.run(async () => { const r = await Battle.start(enc); if (r === 'lose') await Story.defeat(); });
     }
   },
