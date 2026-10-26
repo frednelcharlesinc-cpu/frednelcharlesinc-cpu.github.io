@@ -450,7 +450,7 @@ const CINE = {
   ],
   awaken: () => [
     { bg: 'eyes', fx: ['mana'], dur: 3600, cam: [[0, 320, 200, .95], [4200, 320, 175, 1.5]],
-      actors: [{ port: 'me', expr: 'anger', x: 320, y: 400, scale: 3.6, facing: 1 }],
+      actors: [{ port: 'me', expr: artHas('me', 'sight') ? 'sight' : 'anger', x: 320, y: 400, scale: 3.6, facing: 1 }],
       ev: [[2600, s => { s.flash = 1; s.flashCol = '90,255,150'; sfx('art'); }]],
       lines: ['Something behind your eyes cracks open.', 'The world goes slow. You can SEE it — threads of green light in the air, in the stones, running through Halvard like veins.'] }
   ],
