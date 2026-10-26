@@ -129,16 +129,18 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
     } catch (e) { }
   }
 };
-const PFIT = { ren: .9, ren_hood: .9 };
+const PFIT = { ren: .9, ren_hood: .9, ren_v2: .96, kairo_v2: .96 };
 const ART_ID = { larkMB: 'lark', larkA: 'lark', inq: 'ivo',  kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
 // townsfolk and residents borrow the painted face of the sprite they walk around as
-function artId(who) { let id = ART_ID[who] || who; if (!Art.port[id] && CHAR[who] && CHAR[who].sprite && Art.port[CHAR[who].sprite]) id = CHAR[who].sprite; return id; }
+function artId(who) { let id = ART_ID[who] || who; if (!Art.port[id] && CHAR[who] && CHAR[who].sprite && Art.port[CHAR[who].sprite]) id = CHAR[who].sprite; return styled(id); }
+// Settings → Portrait style: 'new' uses the redrawn sets (<id>_v2) where they exist, 'classic' keeps the original art
+function styled(id) { return G.settings && G.settings.artStyle === 'classic' ? id : (Art.port[id + '_v2'] ? id + '_v2' : id); }
 const VEIL_EXPR = e => /anger|shout|power|glare|grief/.test(e || '') ? 'anger' : /focus|sight|determin|asc/.test(e || '') ? 'focused' : 'neutral';
 function veiledArt() { return G.S && G.S.veil && !G.S.kid && Art.port.ren_veil; }
-function artHas(who, expr) { if (who === 'me' && veiledArt()) return true; const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : 'ren') : artId(who); return !!(Art.port[id] && Art.port[id][expr]); }
+function artHas(who, expr) { if (who === 'me' && veiledArt()) return true; const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : styled('ren')) : artId(who); return !!(Art.port[id] && Art.port[id][expr]); }
 function artFor(who, expr) {
   if (who === 'me' && veiledArt()) { const set = Art.port.ren_veil, e = VEIL_EXPR(expr); return { img: set[e] || set.neutral, left: false, id: 'ren_veil' }; }
-  let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : (G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : artId(who);
+  let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : styled(G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : artId(who);
   const set = Art.port[id]; if (!set) return null;
   const alt = { sad: ['closed', 'shock'], shame: ['sad', 'closed'], blush: ['happy'], closed: ['sad'], shock: [], anger: [], happy: [] }[expr] || [];
   for (const e of [expr || 'neutral', ...alt, 'neutral']) if (set[e]) return { img: set[e], left: Art.left.has(id), id };
