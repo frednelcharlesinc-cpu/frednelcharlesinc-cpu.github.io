@@ -1409,7 +1409,9 @@ async function vaneYears() {
   else { f.resolve++; await say('vane', 'happy', '…I can\'t. Nobody taught me. We\'ll have to find out together, you and I. Same as everything else.'); }
   // ---- the egg hatches ----
   await narr('The night of the deep frost, the egg cracks. A tiny black dragon tumbles out onto your blanket — all head and wings and enormous blue eyes — sneezes a spark, and falls asleep on your hand.');
+  await say('dragon', 'happy', 'Kyuu! Kyuuu!');
   await say('vane', 'happy', '…It hatched in my bed. Of course it did.');
+  await say('dragon', 'sneeze', '— hhh — PTCHH!');
   const dn = await ask('me', 'happy', 'It needs a name.', ['Onyx', 'Midnight', 'Soot', 'Nyx']);
   G.S.dragonName = ['Onyx', 'Midnight', 'Soot', 'Nyx'][Math.max(0, dn)]; f.dragonHatched = 1; delete f.dragonEgg;
   sfx('level'); toast(`<b style="color:#8fd0ff">${G.S.dragonName}</b> the baby dragon joined you! It will help in battle. (Menu → Companions)`, 4200);

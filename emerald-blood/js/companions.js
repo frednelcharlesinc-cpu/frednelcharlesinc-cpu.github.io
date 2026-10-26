@@ -268,7 +268,7 @@ const Familiars = {
     _r(c, t); const B = this.B; if (!B) return;
     for (const a of B.actors) if (a.side === 'p' && !a.ko) { const key = a.isMe ? 'me' : a.id; if (!FAMS[key] || !Familiars.has(key)) continue;
       const img = famImg(key, Math.floor(t / 300)); c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = .95;
-      c.drawImage(img, a.x - 44, a.y - 30 + Math.sin(t / 400 + a.x) * 3, 28, 28); c.restore(); }
+      const fs = 28 * (key === 'me' && typeof DRAGON_STAGE === 'function' ? DRAGON_STAGE()[1] : 1); c.drawImage(img, a.x - 30 - fs / 2, a.y - 2 - fs + Math.sin(t / 400 + a.x) * 3, fs, fs); c.restore(); }
     const me = this.me && this.me(), M = Mounts.cur();
     if (me && M) { const sw = B.mountSwoop && t - B.mountSwoop < 600 ? Math.sin((t - B.mountSwoop) / 600 * Math.PI) : 0;
       const img = mountFrame(M.kind, 'left', Math.floor(t / 110), 'back'); c.save(); c.imageSmoothingEnabled = false;
