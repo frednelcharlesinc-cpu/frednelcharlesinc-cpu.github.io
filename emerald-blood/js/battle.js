@@ -825,6 +825,9 @@ const Battle = {
     const list = B.actors.slice().sort((a, b) => a.y - b.y);
     for (const a of list) {
       if (!a.isMe && !a.img) continue;
+      c.save(); // knockback offset + idle breathing (battlefx.js)
+      if (a.kbx) c.translate(a.kbx, 0);
+      if (a.anim === 'combat' && !a.ko && !a.lift) { const br = 1 + Math.sin(t / 430 + a.x * .07) * .014; c.translate(a.x, a.y); c.scale(1 / Math.sqrt(br), br); c.translate(-a.x, -a.y); }
       const lift = a.lift || 0, lean = a.lean || 0, sh = Math.max(.35, 1 - lift / 60);
       c.fillStyle = `rgba(0,0,0,${.28 * sh})`; c.beginPath(); c.ellipse(a.x, a.y, 15 * sh, 5 * sh, 0, 0, 7); c.fill();
       const s = BT_SCALE * (a.size || 1);
@@ -903,6 +906,7 @@ const Battle = {
         const ga = c.globalAlpha; c.globalAlpha = ga * (.7 + Math.sin(t / 200) * .1); drawBT(c, tinted(a.img, a.E.spectral), a.anim, fr, a.x, a.y, s);
         c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = .35; drawBT(c, tinted(a.img, a.E.spectral), a.anim, fr, a.x, a.y - 2, s * 1.04); c.restore(); c.globalAlpha = ga;
       } else drawBT(c, a.img, a.anim, fr, a.x, a.y, s);
+      if (a.flashT > 0) { const im = a.isMe ? playerImg() : a.img; if (im) { c.save(); c.globalAlpha = Math.min(1, a.flashT / 90) * .8; drawBT(c, tinted(im, '#ffffff'), a.anim, a.isMe && a.anim === 'slash' && !G.S.kid ? ([0, 1, 3, 3, 4, 5][fr] ?? fr) : fr, a.x, a.y, s); c.restore(); } }
       c.globalAlpha = 1;
       // weapon trails: a crescent swoosh on the live frames of every swing
       if (a.once && /slash|thrust/.test(a.anim) && !a.ko) {
@@ -929,6 +933,7 @@ const Battle = {
         if (a.drawn) { c.strokeStyle = 'rgba(95,216,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y, 20, 7, 0, 0, 7); c.stroke(); }
       }
       if (lift || lean) c.restore();
+      c.restore();
     }
     if (B.bar) { const b = B.bar, L = b.x - b.h / 2, Y = b.y, hh = 8; // a slim horizontal bar; the marker sweeps left↔right
       c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(L - 3, Y - hh / 2 - 3, b.h + 6, hh + 6);
