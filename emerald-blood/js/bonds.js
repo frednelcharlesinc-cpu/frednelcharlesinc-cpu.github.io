@@ -174,7 +174,7 @@ async function famAct(a, key, F, A, sig) {
 
 /* ---------- art ---------- */
 const CompArt = { cache: {},
-  get(name) { if (this.cache[name] !== undefined) return this.cache[name]; this.cache[name] = null; loadImg(`assets/companions/${name}.png`).then(im => { this.cache[name] = im; if (G.mode !== 'battle' && UI.menuTab === 'companions' && !$('#menu').classList.contains('hide')) UI.renderMenu(); }).catch(() => {}); return null; } };
+  get(name) { if (this.cache[name] !== undefined) return this.cache[name]; this.cache[name] = null; loadImg(`assets/companions/${name}.png?v=29`).then(im => { this.cache[name] = im; if (G.mode !== 'battle' && UI.menuTab === 'companions' && !$('#menu').classList.contains('hide')) UI.renderMenu(); }).catch(() => {}); return null; } };
 
 /* ---------- the Companions tab (replaces the earlier version) ---------- */
 let compSel = null;

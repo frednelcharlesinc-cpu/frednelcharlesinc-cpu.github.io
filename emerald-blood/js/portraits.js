@@ -122,9 +122,9 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
   async load() {
     try { const r = await fetch('assets/art.json', { cache: 'no-cache' }); if (!r.ok) return; const j = await r.json();
       const jobs = [];
-      for (const [id, exprs] of Object.entries(j.portraits || {})) for (const e of exprs) jobs.push(loadImg(`assets/portraits/${id}_${e}.png`).then(im => { (this.port[id] = this.port[id] || {})[e] = im; }).catch(() => {}));
+      for (const [id, exprs] of Object.entries(j.portraits || {})) for (const e of exprs) jobs.push(loadImg(`assets/portraits/${id}_${e}.png?v=${j.v || 1}`).then(im => { (this.port[id] = this.port[id] || {})[e] = im; }).catch(() => {}));
       (j.facesLeft || []).forEach(id => this.left.add(id));
-      for (const id of j.cuts || []) jobs.push(loadImg(`assets/cutscenes/cut_${id}.png`).then(im => { this.cut[id] = im; }).catch(() => {}));
+      for (const id of j.cuts || []) jobs.push(loadImg(`assets/cutscenes/cut_${id}.png?v=${j.v || 1}`).then(im => { this.cut[id] = im; }).catch(() => {}));
       await Promise.all(jobs); this.ready = true;
     } catch (e) { }
   }
