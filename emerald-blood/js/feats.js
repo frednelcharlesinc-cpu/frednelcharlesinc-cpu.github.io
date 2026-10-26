@@ -34,7 +34,9 @@ const FEATS = [
   ['duel', '⚔', 'Read Like a Book', 'Win 5 duel exchanges.', S => (S.f.duelWins || 0) >= 5],
   ['chain10', '⛓', 'Unbroken', 'Reach a ×10 CHAIN.', S => (S.f.bestChain || 0) >= 10],
   ['wind', '♨', 'Not Yet', 'Survive a lethal blow with Second Wind.', S => !!S.f.secondWind],
-  ['awaken', '◉', 'The Blood Remembers', 'Awaken mid-battle.', S => (S.f.awakenings || 0) >= 1]
+  ['awaken', '◉', 'The Blood Remembers', 'Awaken mid-battle.', S => (S.f.awakenings || 0) >= 1],
+  ['clash1', '✕', 'Steel on Steel', 'Win a clash.', S => (S.f.clashWins || 0) >= 1],
+  ['clash10', '✕', 'Unbreakable Will', 'Win 10 clashes.', S => (S.f.clashWins || 0) >= 10]
 ];
 const Feats = {
   got(id) { return !!(G.S && G.S.ach && G.S.ach[id]); },

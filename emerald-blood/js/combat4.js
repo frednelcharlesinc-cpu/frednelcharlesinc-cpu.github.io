@@ -57,6 +57,7 @@ const CombatX3 = {
       if (!e.ko) await BT.enemyStrike(e, a, { name: 'Punish', hits: [{ anim: 'slash', m: 1.3, w: 560 }] }, true);
     } else {
       await BT.msg('Blades lock — neither gives an inch!', 900);
+      if (typeof Clash !== 'undefined') { B.letter = 0; B.duelZoom = 0; B.clashCd = 0; await Clash.run(a, e, 'blade'); done(); return; }
       for (const x of [a, e]) { const d = Math.max(1, Math.round(x.maxHp * .06)); BT.damage(x, d, false); }
     }
     await wait(250); B.letter = 0; B.duelZoom = 0;

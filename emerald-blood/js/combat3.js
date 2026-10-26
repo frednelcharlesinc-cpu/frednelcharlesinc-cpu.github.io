@@ -144,7 +144,7 @@ const CombatX2 = {
       if (o.fall) c.rotate(-1.35);
       if (o.roll) c.rotate(o.spin || 0);
       if (o.shake) c.translate(Math.sin((performance.now() - o.shake) / 30) * Math.max(0, 4 - (performance.now() - o.shake) / 150), 0);
-      c.globalAlpha = (o.used && !o.fall && !o.roll && o.k !== 'pine' ? .25 : 1) * (B.duelZoom ? .15 : 1);
+      c.globalAlpha = (o.used && !o.fall && !o.roll && o.k !== 'pine' ? .25 : 1) * (B.duelZoom || B.clashOn ? .12 : 1);
       c.drawImage(PI, sx, sy, sw, sh, -md.ax * s, -md.ay * s, sw * s, sh * s);
       c.restore();
       if (!o.used && Battle.menuL && Battle.menuL.some(x => x[0] === 'Environment')) { c.save(); c.globalAlpha = .6 + .3 * Math.sin(t / 200); c.fillStyle = '#ffd36a'; c.font = '900 10px "Nunito"'; c.textAlign = 'center'; c.fillText('✋', o.x, o.y - md.ay * s - 6); c.restore(); }

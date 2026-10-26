@@ -932,7 +932,7 @@ const Battle = {
           else { for (const [w, r] of [[6, 30], [2.5, 36]]) { c.lineWidth = w * sc2 * .5; c.beginPath(); const a0 = dir > 0 ? -1.3 + u * .8 : Math.PI + 1.3 - u * .8; c.arc(cx2 - dir * 10, cy2, r * sc2 * (a.size || 1), dir > 0 ? a0 : a0 - 1.6, dir > 0 ? a0 + 1.6 : a0); c.stroke(); } }
           c.restore(); }
       }
-      if (a.side === 'e' && !a.ko) {
+      if (a.side === 'e' && !a.ko && !B.clashOn) {
         const bw = 44, x = a.x - bw / 2, y = a.y - 76;
         c.fillStyle = 'rgba(0,0,0,.7)'; c.fillRect(x - 1, y - 1, bw + 2, 9);
         c.fillStyle = '#e04848'; c.fillRect(x, y, bw * a.hp / a.maxHp, 4);

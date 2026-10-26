@@ -195,7 +195,7 @@ const CombatX = {
     c.save();
     for (const a of B.actors) {
       if (a.ko && !a.fled) continue;
-      if (a.isMe && a.stance2 && !G.S.kid) { c.font = '900 9px "Nunito"'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = 'rgba(0,0,0,.8)'; const s = a.stance2 === 'drawn' ? '◑ DRAWN' : '◐ SHEATHED'; c.strokeText(s, a.x, a.y + 16); c.fillStyle = a.stance2 === 'drawn' ? '#ffd36a' : '#cfe8ff'; c.fillText(s, a.x, a.y + 16); }
+      if (a.isMe && a.stance2 && !G.S.kid && !B.clashOn) { c.font = '900 9px "Nunito"'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = 'rgba(0,0,0,.8)'; const s = a.stance2 === 'drawn' ? '◑ DRAWN' : '◐ SHEATHED'; c.strokeText(s, a.x, a.y + 16); c.fillStyle = a.stance2 === 'drawn' ? '#ffd36a' : '#cfe8ff'; c.fillText(s, a.x, a.y + 16); }
       if (a.side === 'e' && (a.shaken || a.panic) && !a.ko) { c.font = '900 9px "Nunito"'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#000'; const s = a.panic ? '😨 PANIC' : '😰 SHAKEN'; c.strokeText(s, a.x - 7, a.y + 30); c.fillStyle = a.panic ? '#ff9a5a' : '#ffcf9a'; c.fillText(s, a.x - 7, a.y + 30); }
     }
     B.shouts = (B.shouts || []).filter(x => now - x.t0 < x.life);

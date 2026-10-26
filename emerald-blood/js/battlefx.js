@@ -111,7 +111,7 @@
     _r(c, t);
     // marker under whoever is acting
     const cur = B.cur;
-    if (cur && !cur.ko) { const s = BT_SCALE * (cur.size || 1), p = .55 + .3 * Math.sin(t / 160); c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = cur.side === 'p' ? `rgba(90,255,150,${p})` : `rgba(255,120,100,${p})`; c.lineWidth = 2; c.beginPath(); c.ellipse(cur.x + (cur.kbx || 0), cur.y + 1, 18 * s * .8, 6 * s * .8, 0, 0, 7); c.stroke(); c.restore(); }
+    if (cur && !cur.ko && !B.clashOn) { const s = BT_SCALE * (cur.size || 1), p = .55 + .3 * Math.sin(t / 160); c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = cur.side === 'p' ? `rgba(90,255,150,${p})` : `rgba(255,120,100,${p})`; c.lineWidth = 2; c.beginPath(); c.ellipse(cur.x + (cur.kbx || 0), cur.y + 1, 18 * s * .8, 6 * s * .8, 0, 0, 7); c.stroke(); c.restore(); }
     // slash marks, rings, motes
     for (const p of B.fx) {
       const k = Math.max(0, p.t) / p.life;
@@ -121,7 +121,7 @@
     }
     c.save(); c.fillStyle = B.bdKey === 'snow' ? 'rgba(255,255,255,.85)' : 'rgba(255,240,200,.35)'; for (const m of B.amb || []) { c.fillRect(m.x, m.y, m.s * (B.bdKey === 'snow' ? 2 : 1.4), m.s * (B.bdKey === 'snow' ? 2 : 1.4)); } c.restore();
     // enemy intent icons
-    for (const a of B.actors) if (a.side === 'e' && !a.ko && a.next && a.next.hits && !(this.me() && this.me().sight)) {
+    for (const a of B.actors) if (a.side === 'e' && !a.ko && !B.clashOn && a.next && a.next.hits && !(this.me() && this.me().sight)) {
       const h = a.next.hits, proj = h.some(x => x.proj), mag = h.some(x => x.anim === 'spellcast'), unp = h.some(x => x.unp);
       const icon = unp ? '!!' : proj ? '➶' : mag ? '✦' : '⚔', col = unp ? '#ff6a6a' : proj ? '#ffcf7a' : mag ? '#9fd8ff' : '#e8e8e8';
       const x = a.x + 30, y = a.y - 84 - (a.size ? (a.size - 1) * 40 : 0);
