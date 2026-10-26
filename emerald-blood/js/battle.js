@@ -155,7 +155,7 @@ const Battle = {
     const me = this.me();
     S.hp = Math.max(1, me.hp); S.mp = me.mp;
     for (const a of B.actors) if (a.side === 'p' && !a.isMe && G.S.party.includes(a.id)) G.S.allies[a.id] = { hp: Math.max(1, a.hp), mp: a.mp };
-    if (B.blazed && !G.S.veil) { G.S.hood = false; if (cfg.witness) Story.addSus(cfg.witness); }
+    if (B.blazed && !Veil.on()) { G.S.hood = false; if (cfg.witness) Story.addSus(cfg.witness); }
     if (result === 'win' && Story.rankCheck) setTimeout(() => Story.rankCheck(), 50);
     this.ui(false);
     G.mode = prevMode === 'battle' ? 'world' : 'world'; UI.controls(true); UI.hud();
@@ -425,7 +425,7 @@ const Battle = {
     if (a.strain >= a.strainMax * .9 && !a.fever) { a.fever = 2; B.flash = .4; this.text(a, 'BLOOD FEVER!', '#ff5a3a', -60, true); sfx('alarm'); }
     if (a.isMe && B.sb.verdict) { const d = Math.max(1, Math.round(a.maxHp * .04)); a.hp = Math.max(1, a.hp - d); this.text(a, 'VERDICT -' + d, '#fff3b0', -70); }
     this.hud();
-    if (A.blaze && a.isMe && !A.sword) { if (!B.blazed) { B.blazed = true; if (G.S.veil) { if (!G.S.f.veilDrag) G.S.f.veilDrag = 1; this.text(a, 'Green fire behind the red scarf!', '#ff8a8a', -50); } else if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
+    if (A.blaze && a.isMe && !A.sword) { if (!B.blazed) { B.blazed = true; if (Veil.on()) { if (!G.S.f.veilDrag) G.S.f.veilDrag = 1; this.text(a, 'Green fire behind the red scarf!', '#ff8a8a', -50); } else if (G.S.hood) { G.S.hood = false; this.text(a, 'Hood burns back!', '#46ff95', -50); } } }
     B.dim = .55; B.dimCol = a.isMe ? '10,40,20' : '30,10,40'; sfx('art');
     await this.msg(A.name, 700);
     if (A.type === 'buff') { await this.play(a, 'spellcast', 7, 80); a.ward = 3; this.spark(a.x, a.y - 30, '#46ff95', 26); this.text(a, 'EMERALD FIELD', '#46ff95'); B.fx.push({ field: 1, x: a.x, y: a.y - 30, t: 0, life: 900 }); }

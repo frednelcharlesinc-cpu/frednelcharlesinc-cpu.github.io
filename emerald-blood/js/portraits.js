@@ -136,7 +136,7 @@ function artId(who) { let id = ART_ID[who] || who; if (!Art.port[id] && CHAR[who
 // Settings → Portrait style: 'new' uses the redrawn sets (<id>_v2) where they exist, 'classic' keeps the original art
 function styled(id) { return G.settings && G.settings.artStyle === 'classic' ? id : (Art.port[id + '_v2'] ? id + '_v2' : id); }
 const VEIL_EXPR = e => /anger|shout|power|glare|grief/.test(e || '') ? 'anger' : /focus|sight|determin|asc/.test(e || '') ? 'focused' : 'neutral';
-function veiledArt() { return G.S && G.S.veil && !G.S.kid && Art.port.ren_veil; }
+function veiledArt() { return typeof Veil !== 'undefined' && Veil.on() && Art.port.ren_veil; }
 function artHas(who, expr) { if (who === 'me' && veiledArt()) return true; const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : styled('ren')) : artId(who); return !!(Art.port[id] && Art.port[id][expr]); }
 function artFor(who, expr) {
   if (who === 'me' && veiledArt()) { const set = Art.port.ren_veil, e = VEIL_EXPR(expr); return { img: set[e] || set.neutral, left: false, id: 'ren_veil' }; }

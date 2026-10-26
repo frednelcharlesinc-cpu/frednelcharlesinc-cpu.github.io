@@ -4,26 +4,27 @@
    Drags see straight through it — they always know their own. */
 const Veil = {
   got() { return !!(G.S && G.S.f.veilGot); },
-  on() { return !!(G.S && G.S.veil); },
+  // once you own the scarf, 'hood up' IS the Red Veil costume
+  on() { return !!(G.S && !G.S.kid && G.S.f && G.S.f.veilGot && G.S.hood) || !!(G.S && G.S.veilTmp); },
   fame() { return (G.S && G.S.f.veilFame) || 0; },
   addFame(n, why) { const f = G.S.f; f.veilFame = (f.veilFame || 0) + n; if (n > 0) toast(`<b style="color:#ff5a5a">The Red Veil</b> — ${why || 'the vale is talking about you.'}`, 2800); },
   rank() { const v = this.fame(); return v >= 6 ? ['Wanted by the Crown', "Crown posters show a hooded figure in a red scarf. 300 silver. Nobody has connected it to you."] : v >= 3 ? ['Folk hero', 'Children play "Red Veil and the Inquisitor" in the street. The Inquisitor always loses.'] : v >= 1 ? ['A rumour', 'Tavern talk about a masked stranger in a red scarf.'] : ['Unknown', 'Nobody has heard of the Red Veil yet.']; },
   async set(on) {
-    G.S.veil = !!on; if (on) G.S.hood = true;
+    G.S.hood = !!on;
     await rebuildPlayer(); UI.hud(); save();
   },
   async give(from) {
     const f = G.S.f; if (f.veilGot) return; f.veilGot = true; f.veilFrom = from;
     sfx('level');
-    toast('You received <b style="color:#ff5a5a">the Red Veil</b> — a red scarf to wear over your face. Tap <b>Hood</b> to cycle: Hood ▲ → Veil → Hood ▼.', 5200);
+    toast('You received <b style="color:#ff5a5a">the Red Veil</b>. From now on the <b>Hood</b> button puts the costume on and takes it off.', 5200); UI.hud();
   }
 };
 async function rebuildPlayer() {
   if (!G.S || G.S.kid) return;
   // the Red Veil's outfit: black gi, red sash, charcoal hood, red scarf
   // the costume: hood down, dreads out, red scarf over the face
-  const was = G.S.veil; G.S.veil = true;
-  try { G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black' }), false); } finally { G.S.veil = was; }
+  G.S.veilTmp = true;
+  try { G.A.pVeil = composeLook(Object.assign({}, G.S.look, { top: 'black', obi: 'red', pants: 'black' }), false); } finally { G.S.veilTmp = false; }
 }
 // painted cutscene shot: the art fills the frame, the camera drifts in
 const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes', dur, tapEnds: true, fadeIn: 120, lines, artCam: [[0, 320, (o && o.y) || 330, 1.02], [dur + 2500, 320, ((o && o.y) || 330) - 10, 1.12]] }, o || {});
@@ -32,25 +33,25 @@ const paintShot = (id, dur, lines, o) => Object.assign({ sceneId: id, bg: 'eyes'
   const _pl = partList;
   partList = function (look, hooded) {
     const L = _pl(look, hooded);
-    if (G.S && G.S.veil && !G.S.kid && G.man.parts.veil_scarf) { const i = L.findIndex(p => p[0] === 'hood' || p[0].startsWith('hair_')); L.splice(i < 0 ? L.length : i, 0, ['veil_scarf', null]); }
+    if (G.S && G.S.veilTmp && !G.S.kid && G.man.parts.veil_scarf) { const i = L.findIndex(p => p[0] === 'hood' || p[0].startsWith('hair_')); L.splice(i < 0 ? L.length : i, 0, ['veil_scarf', null]); }
     return L;
   };
   const _pi = playerImg;
-  playerImg = function () { return G.S && G.S.veil && G.A.pVeil ? G.A.pVeil : _pi(); };
+  playerImg = function () { return Veil.on() && G.A.pVeil ? G.A.pVeil : _pi(); };
   const _bps = buildPlayerSprites;
-  setInterval(() => { try { if (G.S && G.S.veil && !(G.S.f && G.S.f.veilGot)) { G.S.veil = false; UI.hud(); } } catch (e) { } }, 1000);
+  setInterval(() => { try { if (G.S && G.S.veil) { delete G.S.veil; UI.hud(); } } catch (e) { } }, 1000);
   buildPlayerSprites = async function () { await _bps(); try { await rebuildPlayer(); } catch (e) { } };
   // Hood button: Hood ▲ → Veil → Hood ▼
   World.toggleHood = function () {
     if (G.mode !== 'world' || this.busy) return;
     if (!G.S.f.hoodGiven) { toast("You don't have a hood yet."); return; }
-    sfx('hood');
-    if (Veil.got() && G.S.hood && !G.S.veil) { Veil.set(true); toast('<b style="color:#ff5a5a">The Red Veil.</b> The costume goes on — red scarf over your face. Strangers see a masked stranger — Drags will still know you.', 3600); return; }
-    if (G.S.veil) { G.S.veil = false; G.S.hood = false; toast('Hood down. Your eyes burn green for anyone to see.'); UI.hud(); save(); return; }
-    G.S.hood = !G.S.hood; toast(G.S.hood ? 'Hood up. Your eyes are hidden.' : 'Hood down. Your eyes burn green for anyone to see.'); UI.hud(); save();
+    sfx('hood'); G.S.hood = !G.S.hood;
+    if (Veil.got()) toast(G.S.hood ? '<b style="color:#ff5a5a">The Red Veil.</b> Red scarf over your face — strangers see a masked stranger. Drags still know you.' : 'Costume off. Your face — and your green eyes — are out in the open.', 3200);
+    else toast(G.S.hood ? 'Hood up. Your eyes are hidden.' : 'Hood down. Your eyes burn green for anyone to see.');
+    UI.hud(); save();
   };
   const _hud = UI.hud.bind(UI);
-  UI.hud = function () { _hud(); const hb = $('#bHood'); if (hb && G.S && G.S.veil) { hb.textContent = 'Veil ◆'; hb.classList.add('on'); hb.style.color = '#ff8a8a'; } else if (hb) hb.style.color = ''; };
+  UI.hud = function () { _hud(); const hb = $('#bHood'); if (hb && Veil.on()) { hb.textContent = 'Veil ◆'; hb.classList.add('on'); hb.style.color = '#ff8a8a'; } else if (hb) hb.style.color = ''; };
   // dialogue: the name tag and the portrait carry the mask
   const _sp = Dlg.setPortraits.bind(Dlg);
   Dlg.setPortraits = function (who, expr) { _sp(who, expr); if (Veil.on()) { const t = $('#portL .tag'); if (t) t.textContent = 'Red Veil'; } };
@@ -84,7 +85,7 @@ function paintVeil(cv) {
   Battle.start = async function (cfg) {
     if (!Veil.on()) return _st(cfg);
     const c = typeof cfg === 'string' ? { enemies: [cfg] } : Object.assign({}, cfg); c.witness = 0;
-    if (c.noFlee && Art.cut.veil_rain && !(Battle.B)) await Cine.play([paintShot('veil_rain', 2400, [['Red Veil', c.veilLine || 'Nobody needs to know my name tonight.', '#ff7a7a']], { y: 340 })]);
+    const now = (G.S.playtime || 0); if (c.noFlee && Art.cut.veil_rain && !(Battle.B) && now - (G.S.f.veilCutT || -1e9) > 15 * 60000 && (G.S.f.veilCutT = now)) await Cine.play([paintShot('veil_rain', 2400, [['Red Veil', c.veilLine || 'Nobody needs to know my name tonight.', '#ff7a7a']], { y: 340 })]);
     const p = _st(c);
     setTimeout(() => { const me = Battle.B && Battle.me(); if (me) me.name = 'Red Veil'; }, 50);
     return p;
