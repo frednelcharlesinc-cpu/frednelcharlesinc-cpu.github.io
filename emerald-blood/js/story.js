@@ -1388,6 +1388,15 @@ async function vaneYears() {
   Stones.give('still');
   await me('neutral', '…Revenge is like the middle ones, isn\'t it. You think you\'re carrying it.');
   await say('vane', 'happy', '…Hm. You\'re getting annoying. That\'s how I know you\'re learning.'); f.resolve++;
+  // ---- the egg in the shrine ----
+  await narr('That night you go back to the ruined shrine alone. Something under the broken altar is warm — warmer than the stones, warmer than you.');
+  await narr('An egg. Black as a starless night, the size of your two fists, wrapped in the rotted silk of an old Drag offering. When you touch it, it knocks back.');
+  await say('vane', 'shock', '…Put that down. Slowly. — No. Don\'t. It\'s already decided it\'s yours.');
+  await say('vane', 'sad', 'Three hundred years since anyone saw a dragon egg that wasn\'t stone. The Crown would burn the whole Realm to get it. The Hollow Saint would make it a god.');
+  const ce = await ask('me', 'neutral', '…', ['Then nobody will know.', 'I\'ll protect it.', 'What if it grows up like Fratenaptor?']);
+  if (ce === 2) await say('vane', 'neutral', 'Then raise it so it doesn\'t. Same as you, pup. Nobody is born a monster. They\'re taught.');
+  else await say('vane', 'happy', 'Hm. Keep it warm. Keep it secret. And for the love of every Elder, don\'t let it hatch in my bed.');
+  f.dragonEgg = 1; sfx('level'); toast('Found a <b style="color:#8fd0ff">mysterious black egg</b>. Keep it warm.', 3600);
   // ---- YEAR 5: the lesson that isn't about the sword ----
   await step(); await Cine.play(CINE.years5(), { music: 'sad' });
   await say('vane', 'neutral', 'Out there, there\'s a whole generation of children with green eyes. Your age. Younger. Every one of them taught the same thing you were: hide, or hate.');
@@ -1398,6 +1407,13 @@ async function vaneYears() {
   if (c5 === 0) await say('vane', 'happy', 'Nobody does. You start by refusing to hate the people in front of you. Then you see who follows.');
   else if (c5 === 1) await say('vane', 'neutral', 'Of course you will. Find her. Just don\'t burn the world down on the way. She has to live in it afterwards.');
   else { f.resolve++; await say('vane', 'happy', '…I can\'t. Nobody taught me. We\'ll have to find out together, you and I. Same as everything else.'); }
+  // ---- the egg hatches ----
+  await narr('The night of the deep frost, the egg cracks. A tiny black dragon tumbles out onto your blanket — all head and wings and enormous blue eyes — sneezes a spark, and falls asleep on your hand.');
+  await say('vane', 'happy', '…It hatched in my bed. Of course it did.');
+  const dn = await ask('me', 'happy', 'It needs a name.', ['Onyx', 'Midnight', 'Soot', 'Nyx']);
+  G.S.dragonName = ['Onyx', 'Midnight', 'Soot', 'Nyx'][Math.max(0, dn)]; f.dragonHatched = 1; delete f.dragonEgg;
+  sfx('level'); toast(`<b style="color:#8fd0ff">${G.S.dragonName}</b> the baby dragon joined you! It will help in battle. (Menu → Companions)`, 4200);
+  await say('vane', 'neutral', `${G.S.dragonName}. Fine. It eats like you, too.`);
   f.newDawn = f.resolve >= 4;
   await fadeOut(900);
   await Story.timeSkip();

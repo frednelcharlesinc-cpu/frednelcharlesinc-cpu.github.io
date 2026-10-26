@@ -150,7 +150,7 @@ const UI = {
     const s = loadSave(); if (!s) return; audioUnlock();
     G.S = s; $('#title').classList.add('hide');
     G.mode = 'boot'; $('#loading').classList.remove('hide'); $('#loadTxt').textContent = 'Waking up…';
-    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); G.S.arts = G.S.arts.map(k => k === 'draw' ? 'azure' : k === 'cast' ? 'crimson' : k); if (G.S.f.eye && !G.S.arts.includes('sight')) G.S.arts.unshift('sight'); if ((G.S.f.vaneDone || G.S.f.newDawn || G.S.f.cultivation) && !G.S.arts.includes('horizon')) G.S.arts.push('horizon'); await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
+    await wait(30); if (!G.S.cast) G.S.cast = defaultCast(); G.S.arts = G.S.arts.map(k => k === 'draw' ? 'azure' : k === 'cast' ? 'crimson' : k); if (G.S.f.eye && !G.S.arts.includes('sight')) G.S.arts.unshift('sight'); if ((G.S.f.vaneDone || G.S.f.newDawn || G.S.f.cultivation) && !G.S.arts.includes('horizon')) G.S.arts.push('horizon'); if ((G.S.f.adultVane || G.S.f.vaneDone) && !G.S.f.dragonHatched) { G.S.f.dragonHatched = 1; G.S.dragonName = G.S.dragonName || 'Onyx'; setTimeout(() => toast('<b style="color:#8fd0ff">Onyx</b> the baby dragon has joined you — the egg you found in the Realm hatched. (Menu → Companions)', 4500), 1500); } await buildPlayerSprites(); await applyCast(); $('#loading').classList.add('hide');
     G.mode = 'world'; await World.load(s.map, s.x, s.y, s.dir); this.controls(true); this.hud();
     await fadeIn(500); banner(SCENES[s.map].title || '', SCENES[s.map].subtitle || '');
   },

@@ -157,7 +157,8 @@ function tameGame(name, diff) {
 
 /* ---------- familiars ---------- */
 const FAMS = {
-  me: { name: 'Wisp', species: 'Emerald fox-spirit', shape: 'fox', c: ['#3fe08a', '#16733e', '#d8ffe8'], glow: '#7dffb0', act: { t: 'strike', name: 'Emerald Pounce', m: .5 }, desc: 'A tiny fox made of green fire that found Ren in the Realm and never left. Vane pretends not to see it. It hunts the threads Emerald Sight shows.' },
+  me: { get name() { return (G.S && G.S.dragonName) || 'Onyx'; }, species: 'Baby dragon', shape: 'dragon', c: ['#2c2e38', '#16171e', '#5fb4ff'], glow: '#8fd0ff', act: { t: 'strike', name: 'Tiny Breath', m: .6 },
+    desc: 'A baby dragon, black as a starless night, with enormous blue eyes. It hatched from an egg Ren found in a ruined Drag shrine in the Realm of No Return. It eats like a whole village, sleeps on Ren\'s head, and sneezes sparks. In a world that hangs people for being "dragon-blooded", nobody can ever see it.' },
   ilya: { name: 'Bun', species: 'Ribbon-hare', shape: 'hare', c: ['#ffd0e6', '#e07aa8', '#ffffff'], glow: '#ff9ad5', act: { t: 'heal', name: 'Nuzzle', m: .14 }, desc: 'A pink-eared hare with a green ribbon on one ear — the other half of Ren\'s ribbon. Nobody knows how it got there.' },
   kairo: { name: 'Cinder', species: 'Ember crow', shape: 'crow', c: ['#26222a', '#0e0c10', '#ff7a3a'], glow: '#ff7a3a', act: { t: 'weaken', name: 'Ash Peck', m: .45 }, desc: 'A crow with coals for eyes that followed Kairo out of burning Thornvale. It pecks out weak points.' },
   liora: { name: 'Selene', species: 'Moon-owl', shape: 'owl', c: ['#f2f2ff', '#b8b8d8', '#ffd34a'], glow: '#e8e8ff', act: { t: 'guard', name: 'Silver Wing', m: 0 }, desc: 'A white owl that only flies at night — except for Liora. It shields her with its wings.' },
@@ -204,6 +205,19 @@ function paintFam(F, f) {
     R(d, 7, 19, 2, 2); R(d, 15, 19, 2, 2);
   } else if (s === 'frog') {
     E(d, 12, 17, 7, 4); E(b, 12, 15 - bob, 6, 5); E(b, 9, 10 - bob, 2.5, 2.5); E(b, 15, 10 - bob, 2.5, 2.5); R('#111', 9, 10 - bob, 1, 1); R('#111', 15, 10 - bob, 1, 1); R(a, 10, 17, 4, 1);
+  } else if (s === 'dragon') {
+    // chibi baby dragon: round body, big head, bat wings, stubby horns, huge blue eyes
+    const wf = f % 2 ? -2 : 1;
+    x.fillStyle = d; x.beginPath(); x.moveTo(8, 12); x.lineTo(0, 5 + wf); x.lineTo(2, 12); x.lineTo(5, 15); x.fill(); x.beginPath(); x.moveTo(16, 12); x.lineTo(24, 5 + wf); x.lineTo(22, 12); x.lineTo(19, 15); x.fill();
+    x.strokeStyle = d; x.lineWidth = 2; x.beginPath(); x.moveTo(15, 20); x.quadraticCurveTo(22, 22, 22, 17 - bob); x.stroke();
+    E(d, 12, 19, 6.5, 4.5); E(b, 12, 18, 6, 4);
+    R(d, 7, 21, 3, 2); R(d, 14, 21, 3, 2);
+    E(d, 12, 10 - bob * .5, 7.5, 6.5); E(b, 12, 9.5 - bob * .5, 7, 6);
+    R(d, 6, 3 - bob, 2, 4); R(d, 16, 3 - bob, 2, 4); R(b, 7, 2 - bob, 1, 2); R(b, 16, 2 - bob, 1, 2);
+    R(d, 10, 4 - bob, 1, 2); R(d, 13, 4 - bob, 1, 2);
+    const ey = 9 - Math.round(bob * .5);
+    R('#f2ead0', 7, ey, 4, 3); R('#f2ead0', 13, ey, 4, 3); R(a, 8, ey, 3, 3); R(a, 13, ey, 3, 3); R('#0a1830', 9, ey + 1, 1, 2); R('#0a1830', 14, ey + 1, 1, 2); R('#ffffff', 8, ey, 1, 1); R('#ffffff', 13, ey, 1, 1);
+    R('#e07a8a', 11, ey + 4, 2, 1);
   } else if (s === 'lizard') {
     x.strokeStyle = d; x.lineWidth = 2; x.beginPath(); x.moveTo(6, 16); x.quadraticCurveTo(1, 18, 2, 12 + bob); x.stroke();
     E(d, 12, 16, 7, 3.5); E(b, 12, 15, 6, 3); E(b, 18, 12, 4, 3); R(a, 19, 11, 2, 1); R(d, 8, 18, 2, 3); R(d, 15, 18, 2, 3);
@@ -214,7 +228,7 @@ function paintFam(F, f) {
 const FCache = {};
 function famImg(id, f) { const k = id + (f % 2); return FCache[k] || (FCache[k] = paintFam(FAMS[id], f)); }
 const Familiars = {
-  has(id) { if (id === 'me') return !G.S.kid; return !!FAMS[id]; },
+  has(id) { if (id === 'me') return !G.S.kid && !!G.S.f.dragonHatched; return !!FAMS[id]; },
   async assist(a) {
     const B = Battle.B; if (!B) return; const key = a.isMe ? 'me' : a.id, F = FAMS[key];
     if (F && this.has(key)) {
@@ -258,7 +272,7 @@ const Familiars = {
     const me = this.me && this.me(), M = Mounts.cur();
     if (me && M) { const sw = B.mountSwoop && t - B.mountSwoop < 600 ? Math.sin((t - B.mountSwoop) / 600 * Math.PI) : 0;
       const img = mountFrame(M.kind, 'left', Math.floor(t / 110), 'back'); c.save(); c.imageSmoothingEnabled = false;
-      const S = M.fly ? 120 : 96, sx = me.x + 62 - sw * (me.x - 180), sy = me.y + (M.fly ? -14 : 6) - sw * 20; c.drawImage(img, sx - S / 2, sy - S * .9, S, S); c.restore(); }
+      const S = M.fly ? 120 : 96, sx = me.x + 62 - sw * (me.x - 180), sy = me.y + (M.fly ? -14 : 6) - sw * 20; c.drawImage(img, sx - S / 2, sy - S * .9, S, S); c.drawImage(mountFrame(M.kind, 'left', Math.floor(t / 110), 'front'), sx - S / 2, sy - S * .9, S, S); c.restore(); }
   };
 })();
 // hook the overworld: ride / fly, draw the mount under the player and the familiar beside them
@@ -278,7 +292,7 @@ const Familiars = {
       c.drawImage(mountFrame(M.kind, this.dir, f, 'front'), ox, oy, S, S); c.restore();
     } else _draw.call(this, c, cx, cy, t);
     if (Familiars.has('me') && G.mode === 'world') { const img = famImg('me', Math.floor(t / 300)), x = this.px - cx, y = this.py - cy;
-      const ox = this.dir === 'left' ? 18 : -18; c.save(); c.imageSmoothingEnabled = false; c.drawImage(img, Math.round(x + ox - 10), Math.round(y - 52 + Math.sin(t / 350) * 3), 20, 20); c.restore(); }
+      const ox = this.dir === 'left' ? 18 : -18; c.save(); c.imageSmoothingEnabled = false; c.drawImage(img, Math.round(x + ox - 12), Math.round(y - 56 + Math.sin(t / 350) * 3), 24, 24); c.restore(); }
   };
   // movement: mount speed and flight
   const _free = World.free.bind(World);
@@ -308,6 +322,8 @@ function companionsMenuHTML() {
 }
 function bindCompanionsMenu() {
   $$('#menuCard [data-ride]').forEach(b => bindTap(b, () => { Mounts.ride(b.dataset.ride || null); UI.renderMenu(); }));
-  $$('#menuCard canvas[data-mcv]').forEach(cv => { const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(mountFrame(cv.dataset.mcv, 'right', 0, 'back'), 0, 0); });
-  $$('#menuCard canvas[data-fcv]').forEach(cv => { const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(famImg(cv.dataset.fcv, 0), 0, 0); });
+  $$('#menuCard canvas[data-mcv]').forEach(cv => { const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(mountFrame(cv.dataset.mcv, 'right', 0, 'back'), 0, 0); x.drawImage(mountFrame(cv.dataset.mcv, 'right', 0, 'front'), 0, 0); });
+  $$('#menuCard canvas[data-fcv]').forEach(cv => { const k = cv.dataset.fcv, art = k === 'me' && Art.port.dragon && (Art.port.dragon.happy || Art.port.dragon.neutral); const x = cv.getContext('2d');
+    if (art) { cv.width = 128; cv.height = 128; cv.style.imageRendering = 'auto'; const sc = Math.max(128 / art.width, 128 / art.height); x.drawImage(art, (128 - art.width * sc) / 2, 0, art.width * sc, art.height * sc); }
+    else { x.imageSmoothingEnabled = false; x.drawImage(famImg(k, 0), 0, 0); } });
 }
