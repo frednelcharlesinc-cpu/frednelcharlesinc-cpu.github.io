@@ -47,7 +47,7 @@ const Dlg = {
       const C = who && who !== 'me' ? (CHAR[who] || { name: who }) : null;
       const nm = $('#dlgName'); nm.textContent = who === 'me' ? (Veil.on() ? 'Red Veil' : G.S.name) : C ? C.name : ''; nm.className = who && who !== 'me' ? 'npc' : ''; nm.style.color = speakerCol(who);
       const tx = $('#dlgText'); tx.className = who ? '' : 'narr';
-      text = this.fmt(text); tx.textContent = ''; $('#dlgChoices').innerHTML = ''; $('#dlgMore').style.visibility = 'hidden';
+      text = this.fmt(text); tx.textContent = ''; $('#dlgChoices').innerHTML = ''; $('#dlgChoiceWrap').classList.remove('scrolls', 'more'); $('#dlgMore').style.visibility = 'hidden';
       this.full = text; this.res = res; this.choices = choices; this.typing = true;
       let i = 0; clearInterval(this.timer);
       const sp = [28, 16, 6][G.settings.text ?? 1];
@@ -57,12 +57,30 @@ const Dlg = {
   finish() {
     clearInterval(this.timer); this.typing = false; $('#dlgText').textContent = this.full;
     if (this.choices) {
-      const box = $('#dlgChoices'); box.innerHTML = '';
-      this.choices.forEach((c, i) => {
-        const b = document.createElement('button'); b.className = 'choice'; b.textContent = this.fmt(c);
-        bindTap(b, () => this.choose(i)); box.appendChild(b);
+      const box = $('#dlgChoices'); box.innerHTML = ''; box.scrollTop = 0;
+      const labels = this.choices.map(c => this.fmt(c));
+      box.classList.toggle('dense', labels.length > 4);
+      box.classList.toggle('two', labels.length > 4 && labels.every(l => l.length <= 34) && innerWidth > 560);
+      labels.forEach((txt, i) => {
+        const b = document.createElement('button'); b.className = 'choice'; b.textContent = txt;
+        // a tap chooses; a drag scrolls the list instead
+        let sx = 0, sy = 0, st = 0, moved = false;
+        b.addEventListener('pointerdown', e => { e.stopPropagation(); audioUnlock(); sx = e.clientX; sy = e.clientY; st = box.scrollTop; moved = false; b.classList.add('press'); });
+        b.addEventListener('pointermove', e => { if (Math.abs(e.clientY - sy) > 8 || Math.abs(e.clientX - sx) > 12 || Math.abs(box.scrollTop - st) > 4) { moved = true; b.classList.remove('press'); } });
+        b.addEventListener('pointercancel', () => { moved = true; b.classList.remove('press'); });
+        b.addEventListener('pointerleave', () => b.classList.remove('press'));
+        b.addEventListener('pointerup', e => { e.stopPropagation(); b.classList.remove('press'); if (!moved && Math.abs(box.scrollTop - st) <= 4) this.choose(i); });
+        box.appendChild(b);
       });
+      requestAnimationFrame(() => Dlg.scrollUI());
     } else $('#dlgMore').style.visibility = 'visible';
+  },
+  scrollUI() {
+    const box = $('#dlgChoices'), wrap = $('#dlgChoiceWrap'); if (!box || !wrap) return;
+    const over = box.scrollHeight > box.clientHeight + 4;
+    wrap.classList.toggle('scrolls', over);
+    wrap.classList.toggle('more', over && box.scrollTop + box.clientHeight < box.scrollHeight - 4);
+    $('#chUp').classList.toggle('off', box.scrollTop <= 2); $('#chDn').classList.toggle('off', box.scrollTop + box.clientHeight >= box.scrollHeight - 2);
   },
   choose(i) { if (!this.res || !this.choices || i >= this.choices.length) return; sfx('blip'); const r = this.res; this.res = null; this.choices = null; r(i); },
   advance() {
@@ -72,7 +90,15 @@ const Dlg = {
     return true;
   }
 };
-bindTap($('#dlg'), e => { if (e.target.closest('.choice')) return; Dlg.advance(); });
+bindTap($('#dlg'), e => { if (e.target.closest('.choice') || e.target.closest('#dlgChoiceWrap')) return; Dlg.advance(); });
+(function () {
+  const box = $('#dlgChoices'), step = () => Math.max(60, box.clientHeight * .7);
+  box.addEventListener('scroll', () => Dlg.scrollUI(), { passive: true });
+  box.addEventListener('pointerdown', e => e.stopPropagation());
+  bindTap($('#chUp'), () => { box.scrollBy({ top: -step(), behavior: 'smooth' }); });
+  bindTap($('#chDn'), () => { box.scrollBy({ top: step(), behavior: 'smooth' }); });
+  addEventListener('resize', () => Dlg.scrollUI());
+})();
 const say = (who, expr, text) => Dlg.line(who, expr, text);
 const me = (expr, text) => Dlg.line('me', expr, text);
 const narr = text => Dlg.line(null, null, text);
