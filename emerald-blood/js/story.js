@@ -6,7 +6,7 @@ Object.assign(CHAR, {
   halvard: { name: 'Halvard', sprite: 'halvard' }, acolyte: { name: 'Acolyte', sprite: 'acolyte' },
   maren: { name: 'Maren', sprite: 'maren' }, tobb: { name: 'Tobb', sprite: 'tobb' }, pip: { name: 'Pip', sprite: 'pip' }, pipmom: { name: "Pip's Mother", sprite: 'pipmom' },
   kess: { name: 'Kess', sprite: 'kess' }, kessE: { name: 'Kess', sprite: 'kess_eyes' }, voss: { name: 'Captain Voss', sprite: 'voss' }, guard: { name: 'Guard', sprite: 'guard' },
-  rook: { name: 'Rook', sprite: 'rook' }, bandit: { name: 'Bandit', sprite: 'bandit' }, sable: { name: 'Sable', sprite: 'hunter' }, cassel: { name: 'Brother Cassel', sprite: 'cassel' },
+  rook: { name: 'Rook', sprite: 'rook' }, bandit: { name: 'Bandit', sprite: 'bandit' }, huntress: { name: 'Sable the Hunter', sprite: 'hunter' }, sable: { name: 'Sable', sprite: 'hunter' }, cassel: { name: 'Brother Cassel', sprite: 'cassel' },
   hoshi: { name: 'Old Hoshi', sprite: 'hoshi' }, brom: { name: 'Guildmaster Brom', sprite: 'brom' }, sylwen: { name: 'Sylwen', sprite: 'sylwen' },
   garrick: { name: 'Garrick', sprite: 'garrick' }, tilda: { name: 'Tilda', sprite: 'tilda' }, bram: { name: 'Bram', sprite: 'innkeep' },
   kairo: { name: 'Kairo', sprite: 'kairo_kid', kid: 1 }, kairoKB: { name: 'Kairo', sprite: 'kairo_kidb', kid: 1 },
@@ -698,12 +698,12 @@ async function innDoor() {
 }
 async function talkSable() {
   const f = F();
-  await say('sable', 'neutral', 'Hood. Hands. Slowly. I hunt Drags for a living, and you, friend, smell like a payday.');
-  const c = await ask('sable', 'neutral', 'Come quietly and I\'ll make sure they feed you on the way to Greyspire.', ['Fight.', 'Walk away.']);
-  if (c === 1) { await say('sable', 'happy', "Walk then. I'll be watching. I'm always watching."); return; }
+  await say('huntress', 'neutral', 'Hood. Hands. Slowly. I hunt Drags for a living, and you, friend, smell like a payday.');
+  const c = await ask('huntress', 'neutral', 'Come quietly and I\'ll make sure they feed you on the way to Greyspire.', ['Fight.', 'Walk away.']);
+  if (c === 1) { await say('huntress', 'happy', "Walk then. I'll be watching. I'm always watching."); return; }
   const r = await Battle.start({ enemies: ['bandit', 'bandit'], bd: 'town', witness: .5, intro: 'Sable and her hired blades attack!' });
   if (r === 'lose') { await Story.defeat(); return; }
-  if (r === 'win') { f.sableBeaten = true; World.remove('sable'); await say('sable', 'shame', '…Hah. They never said the Drags could fight. Keep the money. I\'ll find easier prey.'); }
+  if (r === 'win') { f.sableBeaten = true; World.remove('sable'); await say('huntress', 'shame', '…Hah. They never said the Drags could fight. Keep the money. I\'ll find easier prey.'); }
 }
 async function talkVoss() {
   const f = F();

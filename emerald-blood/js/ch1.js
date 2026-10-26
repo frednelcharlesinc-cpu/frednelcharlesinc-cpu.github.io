@@ -467,9 +467,9 @@ async function talkPell() {
 
 /* ================= TAVERNS & GOSSIP ================= */
 const TAVERNS = {
-  ashford: { name: 'The Crooked Lantern', keep: 'bram_in', pat: [['Old Soldier', 'folk11'], ['Bargewoman', 'folk5'], ['Farmhand', 'folk13']] },
-  millbrook: { name: 'The Drowned Duck', keep: 'marta', pat: [['Fisherman', 'folk2'], ['Ferry Clerk', 'folk7'], ['Retired Adventurer', 'dwarf_m1']] },
-  kettlebrook: { name: 'The Sheaf & Sickle', keep: 'gunna', pat: [['Plowman', 'folk10'], ['Grain Wife', 'folk15'], ['Tinker', 'elf_m1']] }
+  ashford: { name: 'The Crooked Lantern', keep: 'bram_in', pat: [['Old Soldier', 'folk11', 'soldier'], ['Bargewoman', 'folk5', 'bargewoman'], ['Farmhand', 'folk13', 'farmhand']] },
+  millbrook: { name: 'The Drowned Duck', keep: 'marta', pat: [['Fisherman', 'folk2', 'fisherman'], ['Ferry Clerk', 'folk7', 'fclerk'], ['Retired Adventurer', 'dwarf_m1', 'oldadv']] },
+  kettlebrook: { name: 'The Sheaf & Sickle', keep: 'gunna', pat: [['Plowman', 'folk10', 'plowman'], ['Grain Wife', 'folk15', 'grainwife'], ['Tinker', 'elf_m1', 'tinker']] }
 };
 const GOSSIP = {
   strong: { label: 'Who is the strongest?', talks: [
@@ -545,7 +545,7 @@ const LOCAL = {
 async function barSeat(tk) {
   const T = TAVERNS[tk], f = F(); f.gossip = f.gossip || {};
   const ids = ['gpA', 'gpB', 'gpC'];
-  T.pat.forEach(([n, s], i) => { CHAR[ids[i]] = { name: n, sprite: s }; });
+  T.pat.forEach(([n, s, art], i) => { CHAR[ids[i]] = { name: n, sprite: s }; ART_ID[ids[i]] = art; });
   await narr(`You take a stool at the bar of ${T.name}. ${G.S.hood ? 'Nobody looks twice at a hood in a tavern.' : 'A few people look twice at your eyes. One gets up and leaves. The rest are too deep in their cups to care.'}`);
   const run = async lines => { for (const [s, t] of lines) { if (s === 'me') await me('neutral', t); else if (s === 'K') await say(T.keep, 'neutral', t); else await say('gp' + s, null, t); } };
   while (true) {
@@ -593,7 +593,7 @@ innRest = async function () { CHAR.bram_in = { name: 'Bram', sprite: 'innkeep' }
 CHAR.marta = { name: 'Marta Reed', sprite: 'folk19' }; CHAR.gunna = { name: 'Gunna Stoutbarrel', sprite: 'dwarf_f1' };
 const tavRoom = (key, tk, title) => room(key, 'in_inn', title, { npcs: () => [
   Object.assign(resident(TAVERNS[tk].keep + '_k', CHAR[TAVERNS[tk].keep].sprite, 3, 4, [], { nm: CHAR[TAVERNS[tk].keep].name, ai: null }), { talk: () => keepTalk(tk), qm: () => tk === 'ashford' && F().sqFlour === 'on' ? '?' : null }),
-  ...TAVERNS[tk].pat.map(([n, s], i) => resident(key + 'p' + i, s, [2, 9, 12][i], [7, 7, 7][i], () => [GOSSIP[Object.keys(GOSSIP)[(i + G.S.steps) % 7]].talks.map(e => (e.lines || e))[0][0][1].replace(/^/, '"') + '"'], { nm: n, ai: null }))],
+  ...TAVERNS[tk].pat.map(([n, s, art], i) => (ART_ID[key + 'p' + i] = art, resident(key + 'p' + i, s, [2, 9, 12][i], [7, 7, 7][i], () => [GOSSIP[Object.keys(GOSSIP)[(i + G.S.steps) % 7]].talks.map(e => (e.lines || e))[0][0][1].replace(/^/, '"') + '"'], { nm: n, ai: null })))],
   tiles: { '4,4': () => barSeat(tk), '5,4': () => barSeat(tk), '2,4': () => barSeat(tk) } });
 tavRoom('mb_tavern', 'millbrook', 'The Drowned Duck'); tavRoom('kb_tavern', 'kettlebrook', 'The Sheaf & Sickle');
 SCENES.a_inn.tiles = Object.assign(SCENES.a_inn.tiles || {}, { '4,4': () => barSeat('ashford'), '5,4': () => barSeat('ashford'), '2,4': () => barSeat('ashford') });

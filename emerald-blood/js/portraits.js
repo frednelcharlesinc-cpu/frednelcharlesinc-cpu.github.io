@@ -130,7 +130,7 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
   }
 };
 const PFIT = { ren: .9, ren_hood: .9 };
-const ART_ID = { kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
+const ART_ID = { larkMB: 'lark', larkA: 'lark', inq: 'ivo',  kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
 function artHas(who, expr) { const id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : 'ren') : (ART_ID[who] || who); return !!(Art.port[id] && Art.port[id][expr]); }
 function artFor(who, expr) {
   let id = who === 'me' ? (G.S && G.S.kid ? 'ren_kid' : (G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')) : (ART_ID[who] || who);

@@ -170,6 +170,8 @@ function bindPassivesMenu() { $$('#menuCard [data-pv]').forEach(b => bindTap(b, 
     return _es(e, t, sk, isCounter);
   };
   // transformed faces: Scar Bloom Kairo and Ascended Ren pop in with their transformation art
+  const _fo = BT.faceOf.bind(BT);
+  BT.faceOf = function (a) { if (a && GE_RIVAL[a.key]) return GE_RIVAL[a.key]; return _fo(a); };
   const _fp = BT.facePop.bind(BT);
   BT.facePop = function (a, exprs) {
     if (a && a.key === 'kairo_duel' && a.morph > 0) exprs = ['bloom'].concat(exprs);
