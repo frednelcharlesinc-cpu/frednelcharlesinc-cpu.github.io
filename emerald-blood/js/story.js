@@ -720,7 +720,9 @@ async function fightVoss() {
 /* ---------------- EAST WOODS ---------------- */
 SCENES.woods = {
   title: 'The East Woods', subtitle: 'Where the old stone sleeps', music: 'woods', bd: 'forest',
-  encounters() { const r = Math.random(); return { enemies: r < .5 ? ['lupine'] : r < .85 ? ['lupine', 'lupine'] : ['lupine', 'lupine', 'lupine'], bd: 'forest' }; },
+  encounters() { const r = Math.random();
+    if (G.S.rank && r < .55) { const L = [['m_goblin'], ['m_goblin', 'm_goblin'], ['m_ratfolk', 'm_ratfolk'], ['m_gourd'], ['m_gourd', 'm_goblin'], ['lupine', 'm_goblin'], ['m_goblin', 'm_goblin_shaman']]; if (Power.now().i >= 2) L.push(['m_tusker'], ['m_tusker', 'lupine']); return { enemies: L[Math.floor(Math.random() * L.length)], bd: 'forest' }; }
+    return { enemies: r < .5 ? ['lupine'] : r < .85 ? ['lupine', 'lupine'] : ['lupine', 'lupine', 'lupine'], bd: 'forest' }; },
   npcs() {
     const f = F(); const L = [];
     if (!f.rookBeaten) { L.push({ id: 'rook', x: 42, y: 17, dir: 'left', talk: talkRook }); L.push({ id: 'bandit', x: 40, y: 18, dir: 'left', talk: async () => say('bandit', 'anger', "Talk to the boss, hood. I just stab people.") }); }

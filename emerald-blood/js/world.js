@@ -13,7 +13,7 @@ const World = {
     this.mapImg = G.img['map_' + mk] || (G.img['map_' + mk] = await loadImg('assets/map_' + mk + '.png'));
     this.col = this.map.col.map(r => r.split('').map(Number));
     this.grass = new Set(this.map.grass.map(p => p[0] + ',' + p[1]));
-    this.extraProps = []; this.lights = []; this.tint = null;
+    this.extraProps = []; this.lights = []; this.tint = null; this.followLight = null;
     this.ents = [];
     this.player = new Ent({ id: 'player', x, y, dir: dir || G.S.dir, isPlayer: true });
     this.ents.push(this.player);
@@ -31,6 +31,7 @@ const World = {
       const e = new Ent(Object.assign({}, n, { img: await npcImg(n.sprite || n.id) }));
       this.ents.push(e);
     }
+    if (typeof spawnExtras === 'function') { await spawnExtras(this, name); await Quests.spawn(this, name); }
     if (this.scene.crowd) await this.spawnCrowd(this.scene.crowd);
     this.buildPropList();
     this.snapCam(); this.loading = false;
@@ -112,7 +113,7 @@ const World = {
     if (ex && !ex.msg) { this.useExit(ex); return; }
     if (this.scene.step) { const r = this.scene.step(e.x, e.y); if (r) return; }
     // encounters
-    if (this.scene.encounters && this.grass.has(e.x + ',' + e.y) && G.S.steps - this.lastEnc > 6 && Math.random() < 0.11) {
+    if (this.scene.encounters && this.grass.has(e.x + ',' + e.y) && G.S.steps - this.lastEnc > 6 && Math.random() < (this.scene.encRate ?? 0.11)) {
       this.lastEnc = G.S.steps;
       const enc = this.scene.encounters();
       if (enc) Story.run(async () => { const r = await Battle.start(enc); if (r === 'lose') await Story.defeat(); });

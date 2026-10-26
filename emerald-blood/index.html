@@ -85,7 +85,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 #dlgName.npc{color:#ffd88a}
 #dlgText{font-size:clamp(15px,2.3vw,19px);line-height:1.3;white-space:pre-wrap;min-height:48px}
 #dlgText.narr{font-style:italic;color:#c6d6ca}
-#dlgChoices{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+#dlgChoices{display:flex;flex-direction:column;gap:5px;margin-top:6px;max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .choice{text-align:left;padding:7px 10px;background:var(--panel2);border:2px solid var(--line);border-radius:8px;font-size:15px}
 .choice:active,.choice:hover{border-color:var(--green)}
 #dlgMore{position:absolute;right:12px;bottom:6px;color:var(--green);font-size:14px;animation:bob 1s infinite}
@@ -280,12 +280,15 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/portraits.js"></script>
 <script src="js/cine.js"></script>
 <script src="js/battle.js"></script>
+<script src="js/monsters.js"></script>
 <script src="js/realm.js"></script>
 <script src="js/story.js"></script>
 <script src="js/stones.js"></script>
 <script src="js/lore.js"></script>
 <script src="js/guild.js"></script>
 <script src="js/progress.js"></script>
+<script src="js/dungeons.js"></script>
+<script src="js/quests.js"></script>
 <script src="js/ui.js"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>

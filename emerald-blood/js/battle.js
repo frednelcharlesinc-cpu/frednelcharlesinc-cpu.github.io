@@ -572,7 +572,8 @@ const Battle = {
       sk = e.next || this.chooseSkill(e); e.next = this.chooseSkill(e);
     }
     e.turns = (e.turns || 0) + 1;
-    if (E.howl && !e.howled && e.hp < e.maxHp * .5) { e.howled = 1; await this.msg(`${e.name}: HOWL`, 900); sfx('alarm'); B.shake = 10; for (const x of this.alive('e')) { x.atk = Math.round(x.atk * 1.2); this.text(x, 'ATK UP', '#ff8a6a', -20); } await this.summon('lupine', 'ANSWERS THE HOWL'); }
+    if (E.regen && e.hp < e.maxHp) { const h = Math.round(e.maxHp * E.regen); e.hp = Math.min(e.maxHp, e.hp + h); this.text(e, '+' + h + ' REGEN', '#9be37a', -20); }
+    if (E.howl && !e.howled && e.hp < e.maxHp * .5) { e.howled = 1; await this.msg(`${e.name}: ${E.howlName || 'HOWL'}`, 900); sfx('alarm'); B.shake = 10; for (const x of this.alive('e')) { x.atk = Math.round(x.atk * 1.2); this.text(x, 'ATK UP', '#ff8a6a', -20); } await this.summon(E.howlKey || 'lupine', E.howlText || 'ANSWERS THE HOWL'); }
     if (E.shield && e.turns % 4 === 0 && e.shield < 3) { e.shield = 3; await this.msg(`${e.name} locks shields — PHALANX ×3`, 1000); sfx('parry'); return; }
     if (E.faith && this.alive('e').some(x => x.key === 'acolyte')) { const h = Math.round(e.maxHp * .05); e.hp = Math.min(e.maxHp, e.hp + h); this.text(e, '+' + h + ' (FAITH)', '#fff3b0', -20); this.hud(); }
     if (E.stance) { if (e.stance) e.stance = 0; else if (e.turns % 3 === 0) { e.stance = 1; await this.msg(`${e.name} sheathes his blade. The empty sleeve stirs. (Plain attacks will be countered)`, 1500); e.next = this.chooseSkill(e); return; } }
@@ -819,7 +820,7 @@ const Battle = {
         c.fillStyle = a.broken ? '#fff' : '#ffd34a'; c.fillRect(x, y + 5, bw * Math.min(1, a.brk / a.brkMax), 2);
         c.font = '700 11px "Pixelify Sans"'; c.textAlign = 'center'; c.lineJoin = 'round'; c.strokeStyle = '#000'; c.lineWidth = 3; c.strokeText(a.name, a.x - 7, y - 3); c.fillStyle = '#ffb4a8'; c.fillText(a.name, a.x - 7, y - 3);
         const tr = TIER[a.key]; if (tr) { const tx = a.x - 7 + c.measureText(a.name).width / 2 + 9; c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(tx - 6, y - 12, 12, 11); c.fillStyle = TIER_COL[tr]; c.font = '700 8px "Press Start 2P"'; c.fillText(tr, tx, y - 3); }
-        if (a.E.trait) { c.font = '600 10px "Pixelify Sans"'; c.fillStyle = 'rgba(0,0,0,.78)'; const tw = c.measureText(a.E.trait).width; c.fillRect(a.x - tw / 2 - 3, a.y + 6, tw + 6, 13); c.fillStyle = '#f2e6c4'; c.fillText(a.E.trait, a.x, a.y + 16); }
+        if (a.E.trait) { c.font = '600 10px "Pixelify Sans"'; c.fillStyle = 'rgba(0,0,0,.78)'; const tw = c.measureText(a.E.trait).width, lx = Math.max(tw / 2 + 5, Math.min(W - tw / 2 - 5, a.x)); c.fillRect(lx - tw / 2 - 3, a.y + 6, tw + 6, 13); c.fillStyle = '#f2e6c4'; c.fillText(a.E.trait, lx, a.y + 16); }
         if (a.shield) { c.fillStyle = '#cfd8e8'; for (let i = 0; i < a.shield; i++) c.fillRect(a.x - 12 + i * 9, y - 22, 7, 5); }
         if (a.stance) { c.fillStyle = '#cfe8ff'; c.font = '700 8px "Press Start 2P"'; c.fillText('STANCE', a.x, y - 24); }
         if (a.frostOn) { c.strokeStyle = 'rgba(160,230,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30 * (a.size || 1), 20 * (a.size || 1), 34 * (a.size || 1), 0, 0, 7); c.stroke(); }
