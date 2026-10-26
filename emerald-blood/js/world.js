@@ -208,6 +208,7 @@ const World = {
       c.drawImage(PI, sx, sy, sw, sh, x, y, sw, sh);
     };
     this.flat.forEach(drawProp);
+    if (typeof Ambient !== 'undefined') try { Ambient.ground(c, cx, cy, t, w, h); } catch (e) { }
     const list = [];
     for (const o of this.propsDraw) list.push([o.by, 0, o]);
     for (const e of this.ents) {
@@ -219,6 +220,7 @@ const World = {
       if (k === 0) drawProp(o);
       else o.draw(c, cx, cy, t);
     }
+    if (typeof Ambient !== 'undefined') try { Ambient.air(c, cx, cy, t, w, h); Ambient.light(this, t); } catch (e) { }
     // night / fire tint
     if (this.tint) {
       c.fillStyle = this.tint; c.fillRect(0, 0, w, h);
@@ -234,6 +236,7 @@ const World = {
       }
     }
     Weather.render(c, t);
+    if (typeof Ambient !== 'undefined') try { Ambient.sky(c, cx, cy, t, w, h); } catch (e) { }
     // player eye glow
     const p = this.player;
     if (!G.S.hood && G.S.f.dragAwake !== false && p.dir !== 'up' && !p.hidden) {

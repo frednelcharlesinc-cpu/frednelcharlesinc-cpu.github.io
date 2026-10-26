@@ -209,7 +209,7 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'skills', 'passives', 'arts', 'stones', 'items', 'quests', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ party: 'Party', skills: 'Skills', passives: 'Passives', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'skills', 'passives', 'arts', 'stones', 'items', 'quests', 'feats', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ feats: 'Trophies', party: 'Party', skills: 'Skills', passives: 'Passives', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
       body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · ${Power.badge()}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>EXP <b>${Power.xp()}/${Power.now().hi}</b> · <span style="color:${BAND_COL[Power.now().band]}">${BAND_NAME[Power.now().band]}</span> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
@@ -220,6 +220,8 @@ const UI = {
         `<div class="stat" style="margin-bottom:6px"><h3>Strain ⚡</h3><p>Every Drag Art heats your blood. Strain cools a little each turn — Guard and Cultivate cool it fast. Let it climb past 90% and you fall into <b style="color:#ff6a5a">BLOOD FEVER</b>: Arts locked, HP burning, for 2 turns.</p></div>` +
         (S.arts.includes('azure') && S.arts.includes('crimson') ? `<div class="stat" style="margin-bottom:6px"><h3>??? Eclipse Convergence <span class="muted">· locked</span></h3><p>Blue in the field, then red called through it. Two currents meeting at one point. You can feel its shape. You can't touch it yet.</p></div>` : '') +
         `<div class="stat"><h3>How to fight</h3><p>On your attacks, tap when the gold ring closes for a <b>PERFECT</b> hit (×1.5, can't be dodged or parried).</p><p>On enemy attacks: <b>DODGE</b> (wide window) or <b>PARRY</b> (tight window). Perfect timing earns MP. Parry <b>every</b> hit of an attack to COUNTER.</p><p>Red <b>!!</b> attacks can't be parried — dodge them. Fill an enemy's yellow bar to <b>BREAK</b> them.</p></div>`;
+    } else if (t === 'feats') {
+      body = typeof featsMenuHTML === 'function' ? featsMenuHTML() : '';
     } else if (t === 'passives') {
       body = typeof passivesMenuHTML === 'function' ? passivesMenuHTML() : '';
     } else if (t === 'skills') {
@@ -241,7 +243,7 @@ const UI = {
     } else {
       const st = G.settings;
       body = `<div class="grid2"><div class="stat"><h3>Sound effects</h3><button class="btn" data-s="sfx">${st.sfx ? 'On' : 'Off'}</button></div><div class="stat"><h3>Music</h3><button class="btn" data-s="music">${st.music ? 'On' : 'Off'}</button></div>
-        <div class="stat"><h3>Timing ring</h3><p>Shows when enemy hits land.</p><button class="btn" data-s="ring">${st.ring ? 'On' : 'Off'}</button></div><div class="stat"><h3>Text speed</h3><button class="btn" data-s="text">${['Slow', 'Normal', 'Fast'][st.text ?? 1]}</button></div><div class="stat"><h3>Portrait style</h3><p>Ren & Kairo's dialogue faces.</p><button class="btn" data-s="artStyle">${st.artStyle === 'classic' ? 'Classic' : 'New'}</button></div></div>
+        <div class="stat"><h3>Timing ring</h3><p>Shows when enemy hits land.</p><button class="btn" data-s="ring">${st.ring ? 'On' : 'Off'}</button></div><div class="stat"><h3>Text speed</h3><button class="btn" data-s="text">${['Slow', 'Normal', 'Fast'][st.text ?? 1]}</button></div><div class="stat"><h3>Weather & day/night</h3><p>Living world outdoors: clock, rain, fog, wildlife.</p><button class="btn" data-s="noAmbient">${st.noAmbient ? 'Off' : 'On'}</button></div><div class="stat"><h3>Portrait style</h3><p>Ren & Kairo's dialogue faces.</p><button class="btn" data-s="artStyle">${st.artStyle === 'classic' ? 'Classic' : 'New'}</button></div></div>
         <div class="btnrow"><button class="btn" id="mName">Rename hero</button><button class="btn" id="mSave">Save now</button><button class="btn" id="mCredits">Credits</button><button class="btn" id="mTitle">Title screen</button></div>`;
     }
     $('#menuCard').innerHTML = `<h2>MENU</h2><div class="tabs">${tabs}<button id="mClose" style="margin-left:auto;border-color:#2f8a55;color:var(--green)">Close ✕</button></div>${body}`;
