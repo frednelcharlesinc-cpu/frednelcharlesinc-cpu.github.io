@@ -44,7 +44,9 @@ const Stones = {
     const S = G.S; if (!S || !World.scene || World.busy || G.mode !== 'world') return;
     if (!['ashford', 'woods'].includes(S.map) || !this.unregistered()) return;
     if (S.steps % 37 !== 0) return;
-    if (Math.random() < .3 + S.sus * .08) Story.run(registryStop);
+    // wardens are rare: a long quiet spell after every stop, and only a small chance each check
+    if ((S.steps || 0) - (S.lastStop ?? -9999) < 450) return;
+    if (Math.random() < .07 + S.sus * .03) { S.lastStop = S.steps || 0; Story.run(registryStop); }
   }
 };
 async function registryStop() {
