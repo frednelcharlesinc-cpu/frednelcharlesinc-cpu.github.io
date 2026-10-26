@@ -84,7 +84,7 @@ Familiars.assist = async function (a) {
       await famAct(a, key, F, F.act, Bonds.has(key, 'f3'));
     }
   }
-  const M = a.isMe && Mounts.cur();
+  const M = a.isMe && Mounts.cur() && Mounts.battles(Mounts.cur().id) ? Mounts.cur() : null;
   if (M && M.act) {
     B.mountCd = (B.mountCd ?? 1) - 1;
     if (B.mountCd <= 0) {
@@ -190,7 +190,7 @@ companionsMenuHTML = function () {
     const stage = k === 'me' ? ` · ${DRAGON_STAGE()[0]}` : '';
     h += `<div class="stat comp" style="margin-top:6px"><canvas data-cart="${isM ? 'mount_' + k : 'fam_' + k}" data-pix="${isM ? 'm:' + M.kind : 'f:' + k}" width="96" height="96" style="width:96px;height:96px"></canvas><div style="flex:1">
       <h3 style="color:${F ? F.glow : '#ffd34a'}">${Bonds.name(k)} <span class="muted">· ${F ? F.species : 'Mount'}${stage} · ${owner}'s</span></h3>
-      <p>Rank ${Power.badge(p)} · <b>Bond ${b.lv}</b>/${cap} ${b.lv >= cap ? `<span class="muted">(raise your power grade to grow closer)</span>` : ''} · Power ×${Bonds.power(k).toFixed(2)}</p>
+      <p>Rank ${Power.badge(p)} · <b>Bond ${b.lv}</b>/${cap} ${b.lv >= cap ? `<span class="muted">(raise your power grade to grow closer)</span>` : ''} · Power ×${Bonds.power(k).toFixed(2)}</p>${isM && !Mounts.battles(k) ? '<p class="muted">A travel mount — it stays out of battle. Only grade B+ mounts fight beside you.</p>' : ''}
       <div class="gbar" style="height:8px;background:#22302a;border-radius:4px;overflow:hidden"><div style="height:100%;width:${b.lv >= cap ? 100 : Math.round(b.xp / need * 100)}%;background:#7dffb0"></div></div>
       <p class="muted">${b.lv >= cap ? 'Bond maxed for your grade.' : `${b.xp}/${need} Bond XP`} · <b style="color:#7dffb0">${b.pts} Bond Point${b.pts === 1 ? '' : 's'}</b></p>
       <div class="btnrow"><button class="btn" data-play="${k}">${k === 'me' ? 'Play with it' : isM ? 'Groom & feed' : 'Spend time'}</button>${isM ? (S.riding === k ? '<button class="btn" data-ride="">Dismount</button>' : `<button class="btn" data-ride="${k}">Ride</button>`) : ''}</div></div></div>`;

@@ -607,13 +607,21 @@ const Battle = {
     if (!ranged) await this.dash(e, t.x - 54, t.y + 2, 280);
     $('#react').classList.remove('hide');
     let parries = 0, n = 0, streak = 0;
+    // every DODGE / PARRY press during the whole combo is logged the instant it happens, so nothing is lost between hits
+    B.presses = []; B.cut = 0;
+    const logP = k => () => { B.presses.push([k, performance.now()]); const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 110); };
+    Input.on('dodge', logP('dodge')); Input.on('parry', logP('parry'));
+    // stronger enemies vary their rhythm: feints that hesitate, and snap strikes that come early
+    const ti = Math.max(0, ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'SSSS'].indexOf(TIER[e.key] || 'E'));
     for (const h of sk.hits) {
       if (t.ko) break; n++;
-      const r = await this.defend(e, t, Object.assign({ el }, h));
+      let style = 'normal';
+      if (e.side === 'e' && ti >= 2 && !B.tutorial) { const r = Math.random(), fe = .12 + ti * .04, sn = .08 + ti * .03; style = r < fe ? 'feint' : r < fe + sn ? 'snap' : 'normal'; }
+      const r = await this.defend(e, t, Object.assign({ el, style }, h));
       if (r === 'parry' || r === 'pparry') { parries++; streak++; if (streak >= 2) await this.clash(e, t, streak); } else streak = 0;
       await wait(120);
     }
-    $('#react').classList.add('hide');
+    $('#react').classList.add('hide'); Input.on('dodge', null); Input.on('parry', null); B.presses = null;
     const allParried = parries === n && n > 0 && !sk.hits.some(h => h.unp);
     if (!ranged) await this.home(e);
     if (allParried && !t.ko && !e.ko) {
@@ -635,23 +643,26 @@ const Battle = {
         else if (B.tutorial.parry && !h.unp) { B.tutorial.parry = 0; slow = true; await this.msg('Now PARRY: tighter timing. Parry EVERY hit to counter!', 1600, true); }
       }
       B.timeScale = slow ? 0.38 : 1;
-      const dur = w / B.timeScale, t0 = performance.now(), T = t0 + dur;
-      const ring = { x: t.x, y: t.y - 30, t0, dur, kind: h.unp ? 'unp' : 'def', color: h.unp ? '#ff5050' : '#ffffff' };
+      const st = h.style || 'normal', base = (st === 'snap' ? w * .7 : w) / B.timeScale, pause = st === 'feint' ? 300 / B.timeScale : 0;
+      const dur = base + pause, t0 = performance.now(), T = t0 + dur;
+      const ring = { x: t.x, y: t.y - 30, t0, dur, kind: h.unp ? 'unp' : st, color: h.unp ? '#ff5050' : st === 'feint' ? '#ffb04a' : st === 'snap' ? '#ff6ad5' : '#ffffff',
+        prog: now => { const el = now - t0; if (!pause) return el / base; if (el < base * .5) return el / base; if (el < base * .5 + pause) return .5; return (el - pause) / base; } };
       if (G.settings.ring || slow) B.rings.push(ring);
       e.anim = h.anim; e.frame = 0; e.once = true; e.fn = 99; e.fms = 1e9;
-      let pressed = null;
-      const onD = () => { if (!pressed) pressed = ['dodge', performance.now()]; $('#rxDodge').classList.add('on'); setTimeout(() => $('#rxDodge').classList.remove('on'), 120); };
-      const onP = () => { if (!pressed) pressed = ['parry', performance.now()]; $('#rxParry').classList.add('on'); setTimeout(() => $('#rxParry').classList.remove('on'), 120); };
-      Input.on('dodge', onD); Input.on('parry', onP);
+      let pressed = null; const own = !B.presses; // a lone defend (counters, tests) logs its own presses
+      if (own) { B.presses = []; B.cut = 0; const lp = k => () => { B.presses.push([k, performance.now()]); const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 110); }; Input.on('dodge', lp('dodge')); Input.on('parry', lp('parry')); }
       // animate swing so the impact frame lands on T
       const nF = { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[h.anim] || 6, imp = Math.floor(nF / 2);
       const swingAt = T - imp * 60;
-      while (performance.now() < T + 75 * rk / B.timeScale) {
+      const lateEnd = T + 75 * rk / B.timeScale;
+      while (performance.now() < lateEnd) {
         const now = performance.now();
         if (now >= swingAt && e.fms > 1e8) { e.fms = 60; e.at = 0; e.frame = 0; e.fn = nF; sfx('swing'); }
         await wait(10);
       }
-      Input.on('dodge', null); Input.on('parry', null);
+      // the first press after the previous hit's window closed belongs to this hit
+      pressed = B.presses.find(p => p[1] > B.cut) || null; B.cut = Math.max(lateEnd, pressed ? pressed[1] : 0);
+      if (own) { Input.on('dodge', null); Input.on('parry', null); B.presses = null; }
       B.rings = B.rings.filter(x => x !== ring); B.timeScale = 1;
       // judge
       let res = 'hit';
@@ -846,10 +857,12 @@ const Battle = {
     if (T) { const a = T.list[T.i]; const y = a.y - 92 + Math.sin(t / 150) * 3; c.fillStyle = T.side === 'e' ? '#ffd34a' : '#46ff95'; c.beginPath(); c.moveTo(a.x - 7, y); c.lineTo(a.x + 7, y); c.lineTo(a.x, y + 9); c.fill(); }
     // rings
     for (const r of B.rings) {
-      const k = clamp((performance.now() - r.t0) / r.dur, 0, 1.2), rad = lerp(58, 13, Math.min(1, k));
-      c.lineWidth = 2.5; c.strokeStyle = r.color; c.globalAlpha = .9;
-      c.beginPath(); c.arc(r.x, r.y, rad, 0, 7); c.stroke();
-      c.lineWidth = 1.5; c.globalAlpha = .55; c.beginPath(); c.arc(r.x, r.y, 13, 0, 7); c.stroke();
+      const k = clamp(r.prog ? r.prog(performance.now()) : (performance.now() - r.t0) / r.dur, 0, 1.2), rad = lerp(86, 20, Math.min(1, k));
+      c.lineWidth = 4; c.strokeStyle = '#000'; c.globalAlpha = .5; c.beginPath(); c.arc(r.x, r.y, rad, 0, 7); c.stroke();
+      c.lineWidth = 3; c.strokeStyle = r.color; c.globalAlpha = .95; c.beginPath(); c.arc(r.x, r.y, rad, 0, 7); c.stroke();
+      c.fillStyle = r.color; c.globalAlpha = .12 + .25 * Math.min(1, k); c.beginPath(); c.arc(r.x, r.y, 20, 0, 7); c.fill();
+      c.lineWidth = 2.5; c.globalAlpha = .8; c.beginPath(); c.arc(r.x, r.y, 20, 0, 7); c.stroke();
+      if (r.kind === 'feint' || r.kind === 'snap') { c.globalAlpha = 1; c.font = '700 9px "Press Start 2P"'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#000'; const tx = r.kind === 'feint' ? 'FEINT' : 'QUICK'; c.strokeText(tx, r.x, r.y - 96); c.fillStyle = r.color; c.fillText(tx, r.x, r.y - 96); }
       if (r.kind === 'unp') { c.globalAlpha = 1; c.fillStyle = '#ff5050'; c.font = '700 12px "Press Start 2P"'; c.textAlign = 'center'; c.fillText('!!', r.x, r.y - 22); }
       c.globalAlpha = 1;
     }

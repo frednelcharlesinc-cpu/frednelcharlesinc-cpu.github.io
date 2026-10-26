@@ -88,12 +88,14 @@ Object.assign(ENEMY, { bq_wyvern: Object.assign({}, ENEMY.m_drake, { name: 'Stor
 TIER.bq_wyvern = 'S';
 
 const Mounts = {
+  battles(id) { return GRADES.indexOf(MOUNTS[id].grade) >= GRADES.indexOf('B'); },
+  toggle() { if (G.mode !== 'world' || World.busy) return; const S = G.S; if (S.riding) { S.lastMount = S.riding; this.ride(null); } else { const own = Object.keys(this.owned()); const id = own.includes(S.lastMount) ? S.lastMount : own[own.length - 1]; if (!id) { toast('You have no mount yet.'); return; } this.ride(id); } UI.hud(); save(); },
   owned() { return G.S.mounts = G.S.mounts || {}; },
   allowedHere() { const m = G.S.map, sc = SCENES[m]; return !(sc && sc.map && String(sc.map).startsWith('in_')) && !(sc && sc.dungeon) && m !== 'thornvale' && !G.S.kid; },
   cur() { const id = G.S && G.S.riding; return id && MOUNTS[id] && this.allowedHere() ? Object.assign({ id }, MOUNTS[id]) : null; },
   flying() { const m = this.cur(); return !!(m && m.fly); },
   speed(run) { const m = this.cur(); return m ? Math.round(m.ms * (run ? .8 : 1)) : (run ? 125 : 205); },
-  ride(id) { if (id && !this.owned()[id]) return; if (!id && this.flying()) { const p = World.player; if (World.col[p.y][p.x]) { toast('You can\'t land here — find open ground.'); return; } } G.S.riding = id || null; sfx('blip'); toast(id ? `Riding: <b>${MOUNTS[id].name}</b>${MOUNTS[id].fly ? ' — you can fly over anything!' : ''}` : 'You dismount.', 2200); },
+  ride(id) { if (id && !this.owned()[id]) return; if (!id && this.flying()) { const p = World.player; if (World.col[p.y][p.x]) { toast('You can\'t land here — find open ground.'); return; } } G.S.riding = id || null; sfx('blip'); toast(id ? `Riding: <b>${MOUNTS[id].name}</b>${MOUNTS[id].fly ? ' — you can fly over anything!' : ''}` : 'You dismount.', 2200); if (typeof UI !== 'undefined') UI.hud(); },
   gradeOk(id) { return GRADES.indexOf(Power.now().grade) >= GRADES.indexOf(MOUNTS[id].grade); },
   async spawn(W, name) {
     const D = W.map.dungeon;
@@ -268,8 +270,8 @@ const Familiars = {
     _r(c, t); const B = this.B; if (!B) return;
     for (const a of B.actors) if (a.side === 'p' && !a.ko) { const key = a.isMe ? 'me' : a.id; if (!FAMS[key] || !Familiars.has(key)) continue;
       const img = famImg(key, Math.floor(t / 300)); c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = .95;
-      const fs = 28 * (key === 'me' && typeof DRAGON_STAGE === 'function' ? DRAGON_STAGE()[1] : 1); c.drawImage(img, a.x - 30 - fs / 2, a.y - 2 - fs + Math.sin(t / 400 + a.x) * 3, fs, fs); c.restore(); }
-    const me = this.me && this.me(), M = Mounts.cur();
+      const fs = 28 * (key === 'me' && typeof DRAGON_STAGE === 'function' ? DRAGON_STAGE()[1] : 1); c.drawImage(img, a.x + 30 - fs / 2, a.y - 2 - fs + Math.sin(t / 400 + a.x) * 3, fs, fs); c.restore(); }
+    const me = this.me && this.me(), M0 = Mounts.cur(), M = M0 && Mounts.battles(M0.id) ? M0 : null;
     if (me && M) { const sw = B.mountSwoop && t - B.mountSwoop < 600 ? Math.sin((t - B.mountSwoop) / 600 * Math.PI) : 0;
       const img = mountFrame(M.kind, 'left', Math.floor(t / 110), 'back'); c.save(); c.imageSmoothingEnabled = false;
       const S = M.fly ? 120 : 96, sx = me.x + 62 - sw * (me.x - 180), sy = me.y + (M.fly ? -14 : 6) - sw * 20; c.drawImage(img, sx - S / 2, sy - S * .9, S, S); c.drawImage(mountFrame(M.kind, 'left', Math.floor(t / 110), 'front'), sx - S / 2, sy - S * .9, S, S); c.restore(); }
@@ -280,6 +282,10 @@ const Familiars = {
   const _draw = Ent.prototype.draw;
   Ent.prototype.draw = function (c, cx, cy, t) {
     if (!this.isPlayer) return _draw.call(this, c, cx, cy, t);
+    // the familiar walks beside / behind you — drawn first so it never covers you
+    if (Familiars.has('me') && G.mode === 'world') { const img = famImg('me', Math.floor(t / 300)), x = this.px - cx, y = this.py - cy, d = this.dir;
+      const ox = d === 'left' ? 20 : d === 'right' ? -20 : 18, oy = d === 'down' ? -10 : d === 'up' ? 4 : -2, M1 = Mounts.cur(), lift = M1 ? (M1.fly ? 30 : 14) : 0;
+      c.save(); c.imageSmoothingEnabled = false; c.drawImage(img, Math.round(x + ox - 12), Math.round(y + oy - 30 - lift + Math.sin(t / 350) * 3), 24, 24); c.restore(); }
     const M = Mounts.cur();
     if (M) {
       const x = this.px - cx, y = this.py - cy, f = this.move ? Math.floor(this.walkT / 70) : 0, k = M.fly ? 1.9 : M.kind === 'boar' || M.kind === 'drake' ? 1.6 : 1.5, lift = M.fly ? 18 + Math.sin(t / 300) * 3 : 0;
@@ -291,8 +297,6 @@ const Familiars = {
       drawOW(c, this.img_(), 'idle', this.dir, 0, x, y - seat - lift, this.alpha, this.size);
       c.drawImage(mountFrame(M.kind, this.dir, f, 'front'), ox, oy, S, S); c.restore();
     } else _draw.call(this, c, cx, cy, t);
-    if (Familiars.has('me') && G.mode === 'world') { const img = famImg('me', Math.floor(t / 300)), x = this.px - cx, y = this.py - cy;
-      const ox = this.dir === 'left' ? 18 : -18; c.save(); c.imageSmoothingEnabled = false; c.drawImage(img, Math.round(x + ox - 12), Math.round(y - 56 + Math.sin(t / 350) * 3), 24, 24); c.restore(); }
   };
   // movement: mount speed and flight
   const _free = World.free.bind(World);
