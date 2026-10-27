@@ -5,7 +5,7 @@
    Atlases: assets/hd/{ren,hood,npcs}.png, frame table in assets/hd/hd.json: [x, y, w, h, anchorX, feetY, standingHeight]. */
 const HD = {
   meta: null, img: {}, flip: {}, npcCv: {},
-  OW_H: 52, BT_H: 70,
+  OW_H: 52, BT_H: 70, OW: false,
   load() {
     fetch('assets/hd/hd.json?v=' + Date.now().toString(36).slice(0, 5), { cache: 'no-cache' }).then(r => r.json()).then(m => {
       this.meta = m;
@@ -111,7 +111,7 @@ HD.load();
 (function () {
   const _draw = Ent.prototype.draw;
   Ent.prototype.draw = function (c, cx, cy, t) {
-    if (!HD.on()) return _draw.call(this, c, cx, cy, t);
+    if (!HD.on() || !HD.OW) return _draw.call(this, c, cx, cy, t);   // overworld keeps the stepping walkers until walk-cycle art arrives
     let img, fr, faces, h = HD.OW_H * (this.size || 1);
     const moving = !!this.move, ph = moving ? this.walkT / this.move.ms : 0;
     if (this.dir === 'left' || this.dir === 'right') this.face = this.dir;
@@ -121,10 +121,10 @@ HD.load();
       const A = img.__hd.anims, side = this.dir === 'left' || this.dir === 'right';
       let list = moving && set === 'hood' ? A.ow_walk : side ? A.ow_side : this.dir === 'up' ? A.ow_up : A.ow_down;
       const i = moving && set === 'hood' ? list[Math.floor(ph * 2) % list.length] : list[0];
-      fr = img.__hd.frames[i]; faces = img.__hd.faces;
+      fr = img.__hd.frames[i]; faces = 'right'; // the overworld views look to the right; battle frames look left
     } else if (HD.setOf(HD.npcName(this)) && HD.img.kairo) {
       img = HD.sheet('kairo', false); const A = img.__hd.anims;
-      fr = img.__hd.frames[(/_h$/.test(HD.npcName(this)) ? A.ow_hood : A.ow_down)[0]]; faces = img.__hd.faces;
+      fr = img.__hd.frames[(/_h$/.test(HD.npcName(this)) ? A.ow_hood : A.ow_down)[0]]; faces = 'right';
     } else {
       const name = HD.npcName(this); fr = HD.npcFrame(name); img = HD.img.npcs;
       if (!fr || !img) return _draw.call(this, c, cx, cy, t);
@@ -134,8 +134,8 @@ HD.load();
     if (x < -60 || y < -10 || x > G.view.w + 60 || y > G.view.h + 100) return;
     c.fillStyle = 'rgba(0,0,0,.24)'; c.beginPath(); c.ellipse(x, y - 1, 11, 4, 0, 0, 7); c.fill();
     const want = this.face || (this.isPlayer ? 'right' : 'left'), flip = (this.dir === 'left' || this.dir === 'right' || moving) && want !== faces;
-    const bob = moving ? Math.abs(Math.sin(ph * Math.PI)) * 2.4 : 0;
-    const sway = moving ? Math.sin(ph * Math.PI * 2) * .05 : 0;
+    const bob = moving ? Math.abs(Math.sin(ph * Math.PI)) * 1.2 : 0;
+    const sway = 0;
     const breathe = moving ? 1 : 1 + Math.sin((t + this.x * 211) / 420) * .012;
     c.save(); if (this.alpha != null) c.globalAlpha = this.alpha;
     c.translate(x, y - bob); if (sway) c.rotate(sway); if (flip) c.scale(-1, 1); c.scale(1, breathe);
