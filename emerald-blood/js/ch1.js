@@ -123,7 +123,7 @@ SCENES.millbrook = {
     if (!f.larkMB || f.sqBelfry === 'lark') L.push(vnpc('millbrook', 'larkMB', 38, 15, talkLarkMB, { sprite: 'lark', qm: () => !f.larkMB ? '!' : f.sqBelfry === 'lark' ? '?' : null, witness: 0 }));
     return L;
   },
-  exits: [{ x: 47, y: 15, y2: 19, to: 'ashford', tx: 29, ty: 39, dir: 'up' }],
+  exits: [{ x: 47, y: 15, y2: 19, to: 'ashford', tx: 30, ty: 39, dir: 'up' }],
   tiles: {
     '29,10': () => millWheel(), '29,9': () => millWheel(), '29,11': () => millWheel(),
     '19,18': async () => narr('A little fountain carved like a leaping fish. Coins in the basin — and one green pebble, polished smooth, that nobody has dared to take.'),
@@ -323,7 +323,7 @@ SCENES.kettlebrook = {
     }
     return L;
   },
-  exits: [{ x: 22, x2: 25, y: 0, to: 'ashford', tx: 29, ty: 39, dir: 'up' }],
+  exits: [{ x: 22, x2: 25, y: 0, to: 'ashford', tx: 30, ty: 39, dir: 'up' }],
   tiles: {
     '36,20': async () => narr(F().ge2 === 'ignore' || F().ge2lost ? 'Black beams and the smell of burned bread. There was a winter in here.' : F().ge2 === 'help' ? 'The granary. Half of it scorched — the Inquisition half. The village half is stacked safe in the reeve\'s barn.' : 'The granary doors are nailed shut. A white wax seal: PROPERTY OF THE EMBER INQUISITION.'),
     '8,26': () => orlaField(), '9,26': () => orlaField(), '7,26': () => orlaField()
@@ -748,7 +748,7 @@ LEGENDS.push(
 const CH1_KEY = 'eb_ch1_start';
 const CH1_FLAGS = ['alphaBeaten', 'ashIntroDone', 'caelHeard', 'casselFight', 'chapter1Done', 'corranRules', 'coupHint', 'crateDone', 'crateQuest', 'crateTaken', 'crystalGreen', 'duel', 'fear', 'ge1', 'ge1lost', 'ge2', 'ge2lost', 'ge3', 'geKBmet', 'geTrust', 'gossip', 'granaryStands', 'halvardBeaten', 'halvardKilled', 'halvardKilledByKairo', 'halvardSpared', 'hasCrate', 'hollisTalk', 'hope', 'hoshiDone', 'kbHungry', 'kbIn', 'kbVisited', 'kessAsked', 'kessHelp', 'kessJoined', 'kessKnows', 'kessLeft', 'kessRefused', 'kessWait', 'larkMB', 'lead', 'learnedMill', 'lioraAff', 'lioraKairoTalk', 'lioraMet', 'lioraPin', 'lioraRevenge', 'marenKnows', 'mbIn', 'metCassel', 'metKess', 'metMaren', 'metPip', 'metTobb', 'millDone', 'millGuards', 'millIn', 'pipGone', 'ribbonSeen', 'roofDone', 'rookBeaten', 'rookSaw', 'sableBeaten', 'scoutMet', 'shard', 'shrineRead', 'sqBelfry', 'sqFlour', 'sqFlourPaid', 'sqGourd', 'sqHerb', 'sqWheel', 'sylwenN', 'tamsinGossip', 'tobbKnows', 'tobbReveal', 'vossBeaten', 'vossGone', 'vossKnows', 'woodsTip', 'ysoldeKnown', 'knifeKnown'];
 const Chapter = {
-  snap() { if (!G.S) return; const s = JSON.parse(JSON.stringify(G.S)); s.map = 'ashford'; s.x = 29; s.y = 39; s.dir = 'up'; store(CH1_KEY, JSON.stringify(s)); },
+  snap() { if (!G.S) return; const s = JSON.parse(JSON.stringify(G.S)); s.map = 'ashford'; s.x = 30; s.y = 39; s.dir = 'up'; store(CH1_KEY, JSON.stringify(s)); },
   has() { return !!store(CH1_KEY) || (G.S && G.S.chapter === 1 && !G.S.kid); },
   // saves made before restart points existed: rebuild the start of Chapter I from the current save
   rebuild() {
@@ -758,7 +758,7 @@ const Chapter = {
     f.ashIntro = true;
     if (s.st) { const drop = ['riverheart', 'fang', 'echo', 'heart', 'scale', 'verdict']; s.st.inv = s.st.inv.filter(x => !drop.includes(x));
       for (const sl of Object.values(s.st.equip || {})) if (Array.isArray(sl)) sl.forEach((v, i) => { if (drop.includes(v)) sl[i] = null; }); }
-    Object.assign(s, { map: 'ashford', x: 29, y: 39, dir: 'up', sus: 0, seen: {}, hood: true, party: [], allies: {}, side: '', intel: [], quest: 'Ask around Ashford Hollow for where the Inquisition took Ilya.' });
+    Object.assign(s, { map: 'ashford', x: 30, y: 39, dir: 'up', sus: 0, seen: {}, hood: true, party: [], allies: {}, side: '', intel: [], quest: 'Ask around Ashford Hollow for where the Inquisition took Ilya.' });
     if (s.arts) s.arts = s.arts.filter(k => k !== 'ruin');
     return s;
   },

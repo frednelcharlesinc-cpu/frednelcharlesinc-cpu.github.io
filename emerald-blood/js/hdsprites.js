@@ -9,23 +9,28 @@ const HD = {
   load() {
     fetch('assets/hd/hd.json?v=' + Date.now().toString(36).slice(0, 5), { cache: 'no-cache' }).then(r => r.json()).then(m => {
       this.meta = m;
-      for (const k of ['ren', 'hood', 'veil', 'kairo', 'npcs']) loadImg(`assets/hd/${m[k].img}?v=${m.v}`).then(i => { this.img[k] = i; }).catch(() => {});
+      for (const k of Object.keys(m).filter(k => m[k] && m[k].img)) loadImg(`assets/hd/${m[k].img}?v=${m.v}`).then(i => { this.img[k] = i; }).catch(() => {});
     }).catch(() => {});
   },
   on() { return !!this.meta && !(G.settings && G.settings.classicSprites); },
   playerSet() { return G.S && G.S.hood ? (typeof Veil !== 'undefined' && Veil.on() ? 'veil' : 'hood') : 'ren'; },
   npcName(e) { return String(e.sprite || e.spr || e.key || e.id || ''); },
   /* named characters with their own full sets */
-  setOf(name, key) { return /^kairo(_b|_h)?$/.test(name) || /^kairo_duel/.test(key || '') ? 'kairo' : null; },
+  setOf(name, key) {
+    if (/^kairo(_b|_h)?$/.test(name) || /^kairo_duel/.test(key || '')) return 'kairo';
+    if (/_c?h$/.test(name)) return null;   // hooded disguises keep their hooded figure
+    const b = String(name).replace(/^ge_/, '').replace(/_(bt|eyes|e|c|w|cw|r)$/, '').replace(/_(bt|eyes|e|c|w|cw|r)$/, '');
+    return this.meta && this.meta['c_' + b] ? 'c_' + b : null;
+  },
   npcFrame(name) { const m = this.meta && this.meta.npcs.frames; return m && m[name] || null; },
   /* a set's atlas, mirrored on request; the mirrored copy carries mirrored frame coordinates */
   sheet(set, mirror) {
     const im = this.img[set]; if (!im) return null; const M = this.meta[set];
-    if (!mirror) { if (!im.__hd) im.__hd = { frames: M.frames, anims: M.anims, faces: M.faces }; return im; }
+    if (!mirror) { if (!im.__hd) im.__hd = { frames: M.frames, anims: M.anims, faces: M.faces, set }; return im; }
     if (this.flip[set]) return this.flip[set];
     const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d');
     x.translate(im.width, 0); x.scale(-1, 1); x.drawImage(im, 0, 0);
-    c.__hd = { frames: M.frames.map(f => [im.width - f[0] - f[2], f[1], f[2], f[3], f[2] - f[4], f[5], f[6]]), anims: M.anims, faces: M.faces === 'left' ? 'right' : 'left' };
+    c.__hd = { frames: M.frames.map(f => [im.width - f[0] - f[2], f[1], f[2], f[3], f[2] - f[4], f[5], f[6]]), anims: M.anims, faces: M.faces === 'left' ? 'right' : 'left', set };
     return (this.flip[set] = c);
   },
   /* one townsperson as its own little canvas (battle use), facing the way asked */
@@ -62,7 +67,7 @@ const HD = {
       this.blit(c, img, fr, x + dx, feet + dy, h, { rot, sy }); return;
     }
     let list = H.anims[anim] || H.anims.combat, n = this.NBT[anim] || list.length, i;
-    const A = H.me && this.act && now < this.act.end ? this.act : null;
+    const A = H.me && this.act && now < this.act.end ? this.act : (!H.me && H.set && this.acts && this.acts[H.set] && now < this.acts[H.set].end ? this.acts[H.set] : null);
     if (A) {   // a reaction (parry clash, dodge, perfect dodge with afterimages) plays over whatever the battle code is doing
       list = H.anims[A.name] || list; i = list[Math.min(list.length - 1, Math.floor((now - A.t0) / (A.end - A.t0) * list.length))];
     } else {
@@ -123,6 +128,11 @@ HD.load();
   /* reactions: parries clash with sparks, dodges spin away, perfect dodges leave afterimages */
   const _text = Battle.text.bind(Battle);
   Battle.text = function (a, txt, ...r) {
+    const own = a && !a.isMe && HD.on() ? HD.setOf(HD.npcName(a.spr ? a : { id: a.key || a.id }), a.key) : null;
+    if (own && HD.meta[own].anims.parry) {
+      const k = txt === 'PERFECT DODGE' ? ['pdodge', 560] : txt === 'DODGE' ? ['dodge', 380] : (txt === 'PERFECT PARRY' || txt === 'PARRY') ? ['parry', 420] : null;
+      if (k) { const now = performance.now(); (HD.acts = HD.acts || {})[own] = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
+    }
     if (a && a.isMe && HD.on() && !G.S.kid) {
       const k = txt === 'PERFECT DODGE' ? ['pdodge', 560] : txt === 'DODGE' ? ['dodge', 380] : (txt === 'PERFECT PARRY' || txt === 'PARRY') ? ['parry', txt === 'PARRY' ? 360 : 460] : null;
       if (k) { const now = performance.now(); HD.act = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
@@ -148,10 +158,11 @@ HD.load();
       const base = side ? 'ow_side' : this.dir === 'up' ? 'ow_up' : 'ow_down', list = moving && A[base + '_walk'] || A[base];
       const i = moving ? list[Math.floor(this.walkT / (this.move.ms / (list.length >= 8 ? 4 : 2))) % list.length] : list[0];
       fr = img.__hd.frames[i]; faces = 'right'; // the overworld views look to the right; battle frames look left
-    } else if (HD.setOf(HD.npcName(this)) && HD.img.kairo) {
-      img = HD.sheet('kairo', false); const A = img.__hd.anims;
-      const hood = /_h$/.test(HD.npcName(this)), list = moving ? (hood ? A.ow_hood_walk : A.ow_down_walk) : (hood ? A.ow_hood : A.ow_down);
-      fr = img.__hd.frames[list[st % list.length]]; faces = 'right';
+    } else if (HD.setOf(HD.npcName(this)) && HD.img[HD.setOf(HD.npcName(this))]) {
+      const own = HD.setOf(HD.npcName(this)); img = HD.sheet(own, false); const A = img.__hd.anims;
+      const hood = /_h$/.test(HD.npcName(this)) && A.ow_hood, side = this.dir === 'left' || this.dir === 'right';
+      const base = hood ? 'ow_hood' : side && A.ow_side ? 'ow_side' : 'ow_down', list = moving && A[base + '_walk'] || A[base];
+      fr = img.__hd.frames[moving && list.length >= 8 ? list[Math.floor(this.walkT / (this.move.ms / 4)) % list.length] : list[st % list.length]]; faces = 'right';
     } else {
       const name = HD.npcName(this), L4 = HD.npcFrame(name); img = HD.img.npcs; fr = L4 && L4[moving ? st % 4 : 0];
       if (!fr || !img) return _draw.call(this, c, cx, cy, t);
@@ -189,8 +200,8 @@ HD.load();
   const owPick = (who, anim, dir, f) => {
     const walking = anim === 'walk' || anim === 'run';
     if (who[0] === '@' || HD.setOf(who)) {
-      const set = who[0] === '@' ? who.slice(1) : 'kairo', im = HD.img[set]; if (!im) return null; const A = HD.meta[set].anims;
-      const base = set === 'kairo' ? (/_h$/.test(who) ? 'ow_hood' : 'ow_down') : dir === 'left' || dir === 'right' ? 'ow_side' : dir === 'up' ? 'ow_up' : 'ow_down';
+      const set = who[0] === '@' ? who.slice(1) : HD.setOf(who), im = HD.img[set]; if (!im) return null; const A = HD.meta[set].anims;
+      const base = set === 'kairo' && /_h$/.test(who) ? 'ow_hood' : dir === 'left' || dir === 'right' ? 'ow_side' : dir === 'up' ? 'ow_up' : 'ow_down';
       const list = walking && A[base + '_walk'] || A[base]; return [im, HD.meta[set].frames[list[f % list.length]]];
     }
     const L4 = HD.npcFrame(who); if (!L4 || !HD.img.npcs) return null;
@@ -215,7 +226,7 @@ HD.load();
       if (who) {
         let sh = null;
         if (who[0] === '@') { const set = who.slice(1); if (HD.img[set]) sh = HD.sheet(set, HD.meta[set].faces !== 'left'); }   // the hero's old sheets faced left
-        else if (HD.setOf(who)) { if (HD.img.kairo) sh = HD.sheet('kairo', false); }
+        else if (HD.setOf(who)) { if (HD.img[HD.setOf(who)]) sh = HD.sheet(HD.setOf(who), false); }
         else if (HD.npcFrame(who)) sh = HD.npcSheet(who, false);
         if (sh) return HD.bt(c, sh, anim, f, x, y, s);
       }

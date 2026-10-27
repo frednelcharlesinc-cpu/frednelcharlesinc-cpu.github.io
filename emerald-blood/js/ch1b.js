@@ -170,7 +170,7 @@ const H = () => G.S.f;
 // 1 — THE PYRE IN THE SQUARE (fires when you come back to Ashford knowing about the mill)
 async function pyreInSquare() {
   const f = H(); if (f.h1) return; f.h1 = 'seen';
-  await fadeOut(500); await World.load('ashford', 29, 23, 'up'); await wait(200); await fadeIn(500);
+  await fadeOut(500); await World.load('ashford', 30, 23, 'up'); await wait(200); await fadeIn(500);
   await narr('Every bell in Ashford Hollow is ringing at once. The square is packed. A cage-wagon stands by the fountain, and a stake has been driven into the cobbles beside it.');
   await narr('An old woman sits in the cage, hands folded. Green eyes, faded almost grey. Edda the tinker — she has mended half the pots in the vale.');
   await say('halvard', 'neutral', 'Children of the Hollow. I did not come to frighten you. I came because I love you.');

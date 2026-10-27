@@ -38,7 +38,7 @@ const Story = {
     await fadeOut(600);
     G.S.stats.hp = G.S.stats.maxHp; G.S.stats.mp = G.S.stats.maxMp; const lost = Math.floor(G.S.gold / 2); G.S.gold -= lost;
     for (const k in G.S.allies) G.S.allies[k] = {};
-    await World.load('ashford', 9, 16, 'up'); await fadeIn(600);
+    await World.load('ashford', 11, 6, 'up'); await fadeIn(600);
     await narr('Darkness. Then the bitter smell of herbs.');
     await say('maren', F().marenKnows ? 'sad' : 'neutral', F().marenKnows ? "Dragged you onto my porch myself. My back will never forgive you." : "Found you face-down on the road. Lucky the crows didn't find you first.");
     if (lost) toast('You lost ' + lost + ' gold.');
@@ -760,7 +760,7 @@ SCENES.woods = {
     if (!f.alphaBeaten) L.push({ id: 'liora', sprite: 'liora_e', x: 27, y: 25, dir: 'right', talk: talkAlpha });
     return L;
   },
-  exits: [{ x: 0, y: 16, y2: 18, to: 'ashford', tx: 58, ty: 21, dir: 'left' }],
+  exits: [{ x: 0, y: 16, y2: 18, to: 'ashford', tx: 58, ty: 20, dir: 'left' }],
   tiles: {
     '9,6': () => shrine(), '8,6': () => shrine(), '10,6': () => shrine(), '9,7': () => shrine(),
     '43,16': () => crate(),
@@ -860,7 +860,7 @@ SCENES.mill = {
     if (!f.halvardBeaten) L.push({ id: 'halvard', x: 17, y: 11, dir: 'down', talk: () => halvardEvent() });
     return L;
   },
-  exits: [{ x: 17, y: 27, to: 'ashford', tx: 29, ty: 2, dir: 'down' }],
+  exits: [{ x: 17, y: 27, to: 'ashford', tx: 30, ty: 2, dir: 'down' }],
   step(x, y) {
     const f = F();
     if (!f.millGuards && y <= 20 && y >= 19) { Story.run(millGuards); return true; }
