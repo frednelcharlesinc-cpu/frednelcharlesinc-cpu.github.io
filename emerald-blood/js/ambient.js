@@ -214,7 +214,7 @@ const Ambient = {
     const m = Math.floor(Ambient.clock()), h = Math.floor(m / 60), ph = Ambient.phase();
     const icon = ph === 'Night' ? '☾' : ph === 'Dawn' || ph === 'Dusk' ? '◐' : '☀';
     const wx = Ambient.outdoors() ? { rain: ' · ☂ Rain', fog: ' · ≋ Fog', wind: ' · ⇝ Wind', clear: '' }[Ambient.weather] : '';
-    el.textContent = `${icon} ${ph} ${((h + 11) % 12) + 1}:${String(m % 60).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}${wx}`;
+    el.textContent = `${typeof Cal !== 'undefined' ? Cal.label() + (Object.keys(SCHEDULE).some(k => Cal.isOn(k)) ? ' ' + Object.keys(SCHEDULE).filter(k => Cal.isOn(k)).map(k => SCHEDULE[k].icon).join('') : '') + ' · ' : ''}${icon} ${ph} ${((h + 11) % 12) + 1}:${String(m % 60).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}${wx}`;
   }, 500);
 })();
 // ---------------- soundscape: birds by day, crickets at night, rain patter ----------------

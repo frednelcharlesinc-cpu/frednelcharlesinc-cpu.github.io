@@ -561,7 +561,7 @@ const Battle = {
     }
     B.dim = 0; a.alpha = a.veil ? .45 : 1; this.hud();
   },
-  aoeOk(a) { if (a && a.side === 'e') return true; const p = Power.now(); return p.i > 4 || (p.i === 4 && p.band >= 1); },
+  aoeOk(a) { if (a && a.side === 'e') return true; const p = Power.now(); return p.i > 4 || (p.i === 4 && p.band >= 2); },
   async aoePick(a) { if (this.aoeOk(a)) return this.alive('e'); const t = await new Promise(r => this.pickTarget(a, r)); return t ? [t] : []; },
   artCost(a, k) {
     // Emerald Sight: awaken it by flowing — 5 perfect dodges/parries in a row without being touched — or by burning half your MP

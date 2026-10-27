@@ -157,6 +157,7 @@
         this.text(e, sig ? 'FLAWLESS! — THEY\'RE OPEN' : 'READ PERFECTLY', '#ffe36a', -60, true); sfx('level');
         e.brk += sig ? 40 : 14; this.checkBreak(e); if (t.isMe) { t.mp = Math.min(t.maxMp, t.mp + (sig ? 5 : 2)); }
         G.S.f.flawless = (G.S.f.flawless || 0) + 1;
+        if (sig) { B.sigFlawless = 1; G.S.f.flawlessSig = 1; }
       }
       if (sk.__flurry && !e.ko) { e.wait += 90 / Math.max(1, e.spd); this.text(e, 'WINDED', '#c9c9c9', -40); }
       this.hud(); return r;

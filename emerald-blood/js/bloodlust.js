@@ -5,7 +5,7 @@
    Bloodlust (unlocked at power grade A): weaker monsters flee from you — but now and then something much stronger answers. */
 const R8 = ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'SSSS'];
 const stepOf = () => { const p = Power.now(); return p.i * 3 + p.band; };          // E-green = 0 … SSS-red = 23
-const stepGrade = st => { st = Math.max(0, Math.min(26, st)); return { i: Math.floor(st / 3), band: st % 3, grade: R8[Math.floor(st / 3)] }; };
+const stepGrade = st => { st = Math.max(0, Math.min(26, st)); return { i: Math.floor(st / 3), band: BAND3[st % 3], grade: R8[Math.floor(st / 3)] }; };
 const stepBadge = st => { const g = stepGrade(st); return `<span class="grade" style="--gc:${BAND_COL[g.band]}">${g.grade}</span> <span class="muted">${BAND_NAME[g.band]}</span>`; };
 const GE_GAP = { tamsin: 1, dace: 1, corran: 1, sefa: 2, bo: 2, lark: 2, wren: 2 };
 const Rivals = {

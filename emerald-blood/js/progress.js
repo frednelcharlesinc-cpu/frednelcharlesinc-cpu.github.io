@@ -1,33 +1,83 @@
 'use strict';
 /* ================= POWER GRADES & SKILL TREES =================
    No levels. Experience raises your Power Grade: E → D → C → B → A → S → SS → SSS.
-   Within a grade, colour shows how close you are to the next: GREEN (new) → YELLOW (halfway) → RED (about to break through).
-   Every colour step earns a Skill Point for you and each ally. */
+   Within a grade your aura climbs six colours: GREEN → BLUE → YELLOW → ORANGE → PURPLE → RED.
+   Every colour is a step up in power. Only once the aura burns RED can you break through to the next grade. */
 const GRADES = ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS'];
 const GRADE_XP = [0, 150, 400, 800, 1400, 2300, 3600, 5500, 8000];
-const BAND_COL = ['#46e070', '#ffd34a', '#ff5050'], BAND_NAME = ['green', 'yellow', 'red'];
+const BAND_COL = ['#46e070', '#4aa8ff', '#ffd34a', '#ff9a3a', '#b48aff', '#ff5050'], BAND_NAME = ['green', 'blue', 'yellow', 'orange', 'purple', 'red'];
+const BAND3 = [0, 2, 5]; // older three-step values (rival ranks, lore) map onto the six colours
+const AURA_LINE = ['New to this grade. The power is raw and unsteady.', 'Your mana runs cool and steady now.', 'Halfway. The aura has started to show.', 'It burns hotter. People notice when you walk in.', 'Dense and heavy. The air bends around you.', 'On the edge. One more push and you break through.'];
 const Power = {
   xp() { const S = G.S; if (S.xpTotal === undefined) S.xpTotal = Math.max(0, (S.lvl - 1) * 90 + (S.xp || 0)); return S.xpTotal; },
   of(xp) {
     let i = 0; while (i < GRADES.length - 1 && xp >= GRADE_XP[i + 1]) i++;
-    const lo = GRADE_XP[i], hi = GRADE_XP[i + 1], frac = Math.min(.999, (xp - lo) / (hi - lo)), band = frac < 1 / 3 ? 0 : frac < 2 / 3 ? 1 : 2;
-    return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + band };
+    const lo = GRADE_XP[i], hi = GRADE_XP[i + 1], frac = hi ? Math.min(.999, (xp - lo) / (hi - lo)) : .999, band = Math.min(5, Math.floor(frac * 6));
+    return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + (band >> 1), cstep: i * 6 + band };
   },
   now() { return this.of(this.xp()); },
   badge(p) { p = p || this.now(); return `<span class="grade" style="--gc:${BAND_COL[p.band]}">${p.grade}</span>`; }
 };
-// replaces level-ups
+// replaces level-ups: every colour is a real step, and a grade only breaks after red
+const COLOUR_GIFT = [null, { hp: 4, atk: 1 }, { hp: 4, mp: 1 }, { hp: 4, atk: 1 }, { hp: 4, mp: 1 }, { hp: 4, atk: 1 }];
 Story.gainXp = function (n) {
   const S = G.S, before = Power.now(); S.xpTotal = Power.xp() + n; const after = Power.now();
-  const steps = after.step - before.step; if (steps <= 0) { S.lvl = after.step + 1; return false; }
-  const st = S.stats; S.sp = S.sp || {}; const who = ['me', ...Object.keys(ALLY)];
-  for (let k = 0; k < steps; k++) { st.maxHp += 5; st.atk += 1; for (const w of who) S.sp[w] = (S.sp[w] || 0) + 1; }
-  if (after.i > before.i) { st.maxHp += 10; st.maxMp += 3; st.def += 1; banner('POWER GRADE ' + after.grade, 'You broke through.', 2600); }
-  st.hp = st.maxHp; st.mp = st.maxMp; S.lvl = after.step + 1; sfx('level');
+  S.lvl = after.step + 1;
+  if (after.cstep <= before.cstep) return false;
+  const st = S.stats; S.sp = S.sp || {}; const allies = Object.keys(ALLY), shows = [];
+  for (let c = before.cstep + 1; c <= after.cstep; c++) {
+    const band = c % 6; let sp = 0;
+    if (band === 0) { st.maxHp += 6; st.maxMp += 2; st.def += 1; sp = 1; }
+    else { const g = COLOUR_GIFT[band]; st.maxHp += g.hp; st.atk += g.atk || 0; st.maxMp += g.mp || 0; if (band === 2 || band === 4) sp = 1; }
+    if (sp) { S.sp.me = (S.sp.me || 0) + 1; for (const w of allies) S.sp[w] = (S.sp[w] || 0) + 1; }
+    shows.push([{ grade: GRADES[Math.floor(c / 6)], band }, band === 0, sp]);
+  }
+  st.hp = st.maxHp; st.mp = st.maxMp;
   for (const k in S.allies) S.allies[k] = {};
-  toast(`Power rising — <b style="color:${BAND_COL[after.band]}">${after.grade} · ${BAND_NAME[after.band]}</b>. +${steps} Skill Point${steps > 1 ? 's' : ''} for everyone. (Menu → Skills)`, 3800);
+  for (const x of shows.slice(-4)) Aura.ceremony(...x);
   if (Story.rankCheck) Story.rankCheck();
   return true;
+};
+const Aura = {
+  q: [], busy: false,
+  ceremony(p, breakthrough, sp) {
+    this.q.push([p, breakthrough, sp]); if (!this.busy) this.next();
+  },
+  async next() {
+    const it = this.q.shift(); if (!it) { this.busy = false; return; } this.busy = true;
+    const [p, br, sp] = it, col = BAND_COL[p.band];
+    let el = document.getElementById('auraUp');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'auraUp'; document.body.appendChild(el);
+      const css = document.createElement('style'); css.textContent = `#auraUp{position:fixed;inset:0;z-index:95;pointer-events:none;display:none;align-items:center;justify-content:center;flex-direction:column;font-family:inherit}
+#auraUp.on{display:flex}
+#auraUp .au-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,var(--ac) 0%,transparent 60%);opacity:0;animation:auBg 2.6s ease-out forwards}
+#auraUp .au-ring{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px;border-radius:50%;border:4px solid var(--ac);box-shadow:0 0 30px var(--ac),inset 0 0 20px var(--ac);animation:auRing 1.4s ease-out forwards}
+#auraUp .au-ring.r2{animation-delay:.25s;border-width:2px;opacity:0}
+#auraUp .au-pre{position:relative;font-size:13px;letter-spacing:6px;color:#fff;opacity:.85;text-shadow:0 0 8px #000;animation:auTx 2.6s ease-out forwards}
+#auraUp .au-big{position:relative;font-size:46px;font-weight:900;letter-spacing:8px;color:var(--ac);text-shadow:0 0 18px var(--ac),0 0 4px #000,0 3px 0 #000;animation:auTx 2.6s ease-out forwards}
+#auraUp .au-sub{position:relative;max-width:80%;text-align:center;font-size:14px;color:#f2f2f2;text-shadow:0 0 6px #000,0 1px 0 #000;margin-top:6px;animation:auTx 2.6s ease-out forwards}
+#auraUp .au-bar{position:relative;display:flex;gap:6px;margin-top:12px;animation:auTx 2.6s ease-out forwards}
+#auraUp .au-bar i{width:26px;height:8px;border-radius:4px;background:#333;box-shadow:0 0 0 1px #0008}
+#auraUp .au-bar i.on{background:var(--c);box-shadow:0 0 8px var(--c)}
+#auraUp .au-bar i.now{transform:scaleY(1.6);animation:auPulse .5s ease-in-out 3}
+#auraUp.br .au-big{font-size:54px}
+@keyframes auBg{0%{opacity:0}15%{opacity:.75}100%{opacity:0}}
+@keyframes auRing{0%{transform:scale(.2);opacity:1}100%{transform:scale(24);opacity:0}}
+@keyframes auTx{0%{opacity:0;transform:scale(1.6)}12%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+@keyframes auPulse{50%{filter:brightness(2)}}`;
+      document.head.appendChild(css);
+    }
+    const dots = BAND_COL.map((c, i) => `<i class="${i <= p.band ? 'on' : ''} ${i === p.band ? 'now' : ''}" style="--c:${c}"></i>`).join('');
+    el.style.setProperty('--ac', col); el.className = 'on' + (br ? ' br' : '');
+    el.innerHTML = br
+      ? `<div class="au-bg"></div><div class="au-ring"></div><div class="au-ring r2"></div><div class="au-pre">THE RED BURNS WHITE — AND BREAKS</div><div class="au-big">BREAKTHROUGH · ${p.grade}</div><div class="au-sub">You are ${p.grade}-grade now. Your aura falls back to green and starts the climb again.${sp ? ` +${sp} Skill Point for everyone.` : ''}</div><div class="au-bar">${dots}</div>`
+      : `<div class="au-bg"></div><div class="au-ring"></div><div class="au-ring r2"></div><div class="au-pre">${p.grade}-GRADE · YOUR AURA DEEPENS</div><div class="au-big">${BAND_NAME[p.band].toUpperCase()}</div><div class="au-sub">${AURA_LINE[p.band]}${sp ? ` +${sp} Skill Point for everyone.` : ''}</div><div class="au-bar">${dots}</div>`;
+    sfx(br ? 'art' : 'level'); if (br) setTimeout(() => sfx('level'), 500);
+    if (br) banner('POWER GRADE ' + p.grade, 'You broke through.', 2600);
+    await wait(this.q.length ? 2000 : 2700); el.className = ''; el.innerHTML = '';
+    this.next();
+  }
 };
 // the Guild card shows your registered power grade
 Story.rankCheck = function () {
@@ -95,7 +145,7 @@ function skillsMenuHTML() {
   const p = Power.now();
   let h = `<div class="stat" style="margin-bottom:6px"><h3>Power grade ${Power.badge(p)} <span class="muted">· ${BAND_NAME[p.band]} · ${Power.xp()} / ${p.hi} EXP</span></h3>
     <div class="gbar"><i style="width:${p.frac * 100}%;background:${BAND_COL[p.band]}"></i></div>
-    <p class="muted">Green = new to this grade. Yellow = halfway. Red = about to break through. Every colour step earns everyone a Skill Point.</p>
+    <p class="muted">Your aura climbs six colours each grade: ${BAND_COL.map((c, i) => `<b style="color:${c}">${BAND_NAME[i]}</b>`).join(' → ')}. Every colour makes you stronger; yellow, purple and the breakthrough also give everyone a Skill Point. You can only break through to the next grade once your aura burns red.</p>
     <div class="btnrow">${people.map(w => `<button class="btn ${w === who ? 'pri' : ''}" data-who="${w}">${TREES[w].name()} · ${S.sp[w] || 0} SP</button>`).join('')}</div></div>`;
   h += '<div class="tree">';
   for (const [bn, nodes] of Object.entries(TREES[who].branches)) {
@@ -112,3 +162,23 @@ function bindSkillsMenu() {
   $$('#menuCard [data-who]').forEach(b => bindTap(b, () => { skillWho = b.dataset.who; sfx('blip'); UI.renderMenu(); }));
   $$('#menuCard [data-learn]').forEach(b => bindTap(b, () => { if (Skills.learn(skillWho === 'me' || G.S.party.includes(skillWho) ? skillWho : 'me', b.dataset.learn)) toast('Skill learned.'); UI.renderMenu(); }));
 }
+
+// in battle, Ren's aura shows its colour — faint at green, roaring at red
+(function () {
+  if (typeof Battle === 'undefined') return;
+  const _r = Battle.render.bind(Battle);
+  Battle.render = function (c, t) {
+    const out = _r(c, t), B = this.B;
+    try {
+      const me = B && B.actors.find(a => a.isMe && !a.ko); if (!me || B.tutorial || G.S.kid) return out;
+      const p = Power.now(), col = BAND_COL[p.band], s = BT_SCALE * (me.size || 1), k = .1 + p.band * .045 + Math.sin(t / 200) * .03;
+      const h = col.slice(1), rgb = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)).join(',');
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const g = c.createRadialGradient(me.x, me.y - 28 * s, 4, me.x, me.y - 28 * s, (34 + p.band * 4) * s);
+      g.addColorStop(0, `rgba(${rgb},${k})`); g.addColorStop(1, `rgba(${rgb},0)`); c.fillStyle = g;
+      c.fillRect(me.x - 60 * s, me.y - 90 * s, 120 * s, 110 * s); c.restore();
+      if (p.band >= 3 && Math.random() < .08 + p.band * .04) B.fx.push({ x: me.x + rnd(-14, 14) * s, y: me.y - rnd(0, 50) * s, vx: rnd(-.2, .2), vy: rnd(-1.4, -.5), life: rnd(350, 700), t: 0, col, s: rnd(1.2, 2.2) });
+    } catch (e) { }
+    return out;
+  };
+})();
