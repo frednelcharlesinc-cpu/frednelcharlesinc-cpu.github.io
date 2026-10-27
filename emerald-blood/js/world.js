@@ -10,7 +10,7 @@ const World = {
     G.S.map = name; G.S.x = x; G.S.y = y; if (dir) G.S.dir = dir;
     this.scene = SCENES[name] || {}; const mk = this.scene.map || name;
     this.map = G.maps[mk];
-    this.mapImg = G.img['map_' + mk] || (G.img['map_' + mk] = await loadImg('assets/map_' + mk + '.png'));
+    this.mapImg = G.img['map_' + mk] || (G.img['map_' + mk] = await loadImg('assets/map_' + mk + '.png').catch(() => loadImg('assets/map_' + mk + '.png?r=' + Date.now())));
     this.col = this.map.col.map(r => r.split('').map(Number));
     this.grass = new Set(this.map.grass.map(p => p[0] + ',' + p[1]));
     this.extraProps = []; this.lights = []; this.tint = null; this.followLight = null;
