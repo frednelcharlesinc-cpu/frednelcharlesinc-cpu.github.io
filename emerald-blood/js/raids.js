@@ -233,7 +233,7 @@ const Raid = {
   async battle(enemies, o) {
     const r = this.st(), W = G.view.w;
     const allies = [...r.party.map(k => 'adv_' + k), ...(o.lord ? r.rivals.map(k => 'adv_' + k) : [])];
-    const slots = [[W - 128, 212], [W - 92, 268], [W - 160, 156], [W - 70, 168], [W - 236, 196], [W - 206, 262], [W - 262, 138]];
+    const slots = [[W - 178, 212], [W - 142, 268], [W - 210, 156], [W - 120, 168], [W - 286, 196], [W - 256, 262], [W - 312, 138]];
     const keep = G.S.party; G.S.party = [];
     const res = await Battle.start({ enemies, allies, slots, raid: 1, lord: o.lord, noFlee: !!o.lord, boss: !!(o.lord || o.lt), bd: RAIDS[r.id].bd, intro: o.intro, music: o.music, noElite: 1,
       onTurn: (B, BT) => { if (!B.raidInit) { B.raidInit = 1; Raid.initBattle(B, BT, o); } } });
