@@ -165,7 +165,7 @@ const Battle = {
       blazed: false, over: null, turn: 0, tutorial: cfg.tutorial ? { dodge: 1, parry: 1, hit: 1 } : null, log: [], press: [] };
     // party
     const W = G.view.w;
-    const pSlots = [[W - 150, 205], [W - 112, 262], [W - 188, 150]];
+    const pSlots = cfg.slots || [[W - 150, 205], [W - 112, 262], [W - 188, 150]];
     const eSlots = [[150, 210], [96, 262], [196, 152], [70, 160]];
     const S = G.S.stats;
     const SB = Stones.bonus(); B.sb = SB;

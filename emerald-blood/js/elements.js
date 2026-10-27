@@ -183,7 +183,7 @@ function hitType(a, opts) {
         m_lizard: 'water', will_river: 'water', m_tusker: 'earth', m_minotaur: 'earth', m_wartotaur: 'fire', m_vampire: 'shadow', b_goblin_king: 'fire', m_gourd: 'earth' };
       let n = 0;
       for (const e of (B ? B.actors.filter(a => a.side === 'e' && !a.fled) : [])) {
-        const el = ORB_DROP[e.key]; if (!el) continue;
+        const el = ORB_DROP[e.key.replace(/_(dire|ancient)$/, '')]; if (!el) continue;
         const chance = e.E.boss ? 1 : /^(lupine_alpha|rime_alpha|mana_wyrm|m_drake|m_troll)$/.test(e.key) ? .5 : .15;
         if (Math.random() > chance) continue;
         const rank = ORB_RANKS[Math.min(5, Math.max(0, ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'SSSS'].indexOf(TIER[e.key] || 'E')))];

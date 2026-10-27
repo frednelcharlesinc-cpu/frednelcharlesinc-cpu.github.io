@@ -188,3 +188,59 @@ const Cal = {
     return _b.apply(this, arguments);
   };
 })();
+
+/* ---------------- THE COLOUR CURVE ----------------
+   Every colour costs more than the one before it — the climb gets steeper with each step,
+   not just at the letters. 6 colours × 8 grades. */
+const COLOUR_XP = (() => { const a = [0]; for (let n = 0; n < 48; n++) a.push(a[n] + Math.round(38 * Math.pow(1.105, n))); return a; })();
+for (let i = 0; i < GRADE_XP.length; i++) GRADE_XP[i] = COLOUR_XP[Math.min(48, i * 6)];
+Power.of = function (xp) {
+  let i = 0; while (i < GRADES.length - 1 && xp >= GRADE_XP[i + 1]) i++;
+  let c = i * 6; while (c < Math.min(47, i * 6 + 5) && xp >= COLOUR_XP[c + 1]) c++;
+  const band = c - i * 6, lo = GRADE_XP[i], hi = GRADE_XP[i + 1];
+  const frac = hi ? Math.min(.999, (xp - lo) / (hi - lo)) : .999;
+  const clo = COLOUR_XP[c], chi = COLOUR_XP[c + 1] || clo + 1, cfrac = Math.min(.999, (xp - clo) / (chi - clo));
+  return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + (band >> 1), cstep: c, clo, chi, cfrac };
+};
+// older saves keep the grade they've earned
+(function () {
+  const fix = () => { try { const S = G.S; if (!S || S.f.curve2) return; S.f.curve2 = 1; const bt = Break.st(); let top = 0; for (let k = 1; k < GRADES.length; k++) if (bt[GRADES[k]]) top = k; if (Power.of(Power.xp()).i < top) S.xpTotal = GRADE_XP[top]; } catch (e) { } };
+  setInterval(fix, 1000);
+})();
+// the power bar now shows progress through the CURRENT colour
+(function () {
+  const _h = skillsMenuHTML;
+  skillsMenuHTML = function () {
+    const p = Power.now(); let h = _h();
+    h = h.replace(/<div class="gbar"><i style="width:[^"]*"><\/i><\/div>/, `<div class="gbar"><i style="width:${(p.cfrac * 100).toFixed(1)}%;background:${BAND_COL[p.band]}"></i></div><p class="muted" style="margin:2px 0 0">To ${p.band < 5 ? BAND_NAME[p.band + 1] : 'the wall'}: ${Math.max(0, p.chi - Power.xp())} EXP · each colour costs more than the last.</p>`);
+    return h.replace(/ · \d+ \/ \d+ EXP/, ` · ${Power.xp()} EXP`);
+  };
+})();
+
+/* ---------------- STRONGER MOBS ----------------
+   The wilds answer your power: as your aura climbs, DIRE and then ANCIENT beasts start to show up. */
+const Elite = {
+  make(key, kind) {
+    const nk = key + '_' + kind; if (ENEMY[nk]) return nk;
+    const E = ENEMY[key]; if (!E) return key;
+    const k = kind === 'dire' ? 1.45 : 2.1;
+    ENEMY[nk] = Object.assign({}, E, { name: (kind === 'dire' ? 'Dire ' : 'Ancient ') + E.name, hp: Math.round(E.hp * k), atk: Math.round(E.atk * (kind === 'dire' ? 1.25 : 1.55)), def: (E.def || 0) + (kind === 'dire' ? 2 : 5),
+      spd: (E.spd || 10) + (kind === 'dire' ? 1 : 3), brk: Math.round((E.brk || 70) * k), xp: Math.round((E.xp || 20) * (kind === 'dire' ? 1.9 : 3.2)), gold: Math.round((E.gold || 5) * (kind === 'dire' ? 2 : 3.5)),
+      img: E.img || key, elite: kind, trait: (kind === 'dire' ? 'DIRE — bigger, meaner, hungrier. ' : 'ANCIENT — it has lived through a hundred hunters. ') + (E.trait || ''), size: (E.size || 1) * (kind === 'dire' ? 1.12 : 1.25), spectral: kind === 'ancient' ? '#ff9a3a' : E.spectral });
+    const T = ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS'], ti = Math.max(0, T.indexOf(TIER[key] || 'E'));
+    TIER[nk] = T[Math.min(7, ti + (kind === 'dire' ? 1 : 2))];
+    return nk;
+  },
+  apply(enc) {
+    if (!enc || !enc.enemies || !G.S || G.S.kid || enc.noElite) return enc;
+    const c = Power.now().cstep, list = enc.enemies.slice();
+    const dire = Math.min(.45, Math.max(0, (c - 4) * .025)), anc = Math.min(.25, Math.max(0, (c - 16) * .015));
+    for (let i = 0; i < list.length; i++) { if (!ENEMY[list[i]] || ENEMY[list[i]].boss || ENEMY[list[i]].fixed || /_(dire|ancient)$/.test(list[i])) continue; const r = Math.random(); if (r < anc) list[i] = this.make(list[i], 'ancient'); else if (r < anc + dire) list[i] = this.make(list[i], 'dire'); }
+    // packs grow too
+    if (c >= 10 && list.length < 3 && Math.random() < Math.min(.4, (c - 9) * .03)) list.push(list[0].replace(/_(dire|ancient)$/, ''));
+    return Object.assign({}, enc, { enemies: list });
+  }
+};
+(function () {
+  if (typeof Bloodlust !== 'undefined' && Bloodlust.filter) { const _f = Bloodlust.filter.bind(Bloodlust); Bloodlust.filter = function (enc) { const r = _f(enc); return r ? Elite.apply(r) : r; }; }
+})();

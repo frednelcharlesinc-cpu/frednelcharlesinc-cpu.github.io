@@ -16,7 +16,7 @@ const Veil = {
   async give(from) {
     const f = G.S.f; if (f.veilGot) return; f.veilGot = true; f.veilFrom = from;
     sfx('level');
-    toast('You received <b style="color:#ff5a5a">the Red Veil</b>. Your <b>Hood</b> button is now the <b>Veil</b> button — tap it to put the costume on or take it off.', 5200); UI.hud();
+    toast('You received <b style="color:#ff5a5a">the Red Veil</b> — a second face. The Hood button now cycles <b>Hood</b> (you, Ren) → <b>Veil</b> (secret identity) → eyes out. What the Veil does never touches Ren\'s name.', 6500); UI.hud();
   }
 };
 async function rebuildPlayer() {
