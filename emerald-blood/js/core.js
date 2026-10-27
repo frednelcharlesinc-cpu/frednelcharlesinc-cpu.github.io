@@ -42,8 +42,15 @@ function setView(mode) {
 addEventListener('resize', resize); resize();
 
 /* ---------- assets ---------- */
+// images load a few at a time (phones choke on hundreds of parallel requests), with a timeout so one slow file can't freeze start-up
+const IMGQ = { act: 0, max: 8, q: [] };
 function loadImg(src) {
-  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('img ' + src)); i.src = src; });
+  return new Promise((res, rej) => {
+    const go = () => { IMGQ.act++; const i = new Image(); let done = false;
+      const fin = (ok) => { if (done) return; done = true; clearTimeout(to); IMGQ.act--; if (IMGQ.q.length) IMGQ.q.shift()(); ok ? res(i) : rej(new Error('img ' + src)); };
+      const to = setTimeout(() => fin(false), 20000); i.onload = () => fin(true); i.onerror = () => fin(false); i.src = src; };
+    if (IMGQ.act < IMGQ.max) go(); else IMGQ.q.push(go);
+  });
 }
 async function loadJSON(src) { const r = await fetch(src); return r.json(); }
 async function npcImg(name) {
