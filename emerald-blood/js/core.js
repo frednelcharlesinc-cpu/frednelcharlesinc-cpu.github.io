@@ -43,13 +43,15 @@ addEventListener('resize', resize); resize();
 
 /* ---------- assets ---------- */
 // images load a few at a time (phones choke on hundreds of parallel requests), with a timeout so one slow file can't freeze start-up
-const IMGQ = { act: 0, max: 8, q: [] };
-function loadImg(src) {
+const IMGQ = { act: 0, max: 8, q: [], low: [] };
+function nextImg() { const f = IMGQ.q.shift() || IMGQ.low.shift(); if (f) f(); }
+// low = background art (portraits, paintings): always waits behind anything the game needs right now
+function loadImg(src, low) {
   return new Promise((res, rej) => {
     const go = () => { IMGQ.act++; const i = new Image(); let done = false;
-      const fin = (ok) => { if (done) return; done = true; clearTimeout(to); IMGQ.act--; if (IMGQ.q.length) IMGQ.q.shift()(); ok ? res(i) : rej(new Error('img ' + src)); };
-      const to = setTimeout(() => fin(false), 20000); i.onload = () => fin(true); i.onerror = () => fin(false); i.src = src; };
-    if (IMGQ.act < IMGQ.max) go(); else IMGQ.q.push(go);
+      const fin = (ok) => { if (done) return; done = true; clearTimeout(to); IMGQ.act--; nextImg(); ok ? res(i) : rej(new Error('img ' + src)); };
+      const to = setTimeout(() => fin(false), 30000); i.onload = () => fin(true); i.onerror = () => fin(false); i.src = src; };
+    if (IMGQ.act < IMGQ.max && !(low && IMGQ.q.length)) go(); else (low ? IMGQ.low : IMGQ.q).push(go);
   });
 }
 async function loadJSON(src) { const r = await fetch(src); return r.json(); }
