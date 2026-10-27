@@ -22,7 +22,7 @@ const LINKS = {
 // command grid: an icon and an accent colour for every kind of choice
 function cmdIcon(label) {
   const L = String(label), k = L.replace(/^[^A-Za-z?◀]+/, '');
-  const T = [[/^Attack/, '⚔', '#c8452e'], [/Duel/, '⚔', '#c9962a'], [/^(Drag Arts|Skills)/, '✦', '#2f9a5a'], [/^Link Art/, '❖', '#7a4ab0'], [/^Cultivate/, '☯', '#2f8a7a'],
+  const T = [[/^(Transform|Ascended)/, '◉', '#1f9a52'], [/^Attack/, '⚔', '#c8452e'], [/Duel/, '⚔', '#c9962a'], [/^(Drag Arts|Skills)/, '✦', '#2f9a5a'], [/^Link Art/, '❖', '#7a4ab0'], [/^Cultivate/, '☯', '#2f8a7a'],
     [/^Guard/, '⛨', '#2f6a9a'], [/^Items/, '✚', '#2f8a8a'], [/^Flee/, '➜', '#5a6268'], [/^Spare/, '🕊', '#7a8a90'], [/^Veil Tricks/, '🧣', '#a8323a'], [/^Environment/, '✋', '#8a6a3a'],
     [/^Stance/, '⇄', '#4a5a7a'], [/^◀ Back/, '◀', '#3a4a40'], [/^(Tonic|Ether)/, '⚗', '#2f8a8a'], [/^(Strike)/, '⚔', '#c8452e'], [/^(Feint)/, '↯', '#c9962a'], [/^RAGE/, '🔥', '#c8452e'], [/^CALM/, '≈', '#2f6a9a'],
     [/^(Smoke Bomb)/, '☁', '#5a6268'], [/^(Scarf Lash)/, '〰', '#a8323a'], [/^(Knockout)/, '✊', '#a8323a'], [/^(Kick|Topple|Dive|Shake)/, '✋', '#8a6a3a'], [/^\?\?\?/, '?', '#3a3a50']];
@@ -275,7 +275,7 @@ const Battle = {
         this.openMenu(L, null);
       };
       const sub = () => {
-        const L = a.arts.map(k => { const A = ARTS[k], cost = this.artCost(a, k), st = this.artStrain(a, k), hot = a.fever || a.strain + st > a.strainMax;
+        const L = a.arts.filter(k => !(a.isMe && k === 'sight')).map(k => { const A = ARTS[k], cost = this.artCost(a, k), st = this.artStrain(a, k), hot = a.fever || a.strain + st > a.strainMax;
           if (B.cfg.noArts && a.isMe && !A.sword) return [A.name, 'Proving Bouts rules: no Drag Arts. One blaze of your eyes and the whole Guild sees what you are.', () => {}, true, cost];
           return [A.name, A.desc + `  ⚡ Strain +${st}` + (hot ? (a.fever ? '  — BLOOD FEVER: your arts are locked.' : '  — too hot! Guard or Cultivate to cool down.') : '') + (a.isMe && Stones.artBoost(k) > 1 ? `  ◆ Stone-boosted ×${Stones.artBoost(k).toFixed(2)}` : '') + (k === 'sight' && a.isMe ? `  ◉ Flow ${Math.min(5, a.flow || 0)}/5${(a.flow || 0) >= 5 ? ' — FREE' : ''}` : ''), () => this.useArt(a, k).then(done), a.mp < cost || hot || (k === 'sight' && a.sight), cost]; });
         if (a.isMe && a.arts.includes('azure') && a.arts.includes('crimson')) L.push(['??? Eclipse Convergence', B.orb ? 'Blue holds the field. Red strains to answer it through the orb — the two currents pull toward each other until your bones ache. Your body cannot bear it. Not yet. (End-game technique)' : 'An ultimate that needs setup: Azure Tide\'s orb must hold the field before Crimson can be called THROUGH it. You can feel its shape. You cannot touch it yet. (End-game technique)', () => {}, true]);

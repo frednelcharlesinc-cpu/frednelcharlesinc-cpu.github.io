@@ -231,11 +231,15 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 #cmdTipT{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cmdCost{position:static;display:none;flex:none;padding:0 9px;height:18px;line-height:18px;border-radius:999px;background:#12304a;border:1px solid #3d7fb8;color:#9fd8ff;font-size:11px;font-weight:800;white-space:nowrap}
 #cmdCost.on{display:block}
-#cmdList{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(96px,1fr);grid-template-rows:1fr;gap:6px;padding:0 0 2px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#cmdList{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:max-content;scroll-behavior:smooth;grid-template-rows:1fr;gap:6px;padding:0 0 2px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 #cmdList::-webkit-scrollbar{display:none}
 #cmdList button{display:flex;align-items:center;gap:7px;text-align:left;height:100%;padding:0 8px 0 5px;font-size:13.5px;font-weight:800;color:#eaf5ee;background:linear-gradient(180deg,#1d3024,#142019);border:1.5px solid #2c4a37;border-radius:8px;box-shadow:0 2px 0 rgba(0,0,0,.5);transition:transform .06s,border-color .1s,background .1s}
 #cmdList button .ic{flex:none;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--cc,#2c4a37);color:#fff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
-#cmdList button .lb{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cmdList button{min-width:104px}
+#cmdList button .lb{flex:1;white-space:nowrap}
+#cmdBox{position:relative}
+#cmdBox.more::after{content:'›';position:absolute;right:0;bottom:2px;height:calc(100% - 28px);width:34px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font:900 22px Nunito;color:#7dffb0;background:linear-gradient(90deg,rgba(7,12,9,0),#070c09 70%);pointer-events:none;border-radius:0 8px 8px 0}
+#cmdBox.less::before{content:'‹';position:absolute;left:0;bottom:2px;height:calc(100% - 28px);width:30px;z-index:1;display:flex;align-items:center;padding-left:4px;font:900 22px Nunito;color:#7dffb0;background:linear-gradient(270deg,rgba(7,12,9,0),#070c09 70%);pointer-events:none}
 #cmdList button small{flex:none;font-size:10.5px;font-weight:800;margin:0;opacity:1;color:#9fd8ff}
 #cmdList button.sel{border-color:var(--cc,#46ff95);background:linear-gradient(180deg,#24432f,#183224);box-shadow:0 0 0 1px var(--cc,#46ff95),0 2px 0 rgba(0,0,0,.5)}
 #cmdList button.sel:before{content:none}
@@ -331,40 +335,41 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
   setTimeout(function(){ if(window.G&&G.mode==='boot'){ var t=document.getElementById('loadTxt'); add('Still loading after 25s — stuck at: '+(t?t.textContent:'?')+' ('+(document.getElementById('loadBar')||{style:{}}).style.width+')'); } },25000);
 })();
 </script>
-<script src="js/core.js?v=64"></script>
-<script src="js/world.js?v=64"></script>
-<script src="js/dialog.js?v=64"></script>
-<script src="js/portraits.js?v=64"></script>
-<script src="js/cine.js?v=64"></script>
-<script src="js/battle.js?v=64"></script>
-<script src="js/monsters.js?v=64"></script>
-<script src="js/realm.js?v=64"></script>
-<script src="js/story.js?v=64"></script>
-<script src="js/stones.js?v=64"></script>
-<script src="js/lore.js?v=64"></script>
-<script src="js/guild.js?v=64"></script>
-<script src="js/progress.js?v=64"></script>
-<script src="js/dungeons.js?v=64"></script>
-<script src="js/quests.js?v=64"></script>
-<script src="js/worldmap.js?v=64"></script>
-<script src="js/events.js?v=64"></script>
-<script src="js/companions.js?v=64"></script>
-<script src="js/bonds.js?v=64"></script>
-<script src="js/bloodlust.js?v=64"></script>
-<script src="js/ui.js?v=64"></script>
-<script src="js/ch1.js?v=64"></script>
-<script src="js/passives.js?v=64"></script>
-<script src="js/veil.js?v=64"></script>
-<script src="js/leaf.js?v=64"></script>
-<script src="js/tavern.js?v=64"></script>
-<script src="js/ambient.js?v=64"></script>
-<script src="js/combat2.js?v=64"></script>
-<script src="js/combat3.js?v=64"></script>
-<script src="js/combat4.js?v=64"></script>
-<script src="js/battlefx.js?v=64"></script>
-<script src="js/feats.js?v=64"></script>
-<script src="js/clash.js?v=64"></script>
-<script src="js/ch1b.js?v=64"></script>
+<script src="js/core.js?v=65"></script>
+<script src="js/world.js?v=65"></script>
+<script src="js/dialog.js?v=65"></script>
+<script src="js/portraits.js?v=65"></script>
+<script src="js/cine.js?v=65"></script>
+<script src="js/battle.js?v=65"></script>
+<script src="js/monsters.js?v=65"></script>
+<script src="js/realm.js?v=65"></script>
+<script src="js/story.js?v=65"></script>
+<script src="js/stones.js?v=65"></script>
+<script src="js/lore.js?v=65"></script>
+<script src="js/guild.js?v=65"></script>
+<script src="js/progress.js?v=65"></script>
+<script src="js/dungeons.js?v=65"></script>
+<script src="js/quests.js?v=65"></script>
+<script src="js/worldmap.js?v=65"></script>
+<script src="js/events.js?v=65"></script>
+<script src="js/companions.js?v=65"></script>
+<script src="js/bonds.js?v=65"></script>
+<script src="js/bloodlust.js?v=65"></script>
+<script src="js/ui.js?v=65"></script>
+<script src="js/ch1.js?v=65"></script>
+<script src="js/passives.js?v=65"></script>
+<script src="js/veil.js?v=65"></script>
+<script src="js/leaf.js?v=65"></script>
+<script src="js/tavern.js?v=65"></script>
+<script src="js/ambient.js?v=65"></script>
+<script src="js/combat2.js?v=65"></script>
+<script src="js/combat3.js?v=65"></script>
+<script src="js/combat4.js?v=65"></script>
+<script src="js/battlefx.js?v=65"></script>
+<script src="js/feats.js?v=65"></script>
+<script src="js/clash.js?v=65"></script>
+<script src="js/ch1b.js?v=65"></script>
+<script src="js/combat5.js?v=65"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
