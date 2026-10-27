@@ -787,12 +787,12 @@ const Battle = {
     // 1) rank gap: farming weaklings two ranks below you is nearly worthless; punching up pays
     const gapM = gap <= -2 ? .1 : gap === -1 ? .55 : gap === 0 ? 1 : gap === 1 ? 1.35 : 1.7;
     // 2) the grind: from rank B on, raw EXP thins out
-    const grind = [1, 1, .85, .6, .45, .35, .28, .22, .18][me8] || .18;
+    const grind = [.7, .6, .5, .4, .32, .26, .2, .16, .13][me8] || .13;
     // 3) battle quality: perfect hits, perfect parries & dodges, and above all — not being touched
     const st = B.st, qk = me8 >= 3 ? 1.5 : 1, clean = st.hurt === 0 && gap >= -1;
     let q = Math.min(.5, st.perf * .04) + Math.min(.6, st.pp * .07) + Math.min(.4, st.pd * .05);
     if (clean) q += gap >= 0 ? .8 : .3;
-    q *= qk; if (gap <= -2) q *= .25;
+    q *= qk; if (gap <= -2) q *= .25; q = Math.min(1, q);
     const xp = Math.max(1, Math.round(base * gapM * grind * (1 + q)));
     G.S.gold += gold; const ups = Story.gainXp(xp);
     const parts = [];
