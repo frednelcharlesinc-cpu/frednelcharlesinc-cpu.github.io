@@ -517,12 +517,17 @@ const GOSSIP = {
     [['B', "Know what's scarier than Dread? Somebody named him. Somebody's mother sang to him once."], ['C', '…Why would you SAY that. Why would you say that before bed.']],
     [['C', 'They say his eyes are green.'], ['A', 'Who says?'], ['C', 'People who got close enough to see. …So, nobody living.']]
   ] },
-  royals: { label: 'The Emperor & the royal family', talks: [
-    [['A', "Emperor Lucan's thirty and still no empress. My wife says he's married to the map."], ['B', "He's got a map of the whole continent painted on his ceiling. Every bandit king's land painted gold. Like he's already bought it."]],
-    [['B', "The Dowager Empress Helene hasn't left the palace in eleven years. They say she talks to the old emperor's portrait."], ['C', 'And?'], ['B', 'They say it answers. In a voice nobody recognizes.']],
-    [['C', "Prince Corin — the emperor's little brother — ran off to join the Guild under a false name. Made it to D-rank before they caught him."], ['A', 'Good for him!'], ['C', 'They burned his Guild card in front of him in the throne room. He was fourteen. Hasn\'t smiled in public since.']],
+  royals: { label: 'The royal family', talks: [
+    [['A', "Heard the decree? The old Emperor named the YOUNGER boy heir. Prince Corin. From his sickbed."], ['B', "Over Prince Lucan? Lucan's been running the Empire for a year!"], ['C', 'Running it is one thing. Being chosen is another.'], ['me', '(Corin… he must be about my age.)']],
+    [['B', 'Prince Lucan heard the decree at the council table. Smiled. Thanked his father. Went back to his papers.'], ['A', "Well, that's gracious of him."], ['C', 'My cousin pours wine at court. Says that night Lucan burned every letter his brother ever wrote him. One at a time. Still smiling.']],
+    [['A', "The Emperor's coughing gold."], ['B', 'Gold?'], ['A', 'Little flecks of it, in the blood. The physicians have stopped writing down what he says in his sleep.'], ['C', '…What does he say?'], ['A', "Numbers. He counts."]],
+    [['B', "Why pick Corin? The boy ran off to the Guild at fourteen!"], ['C', "Maybe that's why. A prince who wanted out of the palace has at least SEEN outside of it."], ['A', "Or it's those spectacles. Never takes them off. 'His eyes trouble him in bright light.'"], ['B', '…Whose eyes do that?']],
+    [['C', 'Princess Celeste came through Kettlebrook last spring. Gave the reeve\'s girl her own gloves, right off her hands.'], ['A', 'The Rose of Aurel. Bless her.'], ['B', "They say she's the only one alive who can make Lucan laugh. Pray she keeps at it."]],
+    [['C', 'The Empress was born in this vale, you know. House Merrow, from the hill above Millbrook.'], ['A', 'Never heard of House Merrow.'], ['C', "Nobody has. There's nothing left of it but a burned chapel and a dry well. Burned the year she married."]],
+    [['A', "There's to be a royal barge down the Ashen River next spring. The heir's progress — to show the vale its new prince."], ['B', 'Down OUR river? Past Millbrook?'], ['C', "Oswin'll have to write it in his ledger in gold ink."]],
+    [['B', "Lucan's got a map of the whole continent painted on his bedroom ceiling. Every bandit king's land already painted gold."], ['A', "And the Drag lands?"], ['B', 'Painted over in white. Like nothing was ever there.']],
     [['A', "The Aurels claim they're descended from the First Sun — the hero-king who 'founded the Empire on the Cataclysm's ashes.'"], ['B', 'No portrait of him. No tomb. No bones.'], ['C', "Funny, losing a whole hero-king."], ['A', "Funnier, making it a hanging crime to look for a lost city of gold. Why's a Crown afraid of treasure?"]],
-    [['B', "The Crown's buying up every green pebble in the vale. Surveyors with carts and scales."], ['A', "What's a king want with pebbles?"], ['C', "What's any king want? More. Always more. The old songs say the gold king wanted the whole sky."]]
+    [['B', "The Crown's buying up every green pebble in the vale. Surveyors with carts and scales."], ['A', "What's a prince want with pebbles?"], ['C', 'What any king wants. More. The old songs say the gold king wanted the whole sky.']]
   ] },
   eclipse: { label: 'Green Eclipse', talks: [
     [['A', "Green Eclipse. Twenty of 'em, they say. Thirty by winter. All green eyes, all in black and green, like a proper army."], ['B', "Proper army doesn't paint smiles on wanted posters."], ['C', "…This one does."]],
@@ -718,7 +723,7 @@ async function gePosters() {
 /* ================= lore ================= */
 LEGENDS.push(
   { name: 'The Ashen Vale', need: 'valeLore', text: "The green valley of the Ashen River, between the tomb-mountains and the Imperial heartland. Ashford Hollow is its market town; Millbrook ferries its river; Kettlebrook feeds it. A hundred years ago a third of the vale had green eyes. The mills, the bridges and the best hinges were Drag work. Nobody in the vale says so out loud — but the little dragons carved under axles and doorframes are still there, if you know where to look." },
-  { name: 'The House of Aurel', need: 'royalsHeard', text: "Emperor Lucan Aurel, third of his name, thirty and unmarried, with the whole continent painted on his ceiling. The Dowager Empress Helene, who has not left the palace in eleven years and speaks to her husband's portrait. Prince Corin, the emperor's younger brother, who once ran away to be an adventurer and had his Guild card burned in the throne room. The family claims descent from the First Sun, the hero-king who founded the Empire — a king with no portrait, no tomb and no bones." }
+  { name: 'The House of Aurel', need: 'royalsHeard', text: "Emperor Theodric, coughing gold in a sickroom. The Empress Helene, who lets no one else pour his medicine. Prince-Regent Lucan, the firstborn, who runs the Empire and was passed over for it. Prince Corin, the younger son and now the heir, who once ran away to be an adventurer and wears tinted spectacles he never takes off. Princess Celeste, the Rose of Aurel, the only one who can make Lucan laugh. The family claims descent from the First Sun, the hero-king who founded the Empire — a king with no portrait, no tomb and no bones." }
 );
 
 /* ================= the hunt board, the vale's mood, town errands ================= */

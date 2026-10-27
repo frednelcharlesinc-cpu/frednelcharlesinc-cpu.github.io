@@ -12,14 +12,14 @@ const TIERS = [
   ['SSS', 'A walking catastrophe. Fewer than thirty live: the Four Pillars, the Eight Bandit Kings, the Seven of the Guild and its Headmaster. Most are green or yellow. Only the Headmaster is SSS red.'],
   ['SSSS', 'One name. Dread.']
 ];
-const BALANCE = 'Three powers hold the continent in balance. <b>The Empire of Veyl</b> rules the roads, the cities and the law. <b>The Adventurers\' Guild</b> answers to no crown and keeps the monsters back. <b>The Eight Bandit Kings</b> hold everything in between. None of them can beat the other two — so for a hundred years, none of them has tried. But the new Emperor is ambitious.';
+const BALANCE = 'Three powers hold the continent in balance. <b>The Empire of Veyl</b> rules the roads, the cities and the law. <b>The Adventurers\' Guild</b> answers to no crown and keeps the monsters back. <b>The Eight Bandit Kings</b> hold everything in between. None of them can beat the other two — so for a hundred years, none of them has tried. But the old Emperor is dying, and his firstborn is ambitious.';
 const WORLD = {
   empire: {
     title: 'The Empire of Veyl', blurb: 'The Crown rules from Aurel, the white capital. Its army answers to one Grand General, and beneath him stand the Four Pillars — each one SSS, each one a nation\'s worth of power in one body.',
     people: [
-      { id: 'emperor', name: 'Emperor Lucan Aurel', tag: 'Third of his name · "the Sun That Does Not Set"', tier: '?',
-        text: 'Young for an emperor, brilliant, and patient. The Aurel line claims descent from the First Sun, the hero-king who "founded the Empire on the ashes of the Cataclysm" — though no portrait of him survives, and his tomb has never been found. He inherited a throne that shares the continent with the Guild and the Eight, and he has never accepted it. Nobody has seen him fight. Nobody knows his tier.',
-        agenda: 'To end the balance. Crush the Eight, swallow the Guild, and own every D-stone in the world. The Registry, the stone quarries and the hunt for the Dragonoid are all one plan — his.' },
+      { id: 'emperor', name: 'Prince-Regent Lucan Aurel', tag: 'Firstborn · Regent of Veyl · "the Sun That Waits"', tier: '?',
+        text: 'Thirty, brilliant, patient, unmarried. He has ruled in all but name since his father fell ill — and he wears the Crown Sun on his father\'s behalf, because the old man\'s hands can no longer bear it. Raised from birth to be emperor, then passed over in one sentence from a sickbed. In public he has not said a single word against his brother. He never says "Drag" either. He says "the green-eyed", carefully, like a man handling something that burns.',
+        agenda: 'To end the balance. Crush the Eight, swallow the Guild, and own every D-stone in the world. The Registry, the stone quarries and the hunt for the Dragonoid were all his idea — not his father\'s.' },
       { id: 'dread', name: 'Dread', tag: 'Grand General · "the Black Sun"', tier: 'SSSS', need: 'raid',
         text: 'Commander of every Imperial army. Never speaks above a few words. Carries Gravecleaver, a black greatsword longer than a man. Vane swears his eyes are green.' },
       { id: 'caspian', band: 1, name: 'Caspian Thorne', tag: 'First Pillar · "the Sword Unbowed"', tier: 'SSS', element: 'Wind', need: 'caspianKnown',
@@ -34,6 +34,19 @@ const WORLD = {
       { id: 'sereth', band: 1, name: 'Sereth Vael', tag: 'Fourth Pillar · "the Quiet Tide"', tier: 'SSS', element: 'Water / Ice', need: 'serethKnown',
         text: 'An elf spymaster who runs the Crown Registry. Every seal on every legal D-stone passes through her hands. Soft-spoken. Never seen angry. Never seen surprised.',
         agenda: 'Secretly studying the Dragonoid. The Registry\'s "confiscated" Drag children do not all go to Inquisition camps.', under: 'The Registry Wardens · the Silent Office' }
+    ]
+  },
+  royals: {
+    title: 'The House of Aurel', blurb: 'The Emperor is dying. Three months ago, from his sickbed, he named his YOUNGER son heir — over the firstborn who has been running the Empire for a year. He gave no reason. The court has not stopped whispering since.',
+    people: [
+      { id: 'theodric', name: 'Emperor Theodric Aurel', tag: 'Second of his name · "the Quiet Emperor"', tier: '?', need: 'royalsHeard',
+        text: 'Gentle, by Aurel standards. He started no wars and ended none. A year ago he began coughing blood with flecks of gold in it, and the court physicians stopped writing down what he says in his sleep. He has not been seen in public since he named his heir.' },
+      { id: 'helene', name: 'Empress Helene Aurel', tag: 'Empress-consort · born House Merrow', tier: '?', need: 'royalsHeard',
+        text: 'Married at seventeen, out of a minor house in the Ashen Vale that no longer exists. She nurses the Emperor herself and lets no one else pour his medicine. The servants say she hasn\'t left the east wing in a year — except, very late, to walk the palace walls alone, with a lantern and a red shawl.' },
+      { id: 'corin', name: 'Prince Corin Aurel', tag: 'Second son · Heir of Veyl', tier: '?', need: 'royalsHeard',
+        text: 'About your age. Bookish, stubborn, laughs at the wrong moments. At fourteen he ran away to the Guild under a false name and made D-rank before his brother dragged him home and burned his card in the throne room. He has worn tinted spectacles ever since — "his eyes trouble him in bright light."' },
+      { id: 'celeste', name: 'Princess Celeste Aurel', tag: 'Youngest · "the Rose of Aurel"', tier: '?', need: 'royalsHeard',
+        text: 'A year younger than Corin, and the most loved person in the capital — people throw flowers at her carriage. Lucan adores her; she is the only one who can make him laugh. She visits the Registry orphan-houses every week, and asks the wardens questions they do not like.' }
     ]
   },
   kings: {
@@ -156,7 +169,7 @@ function worldMenuHTML() {
   let h = `<div class="stat" style="margin-bottom:6px"><h3>Tiers of power</h3>${TIERS.map(([t, d]) => `<p><b style="color:${TIER_COL[t] || '#fff'};display:inline-block;min-width:48px">${t}</b> ${d}</p>`).join('')}
     <p class="muted">Your power: ${Power.badge()} · Guild card: ${G.S.rank ? `<b style="color:${TIER_COL[G.S.rank]}">${G.S.rank}-RANK</b>` : 'unregistered'}</p></div>`;
   h += `<div class="stat" style="margin-bottom:6px"><h3>The Balance of Power</h3><p>${BALANCE}</p></div>`;
-  for (const k of ['empire', 'kings', 'guild']) {
+  for (const k of ['empire', 'royals', 'kings', 'guild']) {
     const W = WORLD[k];
     h += `<div class="stat" style="margin-bottom:6px"><h3>${W.title}</h3><p class="muted">${W.blurb}</p></div>`;
     for (const p of W.people) {

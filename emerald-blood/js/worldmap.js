@@ -2,7 +2,7 @@
 /* ================= THE CONTINENT: world map, landmarks, fast travel ================= */
 const MAPLOC = [
   // ---- the great powers
-  { id: 'aurel', name: 'Aurel, the White Capital', kind: 'capital', x: .47, y: .45, text: 'Seat of the Empire of Veyl and Emperor Lucan Aurel. White walls, golden domes, and the greatest arena in the world — the Colosseum, where gladiators from every race fight for gold and the Emperor\'s favour.', event: 'colosseum' },
+  { id: 'aurel', name: 'Aurel, the White Capital', kind: 'capital', x: .47, y: .45, text: 'Seat of the Empire of Veyl — of the dying Emperor Theodric, and of his firstborn, the Prince-Regent Lucan. White walls, golden domes, and the greatest arena in the world — the Colosseum, where gladiators from every race fight for gold and the Emperor\'s favour.', event: 'colosseum' },
   { id: 'bellhaven', name: 'Bellhaven, City of the Bell', kind: 'city', x: .44, y: .79, text: 'The tourist jewel of the continent and home of the Adventurers\' Guild Citadel. Pilgrims come to hear Seraphine\'s great bell; adventurers come for the Guild\'s grand tournaments. Neutral ground — no Crown soldier may draw steel inside its walls.', event: 'tourney' },
   { id: 'veylfields', name: 'The Veyl Heartland', kind: 'home', x: .60, y: .40, text: 'Homeland of humankind: wheat fields, mill towns and Imperial roads. Every road leads to Aurel, and every road has a toll.' },
   // ---- the Eight Bandit Kings
