@@ -32,7 +32,7 @@ function resize() {
 }
 // the overworld is drawn from further back than battles, so you can see more of the town around you
 // close camera like a handheld RPG: about 10 tiles tall around the player (Settings → Camera can pull it back)
-const WORLD_ZOOM = .74, CLOSE_ZOOM = 1.3;
+const WORLD_ZOOM = .74, CLOSE_ZOOM = 1.0;
 // in battle, the bottom strip of the screen belongs to the command bar — the fight is laid out above it
 const BATTLE_STRIP = 92;
 function setView(mode) {
