@@ -864,24 +864,24 @@ const Battle = {
       if (a.isMe) {
         const anim = a.anim, glow = a.glow && anim === 'slash';
         if (a.flip) { c.save(); c.translate(a.x, 0); c.scale(-1, 1); c.translate(-a.x, 0); }
-        const drawn = anim === 'slash' || G.S.kid;
-        if (!drawn) { // the katana rests in its scabbard at the hip — Vane's way
+        const drawn = anim === 'slash' || G.S.kid, bts = !!(B && B.renBts);
+        if (!drawn && !bts) { // the katana rests in its scabbard at the hip — Vane's way
           const dyP = anim === 'hurt' ? Math.min(fr, 4) * 2.4 : anim === 'jump' ? -2 : 0;
           const hx = a.x + 2 * s, hy = a.y - (21 - dyP) * s; c.save(); c.lineCap = 'round';
           c.strokeStyle = '#1a120c'; c.lineWidth = 3.4 * s; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx + 19 * s, hy + 7 * s); c.stroke();
           c.strokeStyle = '#3a2a1c'; c.lineWidth = 1.4 * s; c.beginPath(); c.moveTo(hx + 1, hy - 1); c.lineTo(hx + 18 * s, hy + 6 * s); c.stroke();
           c.fillStyle = '#b8b0a0'; c.fillRect(hx + 17 * s, hy + 5.4 * s, 2.6 * s, 2.6 * s); c.restore();
         }
-        const hilt = () => { if (drawn) return; const dyP = anim === 'hurt' ? Math.min(fr, 4) * 2.4 : anim === 'jump' ? -2 : 0; const hx = a.x + 2 * s, hy = a.y - (21 - dyP) * s; c.save(); c.lineCap = 'round';
+        const hilt = () => { if (drawn || bts) return; const dyP = anim === 'hurt' ? Math.min(fr, 4) * 2.4 : anim === 'jump' ? -2 : 0; const hx = a.x + 2 * s, hy = a.y - (21 - dyP) * s; c.save(); c.lineCap = 'round';
           c.strokeStyle = '#2a2a34'; c.lineWidth = 2.6 * s; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx - 8 * s, hy - 2.2 * s); c.stroke();
           c.fillStyle = '#e8e4d8'; for (let q = 1; q < 4; q++) c.fillRect(hx - q * 2.1 * s, hy - q * .6 * s - .5, 1.3, 1.3);
           c.fillStyle = '#c9a24a'; c.beginPath(); c.ellipse(hx + .5, hy, 1.4 * s, 2.6 * s, .4, 0, 7); c.fill(); c.restore(); };
         // the katana's slash frame 2 flips the blade through his body — skip it so the draw reads as one clean arc
-        const frS = anim === 'slash' && !G.S.kid ? [0, 1, 3, 3, 4, 5][fr] ?? fr : fr;
-        if (!G.S.kid && drawn) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, frS, a.x, a.y, s);
+        const frS = anim === 'slash' && !G.S.kid && !bts ? [0, 1, 3, 3, 4, 5][fr] ?? fr : fr;
+        if (!G.S.kid && drawn && !bts) drawBT(c, glow ? G.A.glowBg : G.A.swordBg, anim, frS, a.x, a.y, s);
         drawBT(c, playerImg(), anim, frS, a.x, a.y, s);
         hilt();
-        if (G.S.kid || !drawn) {} else if (!glow) drawBT(c, G.A.sword, anim, frS, a.x, a.y, s);
+        if (bts) { if (glow) { c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= .6; drawBT(c, tinted(playerImg(), '#7dffb0'), anim, frS, a.x, a.y, s); c.restore(); } } else if (G.S.kid || !drawn) {} else if (!glow) drawBT(c, G.A.sword, anim, frS, a.x, a.y, s);
         else { c.save(); c.globalCompositeOperation = 'lighter'; drawBT(c, G.A.glow, anim, frS, a.x, a.y, s); c.restore(); drawBT(c, G.A.glow, anim, frS, a.x, a.y, s); }
         if (!G.S.hood) { const g = c.createRadialGradient(a.x - 4, a.y - 50, 0, a.x - 4, a.y - 50, 8); g.addColorStop(0, 'rgba(70,255,140,.4)'); g.addColorStop(1, 'rgba(70,255,140,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(a.x - 20, a.y - 66, 32, 32); c.restore(); }
         if (a.flip) c.restore();

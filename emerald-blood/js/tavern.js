@@ -352,13 +352,13 @@ function paintMug(x, cx, cy, s) {
 function buildTavernArt() {
   const P = G.props, atlas = G.img.props; if (!atlas || P.tav_houseA) return;
   const kinds = ['houseA', 'houseA_red'].filter(k => P[k]);
-  const s = TAV_SCALE, W = Math.round(256 * s), H = Math.round(224 * s);
+  const s = TAV_SCALE, W = Math.round(Math.max(...kinds.map(k => P[k].r[2])) * s), H = Math.round(Math.max(...kinds.map(k => P[k].r[3])) * s);
   const out = document.createElement('canvas'); out.width = Math.max(atlas.width, W * kinds.length); out.height = atlas.height + H + 4;
   const x = out.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(atlas, 0, 0);
   kinds.forEach((k, i) => {
     const md = P[k], ox = i * W, oy = atlas.height + 2, [sx, sy, sw, sh] = md.r;
-    x.drawImage(atlas, sx, sy, sw, sh, ox, oy, W, H);
-    const door = (md.door + .5) * 32 * s, base = oy + H;
+    x.drawImage(atlas, sx, sy, sw, sh, ox, oy + H - Math.round(sh * s), Math.round(sw * s), Math.round(sh * s));
+    const door = (md.ax + (md.door + .5) * 32) * s, base = oy + H;
     // lanterns either side of the door
     for (const lx of [door - 34, door + 34]) {
       const ly = base - 92;
@@ -383,7 +383,7 @@ function buildTavernArt() {
     paintMug(x, rx + 9, ry - 6, .45);
   });
   G.img.props = out;
-  kinds.forEach((k, i) => { const md = P[k]; P['tav_' + k] = Object.assign({}, md, { r: [i * W, atlas.height + 2, W, H], ax: Math.round((md.door + .5) * 32 * s - (md.door + .5) * 32), ay: H - 1 }); });
+  kinds.forEach((k, i) => { const md = P[k]; P['tav_' + k] = Object.assign({}, md, { r: [i * W, atlas.height + 2, W, H], ax: Math.round((md.ax + (md.door + .5) * 32) * s - (md.door + .5) * 32), ay: H - 1 }); });
 }
 (function () {
   const _b = World.buildPropList.bind(World);
