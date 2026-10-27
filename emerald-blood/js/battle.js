@@ -160,7 +160,7 @@ const Battle = {
     if (typeof cfg === 'string') cfg = { enemies: [cfg] };
     const prevMode = G.mode; G.mode = 'battle'; G.view.mode = 'battle'; setView('battle'); Dlg.close(); UI.controls(false); $('#hud').classList.add('hide'); $('#hudR').classList.add('hide');
     const bdKey = cfg.bd || (SCENES[G.S.map] && SCENES[G.S.map].bd) || 'field';
-    G.img['bd_' + bdKey] = G.img['bd_' + bdKey] || await loadImg('assets/bd_' + bdKey + '.jpg');
+    G.img['bd_' + bdKey] = G.img['bd_' + bdKey] || await loadImg('assets/bd_' + bdKey + '.jpg?v=2');
     const B = this.B = { cfg, bd: G.img['bd_' + bdKey], actors: [], fx: [], texts: [], rings: [], st: { perf: 0, pp: 0, pd: 0, hurt: 0 }, flash: 0, shake: 0, dim: 0, dimCol: '0,0,0', timeScale: 1,
       blazed: false, over: null, turn: 0, tutorial: cfg.tutorial ? { dodge: 1, parry: 1, hit: 1 } : null, log: [], press: [] };
     // party

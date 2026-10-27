@@ -427,7 +427,7 @@ const FOLK_LINES = () => {
   return base;
 };
 SCENES.ashford = {
-  title: 'Ashford Hollow', subtitle: 'Market town of the eastern vale', music: 'town', bd: 'town',
+  title: 'Ashford Hollow', subtitle: 'Market town of the eastern vale', music: 'town', bd: 'ashford',
   crowd: { count: 30, areas: [[22, 19, 37, 25], [5, 20, 20, 23], [28, 27, 31, 37], [39, 20, 54, 23], [33, 33, 48, 34], [22, 19, 37, 25]], talk: talkFolk, lines: FOLK_LINES },
   async setup(W) { },
   npcs() {
@@ -656,7 +656,7 @@ async function talkCassel() {
   if (!G.S.hood) {
     await say('cassel', 'shock', "Green… GREEN! Brothers! Sisters! The Drag-blood walks among you!");
     Story.addSus(1.5); World.shake = 300; sfx('alarm');
-    if (G.S.sus >= 4 && !f.casselFight) { f.casselFight = true; await say('guard', 'anger', 'You heard the Brother. Take the Drag!'); const r = await Battle.start({ enemies: ['acolyte', 'bandit'], witness: .5, bd: 'town' }); if (r === 'lose') await Story.defeat(); }
+    if (G.S.sus >= 4 && !f.casselFight) { f.casselFight = true; await say('guard', 'anger', 'You heard the Brother. Take the Drag!'); const r = await Battle.start({ enemies: ['acolyte', 'bandit'], witness: .5, bd: 'ashford' }); if (r === 'lose') await Story.defeat(); }
     return;
   }
   if (!f.metCassel) {
@@ -701,7 +701,7 @@ async function talkSable() {
   await say('huntress', 'neutral', 'Hood. Hands. Slowly. I hunt Drags for a living, and you, friend, smell like a payday.');
   const c = await ask('huntress', 'neutral', 'Come quietly and I\'ll make sure they feed you on the way to Greyspire.', ['Fight.', 'Walk away.']);
   if (c === 1) { await say('huntress', 'happy', "Walk then. I'll be watching. I'm always watching."); return; }
-  const r = await Battle.start({ enemies: ['bandit', 'bandit'], bd: 'town', witness: .5, intro: 'Sable and her hired blades attack!' });
+  const r = await Battle.start({ enemies: ['bandit', 'bandit'], bd: 'ashford', witness: .5, intro: 'Sable and her hired blades attack!' });
   if (r === 'lose') { await Story.defeat(); return; }
   if (r === 'win') { f.sableBeaten = true; World.remove('sable'); await say('huntress', 'shame', '…Hah. They never said the Drags could fight. Keep the money. I\'ll find easier prey.'); }
 }
@@ -731,7 +731,7 @@ async function talkVoss() {
 }
 async function fightVoss() {
   const f = F(); Story.addSus(1);
-  const r = await Battle.start({ enemies: ['voss', 'acolyte'], noFlee: true, witness: 1, bd: 'town', intro: 'Captain Voss raises his spear. "Your choice, then."' });
+  const r = await Battle.start({ enemies: ['voss', 'acolyte'], noFlee: true, witness: 1, bd: 'ashford', intro: 'Captain Voss raises his spear. "Your choice, then."' });
   if (r === 'lose') { await Story.defeat(); return; }
   await say('voss', 'sad', '…Enough. Enough.');
   if (!G.S.hood) await say('voss', 'shame', "I've seen Drags hanged for less than what you just did. And you're letting me breathe.");
