@@ -31,11 +31,12 @@ function resize() {
   ctx.imageSmoothingEnabled = false;
 }
 // the overworld is drawn from further back than battles, so you can see more of the town around you
-const WORLD_ZOOM = .74;
+// close camera like a handheld RPG: about 10 tiles tall around the player (Settings → Camera can pull it back)
+const WORLD_ZOOM = .74, CLOSE_ZOOM = 1.3;
 // in battle, the bottom strip of the screen belongs to the command bar — the fight is laid out above it
 const BATTLE_STRIP = 92;
 function setView(mode) {
-  const z = (mode === 'world' || mode === 'dialog') ? WORLD_ZOOM : 1;
+  const z = (mode === 'world' || mode === 'dialog') ? (G.settings && G.settings.wideCam ? WORLD_ZOOM : CLOSE_ZOOM) : 1;
   G.view.scale = G.view.base * z; G.view.fullH = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
   G.view.h = mode === 'battle' ? G.view.fullH * (1 - BATTLE_STRIP / innerHeight) : G.view.fullH;
 }
@@ -67,7 +68,7 @@ async function boot() {
   [G.man, G.props, G.maps] = await Promise.all([loadJSON('assets/manifest.json'), loadJSON('assets/props.json'), loadJSON('assets/maps.json')]);
   initBT();
   step(0.25, 'Gathering the townsfolk…');
-  G.img.props = await loadImg('assets/props.png');
+  G.img.props = await loadImg('assets/props.png?v=3');
   const partNames = Object.keys(G.man.parts);
   let n = 0;
   await Promise.all(partNames.map(async p => { G.img['part_' + p] = await loadImg('assets/parts/' + p + '.png'); step(0.25 + 0.5 * (++n / partNames.length)); }));
