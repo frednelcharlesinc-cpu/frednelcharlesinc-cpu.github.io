@@ -240,9 +240,10 @@ const World = {
     // player eye glow
     const p = this.player;
     if (!G.S.hood && G.S.f.dragAwake !== false && p.dir !== 'up' && !p.hidden) {
-      const gx = p.px - cx + (p.dir === 'left' ? -3 : p.dir === 'right' ? 3 : 0), gy = p.py - cy - 33, a = .5 + .15 * Math.sin(t / 260);
+      const hd = typeof HD !== 'undefined' && HD.on() && HD.OW && !G.S.kid;   // the new sprites have the green eyes painted in: only a faint halo
+      const gx = p.px - cx + (p.dir === 'left' ? -3 : p.dir === 'right' ? 3 : 0), gy = hd ? p.py - cy + 3 - HD.OW_H * .76 : p.py - cy - 33, a = (hd ? .22 : .5) + .15 * Math.sin(t / 260);
       c.save(); c.globalCompositeOperation = 'lighter';
-      const g = c.createRadialGradient(gx, gy, 0, gx, gy, 7); g.addColorStop(0, `rgba(70,255,140,${a})`); g.addColorStop(1, 'rgba(70,255,140,0)');
+      const g = c.createRadialGradient(gx, gy, 0, gx, gy, hd ? 5 : 7); g.addColorStop(0, `rgba(70,255,140,${a})`); g.addColorStop(1, 'rgba(70,255,140,0)');
       c.fillStyle = g; c.fillRect(gx - 7, gy - 7, 14, 14); c.restore();
     }
     // interaction hint

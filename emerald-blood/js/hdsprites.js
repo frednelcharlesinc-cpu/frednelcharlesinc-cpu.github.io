@@ -9,11 +9,11 @@ const HD = {
   load() {
     fetch('assets/hd/hd.json?v=' + Date.now().toString(36).slice(0, 5), { cache: 'no-cache' }).then(r => r.json()).then(m => {
       this.meta = m;
-      for (const k of ['ren', 'hood', 'kairo', 'npcs']) loadImg(`assets/hd/${m[k].img}?v=${m.v}`).then(i => { this.img[k] = i; }).catch(() => {});
+      for (const k of ['ren', 'hood', 'veil', 'kairo', 'npcs']) loadImg(`assets/hd/${m[k].img}?v=${m.v}`).then(i => { this.img[k] = i; }).catch(() => {});
     }).catch(() => {});
   },
   on() { return !!this.meta && !(G.settings && G.settings.classicSprites); },
-  playerSet() { return G.S && G.S.hood ? 'hood' : 'ren'; },
+  playerSet() { return G.S && G.S.hood ? (typeof Veil !== 'undefined' && Veil.on() ? 'veil' : 'hood') : 'ren'; },
   npcName(e) { return String(e.sprite || e.spr || e.key || e.id || ''); },
   /* named characters with their own full sets */
   setOf(name, key) { return /^kairo(_b|_h)?$/.test(name) || /^kairo_duel/.test(key || '') ? 'kairo' : null; },
@@ -120,7 +120,7 @@ HD.load();
       const set = HD.playerSet(); img = HD.sheet(set, false); if (!img) return _draw.call(this, c, cx, cy, t);
       const A = img.__hd.anims, side = this.dir === 'left' || this.dir === 'right';
       const base = side ? 'ow_side' : this.dir === 'up' ? 'ow_up' : 'ow_down', list = moving && A[base + '_walk'] || A[base];
-      const i = list[st % list.length];
+      const i = moving ? list[Math.floor(this.walkT / (this.move.ms / (list.length >= 8 ? 4 : 2))) % list.length] : list[0];
       fr = img.__hd.frames[i]; faces = 'right'; // the overworld views look to the right; battle frames look left
     } else if (HD.setOf(HD.npcName(this)) && HD.img.kairo) {
       img = HD.sheet('kairo', false); const A = img.__hd.anims;
