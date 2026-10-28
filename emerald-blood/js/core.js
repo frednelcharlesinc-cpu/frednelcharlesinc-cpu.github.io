@@ -45,20 +45,28 @@ addEventListener('resize', resize); resize();
 /* ---------- assets ---------- */
 // images load a few at a time (phones choke on hundreds of parallel requests), with a timeout so one slow file can't freeze start-up
 const IMGQ = { act: 0, max: 8, q: [], low: [] };
-function nextImg() { const f = IMGQ.q.shift() || (IMGQ.act < IMGQ.max - 3 ? IMGQ.low.shift() : null); if (f) f(); }
+// while a map is loading, background downloads wait so the map and its people arrive first
+function nextImg() { const f = IMGQ.q.shift() || (IMGQ.act < IMGQ.max - 3 && !IMGQ.hold() ? IMGQ.low.shift() : null); if (f) f(); }
+IMGQ.hold = () => typeof World !== 'undefined' && World.loading;
+setInterval(() => { if (!IMGQ.hold()) while (IMGQ.act < IMGQ.max - 3 && IMGQ.low.length && !IMGQ.q.length) IMGQ.low.shift()(); }, 400);
 // low = background art (portraits, paintings): always waits behind anything the game needs right now
 function loadImg(src, low) {
   return new Promise((res, rej) => {
     const go = () => { IMGQ.act++; const i = new Image(); let done = false;
       const fin = (ok) => { if (done) return; done = true; clearTimeout(to); IMGQ.act--; nextImg(); ok ? res(i) : rej(new Error('img ' + src)); };
       const to = setTimeout(() => fin(false), 30000); i.onload = () => fin(true); i.onerror = () => fin(false); i.src = src; };
-    if (low ? (IMGQ.act < IMGQ.max - 3 && !IMGQ.q.length) : IMGQ.act < IMGQ.max) go(); else (low ? IMGQ.low : IMGQ.q).push(go);
+    if (low ? (IMGQ.act < IMGQ.max - 3 && !IMGQ.q.length && !IMGQ.hold()) : IMGQ.act < IMGQ.max) go(); else (low ? IMGQ.low : IMGQ.q).push(go);
   });
 }
 async function loadJSON(src) { const r = await fetch(src); return r.json(); }
-async function npcImg(name) {
-  if (!G.img[name]) G.img[name] = await loadImg('assets/npc/' + name + '.png');
-  return G.img[name];
+// one request per sheet, ever: callers share the same pending load; background prefetches wait behind anything the game needs now
+const NPCP = {};
+function npcImg(name, low) {
+  if (G.img[name]) return Promise.resolve(G.img[name]);
+  if (NPCP[name] && !(NPCP[name].low && !low)) return NPCP[name].p;
+  const p = loadImg('assets/npc/' + name + '.png', !!low).then(i => { G.img[name] = i; return i; });
+  NPCP[name] = { p, low: !!low }; p.catch(() => { delete NPCP[name]; });
+  return p;
 }
 async function boot() {
   const bar = $('#loadBar'), txt = $('#loadTxt');
@@ -74,7 +82,8 @@ async function boot() {
   await Promise.all(partNames.map(async p => { G.img['part_' + p] = await loadImg('assets/parts/' + p + '.png'); step(0.25 + 0.5 * (++n / partNames.length)); }));
   step(1, '');
   // the cast's sheets load behind the title screen; starting a game waits for them only if they are still coming
-  G.bootP = Promise.all([...new Set(Object.values(CHAR).map(c => c.sprite))].map(n => npcImg(n).catch(() => null))).then(() => { G.bootP = null; if (typeof HD !== 'undefined' && HD.lateLoad) HD.lateLoad(); try { for (const id of ['ren_v3', 'ren_hood']) Art.prefetch(id, ['neutral', 'happy', 'anger', 'sad', 'shock', 'focused']); } catch (e) { } });
+  if (typeof HD !== 'undefined' && HD.lateLoad) HD.lateLoad();
+  G.bootP = null; try { for (const id of ['ren_v3', 'ren_hood']) Art.prefetch(id, ['neutral', 'happy', 'anger']); } catch (e) { }
   $('#loading').classList.add('hide');
   window.__booted = 1; UI.title(); try { sessionStorage.removeItem('ebRetry'); } catch (e) { }
   requestAnimationFrame(loop);

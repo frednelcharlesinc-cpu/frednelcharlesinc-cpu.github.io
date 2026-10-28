@@ -1,8 +1,8 @@
 // pages & scripts: network-first (updates arrive immediately). Images: served from the phone's cache,
 // refreshed quietly in the background — so launching never waits on hundreds of image checks.
-const C = 'emerald-blood-v97', IMG = 'emerald-blood-img-2';
+const C = 'emerald-blood-v98', IMG = 'emerald-blood-img-2', JS = 'emerald-blood-js';
 self.addEventListener('install', e => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C && k !== IMG).map(k => caches.delete(k)))).then(() => clients.claim())));
+self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C && k !== IMG && k !== JS).map(k => caches.delete(k)))).then(() => clients.claim())));
 self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
@@ -16,8 +16,18 @@ self.addEventListener('fetch', e => {
     e.respondWith(work);
     return;
   }
-  // scripts & pages: network first (one retry), then whatever copy is cached — even an older version beats a missing file
+  // versioned scripts (…js?v=N) never change once published: serve them straight from the phone, fetch only the first time
+  if (u.search && /\.js$/.test(u.pathname)) {
+    e.respondWith(caches.open(JS).then(c => c.match(e.request).then(hit => hit || fetch(e.request).then(r => { if (r.ok) c.put(e.request, r.clone()); return r; }))).catch(() => fetch(e.request)));
+    return;
+  }
+  // the page and data files: network first, but never wait more than 4 seconds — then use the copy on the phone
   const get = () => fetch(e.request.url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r; });
-  e.respondWith(get().catch(() => new Promise(res => setTimeout(res, 400)).then(get)).then(r => { const cp = r.clone(); caches.open(C).then(c => c.put(e.request, cp)); return r; })
-    .catch(() => caches.match(e.request, { ignoreSearch: true }).then(m => m || fetch(e.request))));
+  const cached = () => caches.match(e.request, { ignoreSearch: true });
+  e.respondWith(new Promise(res => {
+    let done = false; const fin = r => { if (!done && r) { done = true; res(r); } };
+    get().then(r => { const cp = r.clone(); caches.open(C).then(c => c.put(e.request, cp)); fin(r); })
+      .catch(() => cached().then(m => fin(m || fetch(e.request))));
+    setTimeout(() => cached().then(m => fin(m)), 4000);
+  }));
 });

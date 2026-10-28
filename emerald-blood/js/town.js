@@ -16,9 +16,16 @@ const ASH = {
     [[7, 3], [10, 37]], [[51, 3], [55, 4]], [[55, 16], [57, 21]], [[30, 30], [30, 30]], [[45, 34], [40, 34]]
   ],
   // doors: old tile -> new tile(s)
-  DOORS: { '9,14': ['11,5'], '16,14': ['20,5'], '35,14': ['48,15'], '42,14': ['38,9', '39,9'], '53,10': ['10,17', '11,17'],
+  DOORS: { '9,14': ['11,5'], '16,14': ['20,5'], '35,14': ['48,16'], '42,14': ['38,9', '39,9'], '53,10': ['10,17', '11,17'],
     '8,30': ['7,35'], '15,31': ['42,28'], '22,36': ['50,32'], '41,31': ['36,40'], '49,31': ['39,28'] },
-  free(x, y) { const c = G.maps.ashford.col; return y >= 0 && y < c.length && x >= 0 && x < c[0].length && c[y][x] === '0'; },
+  // walkable AND reachable from the town square — so nobody (and no chest) ends up stranded behind a cliff
+  reach() {
+    const c = G.maps.ashford.col; if (this.R && this.Rc === c) return this.R;
+    const R = new Set(['30,22']), q = [[30, 22]];
+    while (q.length) { const [x, y] = q.shift(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy, k = X + ',' + Y; if (Y >= 0 && Y < c.length && X >= 0 && X < c[0].length && c[Y][X] === '0' && !R.has(k)) { R.add(k); q.push([X, Y]); } } }
+    this.Rc = c; return (this.R = R);
+  },
+  free(x, y) { return this.reach().has(x + ',' + y); },
   snap(x, y) {
     if (this.free(x, y)) return [x, y];
     for (let r = 1; r < 12; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
@@ -42,7 +49,8 @@ const ASH = {
     }
     S.tiles = T;
     // the market and plaza crowd
-    if (S.crowd) S.crowd.areas = [[24, 16, 37, 23], [23, 2, 29, 9], [9, 20, 15, 28], [40, 16, 53, 18], [32, 32, 45, 35], [29, 24, 32, 36], [48, 19, 58, 20]];
+    if (S.crowd) { S.crowd.count = Math.min(S.crowd.count || 18, 18);   // townsfolk gather in the squares and gardens, off the main roads
+      S.crowd.areas = [[23, 1, 28, 2], [24, 4, 27, 6], [10, 6, 24, 7], [9, 22, 12, 25], [6, 29, 12, 30], [22, 21, 28, 24], [33, 13, 40, 17], [32, 33, 44, 35], [48, 34, 52, 35], [44, 3, 44, 9], [34, 3, 34, 9]]; }
     // exits (the east road sits a row higher now)
     S.exits = (S.exits || []).map(e => e.x === 59 ? Object.assign({}, e, { y: 19, y2: 21 }) : e);
     // dungeon mouths: the crypt stairs below the west houses, the quarry path up the north-east cliffs
@@ -68,7 +76,7 @@ const ASH = {
       for (const e of this.ents) {
         if (e.isPlayer || e.follower || NEW_SPACE.test(String(e.id))) continue;
         const [nx, ny] = ASH.move(e.x, e.y); e.x = nx; e.y = ny; e.px = nx * TILE + 16; e.py = ny * TILE + 26;
-        if (e.route) e.route = e.route.map(p => ASH.move(p[0], p[1]));
+        if (e.route) e.route = e.id === 'patrol' ? [[33, 19], [52, 19]] : e.route.map(p => ASH.move(p[0], p[1]));   // the watch walks the east road
         if (e.area && e.area.length === 4) { const a = ASH.move(e.area[0], e.area[1]), b = ASH.move(e.area[2], e.area[3]); e.area = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; }
       }
       this.snapCam();

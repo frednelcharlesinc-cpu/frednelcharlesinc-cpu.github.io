@@ -6,12 +6,11 @@ const World = {
   busy: false, lastEnc: 0, bubbleGate: 0, shake: 0, tint: null, lights: [], extraProps: [], followers: [],
 
   async load(name, x, y, dir) {
-    if (G.bootP) await G.bootP;
     this.loading = true;
     G.S.map = name; G.S.x = x; G.S.y = y; if (dir) G.S.dir = dir;
     this.scene = SCENES[name] || {}; const mk = this.scene.map || name;
     this.map = G.maps[mk];
-    this.mapImg = G.img['map_' + mk] || (G.img['map_' + mk] = await loadImg('assets/map_' + mk + '.png' + (this.map.v ? '?v=' + this.map.v : '')).catch(() => loadImg('assets/map_' + mk + '.png?r=' + Date.now())));
+    this.mapImg = G.img['map_' + mk] || (G.img['map_' + mk] = await loadImg('assets/map_' + mk + '.' + (this.map.ext || 'png') + (this.map.v ? '?v=' + this.map.v : '')).catch(() => loadImg('assets/map_' + mk + '.png?r=' + Date.now())));
     this.col = this.map.col.map(r => r.split('').map(Number));
     this.grass = new Set(this.map.grass.map(p => p[0] + ',' + p[1]));
     this.extraProps = []; this.lights = []; this.tint = null; this.followLight = null;
@@ -27,11 +26,11 @@ const World = {
     this.trail = [];
     if (this.scene.setup) await this.scene.setup(this);
     const npcs = this.scene.npcs ? this.scene.npcs() : [];
-    for (const n of npcs) {
-      if (n.show && !n.show()) continue;
-      const e = new Ent(Object.assign({}, n, { img: await npcImg(n.sprite || n.id) }));
-      this.ents.push(e);
-    }
+    // everyone's sheet loads at once (not one after another); people the new art draws need no old sheet at all
+    const shown = npcs.filter(n => !(n.show && !n.show()));
+    const hdHas = s => typeof HD !== 'undefined' && HD.on() && (HD.npcFrame(s) || HD.setOf(s));
+    const imgs = await Promise.all(shown.map(n => { const s = n.sprite || n.id; return hdHas(s) ? Promise.resolve(HD.stub()) : npcImg(s).catch(() => null); }));
+    shown.forEach((n, i) => { const e = new Ent(Object.assign({}, n, { img: imgs[i] || HD.stub() })); this.ents.push(e); });
     if (typeof spawnExtras === 'function') { await spawnExtras(this, name); await Quests.spawn(this, name); }
     if (this.scene.crowd) await this.spawnCrowd(this.scene.crowd);
     this.buildPropList();
@@ -41,12 +40,16 @@ const World = {
   },
   async spawnCrowd(cr) {
     const folk = (cr.pool ? cr.pool() : G.man.folk).slice(); const r = (a) => a[Math.floor(Math.random() * a.length)];
+    const ids = Array.from({ length: cr.count }, (_, i) => folk[i % folk.length]);
+    const hd = id => typeof HD !== 'undefined' && HD.on() && HD.npcFrame(id);
+    const imgs = await Promise.all(ids.map(id => hd(id) ? Promise.resolve(HD.stub()) : npcImg(id).catch(() => null)));
     for (let i = 0; i < cr.count; i++) {
       const area = r(cr.areas); let tries = 40, x, y;
       do { x = area[0] + Math.floor(Math.random() * (area[2] - area[0] + 1)); y = area[1] + Math.floor(Math.random() * (area[3] - area[1] + 1)); } while (tries-- > 0 && !this.free(x, y));
       if (tries <= 0) continue;
       const id = folk[i % folk.length];
-      const e = new Ent({ id: 'folk_' + i, sprite: id, img: await npcImg(id), x, y, dir: r(['down', 'left', 'right', 'up']), folk: true, kid: id.startsWith('kid'), area,
+      if (!imgs[i]) continue;
+      const e = new Ent({ id: 'folk_' + i, sprite: id, img: imgs[i], x, y, dir: r(['down', 'left', 'right', 'up']), folk: true, kid: id.startsWith('kid'), area,
         ai: 'wander', name: cr.names ? cr.names[i % cr.names.length] : 'Townsperson', talk: cr.talk, talkLines: cr.lines, witness: cr.witness });
       e.wait = rnd(500, 4000);
       this.ents.push(e);
@@ -70,6 +73,15 @@ const World = {
     this.cam.y = mh <= h ? (mh - h) / 2 : clamp(p.py - 20 - h / 2, 0, mh - h);
   },
   inMap(x, y) { return x >= 0 && y >= 0 && x < this.map.w && y < this.map.h; },
+  // wandering townsfolk in your way step aside (or swap places with you) instead of blocking the road
+  nudge(x, y, p) {
+    const e = this.ents.find(n => n !== p && !n.follower && n.x === x && n.y === y && n.folk && (n.ai === 'wander' || n.ai === 'turn') && !n.hidden);
+    if (!e || e.move) return false;
+    const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [x + dx, y + dy]).filter(([ax, ay]) => !(ax === p.x && ay === p.y) && this.free(ax, ay, e));
+    if (opts.length) { const [ax, ay] = opts[Math.floor(Math.random() * opts.length)]; e.startMove(ax, ay, 150); e.wait = 1500; }
+    else { e.startMove(p.x, p.y, 200); e.wait = 1500; }
+    return true;
+  },
   entAt(x, y, except) {
     for (const e of this.ents) { if (e === except || e.ghost) continue; if ((e.x === x && e.y === y) || (e.move && e.move.tx === x && e.move.ty === y)) return e; }
     return null;
@@ -88,6 +100,7 @@ const World = {
         const nx = p.x + DIRS[d][0], ny = p.y + DIRS[d][1];
         const ex = this.exitAt(nx, ny) || (!this.inMap(nx, ny) && this.exitAt(p.x, p.y));
         if (ex && ex.msg) { if (G.t - (this.lastMsg || 0) > 2500) { this.lastMsg = G.t; toast(ex.msg); } }
+        else if (!this.free(nx, ny, p) && this.inMap(nx, ny) && !this.col[ny][nx] && this.nudge(nx, ny, p)) { /* a villager stepped aside */ }
         else if (this.free(nx, ny, p)) {
           const run = G.input.run || G.input.runToggle || G.input.mag > 0.92;
           p.startMove(nx, ny, Mounts.speed(run));
@@ -312,7 +325,7 @@ class Ent {
       if (this.x === tx && this.y === ty) { this.ri = (this.ri + 1) % this.route.length; this.wait = rnd(600, 1600); return; }
       const dx = Math.sign(tx - this.x), dy = Math.sign(ty - this.y);
       const nx = this.x + (dx || 0), ny = this.y + (dx ? 0 : dy);
-      if (W.free(nx, ny, this)) this.startMove(nx, ny, 260); else this.wait = 600;
+      if (W.free(nx, ny, this)) { this.startMove(nx, ny, 260); this.stuck = 0; } else { this.wait = 600; if (++this.stuck > 4) { this.stuck = 0; this.ri = (this.ri + 1) % this.route.length; } }   // a blocked patrol moves on to its next post
       return;
     }
     if (this.ai === 'giggle') { if (this.hidden && Math.abs(this.x - p.x) + Math.abs(this.y - p.y) <= 8) this.say(pick(['hee hee!', '*giggle*', "you'll never find me!", 'shhh…', '*snort*']), 1800); this.wait = rnd(2600, 4200); return; }

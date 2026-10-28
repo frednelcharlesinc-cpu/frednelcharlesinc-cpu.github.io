@@ -16,8 +16,9 @@ const HD = {
     this.wantImgs = 1; const m = this.meta; if (!m || this.started) return; this.started = 1;
     const first = ['ren', 'hood', 'npcs', 'kairo', 'veil'], order = [...first, ...Object.keys(m).filter(k => !first.includes(k))].filter(k => m[k] && m[k].img);
     for (const k of order) { const base = `assets/hd/${m[k].img.replace(/\.png$/, '')}`;
-      loadImg(`${base}.webp?v=${m.v}`).catch(() => loadImg(`${base}.png?v=${m.v}`)).then(i => { this.img[k] = i; }).catch(() => {}); }
+      loadImg(`${base}.webp?v=${m.v}`, !first.includes(k) && k !== 'asc').catch(() => loadImg(`${base}.png?v=${m.v}`, true)).then(i => { this.img[k] = i; }).catch(() => {}); }
   },
+  stub() { if (!this._stub) { const c = document.createElement('canvas'); c.width = 64; c.height = 64; this._stub = c; } return this._stub; },
   on() { return !!this.meta && !(G.settings && G.settings.classicSprites); },
   playerSet() { return G.S && G.S.hood ? (typeof Veil !== 'undefined' && Veil.on() ? 'veil' : 'hood') : 'ren'; },
   npcName(e) { return String(e.sprite || e.spr || e.key || e.id || ''); },
