@@ -765,9 +765,22 @@ const Chapter = {
   async restart(keep) {
     const raw = store(CH1_KEY); const old = G.S, s = raw ? JSON.parse(raw) : this.rebuild(); s.name = old.name;
     if (keep) for (const k of ['lvl', 'xp', 'stats', 'gold', 'items', 'arts', 'skills', 'sp', 'bonds', 'fams', 'fam', 'mounts', 'mount', 'pages', 'qitems', 'chests', 'kills']) if (old[k] !== undefined) s[k] = JSON.parse(JSON.stringify(old[k]));
+    if (!keep) this.scratch(s);
     G.S = s; save(); $('#menu').classList.add('hide'); World.busy = false; G.mode = 'world';
     await fadeOut(500); await World.load(s.map, s.x, s.y, s.dir); UI.hud(); UI.controls(true); await fadeIn(500);
     banner('CHAPTER I', 'Ashford Hollow — again', 2200);
+  },
+  // FROM SCRATCH really means scratch: grade, colour, EXP, gold, items, stones, skills, bonds, renown, contracts and trophies of the chapter all go back
+  // to the moment you first arrived (restart points saved on older versions had your later progress baked in)
+  scratch(s) {
+    const base = newState(s.look, s.name);
+    Object.assign(s, { lvl: 1, xp: 0, xpTotal: 0, xpBank: 0, gold: base.gold, stats: base.stats, items: base.items, bt: {} });
+    for (const k of ['sp', 'sk', 'skills', 'bonds', 'fams', 'fam', 'mounts', 'mount', 'pages', 'qitems', 'chests', 'kills', 'arm', 'orbs', 'ct', 'fame', 'notoriety', 'evWins', 'adv', 'q', 'qx', 'gathered', 'ach', 'st', 'riding', 'bloodlust', 'town', 'wounds'])
+      delete s[k];
+    const f = s.f || (s.f = {});
+    for (const k of Object.keys(f)) if (/^(leafCut|leafCuts|leafMiss|projSeen|veilRep|veilGot|veilDrag|clashWins|tav|bars|sq|ct|raid|ledger|dossier|rep|evt|tourney|colosseum|warcry|guild|rank|feat|brk|bound|bond|contract)/i.test(k)) delete f[k];
+    s.rank = null; s.arts = (s.arts || []).filter(k => k !== 'ruin');   // Arts from before the chapter (Vane's teaching) stay
+    s.f.ch1Scratch = 1;
   },
   async ask() {
     const c = await ask(null, null, 'Restart Chapter I from your arrival in Ashford Hollow? Every choice in this chapter will be undone.', ['Restart — keep my strength (level, Arts, gold, items)', 'Restart from scratch (as I first arrived)', 'Cancel']);
