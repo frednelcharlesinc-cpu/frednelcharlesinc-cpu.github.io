@@ -242,3 +242,14 @@ HD.load();
     return _bt(c, img, anim, f, x, y, s);
   };
 })();
+
+/* fetch the faces of the people on a map as soon as you arrive, so their first line shows the right face straight away */
+(function () {
+  const _l = World.load.bind(World);
+  World.load = async function (...a) {
+    const r = await _l(...a);
+    try { for (const e of this.ents) { if (e.isPlayer || /^folk_/.test(String(e.id))) continue; const id = artId(e.id); if (Art.port[id]) Art.prefetch(id, ['neutral', 'happy', 'anger']); }
+      Art.prefetch(styled(G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')); } catch (e) { }
+    return r;
+  };
+})();

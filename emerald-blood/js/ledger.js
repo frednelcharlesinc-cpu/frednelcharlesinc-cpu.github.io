@@ -130,7 +130,7 @@ const Ledger = {
   const _ld = World.load.bind(World);
   World.load = async function (name, x, y, dir) {
     const r = await _ld(name, x, y, dir);
-    try { if (name === 'ashford' && G.S && !G.S.kid && G.S.chapter >= 1 && !G.S.f.ledgerTip) { G.S.f.ledgerTip = 1; setTimeout(() => toast('Tavern talk: <b>the stationer with the teal roof</b> on Ashford\'s east lane sells more than paper. Information — for a price nobody sane would pay.', 6000), 2500); } } catch (e) { }
+    try { if (name === 'ashford' && G.S && !G.S.kid && G.S.chapter >= 1 && !G.S.f.ledgerTip) { G.S.f.ledgerTip = 1; setTimeout(() => toast('Tavern talk: <b>the red-roofed stationer</b> just south of Ashford\'s fountain sells more than paper. Information — for a price nobody sane would pay.', 6000), 2500); } } catch (e) { }
     return r;
   };
 })();

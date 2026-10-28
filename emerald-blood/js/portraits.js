@@ -158,9 +158,12 @@ function artFor(who, expr) {
 function drawPortrait(canvas, who, expr, facing) {
   const af = artFor(who, expr || 'neutral'); let art = af && af.img;
   const req = who + '|' + expr + '|' + facing; canvas.__req = req;
-  if (art && art.lazy) {   // not downloaded yet: fetch it, then paint (keeps the previous face up for the moment it takes)
+  if (art && art.lazy) {   // not downloaded yet: fetch it (and the rest of this person's faces), then paint
     Art.fetch(art).then(() => { if (canvas.__req === req) drawPortrait(canvas, who, expr, facing); });
-    return;
+    Art.prefetch(art.id);
+    const set = Art.port[art.id] || {}, ready = Object.values(set).find(v => v && !v.lazy && v.width);
+    if (!ready) { canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); return; }   // never leave the last speaker's face up
+    art = ready; af.img = ready;   // meanwhile show one of this person's faces that is already here
   }
   if (art) { if (af.left) facing = -facing; // a painted portrait: cover-fit, smooth scaling, mirrored for the right-hand box
     canvas.width = 296; canvas.height = 320; canvas.style.imageRendering = 'auto'; const x = canvas.getContext('2d'); x.clearRect(0, 0, 296, 320);
