@@ -807,8 +807,8 @@ const Battle = {
     return 'win';
   },
   // ---------------- fx ----------------
-  text(a, s, col, dy, big) { this.B.texts.push({ s, x: a.x + rnd(-6, 6), y: a.y - 60 + (dy || 0), t: 0, col, big }); },
-  spark(x, y, col, n) { for (let i = 0; i < n; i++) this.B.fx.push({ x, y, vx: rnd(-2.6, 2.6), vy: rnd(-3, 1), life: rnd(300, 650), t: 0, col, s: rnd(1.5, 3.2) }); },
+  text(a, s, col, dy, big) { if (!this.B || !a) return; this.B.texts.push({ s, x: a.x + rnd(-6, 6), y: a.y - 60 + (dy || 0), t: 0, col, big }); },
+  spark(x, y, col, n) { if (!this.B) return; for (let i = 0; i < n; i++) this.B.fx.push({ x, y, vx: rnd(-2.6, 2.6), vy: rnd(-3, 1), life: rnd(300, 650), t: 0, col, s: rnd(1.5, 3.2) }); },
   pillar(x, y) { this.B.fx.push({ pillar: 1, x, y, t: 0, life: 500 }); },
   async msg(s, ms, hold) { const m = $('#bmsg'); const i = s.indexOf(':'), who = i > 0 && i < 28 ? s.slice(0, i) : null;
     const act = who && this.B && this.B.actors.find(a => a.name === who || who.startsWith(a.name));
