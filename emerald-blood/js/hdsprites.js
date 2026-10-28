@@ -359,3 +359,42 @@ const Comic = {
     if (this.B) await this.home(a);
   };
 })();
+
+/* ---------- PHANTOM STRIKE (transformed only, once per transformation): Ren vanishes, appears behind every enemy in turn
+   with one precise cut each, reappears at his post — then every cut lands at once. One timing ring decides how clean it is. ---------- */
+(function () {
+  if (typeof CombatX === 'undefined') return;
+  const PHANTOM = async function (a) {
+    const B = Battle.B, es = Battle.alive('e'); if (!es.length) return;
+    a.phantomUsed = 1; a.mp -= a.__phCost || 0; Battle.hud();
+    const x0 = a.x, y0 = a.y, side = a.side === 'p' ? 1 : -1, img = playerImg();
+    Battle.text(a, 'PHANTOM STRIKE', '#e8fff6', -70, true); sfx('art'); B.dim = .55; B.dimCol = '0,20,18';
+    a.anim = 'combat'; await wait(420);
+    const g = await Battle.qte(es[0], 0, '#9fffe0', a);
+    // vanish
+    B.fx.push({ ghost: 1, x: x0, y: y0, t: 0, life: 420, img, anim: 'combat', fr: 0, s: BT_SCALE, col: '#9fffe0', a0: .7 }); Battle.spark(x0, y0 - 30, '#9fffe0', 24); a.alpha = 0; sfx('pdodge'); await wait(260);
+    for (const t of es) {   // blink behind each enemy, cut, gone
+      const bx = t.x - side * 46; a.x = bx; a.y = t.y + 2; a.alpha = 1; a.flip = side > 0;
+      HD.forceVar = 'c7'; a.anim = 'slash'; a.frame = 3; a.once = true; a.fn = 99; a.fms = 1e9; sfx('swing');
+      B.fx.push({ hline: 1, x1: bx + side * 30, x2: t.x - side * 50, y: t.y - 34, t: 0, life: 700 });
+      Battle.spark(t.x, t.y - 34, '#e8fff6', 10); await wait(150);
+      B.fx.push({ ghost: 1, x: a.x, y: a.y, t: 0, life: 300, img: playerImg(), anim: 'slash', fr: 3, s: BT_SCALE, col: '#9fffe0', a0: .5 }); a.alpha = 0; await wait(110);
+    }
+    HD.forceVar = null; a.x = x0; a.y = y0; a.flip = false; a.anim = 'combat'; a.alpha = 1; Battle.spark(x0, y0 - 30, '#9fffe0', 16);
+    Battle.text(a, '— click —', '#cfe8ff', -50); await wait(420); B.dim = 0;
+    const m = g === 'perfect' ? 2.6 : g === 'good' ? 2.1 : 1.5;
+    for (const t of es) { if (t.ko) continue; B.flash = .45; B.flashCol = '200,255,235'; Battle.spark(t.x, t.y - 34, '#ffffff', 26); Battle.resolveHit(a, t, m, g, { unblockable: 1, brk: 30, src: 'phantom' }); await wait(90); }
+    B.shake = 12; await wait(500);
+  };
+  const _m = CombatX.menu.bind(CombatX);
+  CombatX.menu = function (a, L, done, resolve, reopen) {
+    _m(a, L, done, resolve, reopen);
+    if (!a.isMe) return;
+    if (!a.sight) { a.phantomUsed = 0; return; }
+    const cost = a.__phCost = Math.max(4, Math.round(a.maxMp * .3)), ok = !a.phantomUsed && a.mp >= cost && !a.fever && Battle.alive('e').length;
+    const i = Math.max(0, L.findIndex(x => /^Ascended/.test(x[0])));
+    L.splice(i + 1, 0, ['Phantom Strike',
+      a.phantomUsed ? 'PHANTOM STRIKE — already used this transformation.' : `PHANTOM STRIKE — vanish and cut every enemy with one precise slash each; all the cuts land at once and can't be blocked. One timing ring: hit it clean for a deadlier cut. Once per transformation. Costs ${cost} MP.${a.mp < cost ? ' — not enough MP!' : ''}`,
+      () => { if (!ok) return; Battle.closeMenu(); PHANTOM(a).then(done); }, !ok, cost]);
+  };
+})();

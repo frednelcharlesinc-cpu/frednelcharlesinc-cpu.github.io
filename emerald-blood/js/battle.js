@@ -22,7 +22,7 @@ const LINKS = {
 // command grid: an icon and an accent colour for every kind of choice
 function cmdIcon(label) {
   const L = String(label), k = L.replace(/^[^A-Za-z?◀]+/, '');
-  const T = [[/^(Transform|Ascended)/, '◉', '#1f9a52'], [/^Attack/, '⚔', '#c8452e'], [/Duel/, '⚔', '#c9962a'], [/^(Drag Arts|Skills)/, '✦', '#2f9a5a'], [/^Link Art/, '❖', '#7a4ab0'], [/^Cultivate/, '☯', '#2f8a7a'],
+  const T = [[/^(Transform|Ascended|Phantom)/, '◉', '#1f9a52'], [/^Attack/, '⚔', '#c8452e'], [/Duel/, '⚔', '#c9962a'], [/^(Drag Arts|Skills)/, '✦', '#2f9a5a'], [/^Link Art/, '❖', '#7a4ab0'], [/^Cultivate/, '☯', '#2f8a7a'],
     [/^Guard/, '⛨', '#2f6a9a'], [/^Items/, '✚', '#2f8a8a'], [/^Flee/, '➜', '#5a6268'], [/^Spare/, '🕊', '#7a8a90'], [/^Veil Tricks/, '🧣', '#a8323a'], [/^Environment/, '✋', '#8a6a3a'],
     [/^Stance/, '⇄', '#4a5a7a'], [/^◀ Back/, '◀', '#3a4a40'], [/^(Tonic|Ether)/, '⚗', '#2f8a8a'], [/^(Strike)/, '⚔', '#c8452e'], [/^(Feint)/, '↯', '#c9962a'], [/^RAGE/, '🔥', '#c8452e'], [/^CALM/, '≈', '#2f6a9a'],
     [/^(Smoke Bomb)/, '☁', '#5a6268'], [/^(Scarf Lash)/, '〰', '#a8323a'], [/^(Knockout)/, '✊', '#a8323a'], [/^(Kick|Topple|Dive|Shake)/, '✋', '#8a6a3a'], [/^\?\?\?/, '?', '#3a3a50']];
