@@ -106,7 +106,9 @@ HD.load();
         if (G.S.kid) { a.hdDone = 1; continue; }
         const set = HD.playerSet(); if (!HD.img[set]) { all = 0; continue; }
         const im = HD.sheet(set, HD.meta[set].faces !== 'left'); im.__hd.me = 1;
-        B.renBts = im; a.hdDone = 1; a.btsDone = 1; continue;
+        B.renBts = im; a.hdDone = 1; a.btsDone = 1;
+        if (HD.meta[set].anims.land) { const n = performance.now(); HD.act = { name: 'land', t0: n, end: n + 900 }; }   // drops in: impact, skid, settle into the stance
+        continue;
       }
       const name = HD.npcName(a.spr ? a : { id: a.key || a.id }), own = HD.setOf(name, a.key);
       if (own) {
