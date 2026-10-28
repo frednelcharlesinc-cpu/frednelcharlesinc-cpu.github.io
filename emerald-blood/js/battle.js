@@ -212,8 +212,8 @@ const Battle = {
     return result;
   },
   mk(o) { return Object.assign({ strain: 0, strainMax: 100, fever: 0, ko: false, anim: 'combat', frame: 0, at: 0, loopAnim: 'combat', x: o.slot[0], y: o.slot[1], hx: o.slot[0], hy: o.slot[1], ward: 0, guard: false, brk: 0, broken: 0, veil: 0, bind: 0, alpha: 1 }, o); },
-  me() { return this.B.actors.find(a => a.isMe); },
-  alive(side) { return this.B.actors.filter(a => a.side === side && !a.ko); },
+  me() { return this.B ? this.B.actors.find(a => a.isMe) : null; },
+  alive(side) { if (!this.B) return []; return this.B.actors.filter(a => a.side === side && !a.ko); },
   ui(on) {
     $('#bui').classList.toggle('hide', !on);
     ['#bcmd', '#react', '#cmdDesc', '#hitTap', '#tgtHint'].forEach(s => $(s).classList.add('hide'));
@@ -586,6 +586,7 @@ const Battle = {
   async slide(a, x, y, ms) { const fx = a.x, fy = a.y, t0 = performance.now();
     while (true) { const k = Math.min(1, (performance.now() - t0) / ms), e = 1 - (1 - k) * (1 - k); a.x = lerp(fx, x, e); a.y = lerp(fy, y, e); if (k >= 1) break; await wait(16); } },
   async adaptTick() {
+    if (!this.B) return;
     for (const e of this.B.actors) {
       if (!e.pendAdapt || !e.pendAdapt.size) continue;
       if (e.morph > 0 && !e.ko) for (const s of e.pendAdapt) {
@@ -898,7 +899,7 @@ const Battle = {
         if (!G.S.hood) { const g = c.createRadialGradient(a.x - 4, a.y - 50, 0, a.x - 4, a.y - 50, 8); g.addColorStop(0, 'rgba(70,255,140,.4)'); g.addColorStop(1, 'rgba(70,255,140,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(a.x - 20, a.y - 66, 32, 32); c.restore(); }
         if (a.flip) c.restore();
         if (a.ward) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.25 + Math.sin(t / 200) * .1})`; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30, 26, 36, 0, 0, 7); c.stroke(); c.restore(); }
-      } else if (a.morph > 0) {
+      } else if (a.morph > 0 && !a.__preImg) {
         // SCAR BLOOM: a burning outline, a larger shadow-body, darkened scaled skin, horns and a crown of spines
         const ga = c.globalAlpha, pul = Math.sin(t / 110);
         c.save();

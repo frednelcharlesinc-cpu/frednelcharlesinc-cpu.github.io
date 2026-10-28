@@ -282,6 +282,7 @@ const Comic = {
   PAGES: {
     // panel rectangles on the 1200x896 page: kneeling → the eyes → eruption → awakened → untouchable → the cut → the form holds
     // every transformation: the eyes open → the light erupts → he stands in the aura
+    kairo: { src: 'assets/cutscenes/comic_kairo.webp', panels: [[0, 0, 596, 444], [600, 0, 1200, 444], [0, 448, 1200, 896]], fx: ['shake', 'flash', 'glow'], hold: 1300, smooth: false },
     asc: { src: 'assets/cutscenes/comic_asc.webp', panels: [[602, 0, 1200, 316], [0, 318, 505, 642], [480, 318, 1010, 642]], fx: ['flash', 'shake', 'glow'], hold: 1300 }
   },
   async play(id) {
@@ -304,7 +305,7 @@ const Comic = {
       let ox = (W - dw) / 2, oy = (H - dh) / 2; const fx = P.fx[i];
       if (fx === 'shake' && now - t0 < 900) { ox += (Math.random() - .5) * 14 * dpr; oy += (Math.random() - .5) * 10 * dpr; }
       x.fillStyle = '#05080a'; x.fillRect(0, 0, W, H);
-      x.globalAlpha = ease; x.imageSmoothingEnabled = true; x.drawImage(img, sx, sy, pw, ph, ox, oy + (1 - ease) * 18 * dpr, dw, dh); x.globalAlpha = 1;
+      x.globalAlpha = ease; x.imageSmoothingEnabled = P.smooth !== false; x.drawImage(img, sx, sy, pw, ph, ox, oy + (1 - ease) * 18 * dpr, dw, dh); x.globalAlpha = 1;
       x.strokeStyle = '#e8f4ee'; x.lineWidth = 3 * dpr; x.strokeRect(ox, oy + (1 - ease) * 18 * dpr, dw, dh);
       if (fx === 'flash' && now - t0 < 260) { x.fillStyle = `rgba(200,255,235,${.8 * (1 - (now - t0) / 260)})`; x.fillRect(0, 0, W, H); }
       if (fx === 'glow') { const a = .12 + .08 * Math.sin(now / 300); x.fillStyle = `rgba(70,255,190,${a})`; x.globalCompositeOperation = 'lighter'; x.fillRect(ox, oy, dw, dh); x.globalCompositeOperation = 'source-over'; }
@@ -396,5 +397,52 @@ const Comic = {
     L.splice(i + 1, 0, ['Phantom Strike',
       a.phantomUsed ? 'PHANTOM STRIKE — already used this transformation.' : `PHANTOM STRIKE — vanish and cut every enemy with one precise slash each; all the cuts land at once and can't be blocked. One timing ring: hit it clean for a deadlier cut. Once per transformation. Costs ${cost} MP.${a.mp < cost ? ' — not enough MP!' : ''}`,
       () => { if (!ok) return; Battle.closeMenu(); PHANTOM(a).then(done); }, !ok, cost]);
+  };
+})();
+
+/* ---------- Kairo's SCAR BLOOM: the monster form. The crown above him turns a notch and lights a rune each time he adapts. ---------- */
+(function () {
+  const isK = e => e && /^kairo(_duel|_spar)?$/.test(e.key || '') || (e && e.key === 'kairo_duel');
+  const _morph = Battle.morph.bind(Battle);
+  Battle.morph = async function (e) {
+    if (isK(e) && HD.on() && HD.img.kmon) { try { await Comic.play('kairo'); } catch (x) { } }
+    await _morph(e);
+    if (isK(e) && HD.on() && HD.img.kmon && this.B) {
+      e.__preImg = e.img; const im = HD.sheet('kmon', e.side !== 'e'); e.img = im;
+      const now = performance.now(); (HD.acts = HD.acts || {}).kmon = { name: 'transform', t0: now, end: now + 1500 };
+    }
+  };
+  const _un = Battle.unmorph.bind(Battle);
+  Battle.unmorph = async function (e) {
+    if (e && e.__preImg && HD.img.kmon) { const now = performance.now(); (HD.acts = HD.acts || {}).kmon = { name: 'revert', t0: now, end: now + 1300 }; }
+    await _un(e);
+    if (e && e.__preImg) { await wait(900); e.img = e.__preImg; e.__preImg = null; }
+  };
+  const _at = Battle.adaptTick.bind(Battle);
+  Battle.adaptTick = async function () {
+    const B = this.B; const before = B ? B.actors.map(a => a.wheel || 0) : [];
+    await _at();
+    if (this.B) this.B.actors.forEach((a, i) => { if ((a.wheel || 0) > (before[i] || 0) && a.__preImg) { const now = performance.now(); (HD.acts = HD.acts || {}).kmon = { name: 'adapt', t0: now, end: now + 900 }; a.crownFlash = now; } });
+  };
+  // the crown: floats over his head, turns a notch per adaptation (a flash + a lit rune for each one)
+  const _r = Battle.render.bind(Battle);
+  Battle.render = function (c, t) {
+    _r(c, t);
+    const B = this.B; if (!B || !HD.img.kmon) return;
+    for (const a of B.actors) {
+      if (!a.__preImg || a.ko || !(a.morph > 0)) continue;
+      const A = HD.acts && HD.acts.kmon; if (A && performance.now() < A.end && A.name !== 'adapt') continue;   // the transform frames draw their own crown
+      const M = HD.meta.kmon, fr = M.frames[M.anims.crown[0]], s = BT_SCALE * (a.size || 1), w = 46 * s, k = w / fr[2], h = fr[3] * k;
+      const fdir = a.img && a.img.__hd && a.img.__hd.faces === 'left' ? -1 : 1, cx = a.x + (a.kbx || 0) + fdir * 9 * s, cy = a.y - HD.BT_H * s * 1.22 + Math.sin(t / 400) * 2;
+      const turn = Math.min(1, (performance.now() - (a.crownFlash || 0)) / 600), sq = turn < 1 ? .55 + .45 * Math.abs(Math.cos(turn * Math.PI)) : 1;
+      c.save(); c.translate(cx, cy); c.scale(sq, 1);
+      c.drawImage(HD.img.kmon, fr[0], fr[1], fr[2], fr[3], -w / 2, -h / 2, w, h);
+      if (turn < 1) { c.globalCompositeOperation = 'lighter'; c.globalAlpha = 1 - turn; c.fillStyle = '#b0ffb0'; c.beginPath(); c.ellipse(0, 0, w * .6, h * .6, 0, 0, 7); c.fill(); }
+      c.restore();
+      const n = Math.min(8, a.wheel || 0);   // one lit rune per adaptation
+      c.save(); c.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 8; i++) { const px = cx - w * .42 + i * w * .12, py = cy + h * .45; c.fillStyle = i < n ? '#7dff7a' : 'rgba(120,160,120,.25)'; c.beginPath(); c.arc(px, py, i < n ? 2.4 : 1.6, 0, 7); c.fill(); }
+      c.restore();
+    }
   };
 })();
