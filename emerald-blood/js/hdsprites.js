@@ -281,8 +281,8 @@ HD.load();
 const Comic = {
   PAGES: {
     // panel rectangles on the 1200x896 page: kneeling → the eyes → eruption → awakened → untouchable → the cut → the form holds
-    asc: { src: 'assets/cutscenes/comic_asc.webp', panels: [[0, 0, 600, 316], [602, 0, 1200, 316], [0, 318, 505, 642], [480, 318, 1200, 642], [0, 644, 436, 896], [440, 644, 896, 896], [900, 644, 1200, 896]],
-      fx: ['rain', 'flash', 'shake', 'glow', null, 'flash', 'glow'] }
+    // every transformation: the eyes open → the light erupts → he stands in the aura
+    asc: { src: 'assets/cutscenes/comic_asc.webp', panels: [[602, 0, 1200, 316], [0, 318, 505, 642], [480, 318, 1010, 642]], fx: ['flash', 'shake', 'glow'], hold: 1300 }
   },
   async play(id) {
     const P = this.PAGES[id]; if (!P) return;
@@ -309,7 +309,7 @@ const Comic = {
       if (fx === 'flash' && now - t0 < 260) { x.fillStyle = `rgba(200,255,235,${.8 * (1 - (now - t0) / 260)})`; x.fillRect(0, 0, W, H); }
       if (fx === 'glow') { const a = .12 + .08 * Math.sin(now / 300); x.fillStyle = `rgba(70,255,190,${a})`; x.globalCompositeOperation = 'lighter'; x.fillRect(ox, oy, dw, dh); x.globalCompositeOperation = 'source-over'; }
       if (fx === 'rain') { x.strokeStyle = 'rgba(200,220,240,.25)'; x.lineWidth = 1 * dpr; for (let r = 0; r < 60; r++) { const rx = ((r * 97 + now * .6) % dw) + ox, ry = ((r * 53 + now * 1.4) % dh) + oy; x.beginPath(); x.moveTo(rx, ry); x.lineTo(rx - 3 * dpr, ry + 12 * dpr); x.stroke(); } }
-      if (now - t0 > 2600) go();
+      if (now - t0 > (P.hold || 2600)) go();
       requestAnimationFrame(draw);
     };
     try { sfx(id === 'asc' ? 'art' : 'swing'); } catch (e) { }
@@ -321,7 +321,7 @@ const Comic = {
   const _ua = Battle.useArt.bind(Battle);
   Battle.useArt = async function (a, k) {
     // the first transformation plays the full page; after that it is just the power-up on the battlefield
-    if (k === 'sight' && a && a.isMe && G.S && !G.S.kid && !G.S.f.comicAsc) { G.S.f.comicAsc = 1; try { await Comic.play('asc'); } catch (e) { } }
+    if (k === 'sight' && a && a.isMe && G.S && !G.S.kid && !a.sight) { try { await Comic.play('asc'); } catch (e) { } }
     return _ua(a, k);
   };
 })();
