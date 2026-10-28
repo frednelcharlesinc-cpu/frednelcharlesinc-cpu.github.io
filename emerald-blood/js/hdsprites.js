@@ -144,8 +144,8 @@ HD.load();
       if (k) { const now = performance.now(); (HD.acts = HD.acts || {})[own] = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
     }
     if (a && a.isMe && HD.on() && !G.S.kid) {
-      const k = txt === 'PERFECT DODGE' ? ['pdodge', 560] : txt === 'DODGE' ? ['dodge', 380] : txt === 'PARRY' ? ['parry', 380] : txt === 'PERFECT PARRY' ? [HD.meta && HD.meta[HD.playerSet()].anims.pp1 ? pick(['pp1', 'pp2', 'pp3']) : 'parry', 520] : null;
-      if (k) { const now = performance.now(); HD.act = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
+      const k = txt === 'PERFECT DODGE' ? [HD.meta && HD.meta[HD.playerSet()].anims.pd1 ? pick(['pd1', 'pd2', 'pd3', 'pd4']) : 'pdodge', 760] : txt === 'DODGE' ? ['dodge', 420] : txt === 'PARRY' ? ['parry', 380] : txt === 'PERFECT PARRY' ? [HD.meta && HD.meta[HD.playerSet()].anims.pp1 ? pick(['pp1', 'pp2', 'pp3']) : 'parry', 520] : null;
+      if (k) { const now = performance.now(); HD.act = { name: k[0], t0: now, end: now + k[1] }; if (/^pd/.test(k[0])) a.afterimg = Math.max(a.afterimg || 0, 520); }
     }
     return _text(a, txt, ...r);
   };
