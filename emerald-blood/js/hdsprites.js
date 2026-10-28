@@ -162,9 +162,12 @@ HD.load();
       if (G.S.kid) return _draw.call(this, c, cx, cy, t);
       const set = HD.playerSet(); img = HD.sheet(set, false); if (!img) return _draw.call(this, c, cx, cy, t);
       const A = img.__hd.anims, side = this.dir === 'left' || this.dir === 'right';
-      const base = side ? 'ow_side' : this.dir === 'up' ? 'ow_up' : 'ow_down', list = moving && A[base + '_walk'] || A[base];
+      const run = moving && this.move.ms < 160, lft = this.dir === 'left' && A.ow_left;
+      const base = lft ? 'ow_left' : side ? 'ow_side' : this.dir === 'up' ? 'ow_up' : 'ow_down', list = moving && (run && A[base + '_run'] || A[base + '_walk']) || A[base];
       const i = moving ? list[Math.floor(this.walkT / (this.move.ms / (list.length >= 8 ? 4 : 2))) % list.length] : list[0];
-      fr = img.__hd.frames[i]; faces = 'right'; // the overworld views look to the right; battle frames look left
+      fr = img.__hd.frames[i];
+      // drawn left/right views face their own way; front/back views never get mirrored when a left view exists
+      faces = lft ? 'left' : side || !A.ow_left ? 'right' : (this.face || 'right');
     } else if (HD.setOf(HD.npcName(this)) && HD.img[HD.setOf(HD.npcName(this))]) {
       const own = HD.setOf(HD.npcName(this)); img = HD.sheet(own, false); const A = img.__hd.anims;
       const hood = /_h$/.test(HD.npcName(this)) && A.ow_hood, side = this.dir === 'left' || this.dir === 'right';
