@@ -144,7 +144,7 @@ HD.load();
       if (k) { const now = performance.now(); (HD.acts = HD.acts || {})[own] = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
     }
     if (a && a.isMe && HD.on() && !G.S.kid) {
-      const k = txt === 'PERFECT DODGE' ? ['pdodge', 560] : txt === 'DODGE' ? ['dodge', 380] : (txt === 'PERFECT PARRY' || txt === 'PARRY') ? ['parry', txt === 'PARRY' ? 360 : 460] : null;
+      const k = txt === 'PERFECT DODGE' ? ['pdodge', 560] : txt === 'DODGE' ? ['dodge', 380] : txt === 'PARRY' ? ['parry', 380] : txt === 'PERFECT PARRY' ? [HD.meta && HD.meta[HD.playerSet()].anims.pp1 ? pick(['pp1', 'pp2', 'pp3']) : 'parry', 520] : null;
       if (k) { const now = performance.now(); HD.act = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
     }
     return _text(a, txt, ...r);
@@ -446,5 +446,28 @@ const Comic = {
       for (let i = 0; i < 8; i++) { const px = cx - w * .42 + i * w * .12, py = cy + h * .45; c.fillStyle = i < n ? '#7dff7a' : 'rgba(120,160,120,.25)'; c.beginPath(); c.arc(px, py, i < n ? 2.4 : 1.6, 0, 7); c.fill(); }
       c.restore();
     }
+  };
+})();
+
+/* the perfect-parry finisher: when every hit of a combo is parried, Ren's eyes flare in a cut-in, then the counter-slash */
+(function () {
+  let eyes = null; loadImg('assets/cutscenes/ren_parry_eyes.png?v=1').then(i => { eyes = i; }).catch(() => {});
+  const _msg = Battle.msg.bind(Battle);
+  Battle.msg = function (s, ms, hold) {
+    if (s === 'COUNTERATTACK!' && HD.on() && G.S && !G.S.kid && HD.meta && HD.meta[HD.playerSet()].anims.ppfin) {
+      const now = performance.now(); HD.act = { name: 'ppfin', t0: now, end: now + 900 }; HD.cutin = { t0: now, end: now + 650 };
+    }
+    return _msg(s, ms, hold);
+  };
+  const _r = Battle.render.bind(Battle);
+  Battle.render = function (c, t) {
+    _r(c, t);
+    const C = HD.cutin, now = performance.now(); if (!C || now > C.end || !eyes || !this.B) return;
+    const W = G.view.w, H = G.view.h, k = (now - C.t0) / (C.end - C.t0), a = k < .15 ? k / .15 : k > .75 ? (1 - k) / .25 : 1;
+    const bh = H * .34, by = H * .22, sc = bh / eyes.height * 1.25, w = eyes.width * sc;
+    c.save(); c.globalAlpha = a; c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(0, by, W, bh);
+    c.beginPath(); c.rect(0, by, W, bh); c.clip(); c.imageSmoothingEnabled = false;
+    c.drawImage(eyes, W / 2 - w / 2 + (1 - k) * 30, by + bh / 2 - eyes.height * sc * .45, w, eyes.height * sc);
+    c.strokeStyle = '#7dffb0'; c.lineWidth = 2; c.globalAlpha = a * .9; c.strokeRect(-2, by, W + 4, bh); c.restore();
   };
 })();
