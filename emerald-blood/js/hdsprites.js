@@ -21,6 +21,8 @@ const HD = {
   stub() { if (!this._stub) { const c = document.createElement('canvas'); c.width = 64; c.height = 64; this._stub = c; } return this._stub; },
   on() { return !!this.meta && !(G.settings && G.settings.classicSprites); },
   playerSet() { return G.S && G.S.hood ? (typeof Veil !== 'undefined' && Veil.on() ? 'veil' : 'hood') : 'ren'; },
+  /* in battle Ren always fights in his own animations; the Red Veil keeps hers */
+  battleSet() { return G.S && G.S.hood && typeof Veil !== 'undefined' && Veil.on() ? 'veil' : 'ren'; },
   npcName(e) { return String(e.sprite || e.spr || e.key || e.id || ''); },
   /* named characters with their own full sets */
   setOf(name, key) {
@@ -105,7 +107,7 @@ HD.load();
       if (a.hdDone) continue;
       if (a.isMe) {
         if (G.S.kid) { a.hdDone = 1; continue; }
-        const set = HD.playerSet(); if (!HD.img[set]) { all = 0; continue; }
+        const set = HD.battleSet(); if (!HD.img[set]) { all = 0; continue; }
         const im = HD.sheet(set, HD.meta[set].faces !== 'left'); im.__hd.me = 1;
         B.renBts = im; a.hdDone = 1; a.btsDone = 1;
         if (HD.meta[set].anims.land) { const n = performance.now(); HD.act = { name: 'land', t0: n, end: n + 900 }; }   // drops in: impact, skid, settle into the stance
@@ -145,7 +147,7 @@ HD.load();
       if (k) { const now = performance.now(); (HD.acts = HD.acts || {})[own] = { name: k[0], t0: now, end: now + k[1] }; if (k[0] === 'pdodge') a.afterimg = Math.max(a.afterimg || 0, 520); }
     }
     if (a && a.isMe && HD.on() && !G.S.kid) {
-      const k = txt === 'PERFECT DODGE' ? [HD.meta && HD.meta[HD.playerSet()].anims.pd1 ? pick(['pd1', 'pd2', 'pd3', 'pd4']) : 'pdodge', 760] : txt === 'DODGE' ? ['dodge', 420] : txt === 'PARRY' ? ['parry', 380] : txt === 'PERFECT PARRY' ? [HD.meta && HD.meta[HD.playerSet()].anims.pp1 ? pick(['pp1', 'pp2', 'pp3']) : 'parry', 520] : null;
+      const k = txt === 'PERFECT DODGE' ? [HD.meta && HD.meta[HD.battleSet()].anims.pd1 ? pick(['pd1', 'pd2', 'pd3', 'pd4']) : 'pdodge', 760] : txt === 'DODGE' ? ['dodge', 420] : txt === 'PARRY' ? ['parry', 380] : txt === 'PERFECT PARRY' ? [HD.meta && HD.meta[HD.battleSet()].anims.pp1 ? pick(['pp1', 'pp2', 'pp3']) : 'parry', 520] : null;
       if (k) { const now = performance.now(); HD.act = { name: k[0], t0: now, end: now + k[1] }; if (/^pd/.test(k[0])) a.afterimg = Math.max(a.afterimg || 0, 520); }
     }
     return _text(a, txt, ...r);
@@ -462,7 +464,7 @@ const Comic = {
   let eyes = null; loadImg('assets/cutscenes/ren_parry_eyes.png?v=1').then(i => { eyes = i; }).catch(() => {});
   const _msg = Battle.msg.bind(Battle);
   Battle.msg = function (s, ms, hold) {
-    if (s === 'COUNTERATTACK!' && HD.on() && G.S && !G.S.kid && HD.meta && HD.meta[HD.playerSet()].anims.ppfin) {
+    if (s === 'COUNTERATTACK!' && HD.on() && G.S && !G.S.kid && HD.meta && HD.meta[HD.battleSet()].anims.ppfin) {
       const now = performance.now(); HD.act = { name: 'ppfin', t0: now, end: now + 900 }; HD.cutin = { t0: now, end: now + 650 };
     }
     return _msg(s, ms, hold);
