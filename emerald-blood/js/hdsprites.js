@@ -14,7 +14,7 @@ const HD = {
   /* the art sheets load after the title screen is up (small WebP files; PNG if the phone can't read WebP) */
   lateLoad() {
     this.wantImgs = 1; const m = this.meta; if (!m || this.started) return; this.started = 1;
-    const order = ['ren', 'hood', 'npcs', 'kairo', 'veil', ...Object.keys(m).filter(k => /^c_/.test(k))].filter(k => m[k] && m[k].img);
+    const first = ['ren', 'hood', 'npcs', 'kairo', 'veil'], order = [...first, ...Object.keys(m).filter(k => !first.includes(k))].filter(k => m[k] && m[k].img);
     for (const k of order) { const base = `assets/hd/${m[k].img.replace(/\.png$/, '')}`;
       loadImg(`${base}.webp?v=${m.v}`).catch(() => loadImg(`${base}.png?v=${m.v}`)).then(i => { this.img[k] = i; }).catch(() => {}); }
   },
@@ -256,5 +256,71 @@ HD.load();
     try { for (const e of this.ents) { if (e.isPlayer || /^folk_/.test(String(e.id))) continue; const id = artId(e.id); if (Art.port[id]) Art.prefetch(id, ['neutral', 'happy', 'anger']); }
       Art.prefetch(styled(G.S && G.S.hood && Art.port.ren_hood ? 'ren_hood' : 'ren')); } catch (e) { }
     return r;
+  };
+})();
+
+/* Emerald Ascension: while it lasts Ren fights in his transformed form (silver dreads, teal aura).
+   Going in plays the power-up (gathering light → burst → aura); coming out plays the fade and the exhausted breath. */
+(function () {
+  const _pi = playerImg;
+  playerImg = function () {
+    const B = Battle.B, base = _pi();
+    if (G.mode !== 'battle' || !B || G.S.kid || !HD.on() || !HD.img.asc) return base;
+    const me = B.actors.find(a => a.isMe); if (!me) return base;
+    const on = (me.sight || 0) > 0, was = !!B.__ascOn, now = performance.now();
+    if (on !== was) { B.__ascOn = on; HD.act = on ? { name: 'transform', t0: now, end: now + 1400 } : { name: 'revert', t0: now, end: now + 1100 }; HD.__actSet = 'asc'; }
+    const useAsc = on || (HD.act && HD.act.name === 'revert' && now < HD.act.end);
+    if (!useAsc) return base;
+    const im = HD.sheet('asc', !!(base && base.__hd && base.__hd.faces !== 'right'));   // face the same way as his normal sheet
+    im.__hd.me = 1; return im;
+  };
+})();
+
+/* ---------- comic cutscenes: your manga page, shown one panel at a time (tap to go on) ---------- */
+const Comic = {
+  PAGES: {
+    // panel rectangles on the 1200x896 page: kneeling → the eyes → eruption → awakened → untouchable → the cut → the form holds
+    asc: { src: 'assets/cutscenes/comic_asc.webp', panels: [[0, 0, 600, 316], [602, 0, 1200, 316], [0, 318, 505, 642], [480, 318, 1200, 642], [0, 644, 436, 896], [440, 644, 896, 896], [900, 644, 1200, 896]],
+      fx: ['rain', 'flash', 'shake', 'glow', null, 'flash', 'glow'] }
+  },
+  async play(id) {
+    const P = this.PAGES[id]; if (!P) return;
+    const img = await loadImg(P.src + '?v=1').catch(() => null); if (!img) return;
+    const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:80;background:#05080a;touch-action:none';
+    const cv = document.createElement('canvas'), skip = document.createElement('button');
+    cv.style.cssText = 'width:100%;height:100%;display:block'; skip.textContent = 'Skip ▶▶';
+    skip.style.cssText = 'position:absolute;top:12px;right:12px;padding:8px 14px;border-radius:10px;border:2px solid #2f9a5a;background:#0b1a12;color:#cfe;font:600 14px system-ui';
+    ov.append(cv, skip); document.body.append(ov);
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr, x = cv.getContext('2d');
+    let i = 0, t0 = performance.now(), done = false, next = null;
+    const go = () => { if (done) return; i++; t0 = performance.now(); if (i >= P.panels.length) finish(); };
+    const finish = () => { if (done) return; done = true; ov.remove(); next && next(); };
+    ov.addEventListener('pointerdown', e => { if (e.target === skip) { finish(); return; } if (performance.now() - t0 > 350) go(); });
+    const draw = now => {
+      if (done) return;
+      const [sx, sy, ex, ey] = P.panels[i], pw = ex - sx, ph = ey - sy, k = Math.min((now - t0) / 600, 1), ease = 1 - Math.pow(1 - k, 3);
+      const fit = Math.min(W * .94 / pw, H * .9 / ph) * (1 + .04 * ((now - t0) / 4000)), dw = pw * fit, dh = ph * fit;
+      let ox = (W - dw) / 2, oy = (H - dh) / 2; const fx = P.fx[i];
+      if (fx === 'shake' && now - t0 < 900) { ox += (Math.random() - .5) * 14 * dpr; oy += (Math.random() - .5) * 10 * dpr; }
+      x.fillStyle = '#05080a'; x.fillRect(0, 0, W, H);
+      x.globalAlpha = ease; x.imageSmoothingEnabled = true; x.drawImage(img, sx, sy, pw, ph, ox, oy + (1 - ease) * 18 * dpr, dw, dh); x.globalAlpha = 1;
+      x.strokeStyle = '#e8f4ee'; x.lineWidth = 3 * dpr; x.strokeRect(ox, oy + (1 - ease) * 18 * dpr, dw, dh);
+      if (fx === 'flash' && now - t0 < 260) { x.fillStyle = `rgba(200,255,235,${.8 * (1 - (now - t0) / 260)})`; x.fillRect(0, 0, W, H); }
+      if (fx === 'glow') { const a = .12 + .08 * Math.sin(now / 300); x.fillStyle = `rgba(70,255,190,${a})`; x.globalCompositeOperation = 'lighter'; x.fillRect(ox, oy, dw, dh); x.globalCompositeOperation = 'source-over'; }
+      if (fx === 'rain') { x.strokeStyle = 'rgba(200,220,240,.25)'; x.lineWidth = 1 * dpr; for (let r = 0; r < 60; r++) { const rx = ((r * 97 + now * .6) % dw) + ox, ry = ((r * 53 + now * 1.4) % dh) + oy; x.beginPath(); x.moveTo(rx, ry); x.lineTo(rx - 3 * dpr, ry + 12 * dpr); x.stroke(); } }
+      if (now - t0 > 2600) go();
+      requestAnimationFrame(draw);
+    };
+    try { sfx(id === 'asc' ? 'art' : 'swing'); } catch (e) { }
+    requestAnimationFrame(draw);
+    return new Promise(r => { next = r; });
+  }
+};
+(function () {
+  const _ua = Battle.useArt.bind(Battle);
+  Battle.useArt = async function (a, k) {
+    // the first transformation plays the full page; after that it is just the power-up on the battlefield
+    if (k === 'sight' && a && a.isMe && G.S && !G.S.kid && !G.S.f.comicAsc) { G.S.f.comicAsc = 1; try { await Comic.play('asc'); } catch (e) { } }
+    return _ua(a, k);
   };
 })();
