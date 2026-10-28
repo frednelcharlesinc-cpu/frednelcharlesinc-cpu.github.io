@@ -191,7 +191,7 @@ const Clash = {
       C.inWin = () => R.pulse && err() < .045;
       const pop = (txt, col) => R.pops.push({ txt, col, t: 0 });
       const miss = () => {
-        R.lives--; R.combo = 0; C.meter = Math.max(0, C.meter - .22); R.miss = 1; sfx('clashMiss'); pop('Miss', '#ff8a8a');
+        R.combo = 0; C.meter = Math.max(0, C.meter - .22); R.miss = 1; sfx('clashMiss'); pop('Miss', '#ff8a8a');
         for (let i = 0; i < 8; i++) this.spark(C, C.mx, C.my, C.ce, .9); B.shake = 7; START();
       };
       const tap = () => {
@@ -214,9 +214,9 @@ const Clash = {
         SFX2.humSet(C.meter);
         if (Math.random() < .5) this.spark(C, C.mx + (C.meter - .5) * 40, C.my, Math.random() < C.meter ? C.cr : C.ce, .6);
         const el = now - R.t0;
-        if (C.meter >= 1 || C.meter <= 0 || R.lives <= 0 || el > 9000) {
+        if (C.meter >= 1 || C.meter <= 0 || el > 9000) {
           R.done = true; Input.on('a', prevA); hit.removeEventListener('pointerdown', h); hit.classList.add('hide');
-          resolve(C.meter >= 1 || (el > 9000 && C.meter > .62) ? 'win' : C.meter <= 0 || R.lives <= 0 || (el > 9000 && C.meter < .38) ? 'lose' : 'draw');
+          resolve(C.meter >= 1 || (el > 9000 && C.meter > .62) ? 'win' : C.meter <= 0 || (el > 9000 && C.meter < .38) ? 'lose' : 'draw');
           return;
         }
         requestAnimationFrame(step);
@@ -311,7 +311,6 @@ const Clash = {
       // centre, combo, lives, call-outs
       c.fillStyle = '#fff'; c.font = '900 14px "Nunito"'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('TAP', cx, cy - 4); c.font = '800 9px "Nunito"'; c.fillStyle = '#cfe3d6'; c.fillText('when the rings match', cx, cy + 10);
       if (R.combo >= 2) { c.font = '900 12px "Nunito"'; c.fillStyle = '#ffc070'; c.fillText(`Combo ${R.combo}`, cx, cy - rad * 1.0 - 10); }
-      c.font = '900 13px "Nunito"'; for (let i = 0; i < 3; i++) { c.fillStyle = i < R.lives ? '#ff5a6a' : 'rgba(255,90,106,.25)'; c.fillText('♥', cx + rad * 1.05 + 4 + i * 14, cy - rad * .85); }
       for (const p of R.pops) { c.globalAlpha = 1 - p.t / .8; c.font = '900 16px "Nunito"'; c.fillStyle = p.col; c.fillText(p.txt, cx, cy - rad * .55 - p.t * 30); } c.globalAlpha = 1;
       // the tug-of-war
       const bw = Math.min(W * .55, 360), bxl = cx - bw / 2, byy = H - 34;
