@@ -329,57 +329,58 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
     if(!d){d=document.createElement('div');d.id='bootErr';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;background:#2a0d0d;border:2px solid #ff6a6a;border-radius:10px;padding:10px 12px;color:#fff;font:600 13px/1.35 -apple-system,system-ui,sans-serif;max-height:45vh;overflow:auto';document.body.appendChild(d);}
     d.innerHTML='<b style="color:#ff9a9a">Something went wrong starting the game.</b><br><span style="opacity:.85">Screenshot this and send it to Claude.</span><pre style="white-space:pre-wrap;font:12px/1.3 ui-monospace,monospace;margin:6px 0">'+msg.replace(/</g,'&lt;')+'</pre><button onclick="location.reload()" style="padding:6px 14px;border-radius:8px;border:0;background:#46ff95;font-weight:800">Reload</button> <button onclick="try{navigator.serviceWorker&&navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister()})});caches&&caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}catch(e){};setTimeout(function(){location.reload()},600)" style="padding:6px 14px;border-radius:8px;border:0;background:#ffd36a;font-weight:800">Clear cache &amp; reload</button>';
   }
-  function add(m){ errs.push(m); if(errs.length>4) errs.shift(); if(window.G&&G.mode&&G.mode!=='boot') return; box(errs.join('\n')); shown=true; }
+  function add(m){ try{ if(!(window.G&&G.mode&&G.mode!=='boot') && !sessionStorage.getItem('ebRetry')){ sessionStorage.setItem('ebRetry','1'); setTimeout(function(){location.reload();},300); return; } }catch(_){} errs.push(m); if(errs.length>4) errs.shift(); if(window.G&&G.mode&&G.mode!=='boot') return; box(errs.join('\n')); shown=true; }
+  window.addEventListener('error',function(e){ var t=e.target; if(t&&t.tagName==='SCRIPT'){ add('could not download '+(t.src||'').split('/').pop()); return; } },true);
   window.addEventListener('error',function(e){ add((e.message||'error')+' @ '+(e.filename||'').split('/').pop()+':'+(e.lineno||'')); });
   window.addEventListener('unhandledrejection',function(e){ add('promise: '+(e.reason&&(e.reason.message||e.reason))); });
   setTimeout(function(){ if(window.G&&G.mode==='boot'){ var t=document.getElementById('loadTxt'); add('Still loading after 25s — stuck at: '+(t?t.textContent:'?')+' ('+(document.getElementById('loadBar')||{style:{}}).style.width+')'); } },25000);
 })();
 </script>
-<script src="js/core.js?v=80"></script>
-<script src="js/world.js?v=80"></script>
-<script src="js/dialog.js?v=80"></script>
-<script src="js/portraits.js?v=80"></script>
-<script src="js/cine.js?v=80"></script>
-<script src="js/battle.js?v=80"></script>
-<script src="js/monsters.js?v=80"></script>
-<script src="js/realm.js?v=80"></script>
-<script src="js/story.js?v=80"></script>
-<script src="js/stones.js?v=80"></script>
-<script src="js/lore.js?v=80"></script>
-<script src="js/guild.js?v=80"></script>
-<script src="js/progress.js?v=80"></script>
-<script src="js/dungeons.js?v=80"></script>
-<script src="js/quests.js?v=80"></script>
-<script src="js/worldmap.js?v=80"></script>
-<script src="js/events.js?v=80"></script>
-<script src="js/companions.js?v=80"></script>
-<script src="js/bonds.js?v=80"></script>
-<script src="js/bloodlust.js?v=80"></script>
-<script src="js/ui.js?v=80"></script>
-<script src="js/ch1.js?v=80"></script>
-<script src="js/passives.js?v=80"></script>
-<script src="js/veil.js?v=80"></script>
-<script src="js/leaf.js?v=80"></script>
-<script src="js/tavern.js?v=80"></script>
-<script src="js/ambient.js?v=80"></script>
-<script src="js/combat2.js?v=80"></script>
-<script src="js/combat3.js?v=80"></script>
-<script src="js/combat4.js?v=80"></script>
-<script src="js/battlefx.js?v=80"></script>
-<script src="js/feats.js?v=80"></script>
-<script src="js/clash.js?v=80"></script>
-<script src="js/ch1b.js?v=80"></script>
-<script src="js/combat5.js?v=80"></script>
-<script src="js/elements.js?v=80"></script>
-<script src="js/flurry.js?v=80"></script>
-<script src="js/journey.js?v=80"></script>
-<script src="js/renown.js?v=80"></script>
-<script src="js/contracts.js?v=80"></script>
-<script src="js/raids.js?v=80"></script>
-<script src="js/ledger.js?v=80"></script>
-<script src="js/btsprites.js?v=80"></script>
-<script src="js/hdsprites.js?v=80"></script>
-<script src="js/town.js?v=80"></script>
+<script src="js/core.js?v=81"></script>
+<script src="js/world.js?v=81"></script>
+<script src="js/dialog.js?v=81"></script>
+<script src="js/portraits.js?v=81"></script>
+<script src="js/cine.js?v=81"></script>
+<script src="js/battle.js?v=81"></script>
+<script src="js/monsters.js?v=81"></script>
+<script src="js/realm.js?v=81"></script>
+<script src="js/story.js?v=81"></script>
+<script src="js/stones.js?v=81"></script>
+<script src="js/lore.js?v=81"></script>
+<script src="js/guild.js?v=81"></script>
+<script src="js/progress.js?v=81"></script>
+<script src="js/dungeons.js?v=81"></script>
+<script src="js/quests.js?v=81"></script>
+<script src="js/worldmap.js?v=81"></script>
+<script src="js/events.js?v=81"></script>
+<script src="js/companions.js?v=81"></script>
+<script src="js/bonds.js?v=81"></script>
+<script src="js/bloodlust.js?v=81"></script>
+<script src="js/ui.js?v=81"></script>
+<script src="js/ch1.js?v=81"></script>
+<script src="js/passives.js?v=81"></script>
+<script src="js/veil.js?v=81"></script>
+<script src="js/leaf.js?v=81"></script>
+<script src="js/tavern.js?v=81"></script>
+<script src="js/ambient.js?v=81"></script>
+<script src="js/combat2.js?v=81"></script>
+<script src="js/combat3.js?v=81"></script>
+<script src="js/combat4.js?v=81"></script>
+<script src="js/battlefx.js?v=81"></script>
+<script src="js/feats.js?v=81"></script>
+<script src="js/clash.js?v=81"></script>
+<script src="js/ch1b.js?v=81"></script>
+<script src="js/combat5.js?v=81"></script>
+<script src="js/elements.js?v=81"></script>
+<script src="js/flurry.js?v=81"></script>
+<script src="js/journey.js?v=81"></script>
+<script src="js/renown.js?v=81"></script>
+<script src="js/contracts.js?v=81"></script>
+<script src="js/raids.js?v=81"></script>
+<script src="js/ledger.js?v=81"></script>
+<script src="js/btsprites.js?v=81"></script>
+<script src="js/hdsprites.js?v=81"></script>
+<script src="js/town.js?v=81"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

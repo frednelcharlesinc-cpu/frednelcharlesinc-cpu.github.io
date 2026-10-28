@@ -76,7 +76,7 @@ async function boot() {
   // the cast's sheets load behind the title screen; starting a game waits for them only if they are still coming
   G.bootP = Promise.all([...new Set(Object.values(CHAR).map(c => c.sprite))].map(n => npcImg(n).catch(() => null))).then(() => { G.bootP = null; if (typeof HD !== 'undefined' && HD.lateLoad) HD.lateLoad(); try { for (const id of ['ren_v3', 'ren_hood']) Art.prefetch(id, ['neutral', 'happy', 'anger', 'sad', 'shock', 'focused']); } catch (e) { } });
   $('#loading').classList.add('hide');
-  UI.title();
+  UI.title(); try { sessionStorage.removeItem('ebRetry'); } catch (e) { }
   requestAnimationFrame(loop);
 }
 
