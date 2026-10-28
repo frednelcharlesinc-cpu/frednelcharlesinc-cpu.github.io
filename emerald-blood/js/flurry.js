@@ -52,7 +52,7 @@
       if (L === 'p') h = { anim: A.cast ? 'spellcast' : melee(), proj: pk, m, w: 520 };
       else if (L === 'q') h = { anim: A.cast ? 'spellcast' : melee(), proj: PROJ[pk] && PROJ[pk].orb ? pk : 'mana', m: m * 1.2, w: 720, unp: 1 };
       else if (L === 'u') h = { anim: A.jump || melee(), m: m * 1.2, w: 640, unp: 1 };
-      else h = { anim: melee(), m, w: L === 'f' ? 470 : 400, style: L === 's' ? 'snap' : L === 'f' ? 'feint' : 'normal' };
+      else h = { anim: melee(), m, w: L === 'f' ? 470 : 400, style: L === 's' ? 'snap' : L === 'f' ? pickR(seeded(e.key + ':' + i), ['feint', ...FEINTS]) : 'normal' };
       if (!h.style) h.style = 'normal';
       if (P) h.w = Math.round(h.w * P.tempo + P.jit[i % 12]);
       if (i === 0) h.w += 160; // a beat to read the opener

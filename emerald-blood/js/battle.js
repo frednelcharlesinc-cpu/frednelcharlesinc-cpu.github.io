@@ -151,6 +151,14 @@ function dreadSwordAngle(anim, fr) {
   return -2.15;
 }
 const SRC_NAME = s => s === 'attack' ? 'Attack' : s === 'link' ? 'Link Arts' : s === 'counter' ? 'Counters' : (ARTS[s] ? ARTS[s].name : s);
+/* extra feint rings — each closes in its own rhythm. p(k) maps time (0..1) to how far the ring has closed (1 = impact). */
+const RING_STYLE = {
+  double: { label: 'DOUBLE FEINT', col: '#b07aff', len: 1, pause: 520, p: (k, el, dur) => { const b = dur - 520, x = el < b * .35 ? el : el < b * .35 + 260 ? b * .35 : el < b * .65 + 260 ? el - 260 : el < b * .65 + 520 ? b * .65 : el - 520; return x / b; } },
+  stutter: { label: 'STUTTER', col: '#4ae0ff', len: 1.15, p: k => k < .45 ? k * 1.4 : k < .6 ? .63 - (k - .45) / .15 * .23 : .4 + (k - .6) / .4 * .6 },
+  delay: { label: 'DELAYED', col: '#ffd84a', len: 1.3, p: k => k * k * k },
+  fakeout: { label: 'FAKE-OUT', col: '#7dff7a', len: 1.35, p: k => k < .45 ? k / .45 * .9 : k < .6 ? .9 - (k - .45) / .15 * .45 : .45 + (k - .6) / .4 * .55 }
+};
+const FEINTS = ['double', 'stutter', 'delay', 'fakeout'];
 const Battle = {
   B: null,
   // Drag reflex: Drag bodies move more efficiently — wider timing windows. The Verdant Eye widens them further.
@@ -675,7 +683,7 @@ const Battle = {
     for (const h of sk.hits) {
       if (t.ko) break; n++;
       let style = 'normal';
-      if (e.side === 'e' && ti >= 2 && !B.tutorial) { const r = Math.random(), fe = .12 + ti * .04, sn = .08 + ti * .03; style = r < fe ? 'feint' : r < fe + sn ? 'snap' : 'normal'; }
+      if (e.side === 'e' && ti >= 2 && !B.tutorial) { const r = Math.random(), fe = .12 + ti * .04, sn = .08 + ti * .03; style = r < fe ? (ti >= 3 ? FEINTS[Math.floor(Math.random() * FEINTS.length)] : Math.random() < .5 ? 'feint' : FEINTS[Math.floor(Math.random() * 2)]) : r < fe + sn ? 'snap' : 'normal'; }
       const r = await this.defend(e, t, Object.assign({ el, style }, h));
       if (r === 'parry' || r === 'pparry') { parries++; streak++; if (streak >= 2) await this.clash(e, t, streak); } else streak = 0;
       await wait(120);
@@ -703,9 +711,9 @@ const Battle = {
       }
       B.timeScale = slow ? 0.38 : 1;
       const st = h.style || 'normal', base = (st === 'snap' ? w * .7 : w) / B.timeScale, pause = st === 'feint' ? 300 / B.timeScale : 0;
-      const dur = base + pause, t0 = performance.now(), T = t0 + dur;
-      const ring = { x: t.x, y: t.y - 30, t0, dur, kind: h.unp ? 'unp' : st, color: h.unp ? '#ff5050' : st === 'feint' ? '#ffb04a' : st === 'snap' ? '#ff6ad5' : '#ffffff',
-        prog: now => { const el = now - t0; if (!pause) return el / base; if (el < base * .5) return el / base; if (el < base * .5 + pause) return .5; return (el - pause) / base; } };
+      const RS = RING_STYLE[st], dur = RS ? base * RS.len + (RS.pause || 0) / B.timeScale : base + pause, t0 = performance.now(), T = t0 + dur;
+      const ring = { x: t.x, y: t.y - 30, t0, dur, kind: h.unp ? 'unp' : st, color: h.unp ? '#ff5050' : RS ? RS.col : st === 'feint' ? '#ffb04a' : st === 'snap' ? '#ff6ad5' : '#ffffff',
+        prog: now => { const el = now - t0; if (RS) return RS.p(el / dur, el, dur); if (!pause) return el / base; if (el < base * .5) return el / base; if (el < base * .5 + pause) return .5; return (el - pause) / base; } };
       if (G.settings.ring || slow) B.rings.push(ring);
       e.anim = h.anim; e.frame = 0; e.once = true; e.fn = 99; e.fms = 1e9;
       let pressed = null; const own = !B.presses; // a lone defend (counters, tests) logs its own presses
@@ -756,7 +764,11 @@ const Battle = {
         if (res === 'unp') this.text(t, "CAN'T PARRY THAT!", '#ff6b6b', -20);
         if (res === 'noleaf') { this.text(t, t.isMe ? "CAN'T CUT IT IN FLIGHT — DODGE!" : 'ONLY A DODGE STOPS THAT', '#ff9a6b', -20); if (t.isMe) { G.S.f.leafMiss = (G.S.f.leafMiss || 0) + 1; B.leafMiss = 1; } }
         if (res === 'early') this.text(t, 'TOO EARLY', '#bbb', -20);
-        this.chip(e, t, m, true, h.el);
+        if (h.unp && res !== 'dodge' && t.side === 'p') {   // eating a red blow hurts: heavier damage, rhythm broken, slower to recover
+          this.chip(e, t, m * 1.4, true, h.el); t.flow = 0; t.delay = Math.max(t.delay || 1, 1.5);
+          if (t.sight) t.sight = Math.max(0, t.sight - 1);
+          this.text(t, 'CRUSHED — STAGGERED', '#ff5050', -44, true); B.shake = Math.max(B.shake || 0, 10); B.flash = .4; B.flashCol = '255,60,60';
+        } else this.chip(e, t, m, true, h.el);
       }
       this.hud();
       resolve(res);
@@ -971,7 +983,7 @@ const Battle = {
       c.lineWidth = 3; c.strokeStyle = r.color; c.globalAlpha = .95; c.beginPath(); c.arc(r.x, r.y, rad, 0, 7); c.stroke();
       c.fillStyle = r.color; c.globalAlpha = .12 + .25 * Math.min(1, k); c.beginPath(); c.arc(r.x, r.y, 20, 0, 7); c.fill();
       c.lineWidth = 2.5; c.globalAlpha = .8; c.beginPath(); c.arc(r.x, r.y, 20, 0, 7); c.stroke();
-      if (r.kind === 'feint' || r.kind === 'snap') { c.globalAlpha = 1; c.font = '700 9px "Press Start 2P"'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#000'; const tx = r.kind === 'feint' ? 'FEINT' : 'QUICK'; c.strokeText(tx, r.x, r.y - 96); c.fillStyle = r.color; c.fillText(tx, r.x, r.y - 96); }
+      if (r.kind === 'feint' || r.kind === 'snap' || RING_STYLE[r.kind]) { c.globalAlpha = 1; c.font = '700 9px "Press Start 2P"'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#000'; const tx = RING_STYLE[r.kind] ? RING_STYLE[r.kind].label : r.kind === 'feint' ? 'FEINT' : 'QUICK'; c.strokeText(tx, r.x, r.y - 96); c.fillStyle = r.color; c.fillText(tx, r.x, r.y - 96); }
       if (r.kind === 'unp') { c.globalAlpha = 1; c.fillStyle = '#ff5050'; c.font = '700 12px "Press Start 2P"'; c.textAlign = 'center'; c.fillText('!!', r.x, r.y - 22); }
       c.globalAlpha = 1;
     }
