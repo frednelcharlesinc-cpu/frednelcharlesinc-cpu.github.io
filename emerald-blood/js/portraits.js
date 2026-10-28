@@ -123,12 +123,19 @@ const Art = { port: {}, cut: {}, left: new Set(), ready: false,
   async load() {
     try { const r = await fetch('assets/art.json', { cache: 'no-cache' }); if (!r.ok) return; const j = await r.json();
       const jobs = [];
-      for (const [id, exprs] of Object.entries(j.portraits || {})) for (const e of exprs) jobs.push(artImg(`assets/portraits/${id}_${e}`, j.v).then(im => { (this.port[id] = this.port[id] || {})[e] = im; }).catch(() => {}));
+      // portraits are fetched the first time someone speaks with that face (hundreds of them — loading all at start made the game slow to open)
+      for (const [id, exprs] of Object.entries(j.portraits || {})) for (const e of exprs) (this.port[id] = this.port[id] || {})[e] = { lazy: 1, base: `assets/portraits/${id}_${e}`, v: j.v, id, e };
       (j.facesLeft || []).forEach(id => this.left.add(id));
       for (const id of j.cuts || []) jobs.push(artImg(`assets/cutscenes/cut_${id}`, j.v).then(im => { this.cut[id] = im; }).catch(() => {}));
       await Promise.all(jobs); this.ready = true;
     } catch (e) { }
-  }
+  },
+  fetch(st) {
+    if (!st || !st.lazy) return Promise.resolve(st);
+    if (!st.p) st.p = artImg(st.base, st.v).then(im => { this.port[st.id][st.e] = im; return im; }).catch(() => { delete this.port[st.id][st.e]; return null; });
+    return st.p;
+  },
+  prefetch(id, exprs) { const set = this.port[id]; if (!set) return; for (const e of exprs || Object.keys(set)) if (set[e] && set[e].lazy) this.fetch(set[e]); }
 };
 const PFIT = { ren: .9, ren_hood: .9, ren_v2: .96, kairo_v2: .96, ren_veil: .96 };
 const ART_ID = { larkMB: 'lark', larkA: 'lark', inq: 'ivo',  kairo: 'kairo_kid', kairoKB: 'kairo_kid_burned', kairoB: 'kairo', kessE: 'kess_eyes', scout: 'lark', bram_in: 'bram', tamsinK: 'tamsin_kid', boK: 'bo_kid', larkK: 'lark_kid', nixK: 'nix_kid' };
@@ -149,7 +156,12 @@ function artFor(who, expr) {
 }
 /* ---------- the painter ---------- */
 function drawPortrait(canvas, who, expr, facing) {
-  const af = artFor(who, expr || 'neutral'), art = af && af.img;
+  const af = artFor(who, expr || 'neutral'); let art = af && af.img;
+  const req = who + '|' + expr + '|' + facing; canvas.__req = req;
+  if (art && art.lazy) {   // not downloaded yet: fetch it, then paint (keeps the previous face up for the moment it takes)
+    Art.fetch(art).then(() => { if (canvas.__req === req) drawPortrait(canvas, who, expr, facing); });
+    return;
+  }
   if (art) { if (af.left) facing = -facing; // a painted portrait: cover-fit, smooth scaling, mirrored for the right-hand box
     canvas.width = 296; canvas.height = 320; canvas.style.imageRendering = 'auto'; const x = canvas.getContext('2d'); x.clearRect(0, 0, 296, 320);
     const z = PFIT[af.id];

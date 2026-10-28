@@ -135,7 +135,7 @@ const UI = {
       render(); rebuild(); raf = requestAnimationFrame(draw);
     });
   },
-  async newGame() {
+  async newGame() { if (G.bootP) { toast('Loading the cast…', 1500); await G.bootP; }
     if (loadSave() && !confirm('Start a new game? Your current save will be replaced.')) return;
     audioUnlock();
     // character creation is switched off for now: Ren, Ilya and Kairo use the looks from the portrait art
@@ -148,7 +148,7 @@ const UI = {
     Story.run(SCENES.thornvale.onEnter);
     await fadeIn(700); banner('PROLOGUE', 'Thornvale'); save();
   },
-  async cont() {
+  async cont() { if (G.bootP) { toast('Loading the cast…', 1500); await G.bootP; }
     const s = loadSave(); if (!s) return; audioUnlock();
     G.S = s; $('#title').classList.add('hide');
     if (!G.S.named) { G.S.name = await askName(); G.S.named = 1; }

@@ -72,9 +72,9 @@ async function boot() {
   const partNames = Object.keys(G.man.parts);
   let n = 0;
   await Promise.all(partNames.map(async p => { G.img['part_' + p] = await loadImg('assets/parts/' + p + '.png'); step(0.25 + 0.5 * (++n / partNames.length)); }));
-  step(0.8, 'Lighting the lanterns…');
-  await Promise.all([...new Set(Object.values(CHAR).map(c => c.sprite))].map(n => npcImg(n).catch(() => null)));
   step(1, '');
+  // the cast's sheets load behind the title screen; starting a game waits for them only if they are still coming
+  G.bootP = Promise.all([...new Set(Object.values(CHAR).map(c => c.sprite))].map(n => npcImg(n).catch(() => null))).then(() => { G.bootP = null; if (typeof HD !== 'undefined' && HD.lateLoad) HD.lateLoad(); try { for (const id of ['ren_v3', 'ren_hood']) Art.prefetch(id, ['neutral', 'happy', 'anger', 'sad', 'shock', 'focused']); } catch (e) { } });
   $('#loading').classList.add('hide');
   UI.title();
   requestAnimationFrame(loop);

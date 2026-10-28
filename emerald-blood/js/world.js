@@ -6,6 +6,7 @@ const World = {
   busy: false, lastEnc: 0, bubbleGate: 0, shake: 0, tint: null, lights: [], extraProps: [], followers: [],
 
   async load(name, x, y, dir) {
+    if (G.bootP) await G.bootP;
     this.loading = true;
     G.S.map = name; G.S.x = x; G.S.y = y; if (dir) G.S.dir = dir;
     this.scene = SCENES[name] || {}; const mk = this.scene.map || name;

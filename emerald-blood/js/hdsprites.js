@@ -8,9 +8,15 @@ const HD = {
   OW_H: 52, BT_H: 70, OW: true,
   load() {
     fetch('assets/hd/hd.json?v=' + Date.now().toString(36).slice(0, 5), { cache: 'no-cache' }).then(r => r.json()).then(m => {
-      this.meta = m;
-      for (const k of Object.keys(m).filter(k => m[k] && m[k].img)) loadImg(`assets/hd/${m[k].img}?v=${m.v}`).then(i => { this.img[k] = i; }).catch(() => {});
+      this.meta = m; if (this.wantImgs) this.lateLoad();
     }).catch(() => {});
+  },
+  /* the art sheets load after the title screen is up (small WebP files; PNG if the phone can't read WebP) */
+  lateLoad() {
+    this.wantImgs = 1; const m = this.meta; if (!m || this.started) return; this.started = 1;
+    const order = ['ren', 'hood', 'npcs', 'kairo', 'veil', ...Object.keys(m).filter(k => /^c_/.test(k))].filter(k => m[k] && m[k].img);
+    for (const k of order) { const base = `assets/hd/${m[k].img.replace(/\.png$/, '')}`;
+      loadImg(`${base}.webp?v=${m.v}`).catch(() => loadImg(`${base}.png?v=${m.v}`)).then(i => { this.img[k] = i; }).catch(() => {}); }
   },
   on() { return !!this.meta && !(G.settings && G.settings.classicSprites); },
   playerSet() { return G.S && G.S.hood ? (typeof Veil !== 'undefined' && Veil.on() ? 'veil' : 'hood') : 'ren'; },

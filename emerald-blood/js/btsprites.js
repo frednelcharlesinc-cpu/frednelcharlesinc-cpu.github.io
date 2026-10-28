@@ -7,6 +7,7 @@ const BTS = {
   load(k) { if (!this.img[k]) this.img[k] = loadImg('assets/bt/' + k + '.png').then(i => { i.__idle6 = 1; this.img[k] = i; return i; }).catch(() => (this.img[k] = null)); return this.img[k]; },
   ready(k) { const v = this.img[k]; return v && !(v instanceof Promise) ? v : null; },
   kind(a) {
+    if (typeof HD !== 'undefined' && HD.meta) return null;
     if (a.isMe) return G.S && !G.S.kid && !(G.settings && G.settings.classicBattle) ? 'samurai' : null;
     if (G.settings && G.settings.classicBattle) return null;
     const k = String(a.key || a.id || '');
@@ -15,7 +16,7 @@ const BTS = {
     return null;
   }
 };
-['samurai_L', 'samurai_R', 'shinobi_L', 'shinobi_R', 'fighter_L', 'fighter_R', 'robe_L', 'robe_R'].forEach(k => BTS.load(k));
+// these older sheets load only if the HD art is switched off or missing
 (function () {
   const assign = function (B) {
     try {
@@ -24,7 +25,7 @@ const BTS = {
         for (const a of B.actors) {
           if (a.btsDone) continue;
           const k = BTS.kind(a);
-          if (!k) { if (a.isMe) { a.btsDone = 1; continue; } const c = BLD.battle(a); if (c === 0) continue; if (c) a.img = c; a.btsDone = 1; continue; }
+          if (!k) { if (a.isMe || (typeof HD !== 'undefined' && HD.meta)) { a.btsDone = 1; continue; } const c = BLD.battle(a); if (c === 0) continue; if (c) a.img = c; a.btsDone = 1; continue; }
           const img = BTS.ready(k + (a.side === 'e' ? '_R' : '_L')); if (!img) { all = 0; BTS.load(k + (a.side === 'e' ? '_R' : '_L')); continue; }
           if (a.isMe) B.renBts = img; else a.img = img; a.btsDone = 1;
         }
@@ -50,6 +51,7 @@ const BTS = {
 (function () {
   const OWK = .84, ROW = { walk: 768 + 8 * 128, run: 768 + 9 * 128, idle: 2048 };
   const kindOf = e => {
+    if (typeof HD !== 'undefined' && HD.meta) return null;
     if (G.settings && G.settings.classicBattle) return null;
     if (e.isPlayer) return G.S && !G.S.kid ? 'samurai' : null;
     const s = String(e.sprite || e.id || '');
