@@ -51,6 +51,7 @@ const HD = {
   },
   /* draw one frame with the feet at (x, y), standing height h */
   blit(c, img, fr, x, y, h, extra) {
+    if (!fr) return;
     const k = h / fr[6];
     if (extra && (extra.rot || extra.sy)) {
       c.save(); c.translate(x, y); if (extra.rot) c.rotate(extra.rot); if (extra.sy) c.scale(1, extra.sy);
@@ -81,7 +82,7 @@ const HD = {
       if (anim === 'combat') i = list[Math.floor(now / 520) % list.length];
       else i = list[Math.min(list.length - 1, Math.floor(f * list.length / n))];
     }
-    const fr = H.frames[i];
+    const fr = H.frames[i] || H.frames[list[0]] || H.frames[0];
     const sy = anim === 'combat' ? 1 + Math.sin(now / 380) * .012 : 1;
     this.blit(c, img, fr, x, feet, h, sy !== 1 ? { sy } : null);
   }
@@ -174,6 +175,7 @@ HD.load();
       if (!fr || !img) return _draw.call(this, c, cx, cy, t);
       faces = 'right';
     }
+    if (!fr || !img) return _draw.call(this, c, cx, cy, t);
     const x = this.px - cx, y = this.py - cy + 3;
     if (x < -60 || y < -10 || x > G.view.w + 60 || y > G.view.h + 100) return;
     c.fillStyle = 'rgba(0,0,0,.24)'; c.beginPath(); c.ellipse(x, y - 1, 11, 4, 0, 0, 7); c.fill();
@@ -217,7 +219,7 @@ HD.load();
   drawOW = function (c, img, anim, dir, f, x, y, alpha, sz) {
     if (HD.on() && HD.OW && !(G.S && G.S.kid)) {
       const who = nameOf(img), r = who && owPick(who, anim, dir, f);
-      if (r) {
+      if (r && r[1]) {
         sz = sz || 1; const [im, fr] = r, k = HD.OW_H * sz / fr[6];
         c.save(); if (alpha !== undefined) c.globalAlpha = alpha; c.translate(x, y + 2 * sz); if (dir === 'left') c.scale(-1, 1);
         c.drawImage(im, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k); c.restore(); return;
