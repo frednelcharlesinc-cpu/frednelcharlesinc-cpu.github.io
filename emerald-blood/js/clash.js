@@ -177,36 +177,46 @@ const Clash = {
     return res;
   },
   spark(C, x, y, col, pow) { const a = Math.random() * Math.PI * 2, v = (1.5 + Math.random() * 4) * (pow || 1); C.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, life: 400 + Math.random() * 500, t: 0, col }); },
+  /* the clash is an EMBER PULSE: a ring of fire shrinks toward a dashed target ring — tap the moment they line up.
+     Perfect and Good push the struggle your way and build a combo; letting it shrink past the target (or tapping wide) is a miss.
+     Three misses and you lose the clash. Every pulse comes a little faster, and the target changes size. */
   ring(C, tier) {
     const B = Battle.B;
     return new Promise(resolve => {
-      const R = { needle: Math.random() * Math.PI * 2, nSpeed: (2.4 + tier * .35) * Math.PI, win: Math.random() * Math.PI * 2, wSize: Math.max(.5, 1.25 - tier * .07), wDrift: (Math.random() < .5 ? -1 : 1) * (.5 + tier * .12), pressure: .07 + tier * .018, hits: 0, last: performance.now(), done: false, flash: 0, miss: 0 };
+      const R = { pulse: null, lives: 3, combo: 0, hits: 0, last: performance.now(), done: false, flash: 0, miss: 0, pops: [], speed: 1 + tier * .08, pressure: .035 + tier * .01 };
       C.R = R; R.t0 = performance.now();
-      const inWin = () => { let d = ((R.needle - R.win) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI; return Math.abs(d) <= R.wSize / 2 ? Math.abs(d) / (R.wSize / 2) : -1; };
-      C.inWin = () => { const d = inWin(); return d >= 0 && d < .45; };
+      const BIG = 2.3, START = () => { R.pulse = { tr: .5 + Math.random() * .45, r: BIG, v: (.95 + Math.random() * .35) * R.speed }; };
+      START();
+      const err = () => Math.abs(R.pulse.r - R.pulse.tr);
+      C.inWin = () => R.pulse && err() < .045;
+      const pop = (txt, col) => R.pops.push({ txt, col, t: 0 });
+      const miss = () => {
+        R.lives--; R.combo = 0; C.meter = Math.max(0, C.meter - .22); R.miss = 1; sfx('clashMiss'); pop('Miss', '#ff8a8a');
+        for (let i = 0; i < 8; i++) this.spark(C, C.mx, C.my, C.ce, .9); B.shake = 7; START();
+      };
       const tap = () => {
-        if (R.done) return; const d = inWin();
-        if (d >= 0) {
-          const perfect = d < .35; C.meter = Math.min(1, C.meter + (perfect ? .3 : .2)); R.hits++; R.flash = 1; sfx(perfect ? 'clashPerfect' : 'clashTick');
-          for (let i = 0; i < (perfect ? 16 : 9); i++) this.spark(C, C.mx, C.my, C.cr, perfect ? 1.3 : .9);
-          if (perfect) Battle.text({ x: C.mx, y: C.my + 30 }, 'PERFECT', '#ffe36a', -40);
-          R.win = R.needle + Math.PI * (.6 + Math.random() * .8) * (Math.random() < .5 ? 1 : -1); R.wSize = Math.max(.32, R.wSize * .88); R.nSpeed *= 1.1; R.wDrift *= -1.15;
-          B.shake = 5;
-        } else { C.meter = Math.max(0, C.meter - .2); R.miss = 1; sfx('clashMiss'); for (let i = 0; i < 8; i++) this.spark(C, C.mx, C.my, C.ce, .9); B.shake = 7; }
+        if (R.done || !R.pulse) return; const d = err();
+        if (d < .045) { R.combo++; C.meter = Math.min(1, C.meter + .2 + Math.min(.1, R.combo * .015)); sfx('clashPerfect'); pop(R.combo >= 3 ? `PERFECT x${Math.min(3, 1 + Math.floor(R.combo / 3))}` : 'PERFECT', '#ffe36a');
+          for (let i = 0; i < 16; i++) this.spark(C, C.mx, C.my, C.cr, 1.3); R.flash = 1; B.shake = 5; }
+        else if (d < .14) { R.combo++; C.meter = Math.min(1, C.meter + .12); sfx('clashTick'); pop('Good', '#ffc070'); for (let i = 0; i < 9; i++) this.spark(C, C.mx, C.my, C.cr, .9); R.flash = .6; }
+        else { miss(); return; }
+        R.hits++; R.speed *= 1.07; START();
       };
       const prevA = Input.handlers.a, hit = $('#hitTap'), h = ev => { ev.preventDefault(); tap(); };
       Input.on('a', tap); hit.classList.remove('hide'); hit.addEventListener('pointerdown', h);
       const step = () => {
         if (R.done) return;
         const now = performance.now(), dt = Math.min(50, now - R.last) / 1000; R.last = now;
-        R.needle += R.nSpeed * dt; R.win += R.wDrift * dt; C.meter = Math.max(0, C.meter - R.pressure * dt);
+        const P = R.pulse; P.r -= P.v * dt; if (P.r < P.tr - .16) miss();   // shrank past the target
+        C.meter = Math.max(0, C.meter - R.pressure * dt);
         R.flash = Math.max(0, R.flash - dt * 4); R.miss = Math.max(0, R.miss - dt * 4);
+        for (const p of R.pops) p.t += dt; R.pops = R.pops.filter(p => p.t < .8);
         SFX2.humSet(C.meter);
         if (Math.random() < .5) this.spark(C, C.mx + (C.meter - .5) * 40, C.my, Math.random() < C.meter ? C.cr : C.ce, .6);
         const el = now - R.t0;
-        if (C.meter >= 1 || C.meter <= 0 || el > 7000) {
+        if (C.meter >= 1 || C.meter <= 0 || R.lives <= 0 || el > 9000) {
           R.done = true; Input.on('a', prevA); hit.removeEventListener('pointerdown', h); hit.classList.add('hide');
-          resolve(C.meter >= 1 || (el > 7000 && C.meter > .62) ? 'win' : C.meter <= 0 || (el > 7000 && C.meter < .38) ? 'lose' : 'draw');
+          resolve(C.meter >= 1 || (el > 9000 && C.meter > .62) ? 'win' : C.meter <= 0 || R.lives <= 0 || (el > 9000 && C.meter < .38) ? 'lose' : 'draw');
           return;
         }
         requestAnimationFrame(step);
@@ -287,20 +297,22 @@ const Clash = {
     c.restore();
     // ---- the CLASH RING (screen space) ----
     if (C.phase === 'ring' && C.R) {
-      const R = C.R, cx = W / 2, cy = H * .25, rad = Math.min(W, H) * .13;
+      const R = C.R, cx = W / 2, cy = H * .3, rad = Math.min(W, H) * .15;
       c.save();
-      c.fillStyle = 'rgba(0,0,0,.55)'; c.beginPath(); c.arc(cx, cy, rad + 14, 0, 7); c.fill();
+      { const g = c.createRadialGradient(cx, cy, rad * .3, cx, cy, rad * 2.5); g.addColorStop(0, 'rgba(8,4,10,.82)'); g.addColorStop(.55, 'rgba(20,6,6,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, rad * 2.5, 0, 7); c.fill(); }
       c.lineWidth = 8; c.strokeStyle = 'rgba(255,255,255,.15)'; c.beginPath(); c.arc(cx, cy, rad, 0, 7); c.stroke();
-      // the window
-      c.lineWidth = 12; c.lineCap = 'round'; c.strokeStyle = R.flash > 0 ? '#ffffff' : C.cr; c.shadowColor = C.cr; c.shadowBlur = 14;
-      c.beginPath(); c.arc(cx, cy, rad, R.win - R.wSize / 2, R.win + R.wSize / 2); c.stroke();
-      c.lineWidth = 12; c.strokeStyle = '#ffe36a'; c.beginPath(); c.arc(cx, cy, rad, R.win - R.wSize * .175, R.win + R.wSize * .175); c.stroke(); c.shadowBlur = 0;
-      // the needle
-      const nx = cx + Math.cos(R.needle) * (rad + 8), ny = cy + Math.sin(R.needle) * (rad + 8);
-      c.strokeStyle = R.miss > 0 ? '#ff6a6a' : '#ffffff'; c.lineWidth = 4; c.beginPath(); c.moveTo(cx + Math.cos(R.needle) * (rad - 18), cy + Math.sin(R.needle) * (rad - 18)); c.lineTo(nx, ny); c.stroke();
-      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(nx, ny, 5, 0, 7); c.fill();
-      // centre: TAP
-      c.fillStyle = '#fff'; c.font = '900 16px "Nunito"'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('TAP!', cx, cy - 6); c.font = '800 10px "Nunito"'; c.fillStyle = '#cfe3d6'; c.fillText('in the window', cx, cy + 10);
+      // target: dashed ember ring
+      const P = R.pulse || { tr: .7, r: 1 }, tr = rad * P.tr, rr = rad * P.r;
+      c.lineWidth = 10; c.strokeStyle = 'rgba(120,70,40,.45)'; c.beginPath(); c.arc(cx, cy, tr, 0, 7); c.stroke();
+      c.setLineDash([5, 6]); c.lineWidth = 2; c.strokeStyle = '#ffd27a'; c.beginPath(); c.arc(cx, cy, tr, 0, 7); c.stroke(); c.setLineDash([]);
+      // the shrinking ring of fire
+      c.lineWidth = 4; c.strokeStyle = R.miss > 0 ? '#ff6a6a' : R.flash > 0 ? '#ffffff' : C.cr; c.shadowColor = C.cr; c.shadowBlur = 16;
+      c.beginPath(); c.arc(cx, cy, Math.max(4, rr), 0, 7); c.stroke(); c.shadowBlur = 0;
+      // centre, combo, lives, call-outs
+      c.fillStyle = '#fff'; c.font = '900 14px "Nunito"'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('TAP', cx, cy - 4); c.font = '800 9px "Nunito"'; c.fillStyle = '#cfe3d6'; c.fillText('when the rings match', cx, cy + 10);
+      if (R.combo >= 2) { c.font = '900 12px "Nunito"'; c.fillStyle = '#ffc070'; c.fillText(`Combo ${R.combo}`, cx, cy - rad * 1.0 - 10); }
+      c.font = '900 13px "Nunito"'; for (let i = 0; i < 3; i++) { c.fillStyle = i < R.lives ? '#ff5a6a' : 'rgba(255,90,106,.25)'; c.fillText('♥', cx + rad * 1.05 + 4 + i * 14, cy - rad * .85); }
+      for (const p of R.pops) { c.globalAlpha = 1 - p.t / .8; c.font = '900 16px "Nunito"'; c.fillStyle = p.col; c.fillText(p.txt, cx, cy - rad * .55 - p.t * 30); } c.globalAlpha = 1;
       // the tug-of-war
       const bw = Math.min(W * .55, 360), bxl = cx - bw / 2, byy = H - 34;
       c.fillStyle = 'rgba(0,0,0,.7)'; c.fillRect(bxl - 3, byy - 3, bw + 6, 14);
