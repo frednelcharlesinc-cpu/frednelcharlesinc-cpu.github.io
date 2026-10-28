@@ -151,6 +151,11 @@ const Clash = {
     } else if (lose) {
       a.kbv = 40; BT.text(a, 'OVERPOWERED', '#ff8a7a', -80, true);
       BT.chip(e, a, kind === 'energy' ? 1.9 : 1.6, true);
+      // losing a clash costs you: your mana scatters, your rhythm breaks, your form slips
+      if (a.side === 'p') {
+        const lost = Math.min(a.mp, Math.ceil(a.maxMp * .3)); a.mp -= lost; if (lost) BT.text(a, `-${lost} MP`, '#7fb8ff', -54);
+        a.flow = 0; if (a.sight) { a.sight = Math.max(0, a.sight - 1); BT.text(a, 'ASCENSION SLIPS', '#9fffe0', -30); }
+      }
       if (typeof Chain !== 'undefined') Chain.reset();
       if (typeof CombatX !== 'undefined') CombatX.shout(e, pick(['Too weak!', 'Ha!', 'Kneel.']), 1300);
     } else {
@@ -162,6 +167,13 @@ const Clash = {
     a.once = false; a.anim = 'combat'; e.once = false; if (!e.ko) e.anim = 'combat';
     await Promise.all([BT.home(a), e.ko ? Promise.resolve() : BT.home(e)]);
     BT.hud();
+    if (lose && a.side === 'p' && !a.ko && !e.ko && BT.B) {   // they press the advantage: a punishing blow you can't parry, and you're staggered
+      await BT.msg(`${e.name} presses the advantage!`, 800);
+      const an = (e.E && e.E.skills && e.E.skills[0] && e.E.skills[0].hits && e.E.skills[0].hits[0].anim) || 'slash';
+      await BT.enemyStrike(e, a, { name: 'Punish', hits: [{ anim: an, m: 1.25, w: 420, unp: 1 }] }, true);
+      if (!a.ko && BT.B) { a.broken = 1; BT.text(a, 'STAGGERED — lose your next turn', '#ffd34a', -70, true); }
+      BT.hud();
+    }
     return res;
   },
   spark(C, x, y, col, pow) { const a = Math.random() * Math.PI * 2, v = (1.5 + Math.random() * 4) * (pow || 1); C.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, life: 400 + Math.random() * 500, t: 0, col }); },
