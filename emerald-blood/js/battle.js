@@ -173,8 +173,8 @@ const Battle = {
       blazed: false, over: null, turn: 0, tutorial: cfg.tutorial ? { dodge: 1, parry: 1, hit: 1 } : null, log: [], press: [] };
     // party
     const W = G.view.w;
-    const pSlots = cfg.slots || [[W - 210, 205], [W - 172, 262], [W - 248, 150]];
-    const eSlots = [[210, 210], [156, 262], [256, 152], [130, 160]];
+    const pSlots = cfg.slots || [[W - 182, 205], [W - 144, 262], [W - 220, 150]];
+    const eSlots = [[182, 210], [128, 262], [228, 152], [102, 160]];
     const S = G.S.stats;
     const SB = Stones.bonus(); B.sb = SB;
     B.actors.push(this.mk({ side: 'p', id: 'me', name: G.S.name, color: '#1f8a4c', isMe: true, hp: S.hp, maxHp: S.maxHp, mp: S.mp, maxMp: S.maxMp, atk: S.atk + SB.atk, def: S.def + SB.def, spd: S.spd, arts: G.S.arts, slot: pSlots[0], strainMax: 100 + SB.cap }));
@@ -578,7 +578,7 @@ const Battle = {
   artStrain(a, k) { return Math.max(5, (ARTS[k].strain || 30) - (a.isMe ? this.B.sb.calm + (Skills.has('me', 't3') ? 8 : 0) : 0)); },
   async summon(key, intro) {
     const B = this.B, E = ENEMY[key], used = B.actors.filter(a => a.side === 'e' && !a.ko).map(a => a.hx);
-    const slots = [[210, 210], [156, 262], [256, 152], [130, 160]], sl = slots.find(s2 => !used.includes(s2[0])) || slots[3];
+    const slots = [[182, 210], [128, 262], [228, 152], [102, 160]], sl = slots.find(s2 => !used.includes(s2[0])) || slots[3];
     const a = this.mk({ side: 'e', id: key + B.actors.length, key, name: E.name, hp: Math.round(E.hp * 1.3), maxHp: Math.round(E.hp * 1.3), mp: 0, maxMp: 0, atk: Math.round(E.atk * 1.18), def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: sl, spr: E.img || key, size: E.size || 1 });
     a.img = await npcImg(a.spr); a.next = this.chooseSkill(a); a.wait = 30; a.alpha = 0; B.actors.push(a);
     for (let i = 0; i <= 10; i++) { a.alpha = i / 10; await wait(30); } if (intro) this.text(a, intro, '#ffb070', -40, true); this.hud();
