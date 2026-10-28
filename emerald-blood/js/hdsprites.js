@@ -282,12 +282,14 @@ const Comic = {
   PAGES: {
     // panel rectangles on the 1200x896 page: kneeling → the eyes → eruption → awakened → untouchable → the cut → the form holds
     // every transformation: the eyes open → the light erupts → he stands in the aura
-    kairo: { src: 'assets/cutscenes/comic_kairo.webp', panels: [[0, 0, 596, 444], [600, 0, 1200, 444], [0, 448, 1200, 896]], fx: ['shake', 'flash', 'glow'], hold: 1300, smooth: false },
+    // like Ren's: the eye splits open → the fire erupts → the monster stands, crowned
+    kairo: { src: 'assets/cutscenes/comic_kairo.webp', panels: [[608, 6, 1196, 328], [4, 344, 388, 892], [560, 344, 924, 892]], fx: ['flash', 'shake', 'glow'], hold: 1300 },
+    kcrown: { src: 'assets/cutscenes/comic_kairo.webp', panels: [[932, 344, 1196, 570]], fx: ['flash'], hold: 650 },
     asc: { src: 'assets/cutscenes/comic_asc.webp', panels: [[602, 0, 1200, 316], [0, 318, 505, 642], [480, 318, 1010, 642]], fx: ['flash', 'shake', 'glow'], hold: 1300 }
   },
   async play(id) {
     const P = this.PAGES[id]; if (!P) return;
-    const img = await loadImg(P.src + '?v=1').catch(() => null); if (!img) return;
+    const img = await loadImg(P.src + '?v=2').catch(() => null); if (!img) return;
     const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:80;background:#05080a;touch-action:none';
     const cv = document.createElement('canvas'), skip = document.createElement('button');
     cv.style.cssText = 'width:100%;height:100%;display:block'; skip.textContent = 'Skip ▶▶';
@@ -422,7 +424,7 @@ const Comic = {
   Battle.adaptTick = async function () {
     const B = this.B; const before = B ? B.actors.map(a => a.wheel || 0) : [];
     await _at();
-    if (this.B) this.B.actors.forEach((a, i) => { if ((a.wheel || 0) > (before[i] || 0) && a.__preImg) { const now = performance.now(); (HD.acts = HD.acts || {}).kmon = { name: 'adapt', t0: now, end: now + 900 }; a.crownFlash = now; } });
+    if (this.B) this.B.actors.forEach((a, i) => { if ((a.wheel || 0) > (before[i] || 0) && a.__preImg) { if (!this.__kc) { this.__kc = 1; Comic.play('kcrown').finally(() => { this.__kc = 0; }); } const now = performance.now(); (HD.acts = HD.acts || {}).kmon = { name: 'adapt', t0: now, end: now + 900 }; a.crownFlash = now; } });
   };
   // the crown: floats over his head, turns a notch per adaptation (a flash + a lit rune for each one)
   const _r = Battle.render.bind(Battle);
