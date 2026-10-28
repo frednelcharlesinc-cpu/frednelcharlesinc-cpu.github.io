@@ -98,6 +98,10 @@ const Eleven = {
   }
 };
 
+/* story speakers: say('lioraV', …) = Seren's Vigil face, say('lioraR', …) = pure rage (for the day she faces Dread) */
+if (typeof CHAR !== 'undefined') Object.assign(CHAR, { lioraV: { name: 'Liora', sprite: 'liora' }, lioraR: { name: 'Liora', sprite: 'liora' } });
+if (typeof ART_ID !== 'undefined') Object.assign(ART_ID, { lioraV: 'liora_vigil', lioraR: 'liora_rage' });
+if (typeof SPEAKER_COL !== 'undefined' && SPEAKER_COL.liora) SPEAKER_COL.lioraV = SPEAKER_COL.lioraR = SPEAKER_COL.liora;
 (function () {
   if (typeof Battle === 'undefined') return;
   Object.assign(Comic.PAGES, {
