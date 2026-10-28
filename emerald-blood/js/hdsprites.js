@@ -130,7 +130,8 @@ HD.load();
     if (a && a.isMe && HD.on() && !G.S.kid) {
       const now = performance.now();
       if (now - (HD.lastStrike || 0) > 1600) { HD.combo = Math.floor(Math.random() * VARS.length); } else HD.combo = (HD.combo + 1) % VARS.length;
-      HD.lastStrike = now; HD.meVar = /thrust/.test(hit.anim || '') && Math.random() < .5 ? 'thr' : VARS[HD.combo];
+      HD.lastStrike = now; if (HD.forceVar) { HD.meVar = HD.forceVar; return _strike(a, t, hit, mult, opts); }
+      HD.meVar = /thrust/.test(hit.anim || '') && Math.random() < .5 ? 'thr' : VARS[HD.combo];
     }
     return _strike(a, t, hit, mult, opts);
   };
@@ -322,5 +323,39 @@ const Comic = {
     // the first transformation plays the full page; after that it is just the power-up on the battlefield
     if (k === 'sight' && a && a.isMe && G.S && !G.S.kid && !G.S.f.comicAsc) { G.S.f.comicAsc = 1; try { await Comic.play('asc'); } catch (e) { } }
     return _ua(a, k);
+  };
+})();
+
+/* ---------- Ascended combo: while transformed, Attack becomes a 7-hit chain — every strike a different move, one of them a ranged spirit wave ---------- */
+(function () {
+  const CHAIN = [
+    { v: 'c1', m: .34, name: 'Crescent' }, { v: 'c2', m: .3, name: 'Palm' }, { v: 'c3', m: .34, name: 'Rush Cut', dash: 26 },
+    { v: 'c4', m: .32, name: 'Blur Step' }, { v: 'c5', m: .42, name: 'SPIRIT WAVE', wave: 1 }, { v: 'c6', m: .3, name: 'Shield Bash' },
+    { v: 'c7', m: .55, name: 'SILVER STORM', fin: 1 }];
+  const _da = Battle.doAttack.bind(Battle);
+  Battle.doAttack = async function (a, t) {
+    if (!(a && a.isMe && (a.sight || 0) > 0 && HD.on() && HD.img.asc && !G.S.kid)) return _da(a, t);
+    const B = this.B, close = t.x + (a.side === 'p' ? 52 : -52);
+    await this.dash(a, close, t.y + 2, 200);
+    let n = 0;
+    try {
+      for (const h of CHAIN) {
+        if (t.ko || !this.B) break;
+        if (h.wave) {   // hop back and fire a teal wave across the field
+          await this.dash(a, close + (a.side === 'p' ? 70 : -70), t.y + 2, 130);
+          HD.forceVar = h.v; const p = this.strike(a, t, { anim: 'slash', m: h.m }, 1, { src: 'attack' });
+          await wait(90); if (this.B) { B.fx.push({ beam: 1, blue: 1, x1: a.x + (a.side === 'p' ? -18 : 18), y1: a.y - 34, x2: t.x, y2: t.y - 30, t: 0, life: 420 }); this.spark(t.x, t.y - 30, '#6dffd2', 20); }
+          await p; await this.dash(a, close, t.y + 2, 120);
+        } else {
+          if (h.dash) a.x += a.side === 'p' ? -h.dash : h.dash;
+          HD.forceVar = h.v; await this.strike(a, t, { anim: 'slash', m: h.m }, 1, { src: 'attack' });
+          if (this.B) this.spark(t.x, t.y - 34, h.fin ? '#e8fff6' : '#6dffd2', h.fin ? 26 : 8);
+          if (h.fin && this.B) { B.shake = 10; B.flash = .5; B.flashCol = '120,255,210'; }
+        }
+        n++;
+        await wait(h.fin ? 200 : 90);
+      }
+    } finally { HD.forceVar = null; }
+    if (this.B) await this.home(a);
   };
 })();
