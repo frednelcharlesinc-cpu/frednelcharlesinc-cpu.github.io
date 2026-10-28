@@ -32,11 +32,17 @@ function resize() {
 }
 // the overworld is drawn from further back than battles, so you can see more of the town around you
 // close camera like a handheld RPG: about 10 tiles tall around the player (Settings → Camera can pull it back)
-const WORLD_ZOOM = .7, CLOSE_ZOOM = .85;
+const WORLD_ZOOM = .7, CLOSE_ZOOM = 1.1;   // about 10 tiles tall around Ren, like the handheld games
 // in battle, the bottom strip of the screen belongs to the command bar — the fight is laid out above it
 const BATTLE_STRIP = 92;
+// THE OVERWORLD CAMERA IS MEASURED IN TILES, not a zoom number: the same framing on every phone, in either orientation.
+// Normal ≈ a handheld Pokémon screen: 12 tiles tall, and never fewer than 15 tiles across. Settings → Camera picks Close / Normal / Wide.
+const CAM_TILES = { close: 10, normal: 12, wide: 15 };
+function camMode() { const s = G.settings || {}; return s.cam || (s.wideCam ? 'wide' : 'normal'); }
 function setView(mode) {
-  const z = (mode === 'world' || mode === 'dialog') ? (G.settings && G.settings.wideCam ? WORLD_ZOOM : CLOSE_ZOOM) : 1;
+  let z = 1;
+  if (mode === 'world' || mode === 'dialog') { const tall = CAM_TILES[camMode()] || 12, across = Math.max(15, tall * 1.5);
+    const sc = Math.min(cv.height / (tall * 32), cv.width / (across * 32)); z = sc / G.view.base; }
   G.view.scale = G.view.base * z; G.view.fullH = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
   G.view.h = mode === 'battle' ? G.view.fullH * (1 - BATTLE_STRIP / innerHeight) : G.view.fullH;
 }

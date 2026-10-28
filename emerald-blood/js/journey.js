@@ -192,7 +192,7 @@ const Cal = {
 /* ---------------- THE COLOUR CURVE ----------------
    Every colour costs more than the one before it — the climb gets steeper with each step,
    not just at the letters. 6 colours × 8 grades. */
-const COLOUR_XP = (() => { const a = [0]; for (let n = 0; n < 48; n++) a.push(a[n] + Math.round(38 * Math.pow(1.105, n))); return a; })();
+const COLOUR_XP = (() => { const a = [0]; for (let n = 0; n < 48; n++) a.push(a[n] + Math.round(540 * Math.pow(1.11, n))); return a; })();
 for (let i = 0; i < GRADE_XP.length; i++) GRADE_XP[i] = COLOUR_XP[Math.min(48, i * 6)];
 Power.of = function (xp) {
   let i = 0; while (i < GRADES.length - 1 && xp >= GRADE_XP[i + 1]) i++;
@@ -204,7 +204,7 @@ Power.of = function (xp) {
 };
 // older saves keep the grade they've earned
 (function () {
-  const fix = () => { try { const S = G.S; if (!S || S.f.curve2) return; S.f.curve2 = 1; const bt = Break.st(); let top = 0; for (let k = 1; k < GRADES.length; k++) if (bt[GRADES[k]]) top = k; if (Power.of(Power.xp()).i < top) S.xpTotal = GRADE_XP[top]; } catch (e) { } };
+  const fix = () => { try { const S = G.S; if (!S || S.f.curve4) return; S.f.curve4 = 1; const bt = Break.st(); let top = 0; for (let k = 1; k < GRADES.length; k++) if (bt[GRADES[k]]) top = k; if (Power.of(Power.xp()).i < top) S.xpTotal = GRADE_XP[top]; } catch (e) { } };
   setInterval(fix, 1000);
 })();
 // the power bar now shows progress through the CURRENT colour

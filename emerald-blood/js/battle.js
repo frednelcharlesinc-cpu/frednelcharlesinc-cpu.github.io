@@ -803,15 +803,16 @@ const Battle = {
     const grind = [.7, .6, .5, .4, .32, .26, .2, .16, .13][me8] || .13;
     // 3) battle quality: perfect hits, perfect parries & dodges, and above all — not being touched
     const st = B.st, qk = me8 >= 3 ? 1.5 : 1, clean = st.hurt === 0 && gap >= -1;
-    let q = Math.min(.5, st.perf * .04) + Math.min(.6, st.pp * .07) + Math.min(.4, st.pd * .05);
-    if (clean) q += gap >= 0 ? .8 : .3;
-    q *= qk; if (gap <= -2) q *= .25; q = Math.min(1, q);
+    // (a plain win is slow — around 40–50 per colour early on; fighting WELL is how you climb: up to ×4 EXP)
+    let q = Math.min(1, st.perf * .08) + Math.min(1.2, st.pp * .15) + Math.min(.8, st.pd * .1);
+    if (clean) q += gap >= 0 ? 1 : .4;
+    q *= qk; if (gap <= -2) q *= .25; q = Math.min(3, q);
     const xp = Math.max(1, Math.round(base * gapM * grind * (1 + q)));
     G.S.gold += gold; const ups = Story.gainXp(xp);
     const parts = [];
     if (gap <= -2) parts.push('far below your rank ×0.1'); else if (gap === -1) parts.push('below your rank'); else if (gap >= 1) parts.push(gap >= 2 ? 'far above your rank!' : 'above your rank');
     if (st.perf) parts.push(`${st.perf} perfect hit${st.perf > 1 ? 's' : ''}`); if (st.pp) parts.push(`${st.pp} perfect parr${st.pp > 1 ? 'ies' : 'y'}`); if (st.pd) parts.push(`${st.pd} perfect dodge${st.pd > 1 ? 's' : ''}`);
-    if (clean) parts.push(gap >= 0 ? 'FLAWLESS ×1.8' : 'flawless');
+    if (clean) parts.push(gap >= 0 ? 'FLAWLESS' : 'flawless');
     if (parts.length) setTimeout(() => toast(`EXP ${xp}: ` + parts.join(' · ') + (q > 0 ? ` (style +${Math.round(q * 100)}%)` : ''), 3600), 300);
     if (es.some(a => a.key === 'mana_wyrm') && !G.S.f.wyrmDrop) { G.S.f.wyrmDrop = 1; setTimeout(() => Stones.give('breath'), 2200); }
     this.me().hp = Math.max(this.me().hp, 1);
@@ -1036,11 +1037,22 @@ const Battle = {
       c.globalAlpha = 1 - k; c.fillStyle = p.col; c.fillRect(p.x + p.vx * p.t / 16, p.y + p.vy * p.t / 16 + k * k * 30, p.s, p.s);
     }
     c.globalAlpha = 1;
+    // call-outs never sit on top of each other: each one takes the first free slot above its spot, and only the newest few stay up
+    if (B.texts.length > 7) B.texts.splice(0, B.texts.length - 7);
+    const placed = [];
     for (const x of B.texts) {
       const k = x.t / 1100; c.globalAlpha = k > .75 ? (1 - k) * 4 : 1;
-      c.font = (x.big ? '700 15px' : '700 12px') + ' "Press Start 2P"'; c.textAlign = 'center'; c.lineJoin = 'round';
-      const y = x.y - Math.min(1, k * 3) * 18;
-      c.strokeStyle = '#000'; c.lineWidth = 4; c.strokeText(x.s, x.x, y); c.fillStyle = x.col; c.fillText(x.s, x.x, y);
+      c.font = (x.big ? '700 13px' : '700 10px') + ' "Press Start 2P"'; c.textAlign = 'center'; c.lineJoin = 'round';
+      const h = x.big ? 19 : 15, w = c.measureText(x.s).width + 10;
+      let cx = Math.max(w / 2 + 4, Math.min(W - w / 2 - 4, x.x)), y = x.y - Math.min(1, k * 3) * 12;
+      if (x.slot == null) { x.slot = 0; }
+      for (let tries = 0; tries < 12; tries++) {
+        const hit = placed.find(p => Math.abs(p.x - cx) < (p.w + w) / 2 && Math.abs(p.y - (y - x.slot * h)) < (p.h + h) / 2);
+        if (!hit) break; x.slot++;
+      }
+      y = Math.max(h, y - x.slot * h); placed.push({ x: cx, y, w, h });
+      c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(cx - w / 2, y - h + 4, w, h);
+      c.strokeStyle = '#000'; c.lineWidth = 4; c.strokeText(x.s, cx, y); c.fillStyle = x.col; c.fillText(x.s, cx, y);
     }
     c.globalAlpha = 1; c.restore();
     if (World.scene && World.scene.realm) Weather.render(c, t);

@@ -285,6 +285,13 @@ const Comic = {
     // every transformation: the eyes open → the light erupts → he stands in the aura
     // like Ren's: the eye splits open → the fire erupts → the monster stands, crowned
     kairo: { src: 'assets/cutscenes/comic_kairo.webp', panels: [[608, 6, 1196, 328], [4, 344, 388, 892], [560, 344, 924, 892]], fx: ['flash', 'shake', 'glow'], hold: 1300 },
+    // Ren cuts through Kairo's Pyre Breath — the moment Leaf Cut clicks
+    leafcut: { src: 'assets/cutscenes/comic_leaf.webp', panels: [[0, 0, 1200, 314], [0, 317, 479, 597], [488, 317, 873, 597], [882, 317, 1200, 597], [0, 600, 599, 896], [602, 600, 867, 896], [876, 600, 1200, 896]],
+      fx: ['shake', null, 'flash', 'flash', 'glow', 'shake', 'glow'], hold: 2100 },
+    // the memory on the mountain: Vane and the falling leaf (sepia flashback)
+    vane: { src: 'assets/cutscenes/comic_vane.webp', panels: [[20, 18, 775, 481], [787, 18, 1180, 212], [787, 232, 1180, 452], [20, 503, 361, 877], [372, 503, 688, 877]], fx: [null, null, 'shake', null, null], hold: 2400 },
+    vaneEnd: { src: 'assets/cutscenes/comic_vane.webp', panels: [[698, 503, 1180, 877]], fx: ['glow'], hold: 2600 },
+    vaneFlash: { src: 'assets/cutscenes/comic_vane.webp', panels: [[698, 503, 1180, 877]], fx: ['flash'], hold: 1100 },
     kcrown: { src: 'assets/cutscenes/comic_kairo.webp', panels: [[932, 344, 1196, 570]], fx: ['flash'], hold: 650 },
     asc: { src: 'assets/cutscenes/comic_asc.webp', panels: [[602, 0, 1200, 316], [0, 318, 505, 642], [480, 318, 1010, 642]], fx: ['flash', 'shake', 'glow'], hold: 1300 }
   },
@@ -470,5 +477,76 @@ const Comic = {
     c.beginPath(); c.rect(0, by, W, bh); c.clip(); c.imageSmoothingEnabled = false;
     c.drawImage(eyes, W / 2 - w / 2 + (1 - k) * 30, by + bh / 2 - eyes.height * sc * .45, w, eyes.height * sc);
     c.strokeStyle = '#7dffb0'; c.lineWidth = 2; c.globalAlpha = a * .9; c.strokeRect(-2, by, W + 4, bh); c.restore();
+  };
+})();
+
+/* ---------- PYRE BREATH: monster Kairo draws in a breath for a turn, then pours green fire across the field.
+   Transformed Ren can CUT it — one timing ring. The first clean cut is the moment Leaf Cut is learned. ---------- */
+const PyreFx = { img: {}, on: null };
+['flame', 'e0', 'e2', 'e3', 'e4', 'e5'].forEach(k => loadImg(`assets/hd/leaf/${k}.png?v=1`, true).then(i => { PyreFx.img[k] = i; }).catch(() => {}));
+(function () {
+  const isMon = e => e && e.key === 'kairo_duel' && e.morph > 0 && e.__preImg;
+  const act = (name, ms) => { const n = performance.now(); (HD.acts = HD.acts || {}).kmon = { name, t0: n, end: n + ms }; };
+  const ren = n => { const t = performance.now(); HD.act = { name: n, t0: t, end: t + 1500 }; };
+  const _et = Battle.enemyTurn.bind(Battle);
+  Battle.enemyTurn = async function (e) {
+    const B = this.B;
+    if (!isMon(e) || !HD.img.kmon) return _et(e);
+    const me = this.me(); if (!me || me.ko) return _et(e);
+    if (!e.pyre && !B.pyreDone) {   // his first move as the monster: breathe in
+      e.pyre = 1; act('breath', 900); sfx('charge'); B.dim = .35; B.dimCol = '0,40,10';
+      this.text(e, 'DRAWING BREATH', '#7dff7a', -80, true);
+      const canAsc = me.arts && me.arts.includes('sight');
+      await this.msg(`Kairo's chest swells with green fire — PYRE BREATH next turn!${!me.sight && canAsc && !LeafCut.has() ? ' (Only an Ascended blade could cut it.)' : ''}`, 1700);
+      B.dim = 0; return;
+    }
+    if (!e.pyre) return _et(e);
+    e.pyre = 0; B.pyreDone = 1;
+    act('breath', 2600); B.dim = .4; B.dimCol = '0,30,8'; B.shake = 10; sfx('art');
+    PyreFx.on = { from: e, to: me, t0: performance.now(), mode: 'breath' };
+    await this.msg('PYRE BREATH!', 700);
+    const ascended = (me.sight || 0) > 0;
+    if (ascended || LeafCut.has()) {
+      if (!LeafCut.has()) await this.msg('…Cut the leaf. Don\'t touch it.', 1100);
+      const g = await this.qte(e, 0, '#7dffd0', me);
+      if (g !== 'miss') {
+        const first = !LeafCut.has();
+        if (first) { try { await Comic.play('vaneFlash'); await Comic.play('leafcut'); } catch (x) { } }
+        ren('leafcut'); PyreFx.on.mode = 'split'; PyreFx.on.t0 = performance.now(); act('split', 1600); sfx('pparry'); B.flash = .6; B.flashCol = '160,255,230';
+        this.text(me, first ? 'LEAF CUT' : 'FIRE SPLIT', '#bfffe6', -70, true);
+        await wait(700);
+        this.resolveHit(me, e, g === 'perfect' ? 2.2 : 1.6, 'perfect', { unblockable: 1, brk: 60, src: 'leaf' });
+        e.broken = Math.max(e.broken || 0, 1); this.text(e, 'STAGGERED', '#ffd34a', -40, true);
+        if (first) { G.S.f.leafCut = 1; G.S.f.leafCuts = (G.S.f.leafCuts || 0) + 5;
+          setTimeout(() => toast('<b style="color:#bfffe6">🍃 TECHNIQUE LEARNED — LEAF CUT</b><br>Parry anything thrown at you — arrows, knives, fire, spells — by cutting it out of the air.', 5200), 400); }
+        await wait(900);
+      } else {
+        PyreFx.on.mode = 'burn'; this.text(me, 'ENGULFED', '#7dff7a', -60, true);
+        this.chip(e, me, 2.4, true, 'fire'); me.flow = 0; B.shake = 14; await wait(900);
+      }
+    } else {   // not Ascended: a torrent of fire to dodge through
+      PyreFx.on.mode = 'breath';
+      const hits = Array.from({ length: 6 }, (_, i) => ({ anim: 'spellcast', m: i === 5 ? .9 : .45, w: 330, proj: 'fire', style: i % 3 === 2 ? 'snap' : 'normal' }));
+      await this.enemyStrike(e, me, { name: 'Pyre Breath', hits }, true);
+    }
+    PyreFx.on = null; B.dim = 0; this.hud();
+  };
+  const _r = Battle.render.bind(Battle);
+  Battle.render = function (c, t) {
+    _r(c, t);
+    const P = PyreFx.on; if (!P || !this.B || !P.from || !P.to) return;
+    const I = PyreFx.img, now = performance.now(), el = now - P.t0, s = BT_SCALE;
+    const fx = P.from.x + (P.to.x > P.from.x ? 1 : -1) * 30 * s, fy = P.from.y - 46 * s, tx = P.to.x, ty = P.to.y - 34 * s, dir = Math.sign(tx - fx) || 1;
+    c.save(); c.imageSmoothingEnabled = false;
+    if (P.mode === 'breath' || P.mode === 'burn') {
+      const fl = I.flame; if (fl) { const grow = Math.min(1, el / 300), L = Math.abs(tx - fx) * grow + 30, H = 70 * s * (.9 + .1 * Math.sin(now / 60));
+        c.translate(fx, fy); if (dir < 0) c.scale(-1, 1); c.globalAlpha = .95; c.drawImage(fl, 0, -H / 2, L, H); }
+    } else if (P.mode === 'split') {
+      const k = Math.min(1, el / 500), mx = tx - dir * 20 * s;
+      if (I.e2) { const w = 120 * s, h = w * I.e2.height / I.e2.width; c.globalAlpha = 1 - k * .6; c.save(); c.translate(mx, ty); if (dir > 0) c.scale(-1, 1); c.drawImage(I.e2, -w / 2 - k * 30, -h / 2 - k * 10, w, h * (1 + k * .3)); c.restore(); }
+      if (I.e0 && el < 900) { const h = 150 * s, w = h * I.e0.width / I.e0.height; c.globalAlpha = 1 - Math.max(0, (el - 500) / 400); c.drawImage(I.e0, mx - w / 2, ty - h / 2, w, h); }
+      if (I.e3) { const w = 110 * s, h = w * I.e3.height / I.e3.width; c.globalAlpha = Math.min(1, el / 400) * (1 - Math.max(0, (el - 1200) / 600)); c.drawImage(I.e3, mx - w / 2, ty - h / 2 + el * .02, w, h); }
+    }
+    c.restore();
   };
 })();

@@ -87,9 +87,7 @@ async function leafFlashback() {
   await fadeOut(800);
   Dlg.close(); G.S.kid = true; G.S.hood = false; G.S.party = []; try { await buildPlayerSprites(); } catch (e) { }
   await wait(200); await fadeIn(300);
-  await Cine.play([{ bg: 'autumnShrine', fx: ['petals'], dur: 2600, cam: [[0, 400, 240, 1.25], [6000, 430, 245, 1.4]],
-    actors: [{ spr: 'vane', x: 380, y: 300, dir: 'right', scale: 2.1 }, { spr: 'me', x: 450, y: 302, dir: 'left', scale: 2.2 }],
-    lines: ['The fourth autumn. The one week of the year the mountain has leaves.', 'The old man holds a dry leaf between two fingers. Then he lets it go.'] }], { music: 'sad' });
+  try { await Comic.play('vane'); } catch (e) { await Cine.play([{ bg: 'autumnShrine', fx: ['petals'], dur: 2600, actors: [], lines: ['The fourth autumn. The old man holds a dry leaf between two fingers. Then he lets it go.'] }], { music: 'sad' }); }
   await say('vane', 'neutral', "Cut it.");
   await narr('You swing. The leaf folds around your blade, rides it, and settles on the snow. Whole.');
   await say('vane', 'happy', "You hit it. I didn't say hit it. I said CUT it.");
@@ -115,6 +113,7 @@ async function leafFlashback() {
     await me('sad', "I can't do it.");
     await say('vane', 'neutral', "Not yet. That's a different word. You'll carry this one for years, pup. One day something will be flying at your face, and your hands will remember before you do.");
   }
+  if (cuts >= 3) { try { await Comic.play('vaneEnd'); } catch (e) { } }
   await narr('He was right. It took years. You never quite got it on the mountain.');
   await fadeOut(800);
   Dlg.close(); G.S.kid = keep.kid; G.S.hood = keep.hood; G.S.party = keep.party; G.S.hp = keep.hp; G.S.mp = keep.mp; try { await buildPlayerSprites(); } catch (e) { }
