@@ -843,10 +843,13 @@ const Battle = {
   },
   render(c, t) {
     const B = this.B; if (!B) return; const W = G.view.w, H = G.view.h;
-    const bd = B.bd, sc = Math.max(W / bd.width, H / bd.height);
+    // ONE picture behind the whole screen: the scene runs on under the command bar (darkened there) instead of stopping at a hard edge
+    const bd = B.bd, FH = G.view.fullH || H, sc = Math.max(W / bd.width, FH / bd.height) * 1.04;
     let ox = 0, oy = 0; if (B.shake > 0) { ox = rnd(-B.shake, B.shake); oy = rnd(-B.shake, B.shake) * .5; }
     c.save(); c.translate(ox, oy);
-    c.drawImage(bd, (W - bd.width * sc) / 2, (H - bd.height * sc) / 2, bd.width * sc, bd.height * sc);
+    const bh = bd.height * sc, by = Math.min(0, Math.max(FH - bh, H * .9 - bh * .86));   // the picture's ground line sits where the fighters stand
+    c.drawImage(bd, (W - bd.width * sc) / 2, by, bd.width * sc, bh);
+    if (FH > H) { const g = c.createLinearGradient(0, H - 26, 0, FH); g.addColorStop(0, 'rgba(6,12,9,0)'); g.addColorStop(.35, 'rgba(6,12,9,.55)'); g.addColorStop(1, 'rgba(6,12,9,.85)'); c.fillStyle = g; c.fillRect(-20, H - 26, W + 40, FH - H + 46); }
     if (B.dim > 0) { c.fillStyle = `rgba(${B.dimCol},${B.dim})`; c.fillRect(-10, -10, W + 20, H + 20); }
     // targeting cursor
     const T = B.targeting;

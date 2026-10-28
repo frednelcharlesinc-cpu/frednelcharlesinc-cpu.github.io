@@ -1,6 +1,6 @@
 // pages & scripts: network-first (updates arrive immediately). Images: served from the phone's cache,
 // refreshed quietly in the background — so launching never waits on hundreds of image checks.
-const C = 'emerald-blood-v100', IMG = 'emerald-blood-img-2', JS = 'emerald-blood-js';
+const C = 'emerald-blood-v101', IMG = 'emerald-blood-img-2', JS = 'emerald-blood-js';
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C && k !== IMG && k !== JS).map(k => caches.delete(k)))).then(() => clients.claim())));
 self.addEventListener('fetch', e => {
