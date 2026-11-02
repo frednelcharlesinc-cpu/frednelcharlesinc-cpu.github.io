@@ -34,7 +34,7 @@
 const TAV = {
   ashford: { scene: 'a_inn', keep: 'bram_in', keepName: 'Bram', keepSprite: 'innkeep',
     special: { name: 'Lantern Red', price: 6, desc: '+2 ATK in your next fight', buff: { atk: 2 }, line: "Lantern Red. Brewed with beetroot and spite. Puts fire in your arm for a fight or two." },
-    greet: "Welcome to the Crooked Lantern. Ale's watered, beds are lumpy, and the gossip's free." },
+    greet: "Welcome to the Crooked Kettle. Ale's watered, beds are lumpy, and the gossip's free." },
   millbrook: { scene: 'mb_tavern', keep: 'marta', keepName: 'Marta Reed', keepSprite: 'folk19',
     special: { name: 'River Smoke', price: 6, desc: '+2 DEF in your next fight', buff: { def: 2 }, line: "River Smoke. We smoke the barley over the mill fire. Sits in your belly like a shield." },
     greet: "Welcome to the Duck. Stew, river ale, and no questions. Two out of three, anyway." },
@@ -137,7 +137,7 @@ function tavScene(key, tk, title) {
   room(key, 'in_tavern', title, { npcs: () => tavNpcs(tk), tiles: Object.fromEntries([2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => [x + ',4', () => barkeep(tk)])) });
   SCENES[key].tavern = tk;
 }
-tavScene('a_inn', 'ashford', 'The Crooked Lantern');
+tavScene('a_inn', 'ashford', 'The Crooked Kettle');
 tavScene('mb_tavern', 'millbrook', 'The Drowned Duck');
 tavScene('kb_tavern', 'kettlebrook', 'The Sheaf & Sickle');
 
@@ -308,7 +308,7 @@ innRest = async function () { await barkeep('ashford'); };
   const _q = questsMenuHTML;
   questsMenuHTML = function () {
     let h = _q(); const L = (G.S && G.S.f.tavLog) || []; if (!L.length) return h;
-    const nm = { ashford: 'Crooked Lantern', millbrook: 'Drowned Duck', kettlebrook: 'Sheaf & Sickle' };
+    const nm = { ashford: 'Crooked Kettle', millbrook: 'Drowned Duck', kettlebrook: 'Sheaf & Sickle' };
     return h + `<div class="stat" style="margin-top:6px"><h3 style="color:#ffd27a">Overheard in taverns</h3>${L.map(e => `<p><b style="color:#ffd27a">◆ ${nm[e.tk] || ''}</b> <span class="muted">—</span> ${esc(e.t)}</p>`).join('')}</div>`;
   };
 })();
@@ -337,7 +337,7 @@ innRest = async function () { await barkeep('ashford'); };
 })();
 
 /* ---------- the tavern buildings: bigger, a hanging beer sign, lanterns, a barrel out front, and a 🍺 you can spot from across town ---------- */
-const TAV_HOUSE = { ashford: [40, 14, 'The Crooked Lantern'], millbrook: [13, 11, 'The Drowned Duck'], kettlebrook: [26, 9, 'The Sheaf & Sickle'] };
+const TAV_HOUSE = { ashford: [40, 14, 'The Crooked Kettle'], millbrook: [13, 11, 'The Drowned Duck'], kettlebrook: [26, 9, 'The Sheaf & Sickle'] };
 const TAV_SCALE = 1.2;
 function paintMug(x, cx, cy, s) {
   x.save(); x.translate(cx, cy); x.scale(s, s);

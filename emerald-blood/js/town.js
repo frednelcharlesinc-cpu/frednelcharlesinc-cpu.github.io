@@ -8,7 +8,7 @@ const ASH = {
     [[9, 15], [11, 6]],   // Maren's clinic (top-left cottage with the herb garden)
     [[16, 15], [20, 6]],  // Pip's house (blue cottage)
     [[35, 15], [48, 16]], // Tobb's general store
-    [[42, 15], [38, 10]], // the Crooked Lantern (the pagoda)
+    [[42, 15], [38, 10]], // the Crooked Kettle (the pagoda)
     [[53, 11], [10, 18]], // Adventurers' Guild hall
     [[8, 31], [7, 36]], [[15, 32], [42, 29]], [[22, 37], [50, 33]], [[41, 32], [36, 41]], [[49, 32], [39, 29]],
     [[29, 20], [30, 22]], [[24, 19], [25, 18]], [[36, 21], [36, 21]], [[24, 9], [27, 7]],

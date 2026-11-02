@@ -48,7 +48,7 @@ const SFX2 = {
 /* ---------------- clashes ---------------- */
 const CLASH_COL = { kairo: '#ff6a2a', vane: '#cfe8ff', halvard: '#ffe36a', tamsin: '#ff8a3a', dace: '#8ad35a', wren: '#d8f08a', corran: '#c8a878', cael: '#ffd0a0', will: '#fff3b0', dread: '#46ff95' };
 const CLASH_LINES = {
-  kairo: [["Forty-two to one, brother. Want to make it forty-three?", 'Not today.'], ["You've gotten FASTER!", "You've gotten louder."], ["Don't you DARE hold back!", "I never could with you."]],
+  kairo: [["Still ahead on the wall, brother. Want to make it one more?", 'Not today.'], ["You've gotten FASTER!", "You've gotten louder."], ["Don't you DARE hold back!", "I never could with you."]],
   vane: [['Show me what the snow taught you, pup.', 'Everything you did.'], ['Breathe.', "I'm breathing."]],
   halvard: [['The fire forgives NOTHING!', 'Then it can start with you.'], ['Kneel before the Lantern!', 'Never again.']],
   tamsin: [['This is for Kairo!', "He'd want you to stop, Tamsin."], ['Stop holding back!', "I'm not."]],

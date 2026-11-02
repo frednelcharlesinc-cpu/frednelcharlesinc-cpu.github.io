@@ -68,7 +68,7 @@ const CombatX3 = {
   memoryFor(B) {
     const keys = B.actors.filter(x => x.side === 'e').map(x => x.key || '');
     if (keys.some(k => k.startsWith('halvard'))) return { bg: 'villageFire', lines: ['Smoke. Screaming. The night Thornvale burned.', ['Nana', 'Hold the fire in your hand, child. Never in your heart.']] };
-    if (keys.some(k => k.startsWith('kairo'))) return { bg: 'ridgeSunset', lines: ['Two boys on a ridge at sunset, keeping score in the dirt.', ['Kairo', "Forty-two to one, brother. You'll never catch me."]] };
+    if (keys.some(k => k.startsWith('kairo'))) return { bg: 'ridgeSunset', lines: ['Two boys on a ridge at sunset, keeping score in the dirt.', ['Kairo', "Still ahead on the wall, brother. You'll never catch me."]] };
     if (keys.some(k => k.startsWith('vane'))) return { bg: 'cliffAurora', lines: ['Aurora over the frozen forest. An old man who never once raised his voice.', ['Vane', 'Throwing is easy, pup. Learn to PULL first.']] };
     if (keys.some(k => typeof GE_RIVAL !== 'undefined' && GE_RIVAL[k])) return { bg: 'hut', lines: ["Nana's hut. Honey and smoke.", ['Nana', 'Our people have been hated before. Hate never once kept us alive, child. Each other did.']] };
     return { bg: 'hut', lines: ['A green ribbon, tied in a terrible knot.', ['Ilya', 'So you can always find me.']] };

@@ -463,9 +463,9 @@ async function orlaField() {
 async function talkPell() {
   const f = F();
   if (!f.sqFlour) {
-    await say('pell', 'happy', "Pell! Baker! Dwarf! In that order. My flour's the best south of the river, and Bram at the Crooked Lantern in Ashford owes me for a sack.");
+    await say('pell', 'happy', "Pell! Baker! Dwarf! In that order. My flour's the best south of the river, and Bram at the Crooked Kettle in Ashford owes me for a sack.");
     const c = await ask('pell', 'neutral', 'Carry this sack to Bram and collect, will you? Thirty gold in it for you.', ['Sure.', 'No thanks.']);
-    if (c === 0) { f.sqFlour = 'on'; toast('Errand: <b>Pell\'s Flour</b> — deliver the sack to Bram (Crooked Lantern, Ashford).', 3000); }
+    if (c === 0) { f.sqFlour = 'on'; toast('Errand: <b>Pell\'s Flour</b> — deliver the sack to Bram (Crooked Kettle, Ashford).', 3000); }
     return;
   }
   if (f.sqFlour === 'done' && !f.sqFlourPaid) { f.sqFlourPaid = true; G.S.gold += 30; sfx('coin'); UI.hud(); await say('pell', 'happy', "He PAID? Bram paid? Here — thirty gold. I'm going to tell everyone. This is a historic day."); return; }
@@ -474,7 +474,7 @@ async function talkPell() {
 
 /* ================= TAVERNS & GOSSIP ================= */
 const TAVERNS = {
-  ashford: { name: 'The Crooked Lantern', keep: 'bram_in', pat: [['Old Soldier', 'folk11', 'soldier'], ['Bargewoman', 'folk5', 'bargewoman'], ['Farmhand', 'folk13', 'farmhand']] },
+  ashford: { name: 'The Crooked Kettle', keep: 'bram_in', pat: [['Old Soldier', 'folk11', 'soldier'], ['Bargewoman', 'folk5', 'bargewoman'], ['Farmhand', 'folk13', 'farmhand']] },
   millbrook: { name: 'The Drowned Duck', keep: 'marta', pat: [['Fisherman', 'folk2', 'fisherman'], ['Ferry Clerk', 'folk7', 'fclerk'], ['Retired Adventurer', 'dwarf_m1', 'oldadv']] },
   kettlebrook: { name: 'The Sheaf & Sickle', keep: 'gunna', pat: [['Plowman', 'folk10', 'plowman'], ['Grain Wife', 'folk15', 'grainwife'], ['Tinker', 'elf_m1', 'tinker']] }
 };
@@ -629,7 +629,7 @@ door('kettlebrook', 36, 20, 'kb_granary', async () => F().ge2 ? null : 'The gran
 (function () {
   const S = SCENES.ashford, _npcs = S.npcs.bind(S);
   const QM = {
-    maren: () => { const f = F(); return f.ashIntroDone && !f.lead ? '!' : f.sqBelfry === 'maren' ? '?' : null; },
+    maren: () => { const f = F(); return (f.ashIntroDone && !f.lead) || (f.h1 === 'done' && !f.h2) ? '!' : f.sqBelfry === 'maren' ? '?' : null; },
     kess: () => { const f = F(); return f.learnedMill && f.kessWait && !f.kessHelp ? '!' : null; },
     voss: () => { const f = F(); return f.kessHelp && !f.vossGone ? '?' : null; },
     tobb: () => { const f = F(); return f.hasCrate && !f.crateDone ? '?' : !f.crateQuest ? '!' : null; },
@@ -737,7 +737,7 @@ LEGENDS.push(
     if (G.S.f.geTrust !== undefined || G.S.f.ge1 || G.S.f.millDone) h += `<div class="stat" style="margin-top:6px"><h3>Green Eclipse notoriety: <span style="color:#a9c4ff">${Notoriety.name()}</span></h3><p><span style="display:inline-block;width:60%;height:6px;background:#222;border-radius:3px;vertical-align:middle"><span style="display:block;height:6px;border-radius:3px;background:#3fbf6a;width:${Math.min(100, Notoriety.val() * 10)}%"></span></span></p><p class="muted">${Notoriety.desc()}${(G.S.f.coupHint || 0) ? ' Kairo is planning something against the Empire itself. Nobody knows what — or why.' : ''}</p></div>`;
     const m = Opinion.mood();
     h += `<div class="stat" style="margin-top:6px"><h3>What the vale thinks of Drags</h3><p><b style="color:#46ff95">Hope ${Math.round(Opinion.hope * 2) / 2}</b> · <b style="color:#ff7a6a">Fear ${Math.round(Opinion.fear * 2) / 2}</b></p><p class="muted">${m[1]}</p></div>`;
-    const E = [['sqWheel', "The Miller's Wheel", 'Clear the river-rats at the Millbrook mill-race, then see Dunstan.'], ['sqHerb', 'Moonpetal for Fen', 'Bring 2 Moonpetal to Fen in Millbrook.'], ['sqBelfry', 'The Girl in the Belfry', f.sqBelfry === 'maren' ? 'Bring Mina to Maren in Ashford.' : 'Bring Mina to Lark at the Millbrook landing.'], ['sqGourd', "Widow Orla's Gourds", "Clear the gourds in Orla's field, Kettlebrook."], ['sqFlour', "Pell's Flour", f.sqFlour === 'done' ? 'Collect your pay from Pell in Kettlebrook.' : 'Deliver the sack to Bram at the Crooked Lantern, Ashford.']];
+    const E = [['sqWheel', "The Miller's Wheel", 'Clear the river-rats at the Millbrook mill-race, then see Dunstan.'], ['sqHerb', 'Moonpetal for Fen', 'Bring 2 Moonpetal to Fen in Millbrook.'], ['sqBelfry', 'The Girl in the Belfry', f.sqBelfry === 'maren' ? 'Bring Mina to Maren in Ashford.' : 'Bring Mina to Lark at the Millbrook landing.'], ['sqGourd', "Widow Orla's Gourds", "Clear the gourds in Orla's field, Kettlebrook."], ['sqFlour', "Pell's Flour", f.sqFlour === 'done' ? 'Collect your pay from Pell in Kettlebrook.' : 'Deliver the sack to Bram at the Crooked Kettle, Ashford.']];
     const on = E.filter(([k]) => f[k] && f[k] !== 'done' && !(k === 'sqFlour' && f.sqFlourPaid));
     if (on.length) h += `<div class="stat" style="margin-top:6px"><h3>Vale errands</h3>${on.map(([k, n, d]) => `<p><b>${n}</b> <span class="muted">— ${d}${f[k] === 'won' ? ' (done — go back for your reward)' : ''}</span></p>`).join('')}</div>`;
     return h;

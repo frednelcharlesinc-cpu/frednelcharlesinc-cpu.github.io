@@ -201,14 +201,14 @@ async function pyreInSquare() {
   Opinion.add('hope', 1); Story.gainXp(60); G.S.gold += 30;
   f.h1 = 'done';
   Intel.add('you', 'Old Edda: Halvard keeps the children at the mill to SING to a green stone — "for a prince in Aurel". A young acolyte, Brother Tam, wants out.');
-  Story.quest('Find Brother Tam. Maren might know how to reach a frightened acolyte.');
+  Story.quest('Find Brother Tam. Ask Maren the healer in Ashford — she treats everyone, even acolytes. (Look for the ! over her head.)');
 }
 // 2 — BROTHER TAM
 async function tamThroughMaren() {
   const f = H();
   await say('maren', 'sad', 'Tam. Of course it\'s Tam. He comes for burn-salve every week — for his own hands. He holds the censer too close on purpose. Punishing himself, I think.');
   await say('maren', 'neutral', 'He prays alone at the old shrine in the East Woods every evening. If you go, go gently. He\'s more afraid of you than you are of him.');
-  f.h2 = 'shrine'; Story.quest('Meet Brother Tam at the old shrine in the East Woods.');
+  f.h2 = 'shrine'; Story.quest('Meet Brother Tam at the old stone shrine in the East Woods — north-west, past the Green Eclipse camp. He kneels on the west side of it.');
 }
 async function talkTam() {
   const f = H(); if (f.h2 !== 'shrine') return;
@@ -284,7 +284,7 @@ async function convoyAmbush() {
   const wd = SCENES.woods, _wn = wd.npcs;
   wd.npcs = function () {
     const L = _wn.call(this), f = H();
-    if (f.h2 === 'shrine') { const [x, y] = freeNear('woods', 11, 9); L.push({ id: 'tam', sprite: 'acolyte', x, y, dir: 'left', name: 'Brother Tam', talk: talkTam, qm: () => '!' }); }
+    if (f.h2 === 'shrine') { const [x, y] = freeNear('woods', 6, 6); L.push({ id: 'tam', sprite: 'acolyte', x, y, dir: 'right', name: 'Brother Tam', talk: talkTam, qm: () => '!' }); }
     if (f.h2 === 'done' && !f.h3) { const [x, y] = freeNear('woods', 38, 9); L.push({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
     return L;
   };
@@ -314,5 +314,5 @@ async function pyreRetry() {
   await say('edda', null, '"Took you long enough. Listen — Halvard keeps the children at the mill to SING to a green stone, for some prince in Aurel. And there\'s a boy in his robes who wants out. Brother Tam. Find him."');
   Opinion.add('hope', 1); Story.gainXp(60); G.S.gold += 30; f.h1 = 'done';
   Intel.add('you', 'Old Edda: Halvard keeps the children at the mill to SING to a green stone — "for a prince in Aurel". A young acolyte, Brother Tam, wants out.');
-  Story.quest('Find Brother Tam. Maren might know how to reach a frightened acolyte.');
+  Story.quest('Find Brother Tam. Ask Maren the healer in Ashford — she treats everyone, even acolytes. (Look for the ! over her head.)');
 }
