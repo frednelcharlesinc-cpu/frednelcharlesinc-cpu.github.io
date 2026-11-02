@@ -215,7 +215,7 @@ async function talkTam() {
   await say('tam', null, '"Don\'t— please. I\'m not armed. I\'m not anything."');
   await narr('He is maybe seventeen. His hands are bandaged to the wrists.');
   await say('tam', null, '"Edda said a green-eyed stranger would come. I didn\'t believe her. I didn\'t believe anything anymore."');
-  await say('tam', null, '"There are nineteen of them under the mill. The youngest is five. They sing to a stone the size of a fist, and the stone… hums back. Halvard says it\'s for the Prince-Regent. That the Prince wants it awake before the old Emperor dies."');
+  await say('tam', null, '"There are nineteen of them under the mill. The youngest is five. They sing to a stone the size of a fist, and the stone… hums back. Halvard says it\'s for the Prince-Regent. That the Prince wants it awake before the old Emperor wakes up."');
   await say('tam', null, '"The inner door has a lock only the Inquisitor\'s Seal can open. Sister Verity carries it. She rides the supply road every third day with the lamp-oil and the grain."');
   await narr('Twigs snap. Torchlight between the trees. Tam goes white.');
   await say('tam', null, '"They followed me. Oh, gods, they followed me—"');

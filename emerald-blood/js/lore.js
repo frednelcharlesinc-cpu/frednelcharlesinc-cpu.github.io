@@ -12,13 +12,13 @@ const TIERS = [
   ['SSS', 'A walking catastrophe. Fewer than thirty live: the Four Pillars, the Eight Bandit Kings, the Seven of the Guild and its Headmaster. Most are green or yellow. Only the Headmaster is SSS red.'],
   ['SSSS', 'One name. Dread.']
 ];
-const BALANCE = 'Three powers hold the continent of Veyrath in balance. <b>The Empire of Veyl</b> rules the roads, the cities and the law. <b>The Adventurers\' Guild</b> answers to no crown and keeps the monsters back. <b>The Eight Bandit Kings</b> hold everything in between. None of them can beat the other two — so for a hundred years, none of them has tried. But the old Emperor is dying, and his firstborn is ambitious.';
+const BALANCE = 'Three powers hold the continent of Veyrath in balance. <b>The Empire of Veyl</b> rules the roads, the cities and the law. <b>The Adventurers\' Guild</b> answers to no crown and keeps the monsters back. <b>The Eight Bandit Kings</b> hold everything in between. None of them can beat the other two — so for a hundred years, none of them has tried. But the Emperor has not woken in a year, five Prince Regents rule in his name, and his firstborn is ambitious.';
 const WORLD = {
   empire: {
     title: 'The Empire of Veyl', blurb: 'The Crown rules from Aurel, the white capital. Its army answers to one Grand General, and beneath him stand the Four Pillars — each one SSS, each one a nation\'s worth of power in one body.',
     people: [
-      { id: 'emperor', name: 'Prince-Regent Lucan Aurel', tag: 'Firstborn · Regent of Veyl · "the Sun That Waits"', tier: '?',
-        text: 'Thirty, brilliant, patient, unmarried. He has ruled in all but name since his father fell ill — and he wears the Crown Sun on his father\'s behalf, because the old man\'s hands can no longer bear it. Raised from birth to be emperor, then passed over in one sentence from a sickbed. In public he has not said a single word against his brother. He never says "Drag" either. He says "the green-eyed", carefully, like a man handling something that burns.',
+      { id: 'emperor', name: 'Prince-Regent Lucan Aurel', tag: 'Firstborn · Prince Regent of the Heartland · "the Sun That Waits"', tier: '?',
+        text: 'Thirty, brilliant, patient, unmarried. First of the five Prince Regents, he rules Aurel and the Heartland in all but name since his father fell asleep — and he wears the Crown Sun on his father\'s behalf, because the sleeping man\'s hands can no longer bear it. Raised from birth to be emperor, then passed over in one sentence — the last his father spoke before he slept. In public he has not said a single word against his brother. He never says "Drag" either. He says "the green-eyed", carefully, like a man handling something that burns.',
         agenda: 'To end the balance. Crush the Eight, swallow the Guild, and own every D-stone in the world. The Registry, the stone quarries and the hunt for the Dragonoid were all his idea — not his father\'s.' },
       { id: 'dread', name: 'Dread', tag: 'Grand General · "the Black Sun"', tier: 'SSSS', need: 'raid',
         text: 'Commander of every Imperial army. Never speaks above a few words. Carries Gravecleaver, a black greatsword longer than a man. Vane swears his eyes are green.' },
@@ -37,14 +37,20 @@ const WORLD = {
     ]
   },
   royals: {
-    title: 'The House of Aurel', blurb: 'The Emperor is dying. Three months ago, from his sickbed, he named his YOUNGER son heir — over the firstborn who has been running the Empire for a year. He gave no reason. The court has not stopped whispering since.',
+    title: 'The House of Aurel', blurb: 'A year ago the Emperor named his YOUNGER son heir — over the firstborn — and that same night fell into a sleep no one can wake him from. He gave no reason. Since then five Prince Regents rule in his name: one for the Heartland and one for each of the four Marches (Frost, Anvil, Sundering, Sun). They are rivals, not allies. The court has not stopped whispering since.',
     people: [
-      { id: 'theodric', name: 'Emperor Theodric Aurel', tag: 'Second of his name · "the Quiet Emperor"', tier: '?', need: 'royalsHeard',
-        text: 'Gentle, by Aurel standards. He started no wars and ended none. A year ago he began coughing blood with flecks of gold in it, and the court physicians stopped writing down what he says in his sleep. He has not been seen in public since he named his heir.' },
+      { id: 'theodric', name: 'Emperor Theodric Aurel', tag: 'Second of his name · "the Sleeping Emperor"', tier: '?', need: 'royalsHeard',
+        text: 'Gentle, by Aurel standards. He started no wars and ended none. A year ago he named his heir, lay down, and did not wake up. He breathes. Sometimes he coughs, and there are flecks of gold in it. He talks in his sleep — the court physicians have stopped writing down what he says.' },
       { id: 'helene', name: 'Empress Helene Aurel', tag: 'Empress-consort · born House Merrow', tier: '?', need: 'royalsHeard',
         text: 'Married at seventeen, out of a minor house in the Ashen Vale that no longer exists. She nurses the Emperor herself and lets no one else pour his medicine. The servants say she hasn\'t left the east wing in a year — except, very late, to walk the palace walls alone, with a lantern and a red shawl.' },
-      { id: 'corin', name: 'Prince Corin Aurel', tag: 'Second son · Heir of Veyl', tier: '?', need: 'royalsHeard',
-        text: 'About your age. Bookish, stubborn, laughs at the wrong moments. At fourteen he ran away to the Guild under a false name and made D-rank before his brother dragged him home and burned his card in the throne room. He has worn tinted spectacles ever since — "his eyes trouble him in bright light."' },
+      { id: 'corin', name: 'Prince Corin Aurel', tag: 'Second son · Heir of Veyl · Prince Regent of the Anvil March', tier: '?', need: 'royalsHeard',
+        text: 'About your age. Bookish, stubborn, laughs at the wrong moments. At fourteen he ran away to the Guild under a false name and made D-rank before his brother dragged him home and burned his card in the throne room. He has worn tinted spectacles ever since — "his eyes trouble him in bright light." When the Emperor fell asleep, Lucan had him named Regent of the Anvil March and sent east, to the dwarf mountains, as far from the throne as the map allows.' },
+      { id: 'hadrian', name: 'Prince Regent Hadrian Frostholm', tag: 'Regent of the Frost March', tier: '?', need: 'royalsHeard',
+        text: 'Not of the blood — a northern lord raised up to hold the cold coast. An iron-willed conqueror who means to break the Viking clans one oath at a time.' },
+      { id: 'silas', name: 'Prince Regent Silas Ardent', tag: 'Regent of the Sundering March', tier: '?', need: 'royalsHeard',
+        text: 'A scholar who never stopped collecting. He governs the rim of the Sundering and wants what the elves of Aeloria will not give: their Forms, and their secrets.' },
+      { id: 'marek', name: 'Prince Regent Marek Solari', tag: 'Regent of the Sun March', tier: '?', need: 'royalsHeard',
+        text: 'A water-lord of the southern deserts. In Sunreach, whoever holds the wells holds the cities — and Marek holds most of the wells.' },
       { id: 'celeste', name: 'Princess Celeste Aurel', tag: 'Youngest · "the Rose of Aurel"', tier: '?', need: 'royalsHeard',
         text: 'A year younger than Corin, and the most loved person in the capital — people throw flowers at her carriage. Lucan adores her; she is the only one who can make him laugh. She visits the Registry orphan-houses every week, and asks the wardens questions they do not like.' }
     ]
