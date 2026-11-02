@@ -67,15 +67,14 @@ const FOUR = {
       B.timeScale = slow; B.dim = .25; B.dimCol = '10,30,20';
       const seq = [], t0 = performance.now(); let last = t0, done = false;
       const ov = document.createElement('div'); ov.id = 'fourOv';
-      ov.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:72;padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(4,12,8,.92) 30%);touch-action:none;font-family:Nunito,system-ui';
+      // the same rounded panel as the battle button: the four moves around DRAW, the timer along the top
+      ov.className = 'atPanel'; ov.style.zIndex = 74;
       const known = Object.keys(this.REC).filter(k => this.known(k) && k.length <= max);
-      ov.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <b style="color:#cfe8ff;font-size:13px;white-space:nowrap">${S.art}</b>
-          <div style="flex:1;height:8px;background:#0b1a12;border:1px solid #2f9a5a;border-radius:5px;overflow:hidden"><i id="fourT" style="display:block;height:100%;width:100%;background:#7dffb0"></i></div>
-          <span id="fourS" style="color:#fff;font-size:13px;min-width:120px;text-align:right">—</span></div>
-        <div id="fourHint" style="color:#9fc8b0;font-size:11px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-        <div style="display:flex;gap:8px">${this.ROLES.map((r, i) => `<button data-r="${r}" style="flex:1;padding:12px 4px;border-radius:12px;border:2px solid ${this.COL[r]};background:#0b1a12;color:${this.COL[r]};font:800 15px Nunito,system-ui">${this.ICON[r]} ${S.b[r]}<small style="display:block;font-size:10px;opacity:.7">${i + 1}</small></button>`).join('')}
-          <button data-draw="1" style="flex:1.1;padding:12px 4px;border-radius:12px;border:2px solid #fff;background:#1f6a3a;color:#fff;font:900 15px Nunito,system-ui">DRAW</button></div>`;
+      const tile = r => `<button class="t" data-r="${r}"><b style="background:radial-gradient(circle at 40% 32%,${this.COL[r]},#0d2418 85%)">${this.ICON[r]}</b>${S.b[r]}</button>`, gap = '<span></span>';
+      ov.innerHTML = `<div style="text-align:center;margin-bottom:6px"><b style="color:#cfe8ff;font-size:12px">${S.art}</b> <span id="fourS" style="color:#fff;font-size:12.5px;font-weight:800">—</span></div>
+        <div style="height:6px;border-radius:4px;background:rgba(0,0,0,.45);overflow:hidden;margin:0 6px 6px"><i id="fourT" style="display:block;height:100%;width:100%;background:#7dffb0"></i></div>
+        <div id="fourHint" style="color:#cfe8d8;font-size:10.5px;text-align:center;min-height:14px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        <div class="g">${gap}${tile('L')}${gap}${tile('W')}<button class="t" data-draw="1"><b style="width:60px;height:60px;background:radial-gradient(circle at 40% 32%,#5fe89a,#14502c 85%);font-size:13px;font-weight:900">DRAW</b>hold = overdraw</button>${tile('P')}${gap}${tile('S')}${gap}</div>`;
       document.body.append(ov);
       const sEl = ov.querySelector('#fourS'), tEl = ov.querySelector('#fourT'), hEl = ov.querySelector('#fourHint');
       const hint = () => {
@@ -90,12 +89,12 @@ const FOUR = {
       const press = r => { if (done) return; seq.push(r); last = performance.now(); sfx('blip'); hint(); if (seq.length >= max) setTimeout(finish, 120); };
       ov.querySelectorAll('[data-r]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); press(b.dataset.r); }));
       const db = ov.querySelector('[data-draw]');
-      db.addEventListener('pointerdown', e => { e.preventDefault(); holdT = performance.now(); db.textContent = 'HOLD…'; setTimeout(() => { if (holdT && !done) { db.textContent = 'OVERDRAW'; db.style.background = '#a8323a'; } }, 650); });
+      db.addEventListener('pointerdown', e => { e.preventDefault(); holdT = performance.now(); const dbb = db.querySelector('b'); dbb.textContent = 'HOLD…'; setTimeout(() => { if (holdT && !done) { dbb.textContent = 'OVER'; dbb.style.background = 'radial-gradient(circle at 40% 32%,#ff7a5a,#5a1010 85%)'; } }, 650); });
       db.addEventListener('pointerup', e => { e.preventDefault(); finish(); }); db.addEventListener('pointerleave', () => { if (holdT) finish(); });
       const key = e => { const i = ['1', '2', '3', '4'].indexOf(e.key); if (i >= 0) { e.preventDefault(); press(this.ROLES[i]); } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finish(); } };
       addEventListener('keydown', key);
       const tick = () => { if (done) return; const now = performance.now(), left = 1 - (now - t0) / (T * 1000);
-        tEl.style.width = Math.max(0, left * 100) + '%'; tEl.style.background = left < .3 ? '#ff8a5a' : '#7dffb0';
+        const L = Math.max(0, left); tEl.style.width = L * 100 + '%'; tEl.style.background = L < .3 ? '#ff8a5a' : '#7dffb0';
         if (left <= 0 || (seq.length && now - last > GAP * 1000)) return finish(); requestAnimationFrame(tick); };
       requestAnimationFrame(tick);
       FOUR.__press = press; FOUR.__finish = finish;   // for tests
