@@ -268,7 +268,7 @@ async function festival() {
   if (c === 0) await say('ilya', null, "Then we just have to make them understand! I'll do it — I'll be a historian like Mama and find the TRUE story, and then everyone will have to read it. I'm very convincing.");
   else if (c === 1) await say('ilya', null, "…That's sad. I'd rather be blamed than be the one doing the blaming.");
   else await say('ilya', null, "That's okay. You can not-know with me. We'll figure it out together.");
-  await say('nana', 'sad', "Fratenaptor nearly ended the world four hundred years ago. And people decided our eyes meant we'd finish the job.");
+  await say('nana', 'sad', "The Crown's books say Fratenaptor nearly ended the world four hundred years ago. That isn't what happened — it's what was easier to teach. And people decided our eyes meant we'd finish the job.");
   await say('nana', 'neutral', "One day I'll tell you all what these mountains really are. When you're older.");
   await Cine.play(CINE.horns(), { music: 'night' });
   await say('asha', 'shock', "INQUISITION! White cloaks on the ridge — and soldiers. Imperial soldiers! They came straight to the bridge!");
@@ -789,13 +789,13 @@ SCENES.woods = {
 async function spring() { Story.heal(true); await narr('Cold spring water. You feel your strength return.'); }
 async function shrine() {
   const f = F();
-  if (f.shrineRead) { await narr('Seven figures. One chained beast. Your eyes still tingle when you look at it.'); return; }
+  if (f.shrineRead) { await narr('Seven figures. Four shadows in chains. One dragon, standing guard behind them. Your eyes still tingle when you look at it.'); return; }
   f.shrineRead = true;
   await narr('An ancient stone disc, choked with moss. You scrape some away.');
-  await narr('Carvings: seven figures with eyes of inlaid green glass stand in a ring around a vast, coiled dragon.');
-  await narr('The dragon is wrapped in chains. The seven are holding the chains.');
-  await me('shock', "They weren't worshipping Fratenaptor…");
-  await me('anger', '…They were BINDING him.');
+  await narr('Carvings: seven figures with eyes of inlaid green glass stand in a ring. In the middle, four huge shadowed shapes — wrapped in chains. The seven are holding the chains.');
+  await narr('Behind the seven, a vast dragon stands with its wings spread over all of them. Not chained. Guarding.');
+  await me('shock', "That's not Fratenaptor in the chains…");
+  await me('anger', '…He was standing WITH them. Everything the Crown teaches is backwards.');
   await narr('From somewhere — not the woods, not the stone — a small voice you know better than your own.');
   await say('ilya', null, '"Did you know dragons can\'t hide their eyes either? Nana told me. That\'s why they\'re brave. They have to be."');
   await me('sad', '…I know, Ilya. I know.');
@@ -1204,7 +1204,7 @@ const RANK_DESC = {
   C: 'One element mastered, or two in hand. Worth a whole town militia.',
   B: 'Towns pay a year\'s taxes for you. Elites, inquisitors, monster lairs.',
   A: 'One in ten thousand. Armies notice when you arrive. Prodigies and warlords.',
-  S: 'Living legends. Maybe a dozen breathe today. Dread is one. The Sword Saint would have been — if he had ever taken a guild card.' };
+  S: 'Living legends. Maybe a dozen breathe today. Above them, the SSS — the Sword Saint was one, though he never took a guild card. Dread is past even that.' };
 Story.rankCheck = function () {
   const S = G.S, f = S.f; if (!S.rank) return;
   let r = 0; if (f.rookBeaten || f.vossBeaten || f.alphaBeaten) r = 1; if (f.halvardBeaten) r = 2; if (f.duel === 'won') r = 3;
@@ -1273,7 +1273,7 @@ async function talkGarrick() {
 }
 async function talkTilda() {
   await say('tilda', 'happy', pick(['Tilda! D-rank, fire! Brom\'s niece. I\'m going to be S-rank by thirty. Uncle says sixty. Uncle\'s a pessimist.',
-    'Dwarves don\'t use much magic. We use HAMMERS. And a little fire, for the hammers.', 'Did you know the Sword Saint was S-rank and NEVER registered? Uncle says he walked in once, looked at the board, laughed, and walked out.']));
+    'Dwarves don\'t use much magic. We use HAMMERS. And a little fire, for the hammers.', 'Did you know the Sword Saint was SSS-rank and NEVER registered? Uncle says he walked in once, looked at the board, laughed, and walked out.']));
 }
 
 /* ---- Green Eclipse: the people Kairo built after you left ---- */

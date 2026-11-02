@@ -525,7 +525,7 @@ const GOSSIP = {
     [['C', 'Princess Celeste came through Kettlebrook last spring. Gave the reeve\'s girl her own gloves, right off her hands.'], ['A', 'The Rose of Aurel. Bless her.'], ['B', "They say she's the only one alive who can make Lucan laugh. Pray she keeps at it."]],
     [['C', 'The Empress was born in this vale, you know. House Merrow, from the hill above Millbrook.'], ['A', 'Never heard of House Merrow.'], ['C', "Nobody has. There's nothing left of it but a burned chapel and a dry well. Burned the year she married."]],
     [['A', "There's to be a royal barge down the Ashen River next spring. The heir's progress — to show the vale its new prince."], ['B', 'Down OUR river? Past Millbrook?'], ['C', "Oswin'll have to write it in his ledger in gold ink."]],
-    [['B', "Lucan's got a map of the whole continent painted on his bedroom ceiling. Every bandit king's land already painted gold."], ['A', "And the Drag lands?"], ['B', 'Painted over in white. Like nothing was ever there.']],
+    [['B', "Lucan's got a map of all Veyrath painted on his bedroom ceiling. Every bandit king's land already painted gold."], ['A', "And the Drag lands?"], ['B', 'Painted over in white. Like nothing was ever there.']],
     [['A', "The Aurels claim they're descended from the First Sun — the hero-king who 'founded the Empire on the Cataclysm's ashes.'"], ['B', 'No portrait of him. No tomb. No bones.'], ['C', "Funny, losing a whole hero-king."], ['A', "Funnier, making it a hanging crime to look for a lost city of gold. Why's a Crown afraid of treasure?"]],
     [['B', "The Crown's seizing every green pebble in the vale. Surveyors with carts and a writ — they don't pay, they take."], ['A', "What's a prince want with pebbles?"], ['C', 'What any king wants. More. The old songs say the gold king wanted the whole sky.']]
   ] },
@@ -573,7 +573,7 @@ async function barSeat(tk) {
     await run(pool[i % pool.length]);
     if (k === 'strong' && !f['strongAsk' + tk]) {
       f['strongAsk' + tk] = 1;
-      const a = await ask('gpA', null, "And you, stranger? Who's the strongest on this continent?", ['Dread.', 'The Headmaster.', 'The Sword Saint.', "Me. Eventually."]);
+      const a = await ask('gpA', null, "And you, stranger? Who's the strongest in all Veyrath?", ['Dread.', 'The Headmaster.', 'The Sword Saint.', "Me. Eventually."]);
       await say('gpB', null, ["Hah! Another one for Dread. Drink up, before he hears you said his name.", "The Bell! Finally someone with taste. To the Headmaster!", "The Sword Saint? You sound like my grandfather. …My grandfather was usually right.", "HA! Listen to this one! …Actually, buy this one a drink. I want to say I knew 'em when."][a]);
       if (a === 3) Opinion.add('hope', 0);
     }

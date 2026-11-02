@@ -12,7 +12,7 @@ const TIERS = [
   ['SSS', 'A walking catastrophe. Fewer than thirty live: the Four Pillars, the Eight Bandit Kings, the Seven of the Guild and its Headmaster. Most are green or yellow. Only the Headmaster is SSS red.'],
   ['SSSS', 'One name. Dread.']
 ];
-const BALANCE = 'Three powers hold the continent in balance. <b>The Empire of Veyl</b> rules the roads, the cities and the law. <b>The Adventurers\' Guild</b> answers to no crown and keeps the monsters back. <b>The Eight Bandit Kings</b> hold everything in between. None of them can beat the other two — so for a hundred years, none of them has tried. But the old Emperor is dying, and his firstborn is ambitious.';
+const BALANCE = 'Three powers hold the continent of Veyrath in balance. <b>The Empire of Veyl</b> rules the roads, the cities and the law. <b>The Adventurers\' Guild</b> answers to no crown and keeps the monsters back. <b>The Eight Bandit Kings</b> hold everything in between. None of them can beat the other two — so for a hundred years, none of them has tried. But the old Emperor is dying, and his firstborn is ambitious.';
 const WORLD = {
   empire: {
     title: 'The Empire of Veyl', blurb: 'The Crown rules from Aurel, the white capital. Its army answers to one Grand General, and beneath him stand the Four Pillars — each one SSS, each one a nation\'s worth of power in one body.',

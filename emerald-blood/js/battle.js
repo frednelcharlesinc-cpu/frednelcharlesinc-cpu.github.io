@@ -72,7 +72,7 @@ const ENEMY = {
     skills: [{ name: 'Judgment', hits: [{ anim: 'thrust', m: .8, w: 520 }, { anim: 'thrust', m: .8, w: 320 }] }, { name: 'Radiant Lance', hits: [{ anim: 'spellcast', m: 1.3, w: 620 }] }] },
 };
 const TIER = { lupine: 'E', bandit: 'E', kairo_spar: 'E', acolyte: 'D', rook: 'D', lupine_alpha: 'D', rime_lupine: 'D', voss: 'C', mana_wyrm: 'C', rime_alpha: 'C',
-  halvard: 'B', halvard_pro: 'B', kairo_duel: 'A', vane: 'S', vane_spar: 'S', dread: 'S' };
+  halvard: 'B', halvard_pro: 'B', kairo_duel: 'A', vane: 'SSS', vane_spar: 'SSS', dread: 'S' };
 const TIER_COL = { E: '#9aa3a0', D: '#7fc97f', C: '#6ab4ff', B: '#c58cff', A: '#ffb347', S: '#ff5a5a' };
 const ELEM = { fire: ['Fire', '#ff7a3a'], water: ['Water', '#4aa8ff'], ice: ['Ice', '#9fe4ff'], lightning: ['Lightning', '#ffe14a'], earth: ['Earth', '#c79a5a'], wind: ['Wind', '#bfe8d0'], light: ['Light', '#fff3b0'], mana: ['Raw Mana', '#46ff95'], shadow: ['Shadow', '#b08aff'] };
 // which enemy techniques carry an element (everyone uses elements — except Drags, who move raw mana)
