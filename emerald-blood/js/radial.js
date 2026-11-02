@@ -52,6 +52,8 @@ const AT = {
   if (typeof Battle === 'undefined') return;
   const st = document.createElement('style'); st.textContent = AT.css; document.head.append(st);
   document.body.classList.add('at');
+  // the panel must sit above the tap-outside shade (inside #bui it was trapped underneath it, so taps never reached the icons)
+  document.body.append($('#bcmd'));
   const _sv = setView;
   setView = function (mode) { _sv(mode); if (mode === 'battle') G.view.h = G.view.fullH; };
   if (G.mode === 'battle') setView('battle');

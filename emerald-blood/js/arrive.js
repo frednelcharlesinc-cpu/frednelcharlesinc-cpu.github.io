@@ -5,8 +5,8 @@ const ARRIVE = { ashford: ['Ashford Hollow', 'Market town of the eastern vale', 
 (function () {
   const _l = World.load.bind(World);
   World.load = async function (name, x, y, dir) {
-    const prev = G.S && G.S.map, A = ARRIVE[name];
-    const show = A && prev && prev !== name && !(SCENES[prev] && SCENES[prev].map && G.maps[SCENES[prev].map] && G.maps[SCENES[prev].map].interior) && !G.S.kid && G.mode === 'world';
+    const prev = G.S && G.S.map, A = ARRIVE[name] || (typeof ASH2 !== 'undefined' && ASH2.isD(name) ? ARRIVE.ashford : null);
+    const show = A && prev && prev !== name && !/^(a_|ashford$)/.test(prev) && !(SCENES[prev] && SCENES[prev].map && G.maps[SCENES[prev].map] && G.maps[SCENES[prev].map].interior) && !G.S.kid && G.mode === 'world';
     const r = await _l(name, x, y, dir);
     if (show) {
       const night = typeof Ambient !== 'undefined' && Ambient.night > .5;

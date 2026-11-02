@@ -70,6 +70,7 @@ const ASH = {
   const NEW_SPACE = /^(player|f_|folk_|cave_|g_)/;
   const _load = World.load.bind(World);
   World.load = async function (name, x, y, dir) {
+    if (window.ASH2_ON) return _load(name, x, y, dir);
     if (name === 'ashford') { ASH.init(); [x, y] = ASH.snap(x, y); }
     const r = await _load(name, x, y, dir);
     if (name === 'ashford') {
@@ -85,7 +86,7 @@ const ASH = {
   };
   const _add = World.addNpc.bind(World);
   World.addNpc = async function (o) {
-    if (G.S && G.S.map === 'ashford' && o && o.x != null) { const [x, y] = ASH.move(o.x, o.y); o = Object.assign({}, o, { x, y }); }
+    if (!window.ASH2_ON && G.S && G.S.map === 'ashford' && o && o.x != null) { const [x, y] = ASH.move(o.x, o.y); o = Object.assign({}, o, { x, y }); }
     return _add(o);
   };
 })();
