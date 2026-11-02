@@ -937,10 +937,15 @@ async function ending() {
   } else if (f.kessHelp) {
     await narr('At the edge of the clearing, a figure in tinted glasses watches you. When you look up, she nods once — and is gone.');
   }
-  f.chapter1Done = true; Story.quest('Chapter I complete. Greyspire Citadel awaits.'); G.S.side = ''; save();
+  // Part V: the Guild Trial — Greyspire's gate only opens for licensed hunters
+  if (typeof Trial !== 'undefined' && !f.trial) { await Trial.open(); await fadeOut(600); await World.load('ashford', 53, 12, 'up'); save(); UI.hud(); await fadeIn(600); return; }
+  await Story.trialEnd();
+}
+Story.trialEnd = async function () {
+  const f = F(); f.chapter1Done = true; Story.quest('Chapter I complete. Greyspire Citadel awaits.'); G.S.side = ''; save();
   await Cine.play(CINE.greyspire(), { music: 'night' });
   Dlg.close(); await UI.endCard();
-}
+};
 
 /* ---- Thornvale villagers ---- */
 async function talkMei() {
