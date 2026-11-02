@@ -233,3 +233,33 @@ const ASH2 = {
     } catch (e) { }
   };
 })();
+
+/* STUCK GUARD — if you're pushing the stick and Ren hasn't moved for a while, find out why and clear it:
+   a game lock nobody released, a step that never finished, standing inside a wall, or someone standing in the way. */
+(function () {
+  if (typeof World === 'undefined') return;
+  let last = '', since = 0, busySince = 0;
+  setInterval(() => {
+    try {
+      const p = World.player, now = performance.now();
+      if (!p || G.mode !== 'world' || World.loading || Dlg.open || (typeof Battle !== 'undefined' && Battle.B)) { since = 0; busySince = 0; return; }
+      // a lock with no dialogue, no fade and no cutscene on screen while you push the stick for 5 seconds is a leftover — release it
+      const fading = $('#fade') && $('#fade').classList.contains('on');
+      if (World.busy && Input.dir() && !fading && ![...document.querySelectorAll('.ov:not(.hide)')].some(o => { const c = getComputedStyle(o); return c.display !== 'none' && +c.opacity > 0; })) { if (!busySince) busySince = now; else if (now - busySince > 5000) { World.busy = false; busySince = 0; console.warn('[stuck] released a leftover lock'); } } else busySince = 0;
+      const d = Input.dir(); const key = p.x + ',' + p.y;
+      if (!d || key !== last) { last = key; since = now; return; }
+      if (now - since < 1200) return;
+      since = now;
+      if (p.move && p.move.t < 1) { p.x = p.move.tx; p.y = p.move.ty; p.move = null; p.px = p.x * TILE + 16; p.py = p.y * TILE + 26; console.warn('[stuck] finished a frozen step'); return; }
+      if (World.col[p.y] && World.col[p.y][p.x]) {   // inside a wall: step onto the nearest open ground
+        let s = null; if (ASH2.isD(G.S.map)) s = ASH2.snap(G.S.map, p.x, p.y);
+        else for (let r = 1; r < 8 && !s; r++) for (const [dx, dy] of [[r, 0], [-r, 0], [0, r], [0, -r]]) if (World.free(p.x + dx, p.y + dy, p)) { s = [p.x + dx, p.y + dy]; break; }
+        if (s) { p.x = s[0]; p.y = s[1]; p.px = p.x * TILE + 16; p.py = p.y * TILE + 26; G.S.x = p.x; G.S.y = p.y; console.warn('[stuck] stepped out of a wall'); }
+        return;
+      }
+      // someone standing in the way who won't move: let Ren slip past them
+      const nx = p.x + DIRS[d][0], ny = p.y + DIRS[d][1];
+      if (World.inMap(nx, ny) && !World.col[ny][nx]) { const e = World.entAt(nx, ny, p); if (e && !e.isPlayer) { e.ghost = true; setTimeout(() => { e.ghost = false; }, 1500); console.warn('[stuck] slipped past ' + e.id); } }
+    } catch (e) { }
+  }, 250);
+})();
