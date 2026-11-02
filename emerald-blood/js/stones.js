@@ -13,6 +13,15 @@ const STONES = {
   riverheart: { name: 'Riverheart', size: 'medium', slot: 'armor', will: 'will_river', desc: 'A stone that sang in the shrine stream for three hundred years. Strain limit +40; your blood cools 8 faster. It wants to be carried somewhere. It won\'t say where.', cap: 40, cool: 8 },
   heart: { name: 'Heartstone Fragment', size: 'large', slot: null, desc: 'A splinter of the great stone Nana shattered. It beats like a heart. When you hold it the ground tilts and your eyes burn. It will not answer you. Not yet. Maybe not ever.' }
 };
+/* every stone is a Heartshard — a piece of the great Heartstone Nana broke — and every shard carries a rune with a will of its own */
+const RUNES = {
+  Return: ['loyalty', 'Gentle and faithful. "I come back to those who don\'t abandon."'], Quake: ['resolve', 'Stubborn and blunt. Wants a wielder who doesn\'t back down.'],
+  Anchor: ['protection', 'Calm and patient. Wants a wielder who stands in front of others.'], Ember: ['passion', 'Loud and fierce. Wants a wielder who burns for something.'],
+  Ward: ['sacrifice', 'Quiet and solemn. Wants a wielder who gives something up.'], Echo: ['memory', 'Wistful. Wants a wielder who remembers the fallen.'],
+  Stillness: ['patience and discipline', 'Silent. The rune of the sheathed blade.'], Eclipse: ['loss and bitterness', 'Cold. Nobody you would want to meet carries it.']
+};
+const STONE_RUNE = { fang: 'Quake', scale: 'Anchor', breath: 'Ember', still: 'Stillness', echo: 'Echo', verdict: 'Ward', riverheart: 'Return' };
+const BOND = ['Silent', 'Stirring', 'Speaking', 'Awakened', 'Sworn'];
 const SIZE_COL = { small: '#7fe8a8', medium: '#ffd88a', large: '#ff8a9a' };
 const Stones = {
   st() { const S = G.S; if (!S.st) S.st = { inv: [], equip: { weapon: [null, null], armor: [null, null], art: {} }, bonded: {}, sealed: false }; return S.st; },
@@ -20,7 +29,7 @@ const Stones = {
   give(id, quiet) {
     const st = this.st(); if (st.inv.includes(id)) return; st.inv.push(id);
     const S = STONES[id]; sfx('level');
-    if (!quiet) toast(`Received a ${S.size.toUpperCase()} D-stone: <b style="color:${SIZE_COL[S.size]}">${S.name}</b>. (Menu → Stones)`, 4600);
+    if (!quiet) toast(`Received a ${S.size.toUpperCase()} Heartshard: <b style="color:${SIZE_COL[S.size]}">${S.name}</b>. (Menu → Stones)`, 4600);
   },
   equipped() { const e = this.st().equip; return [...e.weapon, ...e.armor, ...Object.values(e.art)].filter(Boolean); },
   slotOf(id) { const e = this.st().equip; if (e.weapon.includes(id)) return 'weapon'; if (e.armor.includes(id)) return 'armor'; for (const k in e.art) if (e.art[k] === id) return 'art:' + k; return null; },
@@ -67,7 +76,10 @@ function stonesMenuHTML() {
   const st = Stones.st(), e = st.equip;
   const slot = (label, arr) => `<div class="sockrow"><b>${label}</b>${arr.map(id => `<span class="sock ${id ? 'on ' + STONES[id].size : ''}">${id ? STONES[id].name : '◇ empty'}</span>`).join('')}</div>`;
   const arts = G.S.arts.map(k => `<span class="sock ${e.art[k] ? 'on small' : ''}">${ARTS[k].name}: ${e.art[k] ? STONES[e.art[k]].name : '◇'}</span>`).join('');
-  let h = `<div class="stat" style="margin-bottom:6px"><h3>D-stones</h3><p class="muted">Pieces of Fratenaptor's tomb. <b style="color:${SIZE_COL.small}">Small</b> stones socket into weapon, armor or an Art. <b style="color:${SIZE_COL.medium}">Medium</b> stones have a will of their own — not everyone can use one. Face its will before it serves you. <b style="color:${SIZE_COL.large}">Large</b> stones have a stronger will still: they choose their bearer, and only a few dozen people alive carry one — nearly every SSS fighter, and nobody below.</p>
+  let h = '';
+  if (G.S.f.vaneDone && !G.S.kid) { const b = G.S.f.bladeBond || 0;
+    h += `<div class="stat" style="margin-bottom:6px"><h3 style="color:#cfe8ff">Last Light <span class="muted">· Vane's blade · runic</span></h3><p>Rune of <b>Stillness</b> — patience and discipline. Silent. It refused everyone but Vane for forty years. It has not refused you.</p><p class="muted">Bond: <b style="color:#7dffb0">${BOND[b]}</b> ${BOND.map((n, i) => i <= b ? '●' : '○').join('')} · The bond grows as you fight with patience. Its next level opens new sheathe-art techniques.</p></div>`; }
+  h += `<div class="stat" style="margin-bottom:6px"><h3>Heartshards <span class="muted">(the Crown calls them D-stones)</span></h3><p class="muted">Shards of the great Heartstone Nana broke the night Thornvale burned — Fratenaptor's own heart. Only a few dozen exist in all Veyrath, and every one carries a rune with a will of its own. <b style="color:${SIZE_COL.small}">Small</b> stones socket into weapon, armor or an Art. <b style="color:${SIZE_COL.medium}">Medium</b> stones have a will of their own — not everyone can use one. Face its will before it serves you. <b style="color:${SIZE_COL.large}">Large</b> stones have a stronger will still: they choose their bearer, and only a few dozen people alive carry one — nearly every SSS fighter, and nobody below.</p>
     <p class="muted">${st.sealed ? '✔ Your stones carry forged Crown seals.' : (Stones.unregistered() ? '<b style="color:#ff8a8a">Unregistered stones equipped.</b> Registry patrols in town and on the roads will stop you.' : 'Stones you only carry in your pack don\'t hum loudly enough to be caught.')}</p></div>`;
   h += `<div class="stat" style="margin-bottom:6px">${slot('Weapon', e.weapon)}${slot('Armor', e.armor)}<div class="sockrow"><b>Arts</b>${arts}</div></div>`;
   if (!st.inv.length) h += '<div class="stat"><p class="muted">You carry no stones.</p></div>';
@@ -78,7 +90,7 @@ function stonesMenuHTML() {
     else if (where) btns = `<button class="btn" data-uneq="${id}">Remove</button>`;
     else if (S.slot === 'art') btns = G.S.arts.map(k => `<button class="btn" data-eq="${id}" data-w="art:${k}">${ARTS[k].name}</button>`).join('');
     else btns = `<button class="btn" data-eq="${id}" data-w="${S.slot}">Socket into ${S.slot}</button>`;
-    h += `<div class="stat" style="margin-bottom:6px"><h3 style="color:${SIZE_COL[S.size]}">${S.name} <span class="muted">· ${S.size}${where ? ' · equipped' : ''}</span></h3><p>${S.desc}</p><div class="btnrow">${btns}</div></div>`;
+    h += `<div class="stat" style="margin-bottom:6px"><h3 style="color:${SIZE_COL[S.size]}">${S.name} <span class="muted">· ${S.size}${where ? ' · equipped' : ''}</span></h3><p>${S.desc}</p>${STONE_RUNE[id] ? `<p class="muted">Rune of <b style="color:#cfe8ff">${STONE_RUNE[id]}</b> — ${RUNES[STONE_RUNE[id]][0]}. ${RUNES[STONE_RUNE[id]][1]}</p>` : id === 'heart' ? '<p class="muted">Rune: unreadable. Ilya could read it, maybe.</p>' : ''}<div class="btnrow">${btns}</div></div>`;
   }
   return h;
 }

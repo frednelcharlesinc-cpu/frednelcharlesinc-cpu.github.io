@@ -1522,6 +1522,10 @@ async function vaneFinal() {
   await say('vane', 'neutral', 'And this.');
   await narr('He holds out his sword, hilt-first. The one that never left his side in five years.');
   await say('vane', 'neutral', 'Last Light. It was never sharp because of the steel. Don\'t fight to kill, pup. Fight so that it ends.');
+  await narr('Under the guard, worn almost flat, a single rune. It is cold in your hand — and then, slowly, it isn\'t.');
+  await say('vane', 'neutral', 'Stillness. A runic blade has a will, pup. This one refused every hand but mine for forty years. …It isn\'t refusing yours. Be worthy of that. Patience. Discipline. It will tell you when it trusts you.');
+  await me('neutral', '(Father\'s practice sword goes into your pack, wrapped in cloth. You\'ll never fight with it again. You\'ll never leave it behind either.)');
+  F().bladeBond = 0;
   sfx('level'); toast('You received <b style="color:#46ff95">Last Light</b>, Vane\'s blade.', 4000);
   G.S.stats.atk += 3; G.S.f.vaneDone = true;
   await say('vane', 'sad', '…Go on. South, through the storm. You know how to breathe it now. Don\'t come back. Old men hate goodbyes.');
