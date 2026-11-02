@@ -11,6 +11,7 @@
    Rules: 1 move = a single cut. 2–3 moves may repeat freely (plain cuts if not a known technique).
      4–6 moves must be a real technique (no move twice in a row, 3+ different moves, not a pure cycle) — anything else fizzles.
    Techniques are discovered by entering them. Max length grows with Last Light's bond (Ren) or the fighter's skill. */
+function BT_over_fail(a, t) { Battle.text(t, 'INTERRUPTED!', '#ff8a5a', -50, true); sfx('parry'); Battle.chip(t, a, .5, true); }
 const FOUR = {
   ROLES: ['L', 'S', 'W', 'P'],
   STYLE: {
@@ -84,10 +85,13 @@ const FOUR = {
         hEl.innerHTML = (nm ? `<b style="color:#ffd36a">${nm}</b>  ` : '') + (next.length ? 'Known: ' + next.join(' · ') : seq.length ? '' : `Max ${max} moves · ${known.length} known technique${known.length === 1 ? '' : 's'}`);
       };
       hint();
-      const finish = () => { if (done) return; done = true; ov.remove(); removeEventListener('keydown', key); B.timeScale = 1; B.dim = 0; resolve(seq.slice()); };
+      let holdT = 0; FOUR.hold = 0;
+      const finish = () => { if (done) return; done = true; FOUR.hold = holdT ? performance.now() - holdT : 0; ov.remove(); removeEventListener('keydown', key); B.timeScale = 1; B.dim = 0; resolve(seq.slice()); };
       const press = r => { if (done) return; seq.push(r); last = performance.now(); sfx('blip'); hint(); if (seq.length >= max) setTimeout(finish, 120); };
       ov.querySelectorAll('[data-r]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); press(b.dataset.r); }));
-      ov.querySelector('[data-draw]').addEventListener('pointerdown', e => { e.preventDefault(); finish(); });
+      const db = ov.querySelector('[data-draw]');
+      db.addEventListener('pointerdown', e => { e.preventDefault(); holdT = performance.now(); db.textContent = 'HOLD…'; setTimeout(() => { if (holdT && !done) { db.textContent = 'OVERDRAW'; db.style.background = '#a8323a'; } }, 650); });
+      db.addEventListener('pointerup', e => { e.preventDefault(); finish(); }); db.addEventListener('pointerleave', () => { if (holdT) finish(); });
       const key = e => { const i = ['1', '2', '3', '4'].indexOf(e.key); if (i >= 0) { e.preventDefault(); press(this.ROLES[i]); } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finish(); } };
       addEventListener('keydown', key);
       const tick = () => { if (done) return; const now = performance.now(), left = 1 - (now - t0) / (T * 1000);
@@ -116,12 +120,13 @@ const FOUR = {
     await Battle.msg(rec ? nm.toUpperCase() + '!' : nm, 700);
     await Battle.dash(a, t.x + (a.side === 'p' ? 52 : -52), t.y + 2, 220);
     const path = st.path, VAR = { L: 'cmb3', S: 'cmb4', W: 'cmb2', P: 'thr' }, ANIM = { L: 'halfslash', S: 'jump', W: 'slash', P: 'thrust' };
-    let perf = 0, miss = 0, landed = 0;
+    let perf = 0, miss = 0, landed = 0, over = (FOUR.hold || 0) >= 650;
     for (let i = 0; i < seq.length; i++) {
       if (t.ko) { const nx = Battle.alive('e')[0]; if (!nx) break; t = nx; }
       const r = seq[i], first = i === 0;
       let m = .62 * (first ? (path === 'sheathe' ? 1.5 : 1.3) : 1) * (rec ? 1.15 : 1);
-      const opts = { src: 'attack', brk: 0 };
+      const opts = { src: 'attack', brk: 0, role: r };
+      if (first && over) { if (!t.broken && Math.random() < .25) { BT_over_fail(a, t); over = 0; } else { m *= 1.8 / (path === 'sheathe' ? 1.5 : 1.3); Battle.text(a, 'OVERDRAW', '#ff6a5a', -60, true); } }
       if (r === 'L') opts.brk = 10 * (path === 'break' ? 1.5 : 1);
       if (r === 'S') { opts.brk = 18 * (path === 'break' ? 1.5 : 1); if (t.shield > 0) { t.shield--; Battle.text(t, t.shield ? 'SHIELD CRACKED' : 'PHALANX BROKEN!', '#ffd34a', -40); } if (t.stance) { t.stance = 0; Battle.text(t, 'STANCE BROKEN', '#ffd34a', -24); } }
       if (r === 'P') opts.pierce = 1;
@@ -163,7 +168,7 @@ const FOUR = {
     const rows = Object.keys(this.REC).map(k => { const kn = st.known[k];
       return `<p style="margin:2px 0">${kn ? `<b style="color:#ffd36a">${this.name(k, 'sword')}</b>` : '<span class="muted">???</span>'} <span class="muted">· ${k.length} cuts${kn ? ' · ' + k.split('').map(r => `<b style="color:${this.COL[r]}">${S.b[r]}</b>`).join('-') + ' · ' + this.REC[k][4] : k.length > max ? ' · needs a deeper bond' : ' · not yet discovered'}</span></p>`; }).join('');
     return `<div class="stat" style="margin-bottom:6px"><h3 style="color:#cfe8ff">The Four Cuts <span class="muted">· max ${max} cuts · ${this.PATHS[st.path][0]}</span></h3>
-      <p class="muted">In battle choose <b>Four Cuts</b>: time slows and you enter cuts — <b style="color:${this.COL.L}">▲ Rise</b> (lift), <b style="color:${this.COL.S}">▼ Fall</b> (break guard), <b style="color:${this.COL.W}">◆ Wind</b> (hits everyone), <b style="color:${this.COL.P}">● Needle</b> (pierces). Then time each cut. 4+ cuts must be a real technique: no cut twice in a row, at least three different cuts. Enter an unknown pattern to discover it.</p>
+      <p class="muted">In battle choose <b>Four Cuts</b>: time slows and you enter cuts — <b style="color:${this.COL.L}">▲ Rise</b> (lift), <b style="color:${this.COL.S}">▼ Fall</b> (break guard), <b style="color:${this.COL.W}">◆ Wind</b> (hits everyone), <b style="color:${this.COL.P}">● Needle</b> (pierces). Then time each cut. HOLD Draw to OVERDRAW: the first cut hits ×1.8 — if nobody interrupts you. 4+ cuts must be a real technique: no cut twice in a row, at least three different cuts. Enter an unknown pattern to discover it.</p>
       ${rows}<div class="btnrow" style="margin-top:6px">${Object.entries(this.PATHS).map(([k, [n]]) => `<button class="btn" data-path="${k}" ${st.path === k ? 'disabled' : ''}>Meditate: ${n}</button>`).join('')}</div>
       <p class="muted">${this.PATHS[st.path][1]}</p></div>`;
   }
