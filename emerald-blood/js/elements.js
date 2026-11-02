@@ -245,7 +245,7 @@ CHAR.borrik = CHAR.borrik || { name: 'Borrik Stoutbarrel', sprite: 'dwarf_m1' };
     const a = Arm.st(), orbs = Arm.orbs();
     h = h.replace(/<button class="btn" data-eq="(\w+)" data-w="core">[^<]*<\/button>/g, '<span class="muted">Goes in an Armament core ↑</span>');
     let x = `<div class="stat" style="margin-bottom:6px;border:1px solid #3a6;"><h3>⚔ Armament</h3>`;
-    if (!a.has) x += `<p class="muted">Your katana is plain steel. A smith can refit it with a <b>core</b> that holds a D-stone and an <b>elemental orb</b> from a great beast — then the blade carries that element. (Gunna's tavern in Kettlebrook — ask about her cousin's forge.)</p>${orbs.length ? `<p>Orbs carried: ${orbs.map(o => `${EL_ICON[o.el]} ${ORB_NAME[o.el]} ${o.rank}`).join(', ')}</p>` : ''}`;
+    if (!a.has) x += `<p class="muted">Last Light carries no element yet. A smith can fit its rune-guard with a <b>core</b> that holds a D-stone and an <b>elemental orb</b> from a great beast — then the blade carries that element. (Gunna's tavern in Kettlebrook — ask about her cousin's forge.)</p>${orbs.length ? `<p>Orbs carried: ${orbs.map(o => `${EL_ICON[o.el]} ${ORB_NAME[o.el]} ${o.rank}`).join(', ')}</p>` : ''}`;
     else {
       const o = Arm.orb(), ready = Arm.ready();
       x += `<p>${ready ? `<b style="color:${ELEM[o.el][1]}">${EL_ICON[o.el]} Your blade carries ${ELEM[o.el][0].toUpperCase()}</b> — ${o.rank}-rank: +${ORB_RANKS.indexOf(o.rank) * 6}% elemental damage, ${14 + ORB_RANKS.indexOf(o.rank) * 7}% chance of <b>${ORB_FX[o.el][0]}</b>.` : '<span class="muted">The core is asleep. It needs BOTH a D-stone and an orb.</span>'}</p>`;
