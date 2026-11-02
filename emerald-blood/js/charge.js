@@ -28,8 +28,8 @@ const Charge = {
     const n = 7 + Math.floor(Math.random() * 4), hits = [], A = Charge.styleOf(e) === 'magic' ? ['spellcast', 'slash'] : ['slash', 'halfslash', 'thrust'];
     for (let i = 0; i < n; i++) {
       const last = i === n - 1, r = Math.random();
-      hits.push({ anim: last ? 'backslash' : A[i % A.length], m: last ? 1.5 : .62, w: last ? 380 : 300 + Math.floor(Math.random() * 60),
-        style: last ? 'normal' : r < .22 ? 'snap' : r < .34 ? pick(typeof FEINTS !== 'undefined' ? FEINTS : ['feint']) : 'normal' });
+      hits.push({ anim: last ? 'backslash' : A[i % A.length], m: last ? 1.5 : .62, w: last ? 600 : 470 + Math.floor(Math.random() * 90),
+        style: last ? 'normal' : r < .12 ? 'snap' : r < .24 ? pick(typeof FEINTS !== 'undefined' ? FEINTS : ['feint']) : 'normal' });
     }
     return { name: e.charge.name, hits, charged: 1 };
   }
@@ -52,7 +52,7 @@ const Charge = {
       B.dim = .45; B.dimCol = '60,10,0'; B.shake = 12; sfx('art');
       await this.msg(`${e.name} unleashes ${sk.name}!`, 900);
       const targets = this.alive('p'), t = targets.find(a => a.isMe) || targets[0];
-      if (t) { e.tempoSave = e.tempo; e.tempo = Math.min(e.tempo || 1, .92); await this.enemyStrike(e, t, sk, true); e.tempo = e.tempoSave; }
+      if (t) { e.tempoSave = e.tempo; e.tempo = Math.max(e.tempo || 1, 1); await this.enemyStrike(e, t, sk, true); e.tempo = e.tempoSave; }
       B.dim = 0; return;
     }
     if (Charge.eligible(e)) { await Charge.begin(e); e.anim = 'spellcast'; e.frame = 2; e.once = true; e.fn = 99; e.fms = 1e9; await wait(300); e.anim = 'combat'; return; }
