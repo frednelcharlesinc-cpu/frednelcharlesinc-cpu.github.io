@@ -263,7 +263,7 @@ async function convoyAmbush() {
     const r = await _l(name, x, y, dir);
     try {
       const f = G.S && G.S.f;
-      if (f && name === 'ashford' && f.learnedMill && !f.h1 && !G.S.kid && !f.millDone && G.mode === 'world')
+      if (f && (name === 'ashford' || (typeof ASH2 !== 'undefined' && ASH2.isD(name))) && f.learnedMill && !f.h1 && !G.S.kid && !f.millDone && G.mode === 'world')
         setTimeout(() => { if (!World.busy && G.mode === 'world' && !F().h1) Story.run(pyreInSquare); }, 1300);
     } catch (e) { }
     return r;

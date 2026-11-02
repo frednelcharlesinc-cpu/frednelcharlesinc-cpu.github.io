@@ -56,7 +56,7 @@ const Ambient = {
       else if (/^fire|firepit/.test(p.k)) this.mapLights.push({ x: p.x * 32 + 16, y: p.y * 32 + 10, r: 80, c: '255,140,50' });
     }
     // chickens and cats in towns
-    const town = ['thornvale', 'ashford', 'millbrook', 'kettlebrook'].includes(this.key);
+    const town = ['thornvale', 'ashford', 'millbrook', 'kettlebrook', 'a_terrace', 'a_river', 'a_chapel', 'a_lower'].includes(this.key);
     if (town && this.houses.length) {
       let seed = this.key.length * 97;
       const R = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
