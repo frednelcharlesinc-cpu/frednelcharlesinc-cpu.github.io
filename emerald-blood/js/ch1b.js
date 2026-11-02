@@ -264,7 +264,7 @@ async function convoyAmbush() {
     try {
       const f = G.S && G.S.f;
       if (f && (name === 'ashford' || (typeof ASH2 !== 'undefined' && ASH2.isD(name))) && f.learnedMill && !f.h1 && !G.S.kid && !f.millDone && G.mode === 'world')
-        setTimeout(() => { if (!World.busy && G.mode === 'world' && !F().h1) Story.run(pyreInSquare); }, 1300);
+        { let n = 0; const tk = setInterval(() => { if (F().h1 || ++n > 40) return clearInterval(tk); if (!World.busy && !World.loading && !Dlg.open && G.mode === 'world' && n > 3) { clearInterval(tk); Story.run(pyreInSquare); } }, 400); }   // waits out the arrival scene
     } catch (e) { }
     return r;
   };
