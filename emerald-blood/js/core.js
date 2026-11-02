@@ -333,11 +333,13 @@ const Input = {
     let dx = e.clientX - ox, dy = e.clientY - oy; const d = Math.hypot(dx, dy), max = 44;
     if (d > max) { dx *= max / d; dy *= max / d; }
     knob.style.transform = `translate(${dx}px,${dy}px)`;
-    if (d < 12) { G.input.dir = null; G.input.mag = 0; return; }
+    if (d < 12) { G.input.dir = null; G.input.dir2 = null; G.input.mag = 0; return; }
     G.input.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+    // the other half of a diagonal push: used to slide along a wall instead of stopping dead
+    G.input.dir2 = Math.abs(dx) > Math.abs(dy) ? (Math.abs(dy) > 9 ? (dy > 0 ? 'down' : 'up') : null) : (Math.abs(dx) > 9 ? (dx > 0 ? 'right' : 'left') : null);
     G.input.mag = Math.min(1, d / max);
   });
-  const end = e => { if (e.pointerId !== id) return; id = null; G.input.dir = null; G.input.mag = 0; st.classList.add('hide'); };
+  const end = e => { if (e.pointerId !== id) return; id = null; G.input.dir = null; G.input.dir2 = null; G.input.mag = 0; st.classList.add('hide'); };
   zone.addEventListener('pointerup', end); zone.addEventListener('pointercancel', end);
 })();
 function bindTap(el, fn) { el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); audioUnlock(); fn(e); }); }

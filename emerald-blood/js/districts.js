@@ -163,8 +163,8 @@ const ASH2 = {
     ASH2.raw = 0;
     return _load(name, x, y, dir);
   };
-  /* no bouncing: right after you arrive, the way you came is closed until you lift your thumb off the stick
-     (or walk a few steps) — so a held direction can't throw you straight back where you came from.
+  /* no bouncing: right after you arrive, the way you came is closed until you lift your thumb off the stick,
+     walk a few steps, or keep pushing at the edge for a moment — so a held direction can't throw you straight back where you came from.
      The same after saying "Stay in Ashford" at a road sign. */
   const _ex = World.exitAt.bind(World);
   World.exitAt = function (x, y) {
@@ -176,7 +176,16 @@ const ASH2 = {
     return _ex(x, y);
   };
   const _up = World.update.bind(World);
-  World.update = function (dt) { if (this.grace && !Input.dir()) this.grace = null; return _up(dt); };
+  World.update = function (dt) {
+    const g = this.grace, p = this.player;
+    if (g) {
+      if (!Input.dir()) this.grace = null;
+      // still pushing against the edge after a short beat: you mean it — let the way back open
+      else if (p && !p.move) { const now = performance.now(); if (!g.still) g.still = now; else if (now - g.still > 650) this.grace = null; }
+      else g.still = 0;
+    }
+    return _up(dt);
+  };
   const arm = () => { const p = World.player; if (p && ASH2.isD(G.S.map)) World.grace = { x: p.x, y: p.y, map: G.S.map }; };
   const _ue = World.useExit.bind(World);
   World.useExit = async function (ex) { if (ex && (ex.raw || ex.to === '__ret')) ASH2.raw = 1; const r = await _ue(ex); arm(); return r; };

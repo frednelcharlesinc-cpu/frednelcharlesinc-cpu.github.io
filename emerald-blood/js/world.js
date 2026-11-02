@@ -94,7 +94,10 @@ const World = {
     const p = this.player;
     // player input
     if (G.mode === 'world' && !this.busy && !p.move) {
-      const d = Input.dir();
+      let d = Input.dir();
+      // pushing diagonally into a wall: slide along it the other way instead of standing still
+      if (d && G.input.dir2 && !keyStack.length) { const bx = p.x + DIRS[d][0], by = p.y + DIRS[d][1], d2 = G.input.dir2, cx = p.x + DIRS[d2][0], cy = p.y + DIRS[d2][1];
+        if ((!this.inMap(bx, by) && !this.exitAt(p.x, p.y)) || (this.inMap(bx, by) && this.col[by][bx] && !this.exitAt(bx, by))) { if (this.free(cx, cy, p)) d = d2; } }
       if (d) {
         p.dir = d;
         const nx = p.x + DIRS[d][0], ny = p.y + DIRS[d][1];
