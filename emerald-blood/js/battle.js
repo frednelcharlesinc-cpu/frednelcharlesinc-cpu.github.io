@@ -336,7 +336,7 @@ const Battle = {
     if (B.targeting) {
       const T = B.targeting; let best = -1, bd = 1e9;
       T.list.forEach((a, i) => { const d = Math.hypot(a.x - x, a.y - 30 - y); if (d < bd) { bd = d; best = i; } });
-      if (best >= 0 && bd < 70) { if (T.i === best) this.confirmTarget(); else { T.i = best; sfx('blip'); } }
+      if (best >= 0 && bd < 80) { T.i = best; this.confirmTarget(); }
     }
   },
   // ---------------- timed hits (player attacking) ----------------

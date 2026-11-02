@@ -60,12 +60,12 @@ const FOUR = {
   cost(len) { return Math.max(0, len - 2) * 2; },
 
   /* ---------- the sheathe phase: time slows, enter the moves ---------- */
-  input(a) {
+  input(a, pre) {
     return new Promise(resolve => {
       const B = Battle.B, style = this.styleOf(a), S = this.STYLE[style], max = this.maxLen(a), path = this.st().path;
       const slow = rnd(.15, .4), minT = 1.6 + max * .55, T = (path === 'flow' ? 1.3 : 1) * rnd(minT, minT * 1.7), GAP = 1.25 * (path === 'flow' ? 1.3 : 1);
       B.timeScale = slow; B.dim = .25; B.dimCol = '10,30,20';
-      const seq = [], t0 = performance.now(); let last = t0, done = false;
+      const seq = pre ? pre.slice() : [], t0 = performance.now(); let last = t0, done = false;
       const ov = document.createElement('div'); ov.id = 'fourOv';
       // the same rounded panel as the battle button: the four moves around DRAW, the timer along the top
       ov.className = 'atPanel'; ov.style.zIndex = 74;
@@ -102,9 +102,9 @@ const FOUR = {
   },
 
   /* ---------- the draw phase ---------- */
-  async run(a, t) {
+  async run(a, t, pre) {
     const B = Battle.B, style = this.styleOf(a), S = this.STYLE[style], st = this.st();
-    const seq = await this.input(a);
+    const seq = await this.input(a, pre);
     if (!seq.length) return 'cancel';
     const code = seq.join(''), rec = this.REC[code];
     if (seq.length >= 4 && (!rec || !this.valid(seq))) {
