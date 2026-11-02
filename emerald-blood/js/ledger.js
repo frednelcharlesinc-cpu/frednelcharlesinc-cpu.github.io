@@ -26,7 +26,7 @@ const DOSSIERS = [
       f.learnedMill = true; f.lead = 3;
       Intel.add('you', 'The Silent Ledger: grain shipments to the OLD MILL north of Ashford, "for the keeping of the vessels." The children are there.');
       Intel.add('ge', 'Green Eclipse bought the same information. Kairo knows about the Old Mill too.');
-      Story.quest(f.kessWait ? 'The cages are at the Old Mill, north of Ashford. Go back to Kess — she promised to get you past Captain Voss.' : 'The cages are at the Old Mill, north of Ashford. Get past Captain Voss on the north road.');
+      Story.quest(f.kessWait ? 'The cages are at the Old Mill, north of Ashford. Go back to Kess — she promised to get you past Captain Voss.' : 'The cages are at the Old Mill, north of Ashford. Get past Captain Voss at the North Gate on Chapel Hill (up from the Market Square).');
     } },
   { id: 'seal', title: 'The Seal and the Supply Road', price: 2400,
     show: f => f.learnedMill && !f.millDone && !f.sealGot && f.h2 !== 'done', done: f => f.h2 === 'done' || !!f.sealGot,

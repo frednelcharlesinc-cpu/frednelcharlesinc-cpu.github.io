@@ -85,7 +85,6 @@ const ASH2 = {
       else { const r = this.toD(e.x, e.y); d = r[0]; at = { x: r[1], y: r[2] }; }
       SCENES[d].exits.push(Object.assign({}, e, at, { x2: at.x2 ?? at.x, y2: at.y2 ?? at.y }));
     }
-    SCENES.a_river.exits.push({ x: 37, x2: 40, y: 0, to: 'woods', tx: 2, ty: 17, dir: 'right' });
     SCENES.a_terrace.exits.push({ x: 38, x2: 40, y: 0, to: 'woods', tx: 2, ty: 17, dir: 'right' });
     // the walks between districts
     const L = (from, spec) => SCENES[from].exits.push(Object.assign({ raw: 1 }, spec));
@@ -97,9 +96,9 @@ const ASH2 = {
     L('ashford', { x: 42, y: 18, y2: 19, to: 'a_terrace', tx: 1, ty: 18, dir: 'right' });
     L('a_terrace', { x: 0, y: 3, y2: 5, to: 'ashford', tx: 41, ty: 4, dir: 'left' });
     L('a_terrace', { x: 0, y: 18, y2: 19, to: 'ashford', tx: 41, ty: 18, dir: 'left' });
-    L('ashford', { x: 0, y: 3, y2: 5, to: 'a_river', tx: 16, ty: 4, dir: 'left' });
-    L('ashford', { x: 0, y: 18, y2: 19, to: 'a_river', tx: 16, ty: 18, dir: 'left' });
-    L('a_river', { x: 0, y: 13, y2: 15, to: 'ashford', tx: 1, ty: 18, dir: 'right' });
+    L('ashford', { x: 0, y: 3, y2: 5, to: 'a_river', tx: 35, ty: 13, dir: 'left' });
+    L('ashford', { x: 0, y: 18, y2: 19, to: 'a_river', tx: 35, ty: 13, dir: 'left' });
+    L('a_river', { x: 36, y: 12, y2: 14, to: 'ashford', tx: 1, ty: 18, dir: 'right' });
     // the new places
     const T = (d, keys, fn) => keys.forEach(k => { SCENES[d].tiles[k] = fn; });
     T('a_lower', ['23,10', '24,10', '25,10'], async () => {
@@ -149,6 +148,11 @@ const ASH2 = {
       // anything still standing somewhere it can't (quest people, late spawns) steps onto open ground
       for (const e of this.ents) { if (e.isPlayer || e.follower || /^(cave_|chest_)/.test(String(e.id))) continue;
         const [sx, sy] = ASH2.snap(name, e.x, e.y); if (sx !== e.x || sy !== e.y) { e.x = sx; e.y = sy; e.px = sx * TILE + 16; e.py = sy * TILE + 26; } }
+      let k = 0;
+      for (const e of this.ents) if (/^folk_/.test(String(e.id))) {
+        if (k++ % 3) { e.ai = 'turn'; e.turns = ['down', 'left', 'right']; e.wait = rnd(800, 3000); }
+        else e.area = [Math.max(0, e.x - 2), e.y, e.x + 2, e.y];   // the strollers keep to their own bit of street
+      }
       this.snapCam();
       return r;
     }
@@ -172,4 +176,32 @@ const ASH2 = {
   };
   // the world map and the town lists treat every district as Ashford
   if (typeof Travel !== 'undefined' && Travel.canFrom) { const _c = Travel.canFrom.bind(Travel); Travel.canFrom = function () { const m = G.S.map; if (ASH2.isD(m) && m !== 'ashford') { G.S.map = 'ashford'; try { return _c(); } finally { G.S.map = m; } } return _c(); }; }
+})();
+
+/* signposts: every way out of a district is labelled where you walk off, so you always know where it leads */
+(function () {
+  const NM = { ashford: 'Market Square', a_terrace: 'Guild Terrace', a_river: 'Riverside', a_chapel: 'Chapel Hill', a_lower: 'Lower Ashford', woods: 'East Woods', mill: 'North Road — Old Mill', millbrook: 'Millbrook', kettlebrook: 'Kettlebrook' };
+  const _r = World.render.bind(World);
+  World.render = function (c, t) {
+    _r(c, t);
+    try {
+      if (!G.S || !ASH2.isD(G.S.map) || this.loading || G.mode !== 'world') return;
+      const cx = Math.round(this.cam.x), cy = Math.round(this.cam.y), seen = new Set();
+      c.save(); c.font = '800 9px Nunito, system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      for (const e of this.scene.exits || []) {
+        if (e.when && !e.when()) continue;
+        let nm = NM[e.to] || (e.y === 4 && G.S.map === 'a_chapel' ? NM.mill : e.check ? 'South Roads — Millbrook · Kettlebrook' : null); if (!nm) continue;
+        const x0 = e.x, x1 = e.x2 ?? e.x, y0 = e.y, y1 = e.y2 ?? e.y, mx = (x0 + x1 + 1) / 2 * TILE, my = (y0 + y1 + 1) / 2 * TILE;
+        const W = this.map.w * TILE, H = this.map.h * TILE;
+        const ar = y1 <= 0 || (G.S.map === 'a_chapel' && y0 === 4) ? '↑' : y0 >= this.map.h - 1 ? '↓' : x0 <= 0 ? '←' : x1 >= this.map.w - 1 || e.to === 'ashford' && G.S.map === 'a_river' ? '→' : '•';
+        const key = nm + ar; if (seen.has(key)) continue; seen.add(key);
+        const lx = Math.max(60, Math.min(W - 60, mx)) - cx, ly = Math.max(16, Math.min(H - 16, my + (ar === '↑' ? 14 : ar === '↓' ? -14 : 0))) - cy;
+        const txt = ar === '→' ? nm + ' →' : ar === '←' ? '← ' + nm : ar + ' ' + nm, w = c.measureText(txt).width + 12;
+        c.fillStyle = 'rgba(10,18,14,.72)'; c.beginPath(); c.roundRect ? c.roundRect(lx - w / 2, ly - 8, w, 16, 7) : c.rect(lx - w / 2, ly - 8, w, 16); c.fill();
+        c.strokeStyle = 'rgba(255,220,140,.6)'; c.lineWidth = 1; c.stroke();
+        c.fillStyle = '#ffe7a8'; c.fillText(txt, lx, ly + .5);
+      }
+      c.restore();
+    } catch (e) { }
+  };
 })();

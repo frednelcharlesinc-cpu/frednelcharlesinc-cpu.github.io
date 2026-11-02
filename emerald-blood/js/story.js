@@ -412,7 +412,7 @@ async function talkNanaAfter() {
 function millQuest() { const f = F();
   if (!f.learnedMill) return 'The north road is open. Now find out where the cages were taken — keep asking around Ashford and Millbrook.';
   if (!f.sealGot) return 'The north road is open, but the Old Mill\'s inner door needs the Inquisitor\'s Seal. Free Old Edda, find Brother Tam, take the Seal.';
-  return 'Take the north road to the Old Mill.'; }
+  return 'Take the north road to the Old Mill: go up from the Market Square to Chapel Hill, then out through the North Gate.'; }
 /* Kairo's tally: one score, kept on his wall, read everywhere */
 const NUMW = n => { const o = ['none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'], t = { 4: 'forty', 3: 'thirty', 2: 'twenty' };
   if (n < 10) return o[n]; if (n < 20) return ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'][n - 10];

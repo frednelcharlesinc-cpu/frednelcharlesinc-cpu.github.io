@@ -433,7 +433,7 @@ async function geGranary() {
   f.learnedMill = true; f.lead = 3; sfx('level');
   Intel.add('you', 'The granary manifest: forty measures of grain to the OLD MILL, north of Ashford, "for the keeping of the vessels." The children are there.');
   Intel.add('ge', 'Green Eclipse read the same manifest. Kairo knows about the Old Mill too. It\'s a race now.');
-  Story.quest(f.kessWait ? 'The cages are at the Old Mill, north of Ashford. Go back to Kess — she promised to get you past Captain Voss.' : 'The cages are at the Old Mill, north of Ashford. Get past Captain Voss on the north road.');
+  Story.quest(f.kessWait ? 'The cages are at the Old Mill, north of Ashford. Go back to Kess — she promised to get you past Captain Voss.' : 'The cages are at the Old Mill, north of Ashford. Get past Captain Voss at the North Gate on Chapel Hill (up from the Market Square).');
   ['tamsin', 'corran', 'bo', 'ivo'].forEach(id => World.remove(id));
 }
 async function talkOrla() {

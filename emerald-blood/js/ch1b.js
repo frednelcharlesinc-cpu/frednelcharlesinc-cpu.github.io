@@ -252,7 +252,7 @@ async function convoyAmbush() {
   if (typeof Veil !== 'undefined' && Veil.on()) Veil.addFame(1, 'the Inquisition\'s lamp-oil burned in a ravine, and a red scarf was seen above it.');
   toast('Got <b style="color:#ffd36a">the Inquisitor\'s Seal</b>. And without the lamp-oil, Halvard\'s Purging Light will burn weaker.', 4200);
   Intel.add('you', 'Sister Verity is beaten. You hold the Inquisitor\'s Seal — the Old Mill\'s inner door is yours to open. The lamp-oil burned: Halvard\'s light will be weaker.');
-  Story.quest(F().vossGone ? 'You have the Seal. Take the north road to the Old Mill.' : 'You have the Seal. Get past Captain Voss on the north road — Kess said she\'d help.');
+  Story.quest(F().vossGone ? 'You have the Seal. Take the north road to the Old Mill: up from the Market Square to Chapel Hill, out through the North Gate.' : 'You have the Seal. Get past Captain Voss at the North Gate on Chapel Hill (up from the Market Square) — Kess said she\'d help.');
 }
 
 /* ---------- wiring ---------- */
