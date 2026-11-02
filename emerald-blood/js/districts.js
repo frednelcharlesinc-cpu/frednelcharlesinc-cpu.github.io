@@ -24,7 +24,7 @@ const ASH2 = {
   ],
   // doors on the old map (art coordinates) → the doors in the district art
   DOOR: { '11,5': ['a_chapel', '8,16'], '20,5': ['a_chapel', '1,16'], '48,16': ['ashford', '9,15'], '38,9': ['a_river', '22,11'], '39,9': ['a_river', '23,11'],
-    '10,17': ['a_terrace', '22,11'], '11,17': ['a_terrace', '23,11'], '7,35': ['a_lower', '1,6'], '42,28': ['a_lower', '6,6'], '50,32': ['a_lower', '36,2'],
+    '10,17': ['a_terrace', '22,11'], '11,17': ['a_terrace', '23,11'], '7,35': ['a_lower', '2,17'], '42,28': ['a_lower', '9,17'], '50,32': ['a_lower', '36,2'],
     '36,40': ['a_lower', '39,2'], '39,28': ['ashford', '14,2'] },
   // where the story's named people stand now
   PLACE: { voss: ['a_chapel', 20, 9], guard: ['a_chapel', 22, 9], maren: ['a_chapel', 9, 18], pip: ['a_chapel', 13, 18], pipmom: ['a_chapel', 4, 18], chapelDoor: ['a_chapel', 34, 13],
@@ -81,24 +81,28 @@ const ASH2 = {
       let d, at;
       if (e.y === 0 || (e.y2 ?? e.y) <= 1) { d = 'a_chapel'; at = { x: 20, x2: 22, y: 4 }; }
       else if (e.x >= 58) { d = 'a_terrace'; at = { x: 38, x2: 40, y: 23, y2: 23 }; }
-      else if (e.y >= 40) { d = 'a_river'; at = { x: 6, x2: 12, y: 23, y2: 23 }; }
+      else if (e.y >= 40) { d = 'a_river'; at = { x: 7, x2: 12, y: 23, y2: 23 };
+        SCENES.a_river.exits.push(Object.assign({}, e, { x: 0, x2: 0, y: 13, y2: 15, label: 'River Road — Millbrook', dir: 'left' })); }
       else { const r = this.toD(e.x, e.y); d = r[0]; at = { x: r[1], y: r[2] }; }
       SCENES[d].exits.push(Object.assign({}, e, at, { x2: at.x2 ?? at.x, y2: at.y2 ?? at.y }));
     }
     SCENES.a_terrace.exits.push({ x: 38, x2: 40, y: 0, to: 'woods', tx: 2, ty: 17, dir: 'right' });
     // the walks between districts
     const L = (from, spec) => SCENES[from].exits.push(Object.assign({ raw: 1 }, spec));
-    L('ashford', { x: 18, x2: 23, y: 0, to: 'a_chapel', tx: 21, ty: 22, dir: 'up' });
-    L('a_chapel', { x: 19, x2: 23, y: 23, to: 'ashford', tx: 20, ty: 1, dir: 'down' });
-    L('ashford', { x: 18, x2: 23, y: 23, to: 'a_lower', tx: 13, ty: 1, dir: 'down' });
-    L('a_lower', { x: 10, x2: 16, y: 0, to: 'ashford', tx: 20, ty: 22, dir: 'up' });
-    L('ashford', { x: 42, y: 3, y2: 5, to: 'a_terrace', tx: 1, ty: 4, dir: 'right' });
-    L('ashford', { x: 42, y: 18, y2: 19, to: 'a_terrace', tx: 1, ty: 18, dir: 'right' });
-    L('a_terrace', { x: 0, y: 3, y2: 5, to: 'ashford', tx: 41, ty: 4, dir: 'left' });
-    L('a_terrace', { x: 0, y: 18, y2: 19, to: 'ashford', tx: 41, ty: 18, dir: 'left' });
-    L('ashford', { x: 0, y: 3, y2: 5, to: 'a_river', tx: 35, ty: 13, dir: 'left' });
-    L('ashford', { x: 0, y: 18, y2: 19, to: 'a_river', tx: 35, ty: 13, dir: 'left' });
-    L('a_river', { x: 36, y: 12, y2: 14, to: 'ashford', tx: 1, ty: 18, dir: 'right' });
+    // every arrival is two steps inside the edge, facing away from it, right by the way back
+    L('ashford', { x: 18, x2: 23, y: 0, to: 'a_chapel', tx: 21, ty: 21, dir: 'up' });
+    L('a_chapel', { x: 19, x2: 23, y: 23, to: 'ashford', tx: 20, ty: 2, dir: 'down' });
+    L('ashford', { x: 18, x2: 23, y: 23, to: 'a_lower', tx: 13, ty: 2, dir: 'down' });
+    L('a_lower', { x: 10, x2: 16, y: 0, to: 'ashford', tx: 20, ty: 21, dir: 'up' });
+    L('ashford', { x: 42, y: 3, y2: 5, to: 'a_terrace', tx: 2, ty: 4, dir: 'right' });
+    L('ashford', { x: 42, y: 18, y2: 19, to: 'a_terrace', tx: 2, ty: 18, dir: 'right' });
+    L('a_terrace', { x: 0, y: 3, y2: 5, to: 'ashford', tx: 40, ty: 4, dir: 'left' });
+    L('a_terrace', { x: 0, y: 18, y2: 19, to: 'ashford', tx: 40, ty: 18, dir: 'left' });
+    L('ashford', { x: 0, y: 3, y2: 5, to: 'a_river', tx: 33, ty: 13, dir: 'left' });
+    L('ashford', { x: 0, y: 18, y2: 19, to: 'a_river', tx: 33, ty: 13, dir: 'left' });
+    L('a_river', { x: 35, y: 13, y2: 14, to: 'ashford', tx: 2, ty: 18, dir: 'right' });
+    L('a_terrace', { x: 18, x2: 23, y: 23, to: 'a_lower', tx: 39, ty: 3, dir: 'left' });
+    L('a_lower', { x: 42, y: 3, y2: 4, to: 'a_terrace', tx: 20, ty: 21, dir: 'up' });
     // the new places
     const T = (d, keys, fn) => keys.forEach(k => { SCENES[d].tiles[k] = fn; });
     T('a_lower', ['23,10', '24,10', '25,10'], async () => {
@@ -110,10 +114,10 @@ const ASH2 = {
     T('ashford', ['32,13', '33,13'], async () => narr('The blacksmith\'s door. Inside, a hammer rings on an anvil, slow and even, like a heartbeat.'));
     T('ashford', ['20,13', '21,13'], async () => narr('The fountain. Coins at the bottom — and one green pebble somebody was brave enough to throw in.'));
     T('a_chapel', ['34,12', '35,12'], async () => narr('The chapel. White Inquisition banners hang by the door. Someone has scratched a tiny dragon into the step, then tried to rub it out.'));
-    T('a_chapel', ['24,13', '25,13', '26,13'], async () => narr('Maren\'s greenhouse. Moonpetal, feverfew, and one plant you don\'t know that turns its leaves toward you as you pass.'));
+    T('a_chapel', ['29,12', '29,13', '29,14'], async () => narr('Maren\'s greenhouse. Moonpetal, feverfew, and one plant you don\'t know that turns its leaves toward you as you pass.'));
     // dungeon mouths and travel spots
     if (typeof DUNGEONS !== 'undefined') for (const d of Object.values(DUNGEONS)) if (d.from && d.from.map === 'ashford') {
-      if (d.id === 'd_crypt' || d.from.at[0] < 20) { d.from = Object.assign({}, d.from, { map: 'a_chapel', at: [37, 15], back: [36, 16] }); }
+      if (d.id === 'd_crypt' || d.from.at[0] < 20) { d.from = Object.assign({}, d.from, { map: 'a_chapel', at: [36, 13], back: [35, 13] }); }
       else { d.from = Object.assign({}, d.from, { map: 'a_terrace', at: [39, 1], back: [39, 2] }); }
     }
   },
@@ -153,14 +157,29 @@ const ASH2 = {
         if (k++ % 3) { e.ai = 'turn'; e.turns = ['down', 'left', 'right']; e.wait = rnd(800, 3000); }
         else e.area = [Math.max(0, e.x - 2), e.y, e.x + 2, e.y];   // the strollers keep to their own bit of street
       }
-      this.snapCam();
+      this.snapCam(); this.grace = { x: this.player.x, y: this.player.y, map: name };
       return r;
     }
     ASH2.raw = 0;
     return _load(name, x, y, dir);
   };
+  /* no bouncing: right after you arrive, the way you came is closed until you lift your thumb off the stick
+     (or walk a few steps) — so a held direction can't throw you straight back where you came from.
+     The same after saying "Stay in Ashford" at a road sign. */
+  const _ex = World.exitAt.bind(World);
+  World.exitAt = function (x, y) {
+    const g = this.grace, p = this.player;
+    if (g && p) {
+      if (!Input.dir() || Math.abs(p.x - g.x) + Math.abs(p.y - g.y) >= 3 || g.map !== G.S.map) this.grace = null;
+      else return null;
+    }
+    return _ex(x, y);
+  };
+  const _up = World.update.bind(World);
+  World.update = function (dt) { if (this.grace && !Input.dir()) this.grace = null; return _up(dt); };
+  const arm = () => { const p = World.player; if (p && ASH2.isD(G.S.map)) World.grace = { x: p.x, y: p.y, map: G.S.map }; };
   const _ue = World.useExit.bind(World);
-  World.useExit = function (ex) { if (ex && (ex.raw || ex.to === '__ret')) ASH2.raw = 1; return _ue(ex); };
+  World.useExit = async function (ex) { if (ex && (ex.raw || ex.to === '__ret')) ASH2.raw = 1; const r = await _ue(ex); arm(); return r; };
   const _go = World.go.bind(World);
   World.go = function (to, x, y, d) { if (ASH2.isD(to) && to !== 'ashford') ASH2.raw = 1; return _go(to, x, y, d); };
   // leaving a building comes back to the district you were in, at the door
@@ -190,7 +209,7 @@ const ASH2 = {
       c.save(); c.font = '800 9px Nunito, system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle';
       for (const e of this.scene.exits || []) {
         if (e.when && !e.when()) continue;
-        let nm = NM[e.to] || (e.y === 4 && G.S.map === 'a_chapel' ? NM.mill : e.check ? 'South Roads — Millbrook · Kettlebrook' : null); if (!nm) continue;
+        let nm = e.label || NM[e.to] || (e.y === 4 && G.S.map === 'a_chapel' ? NM.mill : e.check ? 'South Roads — Millbrook · Kettlebrook' : null); if (!nm) continue;
         const x0 = e.x, x1 = e.x2 ?? e.x, y0 = e.y, y1 = e.y2 ?? e.y, mx = (x0 + x1 + 1) / 2 * TILE, my = (y0 + y1 + 1) / 2 * TILE;
         const W = this.map.w * TILE, H = this.map.h * TILE;
         const ar = y1 <= 0 || (G.S.map === 'a_chapel' && y0 === 4) ? '↑' : y0 >= this.map.h - 1 ? '↓' : x0 <= 0 ? '←' : x1 >= this.map.w - 1 || e.to === 'ashford' && G.S.map === 'a_river' ? '→' : '•';
