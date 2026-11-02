@@ -527,7 +527,7 @@ const GOSSIP = {
     [['A', "There's to be a royal barge down the Ashen River next spring. The heir's progress — to show the vale its new prince."], ['B', 'Down OUR river? Past Millbrook?'], ['C', "Oswin'll have to write it in his ledger in gold ink."]],
     [['B', "Lucan's got a map of the whole continent painted on his bedroom ceiling. Every bandit king's land already painted gold."], ['A', "And the Drag lands?"], ['B', 'Painted over in white. Like nothing was ever there.']],
     [['A', "The Aurels claim they're descended from the First Sun — the hero-king who 'founded the Empire on the Cataclysm's ashes.'"], ['B', 'No portrait of him. No tomb. No bones.'], ['C', "Funny, losing a whole hero-king."], ['A', "Funnier, making it a hanging crime to look for a lost city of gold. Why's a Crown afraid of treasure?"]],
-    [['B', "The Crown's buying up every green pebble in the vale. Surveyors with carts and scales."], ['A', "What's a prince want with pebbles?"], ['C', 'What any king wants. More. The old songs say the gold king wanted the whole sky.']]
+    [['B', "The Crown's seizing every green pebble in the vale. Surveyors with carts and a writ — they don't pay, they take."], ['A', "What's a prince want with pebbles?"], ['C', 'What any king wants. More. The old songs say the gold king wanted the whole sky.']]
   ] },
   eclipse: { label: 'Green Eclipse', talks: [
     [['A', "Green Eclipse. Twenty of 'em, they say. Thirty by winter. All green eyes, all in black and green, like a proper army."], ['B', "Proper army doesn't paint smiles on wanted posters."], ['C', "…This one does."]],

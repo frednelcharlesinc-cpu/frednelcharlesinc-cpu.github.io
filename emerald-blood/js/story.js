@@ -433,7 +433,7 @@ const FOLK_LINES = () => {
   if (s >= 2) base.push('Someone saw green eyes by the fountain.', 'Lock your doors tonight.', 'Drags. In OUR town.');
   if (f.vossBeaten) base.push('Did you see Voss limping?');
   base.push('The dwarf at the guild hall says anyone can register. ANYONE. Even elves.', 'My boy lit the barn with his first spark. Fire-born, like his grandad.', 'Elves live four hundred years and still can\'t haggle.', 'D-rank at sixteen! My daughter! Lightning!');
-  base.push('Green Eclipse? Never heard of them. …Don\'t tell anyone I said that.', 'The Crown pays gold for green rocks now. Green ROCKS.');
+  base.push('Green Eclipse? Never heard of them. …Don\'t tell anyone I said that.', 'The Registry took the widow\'s hearthstone last week. "Crown property," they said. It was a ROCK.');
   return base;
 };
 SCENES.ashford = {
@@ -697,7 +697,7 @@ async function talkHoshi() {
   if (!G.S.hood) await say('hoshi', 'sad', '…You have her eyes, you know. Exactly that green. Don\'t worry. I\'ve told no one anything in forty years.');
   await say('hoshi', 'neutral', "The priests say the Drags worshipped Fratenaptor. But there's a stone in the east woods — old, older than the Inquisition — and it tells a different story.");
   await say('hoshi', 'neutral', 'Go read it, if you have a mind to. Past the first bend, north. The priests tried to break it once. It broke their hammers.');
-  await say('hoshi', 'sad', "And mind the Crown's surveyors. They've been buying up every green pebble in the vale. Paying gold. Nobody pays gold for pebbles unless the pebbles are worth blood.");
+  await say('hoshi', 'sad', "And mind the Crown's surveyors. They've been confiscating every green pebble in the vale. Nobody seizes pebbles unless the pebbles are worth blood.");
   Story.quest(G.S.quest); toast('Old Hoshi mentioned a stone in the East Woods.');
 }
 async function talkBram() {
