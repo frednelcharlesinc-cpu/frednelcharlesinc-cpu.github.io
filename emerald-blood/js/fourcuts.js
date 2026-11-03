@@ -116,9 +116,9 @@ const FOUR = {
   },
 
   /* ---------- the draw phase ---------- */
-  async run(a, t, pre) {
+  async run(a, t, pre, auto) {
     const B = Battle.B, style = this.styleOf(a), S = this.STYLE[style], st = this.st();
-    const seq = await this.input(a, pre);
+    const seq = auto ? pre.slice() : await this.input(a, pre);   // auto: a slotted move fired straight from the move bar
     if (!seq.length) return 'cancel';
     const code = seq.join(''), rec = this.REC[code];
     let mine = !rec && seq.length >= 4 && this.valid(seq);
@@ -187,7 +187,7 @@ const FOUR = {
     return `<div class="stat" style="margin-bottom:6px"><h3 style="color:#cfe8ff">Move list — The Four Cuts <span class="muted">· max ${max} cuts · ${this.PATHS[st.path][0]}</span></h3>
       <p class="muted">On your turn, <b>tap an enemy</b> to attack. <b>Swipe</b> anywhere to start a combo — time slows: <b style="color:${this.COL.L}">↑ Rise</b> lifts, <b style="color:${this.COL.S}">↓ Fall</b> breaks guards, <b style="color:${this.COL.P}">← Needle</b> pierces, <b style="color:${this.COL.W}">→ Wind</b> hits everyone. Tap to draw (hold to overdraw), then time each cut. 4+ cuts: never the same cut twice in a row, at least three different cuts. Any new pattern that follows the rules becomes <b>your own technique</b>. In battle there are no hints — remember your moves.</p>
       ${rows}${mine ? '<h3 style="color:#7dffb0;margin-top:6px">Your techniques</h3>' + mine : ''}<div class="btnrow" style="margin-top:6px">${Object.entries(this.PATHS).map(([k, [n]]) => `<button class="btn" data-path="${k}" ${st.path === k ? 'disabled' : ''}>Meditate: ${n}</button>`).join('')}</div>
-      <p class="muted">${this.PATHS[st.path][1]}</p></div>`;
+      <p class="muted">${this.PATHS[st.path][1]}</p></div>` + (typeof MoveBar !== 'undefined' ? MoveBar.medHTML() : '');
   }
 };
 
@@ -215,6 +215,6 @@ const FOUR = {
     const _s = stonesMenuHTML;
     stonesMenuHTML = function () { const h = _s(), i = h.indexOf('<div class="stat" style="margin-bottom:6px"><h3>Heartshards'); const x = FOUR.menuHTML(); return i >= 0 ? h.slice(0, i) + x + h.slice(i) : x + h; };
     const _b = bindStonesMenu;
-    bindStonesMenu = function () { _b(); $$('#menuCard [data-path]').forEach(b => bindTap(b, () => { FOUR.st().path = b.dataset.path; sfx('level'); toast(`You sit, breathe, and let the old forms settle. <b>${FOUR.PATHS[b.dataset.path][0]}</b>.`, 3000); UI.renderMenu(); })); };
+    bindStonesMenu = function () { _b(); if (typeof MoveBar !== 'undefined') MoveBar.medBind(); $$('#menuCard [data-path]').forEach(b => bindTap(b, () => { FOUR.st().path = b.dataset.path; sfx('level'); toast(`You sit, breathe, and let the old forms settle. <b>${FOUR.PATHS[b.dataset.path][0]}</b>.`, 3000); UI.renderMenu(); })); };
   }
 })();

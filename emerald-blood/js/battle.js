@@ -677,7 +677,7 @@ const Battle = {
     let parries = 0, n = 0, streak = 0;
     // every DODGE / PARRY press during the whole combo is logged the instant it happens, so nothing is lost between hits
     B.presses = []; B.cut = 0;
-    const logP = k => () => { B.presses.push([k, performance.now()]); const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 110); };
+    const logP = k => () => { B.presses.push([k, performance.now()]); rxPress(k); };
     Input.on('dodge', logP('dodge')); Input.on('parry', logP('parry'));
     // stronger enemies vary their rhythm: feints that hesitate, and snap strikes that come early
     const ti = Math.max(0, ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'SSSS'].indexOf(TIER[e.key] || 'E'));
@@ -718,7 +718,7 @@ const Battle = {
       if (G.settings.ring || slow) B.rings.push(ring);
       e.anim = h.anim; e.frame = 0; e.once = true; e.fn = 99; e.fms = 1e9;
       let pressed = null; const own = !B.presses; // a lone defend (counters, tests) logs its own presses
-      if (own) { B.presses = []; B.cut = 0; const lp = k => () => { B.presses.push([k, performance.now()]); const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 110); }; Input.on('dodge', lp('dodge')); Input.on('parry', lp('parry')); }
+      if (own) { B.presses = []; B.cut = 0; const lp = k => () => { B.presses.push([k, performance.now()]); rxPress(k); }; Input.on('dodge', lp('dodge')); Input.on('parry', lp('parry')); }
       // animate swing so the impact frame lands on T
       const nF = { slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, run: 8 }[h.anim] || 6, imp = Math.floor(nF / 2);
       const pk = projKind(h); let P = null;
@@ -734,7 +734,17 @@ const Battle = {
         await wait(10);
       }
       // the first press after the previous hit's window closed belongs to this hit
-      pressed = B.presses.find(p => p[1] > B.cut) || null; B.cut = Math.max(lateEnd, pressed ? pressed[1] : 0);
+      // which press counts for this hit: the best-timed one inside the window. A stray late tap left over from the hit before
+      // no longer ruins this one, and an early tap a split second before a good one still counts as mashing.
+      const sc = slow ? 0.38 : 1, lk = (P && !h.unp && LeafCut.can(t)) ? LeafCut.window(t) : 1;
+      const win = k => k === 'dodge' ? [-290 * rk, 75 * rk] : P && !h.unp ? [-125 * rk * lk, 42 * rk * lk] : [-175 * rk, 60 * rk];
+      const cands = B.presses.filter(p => p[1] > B.cut && p[1] <= lateEnd), leftover = (B.prevEnd || 0) + 200;
+      let pick = null;
+      for (const p of cands) { const [lo, hi] = win(p[0]), dd = (p[1] - T) * sc; if (dd < lo || dd > hi) continue;
+        if (cands.some(q => q !== p && q[1] < p[1] && p[1] - q[1] < 140 && q[1] > leftover)) continue;
+        if (!pick || Math.abs(dd) < Math.abs((pick[1] - T) * sc)) pick = p; }
+      pressed = pick || cands.find(p => p[1] > leftover) || null;
+      B.prevEnd = lateEnd; B.cut = Math.max(lateEnd, pressed ? pressed[1] : 0);
       if (own) { Input.on('dodge', null); Input.on('parry', null); B.presses = null; }
       B.rings = B.rings.filter(x => x !== ring); B.timeScale = 1;
       // judge
@@ -742,10 +752,10 @@ const Battle = {
       if (pressed) {
         const d = (pressed[1] - T) * B.timeScale || (pressed[1] - T);
         const dd = (pressed[1] - T) * (slow ? 0.38 : 1);
-        if (pressed[0] === 'dodge') { if (dd >= -110 * rk && dd <= 45 * rk) res = 'pdodge'; else if (dd >= -290 * rk && dd <= 75 * rk) res = 'dodge'; else res = 'early'; }
+        if (pressed[0] === 'dodge') { if (dd >= -110 * rk && dd <= 45 * rk) res = 'pdodge'; else if (dd >= -290 * rk && dd <= 75 * rk) res = 'dodge'; else res = dd > 0 ? 'late' : 'early'; }
         else if (P && !h.unp) { // cutting something in flight: only Ren, and only once Vane's Leaf Cut is his — a tighter window than a blade
-          if (!LeafCut.can(t)) res = 'noleaf'; else { const lk = LeafCut.window(t); if (dd >= -48 * rk * lk && dd <= 24 * rk * lk) res = 'pparry'; else if (dd >= -125 * rk * lk && dd <= 42 * rk * lk) res = 'parry'; else res = 'early'; } }
-        else { if (h.unp) res = 'unp'; else if (dd >= -70 * rk && dd <= 35 * rk) res = 'pparry'; else if (dd >= -175 * rk && dd <= 60 * rk) res = 'parry'; else res = 'early'; }
+          if (!LeafCut.can(t)) res = 'noleaf'; else { if (dd >= -48 * rk * lk && dd <= 24 * rk * lk) res = 'pparry'; else if (dd >= -125 * rk * lk && dd <= 42 * rk * lk) res = 'parry'; else res = dd > 0 ? 'late' : 'early'; } }
+        else { if (h.unp) res = 'unp'; else if (dd >= -70 * rk && dd <= 35 * rk) res = 'pparry'; else if (dd >= -175 * rk && dd <= 60 * rk) res = 'parry'; else res = dd > 0 ? 'late' : 'early'; }
       }
       const m = h.m;
       if (e.morph > 0 && (res === 'pdodge' || res === 'pparry')) { e.tempo = Math.max(.68, (e.tempo || 1) * .9); this.text(e, 'ADAPTING TO YOUR TIMING', '#ff8a6a', -40); }
@@ -765,12 +775,14 @@ const Battle = {
         if (res === 'unp') this.text(t, "CAN'T PARRY THAT!", '#ff6b6b', -20);
         if (res === 'noleaf') { this.text(t, t.isMe ? "CAN'T CUT IT IN FLIGHT — DODGE!" : 'ONLY A DODGE STOPS THAT', '#ff9a6b', -20); if (t.isMe) { G.S.f.leafMiss = (G.S.f.leafMiss || 0) + 1; B.leafMiss = 1; } }
         if (res === 'early') this.text(t, 'TOO EARLY', '#bbb', -20);
+        if (res === 'late') this.text(t, 'TOO LATE', '#bbb', -20);
         if (h.unp && res !== 'dodge' && t.side === 'p') {   // eating a red blow hurts: heavier damage, rhythm broken, slower to recover
           this.chip(e, t, m * 1.4, true, h.el); t.flow = 0; t.delay = Math.max(t.delay || 1, 1.5);
           if (t.sight) t.sight = Math.max(0, t.sight - 1);
           this.text(t, 'CRUSHED — STAGGERED', '#ff5050', -44, true); B.shake = Math.max(B.shake || 0, 10); B.flash = .4; B.flashCol = '255,60,60';
         } else this.chip(e, t, m, true, h.el);
       }
+      if (pressed) rxResult(pressed[0], /^p(parry|dodge)$/.test(res) ? 'perf' : /^(parry|dodge)$/.test(res) ? 'ok' : 'bad');
       this.hud();
       resolve(res);
     });
@@ -1074,3 +1086,30 @@ addEventListener('keydown', e => {
   if (T && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown')) { T.i = (T.i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1) + T.list.length) % T.list.length; sfx('blip'); e.preventDefault(); return; }
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { if (Battle.menuKey(e.key === 'ArrowUp' ? 'up' : 'down')) e.preventDefault(); }
 });
+
+/* DODGE / PARRY button feel: every tap answers at once (squeeze, glow, click, buzz) — and when the hit lands the button
+   flashes how that tap went: white = perfect, gold = good, red = early / late. */
+function rxPress(k) {
+  const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); if (!b) return;
+  b.classList.remove('on'); void b.offsetWidth; b.classList.add('on'); clearTimeout(b.__t); b.__t = setTimeout(() => b.classList.remove('on'), 160);
+  try { tone(k === 'dodge' ? 760 : 980, .035, 'square', .035); } catch (e) { }
+  try { navigator.vibrate && navigator.vibrate(9); } catch (e) { }
+}
+function rxResult(k, kind) {
+  const b = $(k === 'dodge' ? '#rxDodge' : '#rxParry'); if (!b) return;
+  b.classList.remove('r-perf', 'r-ok', 'r-bad'); void b.offsetWidth; b.classList.add('r-' + kind); clearTimeout(b.__r); b.__r = setTimeout(() => b.classList.remove('r-' + kind), 380);
+  if (kind === 'perf') try { navigator.vibrate && navigator.vibrate([12, 30, 12]); } catch (e) { }
+  if (kind === 'bad') try { navigator.vibrate && navigator.vibrate(30); } catch (e) { }
+}
+(function () { const st = document.createElement('style'); st.textContent = `
+  .rx{position:relative}
+  .rx.on{animation:rxSq .16s ease-out}
+  @keyframes rxSq{0%{transform:scale(.84);filter:brightness(1.6)}100%{transform:scale(1);filter:brightness(1)}}
+  .rx::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:4px solid transparent;pointer-events:none;opacity:0}
+  .rx.on::after{border-color:rgba(255,255,255,.85);animation:rxRing .2s ease-out}
+  .rx.r-perf::after{border-color:#fff;box-shadow:0 0 22px #fff,0 0 40px #ffe36a;animation:rxRing .38s ease-out}
+  .rx.r-ok::after{border-color:#ffd34a;box-shadow:0 0 16px #ffd34a;animation:rxRing .38s ease-out}
+  .rx.r-bad::after{border-color:#ff4a4a;box-shadow:0 0 14px #ff4a4a;animation:rxRing .38s ease-out}
+  .rx.r-bad{animation:rxShake .25s}
+  @keyframes rxRing{0%{opacity:1;transform:scale(.9)}100%{opacity:0;transform:scale(1.25)}}
+  @keyframes rxShake{0%,100%{translate:0}25%{translate:-4px}75%{translate:4px}}`; document.head.append(st); })();
