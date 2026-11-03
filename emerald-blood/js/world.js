@@ -98,6 +98,13 @@ const World = {
       // pushing diagonally into a wall: slide along it the other way instead of standing still
       if (d && G.input.dir2 && !keyStack.length) { const bx = p.x + DIRS[d][0], by = p.y + DIRS[d][1], d2 = G.input.dir2, cx = p.x + DIRS[d2][0], cy = p.y + DIRS[d2][1];
         if ((!this.inMap(bx, by) && !this.exitAt(p.x, p.y)) || (this.inMap(bx, by) && this.col[by][bx] && !this.exitAt(bx, by))) { if (this.free(cx, cy, p)) d = d2; } }
+      // pushing straight into the corner of a stall or wall: if there's a way past it up to three steps to the side, step that way
+      else if (d && !keyStack.length) { const bx = p.x + DIRS[d][0], by = p.y + DIRS[d][1];
+        if (this.inMap(bx, by) && this.col[by][bx] && !this.exitAt(bx, by)) {
+          const side = d === 'up' || d === 'down' ? ['left', 'right'] : ['up', 'down'], ok = [];
+          for (const sd of side) for (let k = 1; k <= 3; k++) { const sx = p.x + DIRS[sd][0] * k, sy = p.y + DIRS[sd][1] * k;
+            if (!this.free(sx, sy, p)) break; if (this.free(sx + DIRS[d][0], sy + DIRS[d][1], p)) { ok.push([k, sd]); break; } }
+          if (ok.length === 1 || (ok.length === 2 && ok[0][0] !== ok[1][0])) { ok.sort((a, b) => a[0] - b[0]); d = ok[0][1]; } } }
       if (d) {
         p.dir = d;
         const nx = p.x + DIRS[d][0], ny = p.y + DIRS[d][1];
