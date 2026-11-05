@@ -171,13 +171,14 @@ const FOUR = {
     f.bladeXp = (f.bladeXp || 0) + n; const T = [0, 25, 70, 140, 260], before = f.bladeBond || 0;
     let b = 0; for (let i = 0; i < T.length; i++) if (f.bladeXp >= T[i]) b = i;
     if (b > before) { f.bladeBond = b; const L = ['Silent', 'Stirring', 'Speaking', 'Awakened', 'Sworn'][b];
-      setTimeout(() => { sfx('level'); toast(`Last Light's bond deepens: <b style="color:#7dffb0">${L}</b>. ${b === 1 ? 'You can now chain 4 cuts.' : b === 2 ? 'You can now chain 5 cuts.' : b === 3 ? 'You can now chain 6 cuts.' : 'The blade is sworn to you.'}`, 4200); }, 600); }
+      setTimeout(() => { sfx('level'); toast(`Last Light's bond deepens: <b style="color:#7dffb0">${L}</b>. ${b >= 4 ? 'The blade is sworn to you.' : 'It answers your hand a little faster.'}`, 4200); }, 600); }
   },
 
   /* ---------- meditation: choose a Path, review techniques ---------- */
   PATHS: { sheathe: ['Sheathe Path', 'Counters and openings — the first cut (the draw) hits ×1.5 instead of ×1.3.'], flow: ['Flow Path', 'Long chains — 30% more time to enter moves, and a longer gap between presses.'],
     break: ['Break Path', 'Guards and armor — Lift and Break moves do 50% more guard damage.'] },
   menuHTML() {
+    if (typeof MoveBar !== 'undefined') return MoveBar.medHTML();   // the Four Cuts combo list is retired; Meditation now slots the move bar
     if (!G.S.f.vaneDone || G.S.kid) return '';
     const st = this.st(), max = this.maxLen({ isMe: true }), S = this.STYLE.sword, AR = { L: '↑', S: '↓', P: '←', W: '→' };
     const seqH = k => k.split('').map(r => `<b style="color:${this.COL[r]}">${AR[r]}</b>`).join(' ');
