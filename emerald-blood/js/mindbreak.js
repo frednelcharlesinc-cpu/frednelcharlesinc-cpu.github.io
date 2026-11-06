@@ -118,3 +118,9 @@ const Meditate = {
   const _c = Break.capped.bind(Break);
   Break.capped = function () { _c(); setTimeout(() => { if (Break.has(Break.next())) toast('<b style="color:#7dffb0">🧘 Ready to break through.</b> Menu → Skills → <b>Meditate now</b>.', 5000); }, 11000); };
 })();
+/* the D-grade feat is the story's five winters with Vane: anyone past that has done it */
+(function () {
+  if (typeof BREAK !== 'undefined' && BREAK.D) BREAK.D.hint = 'Your five winters of training with Vane (the old man) in the Realm of No Return — this happens in the story, after the village burns.';
+  const _h = Break.has.bind(Break);
+  Break.has = function (g) { if (g === 'D' && G.S && G.S.f && (G.S.f.vaneDone || G.S.f.cultivation) && !G.S.kid) { const s = this.st(); if (!s.D) s.D = 1; return true; } return _h(g); };
+})();
