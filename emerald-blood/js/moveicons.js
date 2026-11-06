@@ -23,6 +23,8 @@ const MoveIcon = (function () {
       <path d="M46 30 l8 1 -8 2z M50 34 l8 0 -8 1.6z M46 38 l8 -1 -8 -2z" fill="#fff"/>`),
     wyrm: () => wrap('#5a1a2a', '#16050a', '#ff8aa8', `<path d="M10 54 L40 24" stroke="#c8a070" stroke-width="3.2" stroke-linecap="round"/><path d="M38 26 L52 12 L46 30z" fill="#eef" stroke="#fff" stroke-width="1"/>
       <g fill="none" stroke="#ff6a8a" stroke-width="1.6"><path d="M40 40 q6 -6 12 0"/><path d="M36 48 q6 -6 12 0"/></g>`),
+    attack: () => wrap('#6a2a1a', '#160604', '#ffb08a', `<g stroke-linecap="round"><path d="M16 48 L44 16" stroke="#e8e8f0" stroke-width="4"/><path d="M48 48 L20 16" stroke="#e8e8f0" stroke-width="4"/>
+      <path d="M13 43 l8 8 M43 43 l8 8" stroke="#c89a5a" stroke-width="4"/></g><circle cx="32" cy="32" r="3" fill="#ffd36a"/>`),
     // ---- Drag Arts and other specials ----
     fang: () => wrap('#1f6a42', '#031a0c', '#7dffb0', `<path d="M20 12 Q44 26 40 54 Q34 34 20 12z" fill="#7dffb0"/><path d="M24 16 Q40 28 38 46" stroke="#e8fff0" stroke-width="1.4" fill="none"/>`),
     ward: () => wrap('#1a5a3a', '#031a0c', '#7dffb0', `<path d="M32 10 L51 21 V43 L32 54 L13 43 V21z" fill="#46ff95" fill-opacity=".22" stroke="#9dffc4" stroke-width="2.4"/>
@@ -46,7 +48,7 @@ const MoveIcon = (function () {
     star: () => wrap('#2a4a3a', '#04100a', '#9dffc4', `<path d="M32 12 L37 27 L52 27 L40 36 L45 51 L32 42 L19 51 L24 36 L12 27 L27 27z" fill="#9dffc4"/>`)
   };
   // move name → picture
-  const RULES = [[/horizon/i, 'horizon'], [/mirage/i, 'mirage'], [/sever|snow/i, 'sever'], [/cleave|forge/i, 'cleave'], [/viper|needle/i, 'needle'], [/wyrm|pierc/i, 'wyrm'],
+  const RULES = [[/^attack$/i, 'attack'], [/horizon/i, 'horizon'], [/mirage/i, 'mirage'], [/sever|snow/i, 'sever'], [/cleave|forge/i, 'cleave'], [/viper|needle/i, 'needle'], [/wyrm|pierc/i, 'wyrm'],
     [/fang/i, 'fang'], [/field|ward/i, 'ward'], [/ruin|verdant/i, 'ruin'], [/crimson/i, 'crimson'], [/azure/i, 'azure'], [/eclipse|convergence/i, 'eclipse'],
     [/ascen|transform|wyrmshade|sight/i, 'sight'], [/moon/i, 'moonstep'], [/smoke|veil|shadow/i, 'veil'], [/link|twin|eclipse/i, 'link'], [/eleven/i, 'eleven'],
     [/stone|shard|scale|verdict|heart/i, 'stone']];

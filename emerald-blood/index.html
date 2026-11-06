@@ -336,12 +336,13 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
   setTimeout(function(){ if(window.G&&G.mode==='boot'){ var t=document.getElementById('loadTxt'); add('Still loading after 25s — stuck at: '+(t?t.textContent:'?')+' ('+(document.getElementById('loadBar')||{style:{}}).style.width+')'); } },25000);
 })();
 </script>
-<script src="js/core.js?v=fb9d5e22"></script>
+<script src="js/core.js?v=757dabc4"></script>
 <script src="js/world.js?v=b856d45b"></script>
 <script src="js/dialog.js?v=bfab4e25"></script>
 <script src="js/portraits.js?v=1a4da5aa"></script>
-<script src="js/cine.js?v=58e9db35"></script>
-<script src="js/battle.js?v=98d65a36"></script>
+<script src="js/cine.js?v=e6f916fc"></script>
+<script src="js/battle.js?v=690162cd"></script>
+<script src="js/battlefit.js?v=fbe1321b"></script>
 <script src="js/monsters.js?v=e5527527"></script>
 <script src="js/realm.js?v=6409dd68"></script>
 <script src="js/story.js?v=29ac098d"></script>
@@ -379,7 +380,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/raids.js?v=e8b96980"></script>
 <script src="js/ledger.js?v=ed72c692"></script>
 <script src="js/btsprites.js?v=ebdd79da"></script>
-<script src="js/hdsprites.js?v=00fa3bd4"></script>
+<script src="js/hdsprites.js?v=060fa94a"></script>
 <script src="js/town.js?v=a0ab1371"></script>
 <script src="js/charge.js?v=7e71c6e8"></script>
 <script src="js/guildhall.js?v=33ae12c7"></script>
@@ -391,8 +392,8 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/mech.js?v=5e1a71ac"></script>
 <script src="js/radial.js?v=40c3ccbd"></script>
 <script src="js/hd2d.js?v=4950c3f1"></script>
-<script src="js/moveicons.js?v=4bf1798b"></script>
-<script src="js/atkpad.js?v=e693b76f"></script>
+<script src="js/moveicons.js?v=0cdc4e35"></script>
+<script src="js/atkpad.js?v=9c38d3f5"></script>
 <script src="js/districts.js?v=c74c1feb"></script>
 <script src="js/arrive.js?v=9fa37898"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').then(function(r){document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')r.update().catch(function(){});});setInterval(function(){r.update().catch(function(){});},300000);}).catch(function(){});

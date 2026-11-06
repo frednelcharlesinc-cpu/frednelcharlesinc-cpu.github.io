@@ -300,6 +300,8 @@ const Comic = {
   async play(id) {
     const P = this.PAGES[id]; if (!P) return;
     const img = await loadImg(P.src + '?v=2').catch(() => null); if (!img) return;
+    // panels get time to be read, and the page ends on the whole painting so nothing is only ever seen cropped
+    const multi = P.panels.length > 1, panels = multi ? P.panels.concat([[0, 0, img.width, img.height]]) : P.panels, fxs = (P.fx || []).concat(['']), HOLD = multi ? Math.max(P.hold || 2600, 2400) : (P.hold || 2600);
     const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:80;background:#05080a;touch-action:none';
     const cv = document.createElement('canvas'), skip = document.createElement('button');
     cv.style.cssText = 'width:100%;height:100%;display:block'; skip.textContent = 'Skip ▶▶';
@@ -307,14 +309,14 @@ const Comic = {
     ov.append(cv, skip); document.body.append(ov);
     const dpr = Math.min(devicePixelRatio || 1, 2), W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr, x = cv.getContext('2d');
     let i = 0, t0 = performance.now(), done = false, next = null;
-    const go = () => { if (done) return; i++; t0 = performance.now(); if (i >= P.panels.length) finish(); };
+    const go = () => { if (done) return; i++; t0 = performance.now(); if (i >= panels.length) finish(); };
     const finish = () => { if (done) return; done = true; ov.remove(); next && next(); };
     ov.addEventListener('pointerdown', e => { if (e.target === skip) { finish(); return; } if (performance.now() - t0 > 350) go(); });
     const draw = now => {
       if (done) return;
-      const [sx, sy, ex, ey] = P.panels[i], pw = ex - sx, ph = ey - sy, k = Math.min((now - t0) / 600, 1), ease = 1 - Math.pow(1 - k, 3);
+      const [sx, sy, ex, ey] = panels[i], pw = ex - sx, ph = ey - sy, k = Math.min((now - t0) / 600, 1), ease = 1 - Math.pow(1 - k, 3);
       const fit = Math.min(W * .94 / pw, H * .9 / ph) * (1 + .04 * ((now - t0) / 4000)), dw = pw * fit, dh = ph * fit;
-      let ox = (W - dw) / 2, oy = (H - dh) / 2; const fx = P.fx[i];
+      let ox = (W - dw) / 2, oy = (H - dh) / 2; const fx = fxs[i];
       if (fx === 'shake' && now - t0 < 900) { ox += (Math.random() - .5) * 14 * dpr; oy += (Math.random() - .5) * 10 * dpr; }
       x.fillStyle = '#05080a'; x.fillRect(0, 0, W, H);
       x.globalAlpha = ease; x.imageSmoothingEnabled = P.smooth !== false; x.drawImage(img, sx, sy, pw, ph, ox, oy + (1 - ease) * 18 * dpr, dw, dh); x.globalAlpha = 1;
@@ -322,7 +324,7 @@ const Comic = {
       if (fx === 'flash' && now - t0 < 260) { x.fillStyle = `rgba(200,255,235,${.8 * (1 - (now - t0) / 260)})`; x.fillRect(0, 0, W, H); }
       if (fx === 'glow') { const a = .12 + .08 * Math.sin(now / 300); x.fillStyle = `rgba(70,255,190,${a})`; x.globalCompositeOperation = 'lighter'; x.fillRect(ox, oy, dw, dh); x.globalCompositeOperation = 'source-over'; }
       if (fx === 'rain') { x.strokeStyle = 'rgba(200,220,240,.25)'; x.lineWidth = 1 * dpr; for (let r = 0; r < 60; r++) { const rx = ((r * 97 + now * .6) % dw) + ox, ry = ((r * 53 + now * 1.4) % dh) + oy; x.beginPath(); x.moveTo(rx, ry); x.lineTo(rx - 3 * dpr, ry + 12 * dpr); x.stroke(); } }
-      if (now - t0 > (P.hold || 2600)) go();
+      if (now - t0 > (multi && i === panels.length - 1 ? 2600 : HOLD)) go();
       requestAnimationFrame(draw);
     };
     try { sfx(id === 'asc' ? 'art' : 'swing'); } catch (e) { }

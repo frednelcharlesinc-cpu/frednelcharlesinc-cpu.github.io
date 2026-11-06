@@ -78,6 +78,7 @@ const MoveBar = {
   #mbar .mv span{font:800 9px/1.05 Nunito,system-ui;color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000;max-width:58px;text-align:center}
   #mbar .mv em{position:absolute;top:-4px;right:0;font:800 8.5px Nunito,system-ui;font-style:normal;padding:0 4px;border-radius:7px;background:#0b2a4a;border:1px solid #5fb8ff;color:#cfe8ff}
   #mbar .mv.on{transform:scale(.86);filter:brightness(1.5)}
+  #mbar .mv.atk{margin-right:6px}
   #mbar .mv.off{opacity:.4;filter:grayscale(.75)}`;
   document.head.append(css);
 
@@ -112,17 +113,18 @@ const MoveBar = {
   function render() {
     const c = cur; if (!c) return;
     const a = c.a, S = split(c.list);
-    if (!S.phys.length && !S.spec.length) { bar.classList.add('hide'); return; }
+    
     if (tab === 'phys' && !S.phys.length) tab = 'spec'; if (tab === 'spec' && !S.spec.length) tab = 'phys';
     const have = S[tab], names = have.map(x => MoveBar.norm(x[0]));
     let want = a.isMe && MoveBar.lo()[tab] && MoveBar.lo()[tab].some(Boolean) ? MoveBar.lo()[tab].slice(0, 5) : names.slice(0, 5);
     if (!a.isMe) want = names.slice(0, 5);
     const slots = want.map(n => { if (!n) return null; const x = have.find(s => MoveBar.norm(s[0]) === n); return x ? { x, name: n, cost: x[4] } : { gone: 1, name: n }; }).filter(Boolean);
-    bar.innerHTML = `<div class="row">${slots.map((s, i) => {
+    bar.innerHTML = `<div class="row"><div class="mv atk"><i>${MoveIcon('Attack')}</i><span>Attack</span></div>${slots.map((s, i) => {
       const off = s.gone || (s.cost && a.mp < s.cost) || s.x[3];
       return `<div class="mv${off ? ' off' : ''}" data-i="${i}"><i>${MoveIcon(s.name)}</i><span>${MoveBar.short(s.name)}</span>${s.cost ? `<em>${s.cost}</em>` : ''}</div>`;
     }).join('')}</div>
       <div class="tabs">${S.phys.length ? `<div class="tab ${tab === 'phys' ? 'sel' : ''}" data-t="phys">⚔ Sword</div>` : ''}${S.spec.length ? `<div class="tab ${tab === 'spec' ? 'sel' : ''}" data-t="spec">✦ Special</div>` : ''}</div>`;
+    onDown(bar.querySelector('.mv.atk'), el => { feel(el); const t = target(a); if (!t) return; go(c2 => Battle.doAttack(c2.a, t).then(c2.done)); });
     bar.querySelectorAll('.tab').forEach(el => onDown(el, () => { tab = el.dataset.t; try { localStorage.setItem('eb_mbtab2', tab); } catch (e) { } sfx('blip'); render(); }));
     bar.querySelectorAll('.mv[data-i]').forEach(el => onDown(el, () => {
       const s = slots[+el.dataset.i]; if (!s) return;
@@ -150,9 +152,9 @@ const MoveBar = {
 
   function show(a, done, reopen, L) {
     cur = { a, done, reopen, list: moves(a, L || []) }; turns++;
-    chip.innerHTML = `<b>${a.name}</b> · tap ⚔ or an enemy to attack · tap a move above ${a.isMe ? 'you' : a.name} · ◉ menu`;
+    chip.innerHTML = `<b>${a.name}</b> · tap an enemy or ⚔ Attack · moves are above ${a.isMe ? 'you' : a.name} · ◉ menu`;
     chip.classList.toggle('hide', turns > 6 && !(G.settings && G.settings.hints));
-    gp.classList.remove('hide'); bar.classList.remove('hide'); render();
+    bar.classList.remove('hide'); render();
   }
 
   // tap an enemy to attack it

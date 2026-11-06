@@ -31,7 +31,9 @@ function cmdIcon(label) {
   for (const [re, ic, cc] of T) if (re.test(k) || re.test(L)) return [ic, cc, disp];
   return ['✧', '#2f7a52', disp];
 }
-const BT_SCALE = 1.5; // fighters stand close to the camera so you can see them clearly
+const BT_SCALE = 1.5;
+// where the enemy side stands (mirror of the party), as fractions of the screen so every phone gets the same layout
+function BT_ESLOTS() { const W = G.view.w, FH = G.view.fullH || G.view.h; return [[W * .26, FH * .65], [W * .16, FH * .80], [W * .32, FH * .55], [W * .09, FH * .58]]; } // fighters stand close to the camera so you can see them clearly
 const ENEMY = {
   lupine: { name: 'Ashen Lupine', hp: 38, atk: 10, def: 2, spd: 12, dodge: .2, parry: 0, brk: 40, xp: 14, gold: 6,
     skills: [{ name: 'Claw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Frenzy', w: .5, hits: [{ anim: 'slash', m: .55, w: 480 }, { anim: 'halfslash', m: .55, w: 300 }, { anim: 'slash', m: .7, w: 380 }] }] },
@@ -53,7 +55,7 @@ const ENEMY = {
   kairo_duel: { name: 'Kairo', trait: 'Scar Bloom — adapts to whatever hurts him', drag: 1, hp: 260,
     morph: { at: .55, turns: 4, name: 'SCAR BLOOM', lines: ['Kairo: "…You want to see what the fire left me?"', 'His scars split open. Something underneath them is MOVING.', 'Black scale. Claws. A crown of burning spines. It is still Kairo — and it isn\'t.'],
       hint: 'He adapts to anything that hurts him. Each attack works ONCE — change it up!', end: ['The scales crack and fall away like ash.', 'Kairo: "…Hah… it never… lasts…"'] }, atk: 14, def: 5, spd: 15, dodge: .25, parry: .25, brk: 85, xp: 70, gold: 0, img: 'kairo_b', boss: 1,
-    skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'slash', m: 1.4, w: 340 }] },
+    skills: [{ name: 'Eclipse Edge', hits: [{ anim: 'slash', m: .7, w: 520 }, { anim: 'slash', m: .7, w: 300 }, { anim: 'slash', m: .9, w: 420 }] }, { name: 'Lightning Draw', w: .35, hits: [{ anim: 'thrust', m: 1.4, w: 340 }] },
       { name: 'Shard Flare', w: .25, hits: [{ anim: 'spellcast', m: 2, w: 1000, unp: 1 }] }] },
   dread: { name: 'Dread', fixed: 1, trait: 'Something you cannot beat. Yet.', drag: 1, hp: 99999, atk: 20, def: 99, spd: 8, dodge: 0, parry: .7, brk: 99999, xp: 0, gold: 0, size: 1.5,
     skills: [{ name: 'Gravecleaver', hits: [{ anim: 'slash', m: 1.3, w: 900 }] }, { name: 'Grave Thrust', w: .4, hits: [{ anim: 'thrust', m: 1.1, w: 700 }, { anim: 'slash', m: .9, w: 380 }] }, { name: 'Black Sun Arc', w: .25, hits: [{ anim: 'slash', m: 1.6, w: 1000, unp: 1 }] }] },
@@ -169,12 +171,13 @@ const Battle = {
     const prevMode = G.mode; G.mode = 'battle'; G.view.mode = 'battle'; setView('battle'); Dlg.close(); UI.controls(false); $('#hud').classList.add('hide'); $('#hudR').classList.add('hide');
     const bdKey = cfg.bd || (SCENES[G.S.map] && SCENES[G.S.map].bd) || 'field';
     G.img['bd_' + bdKey] = G.img['bd_' + bdKey] || await loadImg('assets/bd_' + bdKey + '.jpg?v=2');
-    const B = this.B = { cfg, bd: G.img['bd_' + bdKey], actors: [], fx: [], texts: [], rings: [], st: { perf: 0, pp: 0, pd: 0, hurt: 0 }, flash: 0, shake: 0, dim: 0, dimCol: '0,0,0', timeScale: 1,
+    const B = this.B = { cfg, bdKey, bd: G.img['bd_' + bdKey], actors: [], fx: [], texts: [], rings: [], st: { perf: 0, pp: 0, pd: 0, hurt: 0 }, flash: 0, shake: 0, dim: 0, dimCol: '0,0,0', timeScale: 1,
       blazed: false, over: null, turn: 0, tutorial: cfg.tutorial ? { dodge: 1, parry: 1, hit: 1 } : null, log: [], press: [] };
     // party
-    const W = G.view.w;
-    const pSlots = cfg.slots || [[W - 182, 205], [W - 144, 262], [W - 220, 150]];
-    const eSlots = [[182, 210], [128, 262], [228, 152], [102, 160]];
+    const W = G.view.w, FH = G.view.fullH || G.view.h;
+    // the two sides face each other across open ground: three rows of depth (far, middle, near), the near row lowest on screen
+    const pSlots = cfg.slots || [[W * .74, FH * .65], [W * .84, FH * .80], [W * .68, FH * .55]];
+    const eSlots = BT_ESLOTS();
     const S = G.S.stats;
     const SB = Stones.bonus(); B.sb = SB;
     B.actors.push(this.mk({ side: 'p', id: 'me', name: G.S.name, color: '#1f8a4c', isMe: true, hp: S.hp, maxHp: S.maxHp, mp: S.mp, maxMp: S.maxMp, atk: S.atk + SB.atk, def: S.def + SB.def, spd: S.spd, arts: G.S.arts, slot: pSlots[0], strainMax: 100 + SB.cap }));
@@ -578,7 +581,7 @@ const Battle = {
   artStrain(a, k) { return Math.max(5, (ARTS[k].strain || 30) - (a.isMe ? this.B.sb.calm + (Skills.has('me', 't3') ? 8 : 0) : 0)); },
   async summon(key, intro) {
     const B = this.B, E = ENEMY[key], used = B.actors.filter(a => a.side === 'e' && !a.ko).map(a => a.hx);
-    const slots = [[182, 210], [128, 262], [228, 152], [102, 160]], sl = slots.find(s2 => !used.includes(s2[0])) || slots[3];
+    const slots = BT_ESLOTS(), sl = slots.find(s2 => !used.includes(s2[0])) || slots[3];
     const a = this.mk({ side: 'e', id: key + B.actors.length, key, name: E.name, hp: Math.round(E.hp * 1.3), maxHp: Math.round(E.hp * 1.3), mp: 0, maxMp: 0, atk: Math.round(E.atk * 1.18), def: E.def, spd: E.spd, dodge: E.dodge, parry: E.parry, brkMax: E.brk, E, slot: sl, spr: E.img || key, size: E.size || 1 });
     a.img = await npcImg(a.spr); a.next = this.chooseSkill(a); a.wait = 30; a.alpha = 0; B.actors.push(a);
     for (let i = 0; i <= 10; i++) { a.alpha = i / 10; await wait(30); } if (intro) this.text(a, intro, '#ffb070', -40, true); this.hud();
@@ -856,11 +859,10 @@ const Battle = {
   render(c, t) {
     const B = this.B; if (!B) return; const W = G.view.w, H = G.view.h;
     // ONE picture behind the whole screen: the scene runs on under the command bar (darkened there) instead of stopping at a hard edge
-    const bd = B.bd, FH = G.view.fullH || H, sc = Math.max(W / bd.width, FH / bd.height) * 1.04;
+    const bd = B.bd, FH = G.view.fullH || H;
     let ox = 0, oy = 0; if (B.shake > 0) { ox = rnd(-B.shake, B.shake); oy = rnd(-B.shake, B.shake) * .5; }
     c.save(); c.translate(ox, oy);
-    const bh = bd.height * sc, by = Math.min(0, Math.max(FH - bh, H * .9 - bh * .86));   // the picture's ground line sits where the fighters stand
-    c.drawImage(bd, (W - bd.width * sc) / 2, by, bd.width * sc, bh);
+    BTBD.draw(c, B, W, FH);   // the picture placed so its ground meets the fighters' feet, soft in the distance (battlefit below)
     if (FH > H) { const g = c.createLinearGradient(0, H - 26, 0, FH); g.addColorStop(0, 'rgba(6,12,9,0)'); g.addColorStop(.35, 'rgba(6,12,9,.55)'); g.addColorStop(1, 'rgba(6,12,9,.85)'); c.fillStyle = g; c.fillRect(-20, H - 26, W + 40, FH - H + 46); }
     if (B.dim > 0) { c.fillStyle = `rgba(${B.dimCol},${B.dim})`; c.fillRect(-10, -10, W + 20, H + 20); }
     // targeting cursor
@@ -872,7 +874,8 @@ const Battle = {
       if (a.kbx) c.translate(a.kbx, 0);
       if (a.anim === 'combat' && !a.ko && !a.lift) { const br = 1 + Math.sin(t / 430 + a.x * .07) * .014; c.translate(a.x, a.y); c.scale(1 / Math.sqrt(br), br); c.translate(-a.x, -a.y); }
       const lift = a.lift || 0, lean = a.lean || 0, sh = Math.max(.35, 1 - lift / 60);
-      c.fillStyle = `rgba(0,0,0,${.28 * sh})`; c.beginPath(); c.ellipse(a.x, a.y, 15 * sh, 5 * sh, 0, 0, 7); c.fill();
+      { const rs = 16 * sh * BT_SCALE * (a.size || 1) / 1.5; c.save(); c.translate(a.x, a.y); c.scale(1, .3); const sg = c.createRadialGradient(0, 0, 0, 0, 0, rs * 1.25);   // soft contact shadow
+        sg.addColorStop(0, `rgba(0,0,0,${.5 * sh})`); sg.addColorStop(.55, `rgba(0,0,0,${.3 * sh})`); sg.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = sg; c.beginPath(); c.arc(0, 0, rs * 1.25, 0, 7); c.fill(); c.restore(); }
       const s = BT_SCALE * (a.size || 1);
       if (lift || lean) { c.save(); c.translate(a.x, a.y - lift); c.rotate(lean); c.translate(-a.x, -a.y); }
       if (a.aura) { c.save(); c.globalCompositeOperation = 'lighter'; const ag = c.createRadialGradient(a.x, a.y - 30 * s, 2, a.x, a.y - 30 * s, 34 * s); ag.addColorStop(0, a.aura + 'aa'); ag.addColorStop(1, a.aura + '00'); c.fillStyle = ag; c.beginPath(); c.ellipse(a.x, a.y - 30 * s, 26 * s, 38 * s, 0, 0, 7); c.fill(); c.restore(); }
@@ -978,6 +981,7 @@ const Battle = {
       if (lift || lean) c.restore();
       c.restore();
     }
+    BTBD.grade(c, B, W, FH);   // one light over fighters and scenery alike, so nobody looks pasted on
     if (B.bar) { const b = B.bar, L = b.x - b.h / 2, Y = b.y, hh = 8; // a slim horizontal bar; the marker sweeps left↔right
       c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(L - 3, Y - hh / 2 - 3, b.h + 6, hh + 6);
       c.fillStyle = '#2a2f36'; c.fillRect(L, Y - hh / 2, b.h, hh);

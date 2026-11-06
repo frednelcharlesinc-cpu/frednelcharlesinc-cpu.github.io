@@ -103,11 +103,12 @@ const Cine = {
     c.setTransform(k * z, 0, 0, k * z, cv.width / 2 - (camX + sx) * k * z, cv.height / 2 - (camY + sy) * k * z);
     c.imageSmoothingEnabled = false;
     const art = s.sceneId && typeof s.bg === 'string' && Art.cut[s.sceneId];
-    if (art && s.fit === 'contain') { // whole painting on screen: blurred fill behind, slow gentle push-in
+    if (art && (s.fit === 'contain' || art.width / art.height < 1.6)) {   // squarer paintings are never cropped: shown whole
+      // whole painting on screen: blurred fill behind, slow gentle push-in
       c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true;
       const cw = cv.width, ch = cv.height, bs = Math.max(cw / art.width, ch / art.height) * 1.1;
       c.save(); c.filter = 'blur(18px) brightness(.55)'; c.drawImage(art, (cw - art.width * bs) / 2, (ch - art.height * bs) / 2, art.width * bs, art.height * bs); c.restore();
-      const zz = 1 + Math.min(1, t / Math.max(1, (s.dur || 3000) + 2500)) * .05, fs = Math.min(cw * .9 / art.width, ch * .76 / art.height) * zz;
+      const zz = 1 + Math.min(1, t / Math.max(1, (s.dur || 3000) + 2500)) * .05, fs = Math.min(cw * .94 / art.width, ch * .82 / art.height) * zz;
       c.drawImage(art, (cw - art.width * fs) / 2 + sx * k, (ch - art.height * fs) / 2 - ch * .01 + sy * k, art.width * fs, art.height * fs);
       c.setTransform(k * z, 0, 0, k * z, cv.width / 2 - (camX + sx) * k * z, cv.height / 2 - (camY + sy) * k * z); c.imageSmoothingEnabled = false;
     } else if (art) { c.imageSmoothingEnabled = true; const sc = Math.max(900 / art.width, 520 / art.height); c.drawImage(art, 320 - art.width * sc / 2, -10, art.width * sc, art.height * sc); c.imageSmoothingEnabled = false; }
