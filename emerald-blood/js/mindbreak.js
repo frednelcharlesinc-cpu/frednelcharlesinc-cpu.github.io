@@ -106,8 +106,9 @@ const Meditate = {
   },
   go() {
     const s = this.state(); if (!s || !s.done || !s.full) return;
-    if (G.mode !== 'world' || World.busy) { toast('Find somewhere quiet first (you can\'t meditate in a fight or a scene).', 2400); return; }
-    UI.closeMenu(); MIND.coolUntil = 0; Break.pending = true; Story.run(() => Break.scene(s.g));
+    if (!$('#menu').classList.contains('hide')) UI.closeMenu();   // the open menu itself holds the game still — close it first
+    if (G.mode !== 'world' || World.busy || (typeof Battle !== 'undefined' && Battle.B)) { toast('Find somewhere quiet first (you can\'t meditate in a fight or a scene).', 2400); return; }
+    MIND.coolUntil = 0; Break.pending = true; setTimeout(() => Story.run(() => Break.scene(s.g)), 250);
   }
 };
 (function () {
