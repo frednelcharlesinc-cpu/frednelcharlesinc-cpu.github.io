@@ -23,9 +23,9 @@ const ASH2 = {
     [[42, 29], 'a_lower', [6, 18]], [[7, 36], 'a_lower', [3, 18]], [[50, 33], 'a_lower', [36, 4]], [[36, 41], 'a_lower', [25, 18]], [[39, 29], 'a_lower', [11, 3]], [[45, 36], 'a_lower', [30, 18]]
   ],
   // doors on the old map (art coordinates) → the doors in the district art
-  DOOR: { '11,5': ['a_chapel', '8,16'], '20,5': ['a_chapel', '1,16'], '48,16': ['ashford', '9,15'], '38,9': ['a_river', '22,11'], '39,9': ['a_river', '23,11'],
-    '10,17': ['a_terrace', '22,11'], '11,17': ['a_terrace', '23,11'], '7,35': ['a_lower', '2,17'], '42,28': ['a_lower', '9,17'], '50,32': ['a_lower', '36,2'],
-    '36,40': ['a_lower', '39,2'], '39,28': ['ashford', '14,2'] },
+  DOOR: { '11,5': ['a_chapel', '8,16'], '20,5': ['a_chapel', '0,16'], '48,16': ['ashford', '9,17'], '38,9': ['a_river', '22,11'], '39,9': ['a_river', '23,11'],
+    '10,17': ['a_terrace', '22,11'], '11,17': ['a_terrace', '23,11'], '7,35': ['a_lower', '2,16'], '42,28': ['a_lower', '9,16'], '50,32': ['a_lower', '36,1'],
+    '36,40': ['a_lower', '39,1'], '39,28': ['ashford', '14,1'] },
   // where the story's named people stand now
   PLACE: { voss: ['a_chapel', 20, 9], guard: ['a_chapel', 22, 9], maren: ['a_chapel', 9, 18], pip: ['a_chapel', 13, 18], pipmom: ['a_chapel', 4, 18], chapelDoor: ['a_chapel', 34, 13],
     kess: ['a_terrace', 26, 13], tobb: ['ashford', 17, 9], hoshi: ['ashford', 12, 18], cassel: ['ashford', 24, 18], crier: ['ashford', 30, 18], larkA: ['ashford', 21, 17],
@@ -94,15 +94,16 @@ const ASH2 = {
     L('a_chapel', { x: 19, x2: 23, y: 23, to: 'ashford', tx: 20, ty: 2, dir: 'down' });
     L('ashford', { x: 18, x2: 23, y: 23, to: 'a_lower', tx: 13, ty: 2, dir: 'down' });
     L('a_lower', { x: 10, x2: 16, y: 0, to: 'ashford', tx: 20, ty: 21, dir: 'up' });
-    L('ashford', { x: 42, y: 3, y2: 5, to: 'a_terrace', tx: 2, ty: 4, dir: 'right' });
+    L('ashford', { x: 42, y: 2, y2: 3, to: 'a_terrace', tx: 2, ty: 3, dir: 'right' });
     L('ashford', { x: 42, y: 18, y2: 19, to: 'a_terrace', tx: 2, ty: 18, dir: 'right' });
-    L('a_terrace', { x: 0, y: 3, y2: 5, to: 'ashford', tx: 40, ty: 4, dir: 'left' });
+    L('a_terrace', { x: 0, y: 2, y2: 3, to: 'ashford', tx: 40, ty: 3, dir: 'left' });
     L('a_terrace', { x: 0, y: 18, y2: 19, to: 'ashford', tx: 40, ty: 18, dir: 'left' });
-    L('ashford', { x: 0, y: 3, y2: 5, to: 'a_river', tx: 33, ty: 13, dir: 'left' });
-    L('ashford', { x: 0, y: 18, y2: 19, to: 'a_river', tx: 33, ty: 13, dir: 'left' });
-    L('a_river', { x: 35, y: 13, y2: 14, to: 'ashford', tx: 2, ty: 18, dir: 'right' });
+    L('ashford', { x: 0, y: 2, y2: 3, to: 'a_river', tx: 32, ty: 13, dir: 'left' });
+    L('ashford', { x: 0, y: 18, y2: 19, to: 'a_river', tx: 32, ty: 13, dir: 'left' });
+    L('a_river', { x: 34, y: 12, y2: 14, to: 'ashford', tx: 2, ty: 18, dir: 'right' });
     L('a_terrace', { x: 18, x2: 23, y: 23, to: 'a_lower', tx: 39, ty: 3, dir: 'left' });
     L('a_lower', { x: 42, y: 3, y2: 4, to: 'a_terrace', tx: 20, ty: 21, dir: 'up' });
+    SCENES.ashford.tiles['10,17'] = SCENES.ashford.tiles['9,17'];
     // the new places
     const T = (d, keys, fn) => keys.forEach(k => { SCENES[d].tiles[k] = fn; });
     T('a_lower', ['23,10', '24,10', '25,10'], async () => {
@@ -111,7 +112,7 @@ const ASH2 = {
       if (typeof toast === 'function') toast('The Midnight Exchange — the intelligence house of House Meridian. (Opens later in the story.)', 3600);
     });
     T('a_lower', ['21,20', '22,20', '23,20'], async () => narr('The sewer grate. Rusted bars, a green glow far down the tunnel, and a smell that has its own weather. The lock is new.'));
-    T('ashford', ['32,13', '33,13'], async () => narr('The blacksmith\'s door. Inside, a hammer rings on an anvil, slow and even, like a heartbeat.'));
+    T('ashford', ['31,14', '32,14', '33,14'], async () => narr('The blacksmith\'s door. Inside, a hammer rings on an anvil, slow and even, like a heartbeat.'));
     T('ashford', ['20,13', '21,13'], async () => narr('The fountain. Coins at the bottom — and one green pebble somebody was brave enough to throw in.'));
     T('a_chapel', ['34,12', '35,12'], async () => narr('The chapel. White Inquisition banners hang by the door. Someone has scratched a tiny dragon into the step, then tried to rub it out.'));
     T('a_chapel', ['29,12', '29,13', '29,14'], async () => narr('Maren\'s greenhouse. Moonpetal, feverfew, and one plant you don\'t know that turns its leaves toward you as you pass.'));

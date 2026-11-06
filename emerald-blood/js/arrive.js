@@ -1,12 +1,12 @@
 'use strict';
 /* ARRIVAL SCENES — walking into a town from the road shows the whole town for a moment (day or night picture), with its name.
    Tap to skip. Plays once per visit from outside, not when leaving a house. */
-const ARRIVE = { ashford: ['Ashford Hollow', 'Market town of the eastern vale', 'assets/cutscenes/ashford_day.webp', 'assets/cutscenes/ashford_night.webp'] };
+const ARRIVE = { hm_gate: ['Highmark', 'Mother city of the Adventurers\' Guild', 'assets/cutscenes/cut_hm_arrive.webp', 'assets/cutscenes/cut_hm_arrive.webp'], ashford: ['Ashford Hollow', 'Market town of the eastern vale', 'assets/cutscenes/ashford_day.webp', 'assets/cutscenes/ashford_night.webp'] };
 (function () {
   const _l = World.load.bind(World);
   World.load = async function (name, x, y, dir) {
     const prev = G.S && G.S.map, A = ARRIVE[name] || (typeof ASH2 !== 'undefined' && ASH2.isD(name) ? ARRIVE.ashford : null);
-    const show = A && prev && prev !== name && !/^(a_|ashford$)/.test(prev) && !(SCENES[prev] && SCENES[prev].map && G.maps[SCENES[prev].map] && G.maps[SCENES[prev].map].interior) && !G.S.kid && G.mode === 'world';
+    const show = A && prev && prev !== name && !/^(a_|ashford$|hm_)/.test(prev) && !(SCENES[prev] && SCENES[prev].map && G.maps[SCENES[prev].map] && G.maps[SCENES[prev].map].interior) && !G.S.kid && G.mode === 'world';
     const r = await _l(name, x, y, dir);
     if (show) {
       const night = typeof Ambient !== 'undefined' && Ambient.night > .5;

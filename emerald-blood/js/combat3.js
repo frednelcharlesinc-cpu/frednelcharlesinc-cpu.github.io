@@ -89,7 +89,7 @@ const CombatX2 = {
   BT.run = async function () {
     const B = this.B;
     try {
-      if (B && !B.cfg.leafTrain && !B.cfg.tutorial) {
+      if (false && B && !B.cfg.leafTrain && !B.cfg.tutorial) {   // terrain props retired (Nov 2026)
         const key = B.bdKey || window.__bdKey || 'field', kinds = (BD_OBJ[key] || BD_OBJ.field).slice().sort(() => Math.random() - .5).slice(0, 2);
         const W = G.view.w, ys = B.actors.map(a => a.y), my = ys.length ? (Math.min(...ys) + Math.max(...ys)) / 2 : G.view.h * .6;
         const top = ys.length ? Math.min(...ys) : my; B.objs = kinds.map((k, i) => ({ k, x: W * (i ? .56 : .42), y: top - 12 + (i ? 10 : 0) }));

@@ -52,16 +52,18 @@ const Trial = {
   async open() {
     const f = this.f(); if (f.trial) return; f.trial = 'open';
     await say('liora', 'neutral', "One more thing. Greyspire's gate only opens for Guild-licensed hunters on Crown contract. Escorts. Bounty men. Anyone else gets shot from the wall.");
-    await say('liora', 'smirk', "The Guild Trial starts in Ashford in three days. Miss it and the next is in a year. …I'm signing up. I hate guilds. I love loopholes.");
+    await say('liora', 'smirk', "The Guild Trial is in Highmark — the Guild's mother city, up the Crown Road. Three days. Miss it and the next is in a year. …I'm signing up. I hate guilds. I love loopholes.");
+    await say('liora', 'neutral', "There's a Guild coach in the Market Square. Applicants ride free.");
     await say('liora', 'neutral', "Try not to die in the Gate before I get to beat you at something.");
-    Story.quest('The Guild Trial: go to the Adventurers\' Guild in Ashford Hollow. The Trial starts in three days.');
+    Story.quest('The Guild Trial: take the Guild coach from Ashford\'s Market Square to Highmark, and hear the announcement at the Gate Plaza.');
   },
 
   /* ---- the whole Trial, from the moment you walk into the Guild hall ---- */
   async run() {
     const f = this.f(), S = G.S; if (f.trial !== 'open' || this.active) return; f.trial = 'running'; this.active = 1;
     // STAGE 0 — application
-    await narr('The Guild hall is packed wall to wall. Farmhands, sellswords, a dwarf girl with a hammer bigger than she is, an elf boy who won\'t stop staring at the ceiling.');
+    await narr('The Great Hall of Highmark is packed wall to wall. Up at the front, a familiar bald head — Brom of Ashford, proctoring the vale\'s applicants.');
+    await say('brom', 'happy', 'You made it up the Crown Road! Good. The Guild Master gives the speeches. I do the shouting.');
     await say('brom', 'neutral', 'Three stages. The Ledger Exam. The Gate. The duels. Survive the Gate and you walk out a licensed adventurer — that\'s the whole prize, and it\'s a big one.');
     await say('brom', 'sad', 'And some of you won\'t walk out. I\'m not saying that to scare you. I\'m saying it because it\'s true every year.');
     if (S.rank || (S.q && Object.values(S.q).includes('done'))) await say('brom', 'happy', 'You — you\'ve done Guild work. Fee\'s waived. Sign the waiver.');
@@ -171,6 +173,7 @@ const Trial = {
     await narr('The chains move. They were never holding the light up. They were WRAPPED around something — and it\'s standing.');
     const withL = f.lioraAlliance || (f.lioraAff || 0) >= 2;
     if (withL) await say('liora', (f.lioraAff || 0) >= 4 ? 'happy' : 'neutral', (f.lioraAff || 0) >= 4 ? 'Hey. Hey — look at me. Eleven steps. We\'ve got this.' : 'That favour you owe me? I\'m collecting. Stand there and don\'t die.');
+    if (typeof Art !== 'undefined' && Art.cut.hm_heart && typeof paintShot === 'function') await Cine.play([paintShot('hm_heart', 3000, [['', 'The heart of the pocket: a floating ring of broken stone, chained pillars — and the Core, beating like something alive.', '#9dffc8']], { y: 330 })]);
     await this.must({ enemies: ['gt_warden'], allies: withL ? ['liora'] : [], boss: true, bd: 'crypt', music: 'boss', intro: 'THE HOLLOW WARDEN — the Gate is B-rank now' }, 'The Warden\'s chain throws you into the wall. You taste blood and stone — and get up again.');
     f.anomalySurvived = 1;
     // the Core choice
@@ -183,7 +186,7 @@ const Trial = {
 
     // STAGE 4 — the ceremony
     await fadeOut(600); await fadeIn(600);
-    await narr('Daylight. A crowd outside the Gate Hall. Maren is there. Tobb is selling snacks. Pip is holding Gerald up so he can see.');
+    await narr('Daylight. The Gate Plaza is full again. The Gate turns overhead. Somebody is selling snacks. A little girl on her father\'s shoulders is waving a blue Guild flag.');
     const dead = f.mirelSaved ? ['Hobb Tanner', 'Corwin'] : ['Hobb Tanner', 'Corwin', 'Mirel'];
     await say('brom', 'sad', `${dead.length === 2 ? 'Two' : 'Three'} of ours did not walk out of the Quarry Gate. ${dead.join(', ')}. Remember their names.`);
     await narr('Brom hands out black ribbons. His hands aren\'t steady. Then he reads the survivors, one by one — and yours is one of them.');
@@ -244,7 +247,7 @@ const Trial = {
   World.load = async function (name, x, y, dir) {
     const r = await _l(name, x, y, dir);
     try { if (G.S.f.trial === 'running' && !Trial.active) G.S.f.trial = 'open';   // a save made mid-Trial starts it over from the hall
-      if (name === 'a_guild' && G.S.f.trial === 'open' && G.mode === 'world') setTimeout(() => { if (G.S.f.trial === 'open' && !World.busy) Story.run(() => Trial.run()); }, 900); } catch (e) { }
+      if (name === 'hm_hall' && G.S.f.trial === 'open' && G.S.f.hmAnn && G.mode === 'world') setTimeout(() => { if (G.S.f.trial === 'open' && !World.busy) Story.run(() => Trial.run()); }, 900); } catch (e) { }
     return r;
   };
   // the Guild ledger: Trial status on the Quests page
@@ -252,6 +255,6 @@ const Trial = {
     const _q = questsMenuHTML;
     questsMenuHTML = function () { const f = G.S.f; let h = _q(); if (!f.trial) return h;
       const st = (ok, t) => `<p>${ok ? '<b style="color:#46ff95">✓</b>' : '<b style="color:#ffd36a">○</b>'} ${t}</p>`;
-      return h + `<div class="stat" style="margin-top:6px"><h3 style="color:#7fd8ff">The Guild Trial</h3>${st(f.trial === 'running' || f.trial === 'done', 'Report to the Guild hall in Ashford')}${st(f.gateObjectiveDone, 'Survive the Quarry Gate')}${st(f.trial === 'done', 'The duels')}</div>`; };
+      return h + `<div class="stat" style="margin-top:6px"><h3 style="color:#7fd8ff">The Guild Trial</h3>${st(f.trial === 'running' || f.trial === 'done', 'Report to the Great Hall in Highmark')}${st(f.gateObjectiveDone, 'Survive the Quarry Gate')}${st(f.trial === 'done', 'The duels')}</div>`; };
   }
 })();
