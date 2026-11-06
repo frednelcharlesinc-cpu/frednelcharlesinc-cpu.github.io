@@ -53,9 +53,9 @@ const Trial = {
     const f = this.f(); if (f.trial) return; f.trial = 'open';
     await say('liora', 'neutral', "One more thing. Greyspire's gate only opens for Guild-licensed hunters on Crown contract. Escorts. Bounty men. Anyone else gets shot from the wall.");
     await say('liora', 'smirk', "The Guild Trial is in Highmark — the Guild's mother city, up the Crown Road. Three days. Miss it and the next is in a year. …I'm signing up. I hate guilds. I love loopholes.");
-    await say('liora', 'neutral', "There's a Guild coach in the Market Square. Applicants ride free.");
+    await say('liora', 'neutral', "There's a carriage to Highmark at the south end of the Market Square. Forty gold, and worth it.");
     await say('liora', 'neutral', "Try not to die in the Gate before I get to beat you at something.");
-    Story.quest('The Guild Trial: take the Guild coach from Ashford\'s Market Square to Highmark, and hear the announcement at the Gate Plaza.');
+    Story.quest('The Guild Trial: take the carriage from the south side of Ashford\'s Market Square to Highmark, and hear the announcement at the Gate Plaza.');
   },
 
   /* ---- the whole Trial, from the moment you walk into the Guild hall ---- */

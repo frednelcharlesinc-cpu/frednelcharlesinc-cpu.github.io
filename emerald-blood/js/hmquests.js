@@ -115,7 +115,7 @@ const Coach = {
     await this.informant();
     await fadeOut(500);
     if (typeof ASH2 !== 'undefined' && to !== 'hm') ASH2.raw = 1;
-    if (to === 'hm') await World.load('hm_gate', 21, 21, 'up'); else await World.load('ashford', 21, 4, 'down');
+    if (to === 'hm') await World.load('hm_gate', 21, 21, 'up'); else await World.load('ashford', 32, 27, 'down');
     save(); UI.hud(); await fadeIn(500); banner(to === 'hm' ? 'Highmark' : 'Ashford Hollow', to === 'hm' ? 'Mother city of the Guild' : 'Market town of the eastern vale', 1600);
     if (typeof Cal !== 'undefined') S.day = (S.day || 1);
     return true;
@@ -219,7 +219,7 @@ const Coach = {
   if (typeof mapMenuHTML === 'function') {
     const _h = mapMenuHTML; mapMenuHTML = function () { let h = _h();
       const here = G.S.map, inA = typeof ASH2 !== 'undefined' && ASH2.isD(here), inH = typeof HM !== 'undefined' && HM.is(here);
-      if ((inA || inH) && G.S.f.vaneDone && !G.S.kid) h = `<div class="stat" style="margin-bottom:6px;border:1px solid #ffd36a"><h3 style="color:#ffd36a">🐎 Carriage</h3><p class="muted">The Crown Road coach runs between Ashford Hollow and Highmark. ${Coach.FARE} gold a seat. Coach stops: Ashford's Market Square (top of the square, by the road to Chapel Hill) · Highmark's Crown Road Gate.</p><div class="btnrow"><button class="btn" data-coach="${inA ? 'hm' : 'ash'}">Take the carriage to ${inA ? 'Highmark' : 'Ashford'}</button></div></div>` + h;
+      if ((inA || inH) && G.S.f.vaneDone && !G.S.kid) h = `<div class="stat" style="margin-bottom:6px;border:1px solid #ffd36a"><h3 style="color:#ffd36a">🐎 Carriage</h3><p class="muted">The Crown Road coach runs between Ashford Hollow and Highmark. ${Coach.FARE} gold a seat. Coach stops: Ashford's Market Square (south-east corner, by the high street) · Highmark's Crown Road Gate.</p><div class="btnrow"><button class="btn" data-coach="${inA ? 'hm' : 'ash'}">Take the carriage to ${inA ? 'Highmark' : 'Ashford'}</button></div></div>` + h;
       return h; };
     document.addEventListener('pointerdown', e => { const b = e.target.closest && e.target.closest('[data-coach]'); if (!b) return; e.preventDefault(); UI.closeMenu(); Story.run(() => Coach.ride(b.dataset.coach)); }, true);
   }
