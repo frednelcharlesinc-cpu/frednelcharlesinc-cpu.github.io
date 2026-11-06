@@ -93,3 +93,28 @@ const MIND = {
   const _h = Story.heal.bind(Story);
   Story.heal = function (full) { const r = _h(full); try { if (full && G.mode === 'world' && !Battle.B && !MIND.active) setTimeout(() => { MIND.coolUntil = 0; Break.try(); }, 1500); } catch (e) { } return r; };
 })();
+/* MEDITATE — a button wherever the breakthrough is shown (Menu → Skills, Menu → Stones, Menu → Quests) */
+const Meditate = {
+  state() { const g = Break.next(); if (!g || !BREAK[g]) return null;
+    return { g, B: BREAK[g], done: Break.has(g), full: Break.atCap() }; },
+  html() {
+    const s = this.state(); if (!s || G.S.kid) return '';
+    const ready = s.done && s.full;
+    const why = !s.done ? `First: ${s.B.hint}` : !s.full ? 'Feat done ✔ — now fill your aura (keep fighting until it burns red and full).' : 'Ready. Sit, close your eyes, and face your Shadow.';
+    return `<div class="stat" style="margin:6px 0;border:1px solid ${ready ? '#46ff95' : '#5a4a2a'}"><h3 style="color:#7dffb0">🧘 Meditate — Breakthrough to ${s.g}</h3><p class="muted">${why}</p>
+      <div class="btnrow"><button class="btn" data-meditate="1" ${ready ? '' : 'disabled'}>${ready ? 'Meditate now' : 'Not ready yet'}</button></div></div>`;
+  },
+  go() {
+    const s = this.state(); if (!s || !s.done || !s.full) return;
+    if (G.mode !== 'world' || World.busy) { toast('Find somewhere quiet first (you can\'t meditate in a fight or a scene).', 2400); return; }
+    UI.closeMenu(); MIND.coolUntil = 0; Break.pending = true; Story.run(() => Break.scene(s.g));
+  }
+};
+(function () {
+  const add = (fn, at) => { if (typeof window[fn] !== 'function') return; const _o = window[fn]; window[fn] = function () { const h = _o.apply(this, arguments); return at === 'top' ? Meditate.html() + h : h + Meditate.html(); }; };
+  add('skillsMenuHTML', 'top'); add('questsMenuHTML'); add('stonesMenuHTML', 'top');
+  document.addEventListener('pointerdown', e => { const b = e.target.closest && e.target.closest('[data-meditate]'); if (!b || b.disabled) return; e.preventDefault(); try { sfx('art'); } catch (x) { } Meditate.go(); }, true);
+  // the wall toast now says where the button is
+  const _c = Break.capped.bind(Break);
+  Break.capped = function () { _c(); setTimeout(() => { if (Break.has(Break.next())) toast('<b style="color:#7dffb0">🧘 Ready to break through.</b> Menu → Skills → <b>Meditate now</b>.', 5000); }, 11000); };
+})();

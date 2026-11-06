@@ -201,3 +201,26 @@ const Coach = {
   if (typeof talkAldric === 'function') { const _a = talkAldric; talkAldric = async function () { await _a(); if (typeof Break !== 'undefined' && Break.walled()) { await say('aldric', 'neutral', '"Your aura\'s burning red, applicant. You\'ve hit a wall. Everyone does. Experience won\'t move it — only doing the thing will."'); await tip(); } }; SCENES.hm_office.npcs = () => [{ id: 'aldric', sprite: 'gideon', x: 14, y: 11, dir: 'down', talk: talkAldric }]; }
 })();
 
+/* the carriage stops are easy to find: a sign over each coachman, a quest pointer, and a button on the world map */
+(function () {
+  const _r = World.render.bind(World);
+  World.render = function (c, t) {
+    _r(c, t);
+    try { if (G.mode !== 'world' || this.loading) return;
+      const e = (this.ents || []).find(n => n.id === 'hm_coachman'); if (!e) return;
+      const txt = G.S.map === 'ashford' ? '🐎 Carriage to Highmark · 40g' : '🐎 Carriage to Ashford · 40g';
+      const x = e.px - Math.round(this.cam.x), y = e.py - 62 - Math.round(this.cam.y);
+      c.save(); c.font = '800 9px Nunito, system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; const w = c.measureText(txt).width + 12;
+      c.fillStyle = 'rgba(60,30,8,.85)'; c.beginPath(); c.roundRect ? c.roundRect(x - w / 2, y - 8, w, 16, 7) : c.rect(x - w / 2, y - 8, w, 16); c.fill();
+      c.strokeStyle = '#ffd36a'; c.lineWidth = 1; c.stroke(); c.fillStyle = '#ffe7a8'; c.fillText(txt, x, y + .5); c.restore();
+    } catch (x) { }
+  };
+  // fast travel between the two cities = the carriage (from anywhere in either town)
+  if (typeof mapMenuHTML === 'function') {
+    const _h = mapMenuHTML; mapMenuHTML = function () { let h = _h();
+      const here = G.S.map, inA = typeof ASH2 !== 'undefined' && ASH2.isD(here), inH = typeof HM !== 'undefined' && HM.is(here);
+      if ((inA || inH) && G.S.f.vaneDone && !G.S.kid) h = `<div class="stat" style="margin-bottom:6px;border:1px solid #ffd36a"><h3 style="color:#ffd36a">🐎 Carriage</h3><p class="muted">The Crown Road coach runs between Ashford Hollow and Highmark. ${Coach.FARE} gold a seat. Coach stops: Ashford's Market Square (top of the square, by the road to Chapel Hill) · Highmark's Crown Road Gate.</p><div class="btnrow"><button class="btn" data-coach="${inA ? 'hm' : 'ash'}">Take the carriage to ${inA ? 'Highmark' : 'Ashford'}</button></div></div>` + h;
+      return h; };
+    document.addEventListener('pointerdown', e => { const b = e.target.closest && e.target.closest('[data-coach]'); if (!b) return; e.preventDefault(); UI.closeMenu(); Story.run(() => Coach.ride(b.dataset.coach)); }, true);
+  }
+})();
