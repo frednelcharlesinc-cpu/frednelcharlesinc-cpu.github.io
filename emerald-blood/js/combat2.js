@@ -29,7 +29,7 @@ const CombatX = {
         () => { a.stance2 = st === 'sheathed' ? 'drawn' : 'sheathed'; sfx(a.stance2 === 'drawn' ? 'swing' : 'parry'); Battle.text(a, a.stance2 === 'drawn' ? 'BLADE DRAWN' : '— click — SHEATHED', a.stance2 === 'drawn' ? '#ffd36a' : '#cfe8ff', -40); reopen(); }]);
     }
     const panicked = Battle.alive('e').filter(e => e.panic);
-    if (a.isMe && panicked.length) add('Spare them', `${panicked.length > 1 ? 'They are' : (panicked[0].name + ' is')} begging. Let ${panicked.length > 1 ? 'them' : 'them'} run. (The vale hears about mercy.)`, async () => { Battle.closeMenu(); await this.spare(panicked); done(); });
+    if (a.side === 'p' && panicked.length) add('Spare them', `${panicked.length > 1 ? 'They are' : (panicked[0].name + ' is')} begging. Let ${panicked.length > 1 ? 'them' : 'them'} run. (The vale hears about mercy.)`, async () => { Battle.closeMenu(); await this.spare(panicked); done(); });
     if (typeof CombatX2 !== 'undefined') CombatX2.menu(a, L, done, resolve, reopen, add);
   },
   // ---------------- morale ----------------
@@ -120,7 +120,7 @@ const CombatX = {
     if (t.side === 'e' && r === 'hit') { if (grade === 'perfect') CombatX.shake(t, 12); if (t.broken) CombatX.shake(t, 15); }
     if (wasAlive && t.ko && t.side === 'e') {
       for (const o of BT.alive('e')) CombatX.shake(o, t.E.boss ? 70 : 40);
-      if (panicked && a.side === 'p' && HUMANOID.test(t.key) && !this.B.cutDown) { this.B.cutDown = 1; if (typeof Opinion !== 'undefined') Opinion.add('fear', .5); this.text(t, 'CUT DOWN BEGGING', '#ff6a5a', -70); }
+      if (panicked && a.isMe && HUMANOID.test(t.key) && !this.B.cutDown) { this.B.cutDown = 1; if (typeof Opinion !== 'undefined') Opinion.add('fear', .5); this.text(t, 'CUT DOWN BEGGING', '#ff6a5a', -70); }
     }
     return r;
   };

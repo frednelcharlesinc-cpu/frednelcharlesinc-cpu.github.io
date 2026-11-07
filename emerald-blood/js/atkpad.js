@@ -70,6 +70,9 @@ const MoveBar = {
   #gpad .go.on i{transform:scale(.86);background:rgba(255,255,255,.32);box-shadow:0 0 16px #ff9a7a}
   #mbar{position:fixed;z-index:57;display:flex;flex-direction:column;align-items:center;gap:4px;touch-action:none;font-family:Nunito,system-ui;-webkit-user-select:none;user-select:none}
   #mbar .tabs{display:flex;gap:4px}
+  #mbar .spare{display:flex;white-space:nowrap;justify-content:space-between;align-items:center;gap:6px;margin:0 0 6px;padding:6px 10px;border-radius:12px;background:rgba(20,40,60,.88);border:2px solid #bfe3ff;color:#eaf6ff;font:700 12px Nunito,system-ui;box-shadow:0 0 14px rgba(150,210,255,.5);cursor:pointer;animation:spPulse 1.2s ease-in-out infinite}
+  #mbar .spare .sp-go{margin-left:auto;padding:3px 12px;border-radius:9px;background:#bfe3ff;color:#0b2233;font-weight:900}
+  @keyframes spPulse{50%{box-shadow:0 0 22px rgba(150,210,255,.9)}}
   #mbar .tab{padding:3px 10px;border-radius:10px;background:rgba(8,16,12,.62);border:1px solid rgba(255,255,255,.18);color:#cfe3d6;font:800 11px Nunito,system-ui;-webkit-tap-highlight-color:transparent}
   #mbar .tab.sel{background:rgba(70,255,149,.28);border-color:#7dffb0;color:#fff}
   #mbar .row{display:flex;gap:5px}
@@ -87,7 +90,7 @@ const MoveBar = {
   const chip = document.createElement('div'); chip.id = 'atkHint'; chip.className = 'hide'; document.body.append(chip);
   const feel = el => { el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); sfx('blip'); try { navigator.vibrate && navigator.vibrate(12); } catch (e) { } setTimeout(() => el.classList.remove('on'), 140); };
   let cur = null, turns = 0, tab = (() => { try { return localStorage.getItem('eb_mbtab2') || 'phys'; } catch (e) { return 'phys'; } })();
-  const target = a => (a.lastTarget && !a.lastTarget.ko && a.lastTarget) || Battle.alive('e')[0] || null;
+  const target = a => { const L = Battle.alive('e'), calm = L.filter(e => !e.panic); const lt = a.lastTarget && !a.lastTarget.ko && !a.lastTarget.panic && a.lastTarget; return lt || calm[0] || L[0] || null; };
   const hide = () => { chip.classList.add('hide'); gp.classList.add('hide'); bar.classList.add('hide'); cur = null; };
   const go = fn => { const c = cur; hide(); if (typeof AT !== 'undefined') { AT.fold(); AT.btn.classList.add('hide'); } Battle.closeMenu(); fn(c); };
   const onDown = (el, fn) => el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (!cur) return; try { audioUnlock(); } catch (x) { } fn(el); });
@@ -119,11 +122,13 @@ const MoveBar = {
     let want = a.isMe && MoveBar.lo()[tab] && MoveBar.lo()[tab].some(Boolean) ? MoveBar.lo()[tab].slice(0, 5) : names.slice(0, 5);
     if (!a.isMe) want = names.slice(0, 5);
     const slots = want.map(n => { if (!n) return null; const x = have.find(s => MoveBar.norm(s[0]) === n); return x ? { x, name: n, cost: x[4] } : { gone: 1, name: n }; }).filter(Boolean);
-    bar.innerHTML = `<div class="row"><div class="mv atk"><i>${MoveIcon('Attack')}</i><span>Attack</span></div>${slots.map((s, i) => {
+    const beg = c.spare ? Battle.alive('e').filter(e => e.panic) : [];
+    bar.innerHTML = `${beg.length ? `<div class="spare">🕊 <b>${beg.length > 1 ? 'Begging for mercy' : 'Begging'}</b><span class="sp-go">Spare</span></div>` : ''}<div class="row"><div class="mv atk"><i>${MoveIcon('Attack')}</i><span>Attack</span></div>${slots.map((s, i) => {
       const off = s.gone || (s.cost && a.mp < s.cost) || s.x[3];
       return `<div class="mv${off ? ' off' : ''}" data-i="${i}"><i>${MoveIcon(s.name)}</i><span>${MoveBar.short(s.name)}</span>${s.cost ? `<em>${s.cost}</em>` : ''}</div>`;
     }).join('')}</div>
       <div class="tabs">${S.phys.length ? `<div class="tab ${tab === 'phys' ? 'sel' : ''}" data-t="phys">⚔ Sword</div>` : ''}${S.spec.length ? `<div class="tab ${tab === 'spec' ? 'sel' : ''}" data-t="spec">✦ Special</div>` : ''}</div>`;
+    const sp = bar.querySelector('.spare'); if (sp) onDown(sp, el => { feel(el); sfx('blip'); go(c2 => { try { c2.spare[2](); } catch (e) { console.warn(e); } }); });
     onDown(bar.querySelector('.mv.atk'), el => { feel(el); const t = target(a); if (!t) return; go(c2 => Battle.doAttack(c2.a, t).then(c2.done)); });
     bar.querySelectorAll('.tab').forEach(el => onDown(el, () => { tab = el.dataset.t; try { localStorage.setItem('eb_mbtab2', tab); } catch (e) { } sfx('blip'); render(); }));
     bar.querySelectorAll('.mv[data-i]').forEach(el => onDown(el, () => {
@@ -151,7 +156,7 @@ const MoveBar = {
   addEventListener('resize', place);
 
   function show(a, done, reopen, L) {
-    cur = { a, done, reopen, list: moves(a, L || []) }; turns++;
+    cur = { a, done, reopen, list: moves(a, L || []), spare: a.side === 'p' ? (L || []).find(x => String(x[0]) === 'Spare them') : null }; turns++;
     chip.innerHTML = `<b>${a.name}</b> · tap an enemy or ⚔ Attack · moves are above ${a.isMe ? 'you' : a.name} · ◉ menu`;
     chip.classList.toggle('hide', turns > 6 && !(G.settings && G.settings.hints));
     bar.classList.remove('hide'); render();
