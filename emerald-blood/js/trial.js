@@ -243,7 +243,7 @@ const Trial = {
     await narr('Outside the hall, Dax Merrin ties a green-edged knot to a crow\'s leg and lets it go north.');
     await narr('A day later, a crow comes back. One line, in a burned hand: "Tell her she\'s still not joining me. …And tell my brother I heard."');
     await say('liora', 'neutral', 'I\'ve got my license. You\'ve got yours. See you on the Greyspire road, Sword Saint\'s student.');
-    f.trial = 'done'; this.active = 0;
+    f.trial = 'done'; f.trialWalked = 1; this.active = 0;
     Story.trialEnd && await Story.trialEnd();
   }
 };
@@ -269,5 +269,5 @@ const Trial = {
   }
 })();
 
-function trialRepair() { const F0 = G.S && G.S.f; if (!F0) return; if (F0.chapter1Done && !G.S.kid && (F0.trial !== 'done' || !F0.dawnDone) && !F0.trialRepair2) { F0.trialRepair2 = 1; setTimeout(() => { try { save(); } catch (e) { } }, 500); delete F0.chapter1Done; delete F0.dawnDone; delete F0.dawnDream; F0.trial = 'open'; F0.hmAnn = 0; Story.quest('The Guild Trial: take the carriage from the south side of Ashford\'s Market Square to Highmark, and hear the announcement in the Great Hall.'); toast('<b>The Guild Trial</b> is still ahead of you — take the carriage from Ashford\'s Market Square to Highmark.', 5000); } }
+function trialRepair() { const F0 = G.S && G.S.f; if (!F0) return; if (F0.chapter1Done && !G.S.kid && !F0.trialWalked && !F0.trialRepair3) { F0.trialRepair3 = 1; setTimeout(() => { try { save(); } catch (e) { } }, 500); delete F0.chapter1Done; delete F0.dawnDone; delete F0.dawnDream; F0.trial = 'open'; F0.hmAnn = 0; Story.quest('The Guild Trial: take the carriage from the south side of Ashford\'s Market Square to Highmark, and hear the announcement in the Great Hall.'); toast('<b>The Guild Trial</b> is still ahead of you — take the carriage from Ashford\'s Market Square to Highmark.', 5000); } }
 setInterval(() => { try { if (G.S && G.mode === 'world' && !World.busy && !Dlg.open) trialRepair(); } catch (e) { } }, 1500);
