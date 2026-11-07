@@ -6,9 +6,9 @@
    Ranks: survivors are licensed (E); a quarterfinal win → D; reaching the final → C. The final is for the title.
    Deaths: Hobb and Corwin always; Mirel unless Ren saves her. Kairo stays away — only Dace ("Dax Merrin") reports to him. */
 Object.assign(CHAR, {
-  dax: { name: 'Dax Merrin', sprite: 'ge_dace' }, hobb: { name: 'Hobb Tanner', sprite: 'folk11' }, corwin: { name: 'Corwin', sprite: 'folk14' },
-  mirel: { name: 'Mirel', sprite: 'folk5' }, eirik: { name: 'Eirik Stormborn', sprite: 'hrok' }, brenna: { name: 'Brenna Ironvein', sprite: 'dwarf_f1' },
-  faelan: { name: 'Faelan', sprite: 'elf_m1' }, samira: { name: 'Samira of Solmere', sprite: 'asha' }, tobias: { name: 'Ser Tobias Wend', sprite: 'gideon' }
+  dax: { name: 'Dax Merrin', sprite: 'dax' }, hobb: { name: 'Hobb Tanner', sprite: 'hobb' }, corwin: { name: 'Corwin', sprite: 'corwin' },
+  mirel: { name: 'Mirel', sprite: 'mirel' }, eirik: { name: 'Eirik Stormborn', sprite: 'hrok' }, brenna: { name: 'Brenna Ironvein', sprite: 'dwarf_f1' },
+  faelan: { name: 'Faelan', sprite: 'elf_m1' }, samira: { name: 'Samira of Solmere', sprite: 'asha' }, tobias: { name: 'Ser Tobias Wend', sprite: 'tobias' }
 });
 const TM = (name, img, hp, atk, def, spd, extra, skills) => Object.assign({ name, img, hp, atk, def, spd, dodge: .15, parry: .1, brk: Math.round(hp * .6), xp: Math.round(hp / 3), gold: Math.round(hp / 6), skills }, extra || {});
 Object.assign(ENEMY, {
@@ -20,8 +20,8 @@ Object.assign(ENEMY, {
   gt_shade: TM('Mirror Shade', 'm_vampire', 70, 14, 3, 15, { dodge: .3, trait: 'Carries an Azure Sigil — wears your movements' }, [{ name: 'Mirror Cut', hits: [{ anim: 'slash', m: .8, w: 420 }, { anim: 'halfslash', m: .8, w: 260 }] }, { name: 'Blood Bats', w: .3, hits: [{ anim: 'spellcast', proj: 'shadow', m: 1, w: 560 }] }]),
   gt_stalker: TM('Pale Stalker', 'm_ghoul', 64, 14, 3, 16, { dodge: .25, trait: 'Hunts the weakest first' }, [{ name: 'Lunge', hits: [{ anim: 'thrust', m: 1.1, w: 420 }] }, { name: 'Frenzy', w: .35, hits: [{ anim: 'slash', m: .6, w: 360 }, { anim: 'slash', m: .6, w: 240 }, { anim: 'slash', m: .7, w: 260 }] }]),
   gt_warden: TM('The Hollow Warden', 'm_troll', 340, 18, 7, 9, { boss: 1, size: 1.35, brk: 160, trait: 'Stone and chain — the Gate jumped to B-rank around it' }, [{ name: 'Chain Sweep', hits: [{ anim: 'slash', m: 1, w: 560 }, { anim: 'halfslash', m: .8, w: 320 }] }, { name: 'Quarry Slam', w: .3, hits: [{ anim: 'jump', m: 1.6, w: 680, unp: 1 }] }, { name: 'Gate Pulse', w: .25, hits: [{ anim: 'spellcast', proj: 'mana', m: 1.2, w: 600 }] }]),
-  gt_tobias: TM('Ser Tobias Wend', 'gideon', 120, 14, 6, 11, { parry: .35, trait: 'Crown squire — Creed: parries and counters' }, [{ name: 'Drill Thrust', hits: [{ anim: 'thrust', m: 1, w: 520 }] }, { name: 'Creed Counter', w: .35, hits: [{ anim: 'slash', m: .7, w: 380 }, { anim: 'slash', m: .9, w: 300 }] }]),
-  gt_dax: TM('Dax Merrin', 'ge_dace', 160, 16, 5, 15, { drag: 1, parry: .2, dodge: .2, trait: 'Green Eclipse brawler — fights like he has something to prove' }, [{ name: 'Knuckle Rush', hits: [{ anim: 'slash', m: .6, w: 380 }, { anim: 'halfslash', m: .6, w: 240 }, { anim: 'slash', m: .7, w: 260 }] }, { name: 'Five Years', w: .3, hits: [{ anim: 'thrust', m: 1.6, w: 620 }] }]),
+  gt_tobias: TM('Ser Tobias Wend', 'tobias', 120, 14, 6, 11, { parry: .35, trait: 'Crown squire — Creed: parries and counters' }, [{ name: 'Drill Thrust', hits: [{ anim: 'thrust', m: 1, w: 520 }] }, { name: 'Creed Counter', w: .35, hits: [{ anim: 'slash', m: .7, w: 380 }, { anim: 'slash', m: .9, w: 300 }] }]),
+  gt_dax: TM('Dax Merrin', 'dax', 160, 16, 5, 15, { drag: 1, parry: .2, dodge: .2, trait: 'Green Eclipse brawler — fights like he has something to prove' }, [{ name: 'Knuckle Rush', hits: [{ anim: 'slash', m: .6, w: 380 }, { anim: 'halfslash', m: .6, w: 240 }, { anim: 'slash', m: .7, w: 260 }] }, { name: 'Five Years', w: .3, hits: [{ anim: 'thrust', m: 1.6, w: 620 }] }]),
   gt_liora: TM('Liora', 'liora', 170, 17, 5, 18, { drag: 1, parry: .4, dodge: .2, trait: "Counter-fighter — Wolf's Parry deflects and strikes in one move" }, [{ name: 'Spear Line', hits: [{ anim: 'thrust', m: 1, w: 460 }, { anim: 'thrust', m: .8, w: 280 }] }, { name: 'Moon Waltz', w: .3, hits: [{ anim: 'backslash', m: .5, w: 360 }, { anim: 'slash', m: .5, w: 240 }, { anim: 'thrust', m: .9, w: 300 }] }, { name: "Wolf's Reply", w: .2, hits: [{ anim: 'thrust', m: 1.5, w: 560, unp: 1 }] }])
 });
 Object.assign(TIER, { gt_gloom: 'E', gt_rat: 'E', gt_imp: 'D', gt_spawn: 'C', gt_brute: 'C', gt_shade: 'C', gt_stalker: 'C', gt_warden: 'B', gt_tobias: 'D', gt_dax: 'C', gt_liora: 'B' });
@@ -69,11 +69,11 @@ const Trial = {
     if (S.rank || (S.q && Object.values(S.q).includes('done'))) await say('brom', 'happy', 'You — you\'ve done Guild work. Fee\'s waived. Sign the waiver.');
     else { await say('brom', 'neutral', 'Thirty gold. Sign the waiver.'); S.gold = Math.max(0, S.gold - 30); UI.hud(); }
     await narr('The waiver is one line long: THE GUILD IS NOT RESPONSIBLE FOR WHAT THE GATE DOES. You sign it.');
-    await say('hobb', null, '"Hobb Tanner! Farmhand, forty-one, three kids. If I get a license, I get paid more to stab the same wolves. Ha!"');
-    await say('corwin', null, '"Corwin. Team leader — well, I will be. Stick with the winners, hood."');
-    await say('mirel', null, '"I\'m Mirel. I\'m… an apprentice healer. Maren says I\'m ready. I don\'t think Maren\'s ever wrong. I think she might be wrong."');
-    await narr('Near the back wall, a young man with a headband low over a scar leans on a pillar with his arms crossed. He has been watching you since you walked in.');
-    await say('dax', null, '"Dax Merrin. I work alone." He says it to the whole room — but he\'s looking at you.');
+    await say('hobb', 'laugh', '"Hobb Tanner! Farmhand, forty-one, three kids. If I get a license, I get paid more to stab the same wolves. Ha!"');
+    await say('corwin', 'smirk', '"Corwin. Team leader — well, I will be. Stick with the winners, hood."');
+    await say('mirel', 'scared', '"I\'m Mirel. I\'m… an apprentice healer. Maren says I\'m ready. I don\'t think Maren\'s ever wrong. I think she might be wrong."');
+    await narr('Near the back wall, a lean boy with a green streak in his black hair and a scar through one eyebrow leans on a pillar with his arms crossed. He has been watching you since you walked in.');
+    await say('dax', 'neutral', '"Dax Merrin. I work alone." He says it to the whole room — but he\'s looking at you.');
     await me('neutral', '(…Dace. Kairo\'s best fighter. Under a fake name, in a Guild hall.)');
     await narr('Three days go by: whetstones, bad sleep, Tobb selling "Trial tonics" at double price. Then it\'s dawn.');
     if (typeof Cal !== 'undefined') S.day = (S.day || 1) + 3;
@@ -114,6 +114,7 @@ const Trial = {
       await narr('Dax Merrin doesn\'t laugh. He looks at the grey crystal, then at your hands — still, too still — and narrows his eyes.');
     }
     // STAGE 2 — the lottery
+    await Paint.show('ex_lottery', 'The lottery. Coloured tokens from a sack — and your life on whichever one you draw.');
     await narr('Coloured tokens from a bag. Six teams of three. Corwin gets Hobb and two boys from Millbrook. Mirel ends up with three strangers who don\'t learn her name.');
     await say('brom', 'sad', 'You. Hood. You go in alone. I can\'t put your eyes in a team of strangers, and I can\'t put strangers\' lives next to your eyes. …Don\'t make that face. It\'s the kindest insult I\'ve got.');
     await say('dax', null, '"I don\'t take a team." / "I don\'t either," says a voice by the door — Liora, a spear across her back, already bored.');
@@ -124,6 +125,7 @@ const Trial = {
 
     // STAGE 3 — THE QUARRY GATE: four floors you walk yourself
     const me_ = this;
+    await Paint.show('ex_gate', 'The Quarry Gate opens. Green light, cold air, and a sound like breathing.', '#9dffc8');
     await narr('The Gate\'s iron door opens. Green light, cold air, and a sound like breathing. You step through.');
     await this.floor('gate1', 24, 5, 'down', [22, 29, 26, 31], [
       { at: [16, 14, 34, 23], fn: async () => { await narr('A camp in the middle of the cave. Blue banners, cold ashes, bedrolls still laid out. A team that came in two years ago and never came out.'); await narr('Something chitters behind the tent — then a dozen somethings.'); await me_.must({ enemies: ['gt_gloom', 'gt_rat', 'gt_gloom'], bd: 'warren', intro: 'The Quarry Steps — Gate-spawn!' }); } },
@@ -142,7 +144,7 @@ const Trial = {
       await say('liora', 'smirk', 'An Azure for a Crimson? You already put your Crimson in. …Fine. A favour, then. Owed. I\'ll collect at the worst possible moment.');
       f.lioraAlliance = 1; f.lioraAff = (f.lioraAff || 0) + 1; f.sigilTrades = 'liora';
     } else if (sd === 1) {
-      await say('dax', null, '"Hold the door open after. If you shut it on me, I\'ll gut you." He slaps the Azure into your palm hard enough to hurt.');
+      await say('dax', 'anger', '"Hold the door open after. If you shut it on me, I\'ll gut you." He slaps the Azure into your palm hard enough to hurt.');
       f.daxTrade = 1; f.sigilTrades = 'dax';
     } else {
       await this.must({ enemies: ['gt_shade'], bd: 'crypt', intro: 'The Mirror Shade — it carries a spare Azure Sigil' });
@@ -151,7 +153,7 @@ const Trial = {
     await narr('The third socket takes the Azure. The black stone grinds open. Ten minutes, then it seals again.');
     await narr('Mirel\'s team comes running, white-faced, no sigils left. One of them is limping.');
     const hd = await ask('me', 'neutral', '(The door is already grinding shut.)', ['Hold it open for them.', 'Go through. Every second counts.']);
-    if (hd === 0) { await narr('You put your shoulder under the stone. It is heavier than anything has a right to be. They make it through. Mirel says "thank you" four times.'); f.heldDoor = 1; if (typeof Opinion !== 'undefined') Opinion.add('hope', .5); }
+    if (hd === 0) { await Paint.show('ex_door', 'You put your shoulder under the stone. GO!', '#9dffc8'); await narr('You put your shoulder under the stone. It is heavier than anything has a right to be. They make it through. Mirel says "thank you" four times.'); f.heldDoor = 1; if (typeof Opinion !== 'undefined') Opinion.add('hope', .5); }
     else await narr('You go through. Behind you, the door booms shut. You hear them hammering on it for a long time.');
     // FLOOR THREE
     await this.floor('gate3', 24, 31, 'up', [21, 2, 27, 5], [
@@ -162,7 +164,7 @@ const Trial = {
         const ms = await ask('me', 'shock', '(Another stalker drops toward Mirel\'s team. Mirel is closest.)', ['Run for Mirel.', 'Keep moving — you can\'t save everyone.']);
         if (ms === 0 || f.heldDoor) {
           await me_.must({ enemies: ['gt_stalker', 'gt_stalker'], bd: 'crystal', intro: 'Pale Stalkers — they hunt the weakest first' });
-          if (ms === 0) { f.mirelSaved = 1; await say('mirel', null, '"You came back. Nobody comes back. …I\'m going to be a very good healer. I\'m going to owe you forever."'); }
+          if (ms === 0) { f.mirelSaved = 1; await say('mirel', 'cry', '"You came back. Nobody comes back. …I\'m going to be a very good healer. I\'m going to owe you forever."'); }
           else { await narr('You fight your own way through. By the time you look back, Mirel\'s team is gone — and on the Mirror, a third crystal has gone dark.'); }
         } else await narr('You keep moving. Behind you, a scream that the hall repeats nine times. On the Mirror, a third crystal goes dark.'); } },
       { at: [0, 0, 47, 12], fn: async () => {
@@ -170,7 +172,7 @@ const Trial = {
         const dd = await ask('me', 'neutral', '(He came here to spy on you. He hates you.)', ['Cut them off him.', 'Leave him. He made his choice.']);
         if (dd === 0) {
           await me_.must({ enemies: ['gt_stalker', 'gt_stalker'], bd: 'crystal', intro: 'Pale Stalkers on Dax Merrin' });
-          f.daceSaved = 1; await say('dax', null, '"…I didn\'t need that." He doesn\'t thank you. He also doesn\'t look away.');
+          f.daceSaved = 1; await say('dax', 'respect', '"…I didn\'t need that." He doesn\'t thank you. He also doesn\'t look away.');
         } else { await narr('You leave him. Later, you find out a stalker\'s claw caught his arm and he still made it through. When he sees you, his eyes say he knows exactly what you did.'); f.daceLeft = 1; } } }],
       'Floor Three: climb the Weeping Hall to the green light at the top.');
     // FLOOR FOUR — the Anomaly
@@ -180,6 +182,7 @@ const Trial = {
     await narr('Then the light SURGES. The floor bucks. Every watch crystal on every wrist turns black. Somewhere far above, a horn that is not the Guild\'s starts blowing and doesn\'t stop.');
     await narr('The Gate just jumped from C to B. The Mirror can\'t see you. Nobody is coming.');
     await narr('The chains move. They were never holding the light up. They were WRAPPED around something — and it\'s standing.');
+    await Paint.show('ex_warden', 'THE HOLLOW WARDEN — stone and chain, and one burning eye.', '#9dffc8');
     const withL = f.lioraAlliance || (f.lioraAff || 0) >= 2;
     if (withL) await say('liora', (f.lioraAff || 0) >= 4 ? 'happy' : 'neutral', (f.lioraAff || 0) >= 4 ? 'Hey. Hey — look at me. Eleven steps. We\'ve got this.' : 'That favour you owe me? I\'m collecting. Stand there and don\'t die.');
     if (typeof Art !== 'undefined' && Art.cut.hm_heart && typeof paintShot === 'function') await Cine.play([paintShot('hm_heart', 3000, [['', 'The heart of the pocket: a floating ring of broken stone, chained pillars — and the Core, beating like something alive.', '#9dffc8']], { y: 330 })]);
@@ -223,6 +226,7 @@ const Trial = {
         this.rankUp('C'); toast('Into the final — <b style="color:#7fd8ff">C-RANK</b>.', 3200); f.tournamentResult = 'final';
         if (f.lioraPin) await narr('Before the final, you touch the hairpin in your pocket. Across the yard, Liora sees you do it. She looks away first.');
         await say('liora', (f.lioraAff || 0) >= 3 ? 'happy' : 'smirk', (f.lioraAff || 0) >= 3 ? 'Don\'t hold back. If you hold back I\'ll know, and I\'ll never forgive you.' : 'Sheathe slower. You\'re telegraphing it.');
+        await Paint.show('ex_final', 'THE FINAL. The whole city on its feet.', '#ffd36a');
         r = await this.duel('gt_liora', 'ashford', 'THE FINAL — Liora', 'Liora: "Eleven steps, Sword Saint\'s student. You\'re on three."');
         if (r === 'win') {
           f.lioraFinal = 'won'; f.tournamentResult = 'champion'; f.questTitle = 'Victor of the Quarry'; G.S.qitems = G.S.qitems || {}; G.S.qitems.runeVoucher = 1;
