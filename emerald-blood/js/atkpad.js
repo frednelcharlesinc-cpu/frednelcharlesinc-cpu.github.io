@@ -106,7 +106,7 @@ const MoveBar = {
       const lb = String(it[0]);
       if (lb === 'More') { for (const x of moves(a, grab(it[2]).filter(y => y[0] !== '◀ Back'))) out.push(x); continue; }
       if (/^(Drag Arts|Skills|Stone Skills)$/.test(lb)) { for (const x of grab(it[2])) if (x[0] !== '◀ Back') out.push(x); }
-      else if (/^(Link Art|Transform|Ascen|Emerald Ascension|Eleventh|Phantom|Wyrmshade)/.test(lb)) out.push(it);
+      else if (it.mart || /^(Link Art|Transform|Ascen|Emerald Ascension|Eleventh|Phantom|Wyrmshade|Four (Cuts|Lines|Strikes|Shadows))/.test(lb)) out.push(it);
     }
     if (a.isMe) { const s = G.S.f.specSeen = G.S.f.specSeen || {}; for (const x of out) if (!MoveBar.isPhys(x[0])) s[MoveBar.norm(x[0])] = 1; }
     return out;

@@ -209,11 +209,11 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'skills', 'passives', 'arts', 'stones', 'items', 'quests', 'calendar', 'renown', 'feats', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ feats: 'Trophies', party: 'Party', skills: 'Skills', passives: 'Passives', arts: 'Arts', stones: 'Stones', items: 'Items', quests: 'Quests', calendar: 'Calendar', renown: 'Renown', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'skills', 'passives', 'arts', 'martial', 'stones', 'items', 'quests', 'calendar', 'renown', 'feats', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ feats: 'Trophies', party: 'Party', skills: 'Skills', passives: 'Passives', arts: 'Arts', martial: 'Martial Arts', stones: 'Stones', items: 'Items', quests: 'Quests', calendar: 'Calendar', renown: 'Renown', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
       body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · ${Power.badge()}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>EXP <b>${Power.xp()}/${Power.now().hi}</b> · <span style="color:${BAND_COL[Power.now().band]}">${BAND_NAME[Power.now().band]}</span> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
-        S.party.map(id => { const A = ALLY[id], lv = S.lvl - 1 + (A.lvUp || 0); return `<div class="stat"><h3>${A.name}${A.badge ? ' ' + A.badge() : ''}</h3><p>ATK <b>${A.atk + lv * 2}</b> · DEF <b>${A.def + lv}</b> · SPD <b>${A.spd}</b></p><p>Arts: <b>${A.arts.map(k => ARTS[k].name).join(', ')}</b></p><p>Link Art: <b>${LINKS[id].name}</b></p></div>`; }).join('') + '</div>';
+        S.party.map(id => { const A = ALLY[id], lv = S.lvl - 1 + (A.lvUp || 0); return `<div class="stat"><h3>${A.name}${A.badge ? ' ' + A.badge() : ''}</h3><p>ATK <b>${A.atk + lv * 2}</b> · DEF <b>${A.def + lv}</b> · SPD <b>${A.spd}</b></p><p>Arts: <b>${A.arts.map(k => ARTS[k] ? ARTS[k].name : k).join(', ')}</b></p><p>Link Art: <b>${LINKS[id] ? LINKS[id].name : '—'}</b></p></div>`; }).join('') + '</div>';
     } else if (t === 'arts') {
       body = S.arts.map(k => `<div class="stat" style="margin-bottom:6px"><h3>${ARTS[k].name} <span class="muted">· ${ARTS[k].mp} MP</span></h3><p>${ARTS[k].desc}</p></div>`).join('') +
         `<div class="stat" style="margin-bottom:6px"><h3>Drag Reflex <span class="muted">· passive</span></h3><p>A Drag body wastes nothing. Your dodge, parry and timed-hit windows are wider than a human's. Drag enemies dodge and parry more often, and may RIPOSTE when they parry you.</p></div>` +
@@ -234,6 +234,8 @@ const UI = {
       body = worldMenuHTML();
     } else if (t === 'map') {
       body = mapMenuHTML();
+    } else if (t === 'martial') {
+      body = typeof MARTIAL !== 'undefined' ? MARTIAL.html() : '';
     } else if (t === 'companions') {
       body = companionsMenuHTML();
     } else if (t === 'stones') {
@@ -254,6 +256,7 @@ const UI = {
     $$('#menuCard .tabs button[data-t]').forEach(b => bindTap(b, () => { this.menuTab = b.dataset.t; sfx('blip'); this.renderMenu(); }));
     bindTap($('#mClose'), () => this.closeMenu());
     if (t === 'stones') bindStonesMenu();
+    if (t === 'martial' && typeof MARTIAL !== 'undefined') MARTIAL.bind();
     if (t === 'skills') bindSkillsMenu();
     if (t === 'passives' && typeof bindPassivesMenu === 'function') bindPassivesMenu();
     if (t === 'map') bindMapMenu();
