@@ -92,8 +92,8 @@ async function spawnExtras(W, name) {
   }
   // gather spots (herbs / ore / bones) — respawn each visit until collected for this "day"
   const G8 = D ? D.gather : (GATHER_SPOTS[mk] || []);
-  const kind = D ? { warren: 'ore', crypt: 'bones', mire: 'herb', crystal: 'ore' }[D.style] : 'herb';
-  const item = D ? { warren: 'glowore', crypt: 'gravedust', mire: 'mireroot', crystal: 'skyshard' }[D.style] : 'moonpetal';
+  const kind = D ? ({ warren: 'ore', crypt: 'bones', mire: 'herb', crystal: 'ore', sewer: 'bones' }[D.style] || 'herb') : 'herb';
+  const item = D ? ({ warren: 'glowore', crypt: 'gravedust', mire: 'mireroot', crystal: 'skyshard', sewer: 'gravedust' }[D.style] || 'mireroot') : 'moonpetal';
   for (const [x0, y0] of G8) {
     const p = free(x0, y0); if (!p) continue; const key = `${name}:${x0},${y0}`;
     if (key in S.gathered && S.gathered[key] > (S.steps || 0) - 400) continue; // regrows after a while
