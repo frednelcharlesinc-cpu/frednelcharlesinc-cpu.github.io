@@ -7,18 +7,18 @@
   const kessStep = () => { const p = Power.now(); return Math.min(GRADES.length * 6 - 1, p.cstep + 3); };
   const kessGrade = () => { const c = kessStep(); return { grade: GRADES[Math.floor(c / 6)], band: c % 6 }; };
   window.kessGrade = kessGrade;
-  Object.defineProperty(K, 'lvUp', { configurable: true, get: () => 2 });               // three colours ≈ a step and a half of stats
+  Object.defineProperty(K, 'lvUp', { configurable: true, get: () => 1 });               // three colours ≈ a step and a half of stats
   K.badge = () => { const g = kessGrade(); return `<span class="grade" style="--gc:${BAND_COL[g.band]}">${g.grade}</span> <span class="muted" style="font-size:12px">${BAND_NAME[g.band]}</span>`; };
-  Object.assign(K, { hp: 58, mp: 24, atk: 13, def: 4, spd: 17 });
+  Object.assign(K, { hp: 50, mp: 22, atk: 11, def: 3, spd: 15 });
 
   /* her arts */
   Object.assign(ARTS, {
-    shadowfang: { name: 'Shadow Fang Flurry', strain: 40, mp: 6, desc: 'Kess blurs in and out of the enemy\'s shadow: five knife strikes, the last one ×1.6. Pierces parries.', type: 'hit',
-      hits: [{ anim: 'slash', m: .7 }, { anim: 'halfslash', m: .7 }, { anim: 'slash', m: .7 }, { anim: 'halfslash', m: .7 }, { anim: 'backslash', m: 1.6 }], brk: 20, pierce: 1 },
-    umbra: { name: 'Umbral Rain', strain: 50, mp: 8, desc: 'She throws a fan of shadow-knives into the air. They fall on EVERY enemy — three timed volleys.', type: 'all',
-      hits: [{ anim: 'spellcast', m: .8 }, { anim: 'spellcast', m: .8 }, { anim: 'spellcast', m: 1.1 }], brk: 10 },
-    nightfall: { name: 'Nightfall', strain: 60, mp: 10, desc: 'The killing blow from nowhere. One strike ×3.2 that ignores defence and parries. Twelve years of hiding, in one cut.', type: 'hit',
-      hits: [{ anim: 'thrust', m: 3.2, glow: 1 }], brk: 30, pierce: 1 }
+    shadowfang: { name: 'Shadow Fang Flurry', strain: 40, mp: 6, desc: 'Kess blurs in and out of the enemy\'s shadow: five knife strikes, the last one ×1.1. Pierces parries.', type: 'hit',
+      hits: [{ anim: 'slash', m: .5 }, { anim: 'halfslash', m: .5 }, { anim: 'slash', m: .5 }, { anim: 'halfslash', m: .5 }, { anim: 'backslash', m: 1.1 }], brk: 14, pierce: 1 },
+    umbra: { name: 'Umbral Rain', strain: 55, mp: 9, desc: 'She throws a fan of shadow-knives into the air. They fall on EVERY enemy — three timed volleys.', type: 'all',
+      hits: [{ anim: 'spellcast', m: .55 }, { anim: 'spellcast', m: .55 }, { anim: 'spellcast', m: .8 }], brk: 8 },
+    nightfall: { name: 'Nightfall', strain: 65, mp: 12, desc: 'The killing blow from nowhere. One strike ×2.4 that ignores defence and parries. Twelve years of hiding, in one cut.', type: 'hit',
+      hits: [{ anim: 'thrust', m: 2.4, glow: 1 }], brk: 22, pierce: 1 }
   });
   Object.defineProperty(K, 'arts', { configurable: true, get() {
     const f = (G.S && G.S.f) || {}; const L = ['needle', 'shadowfang', 'veil', 'umbra'];

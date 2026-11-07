@@ -378,19 +378,19 @@ const Battle = {
     const band = this.dashBand ? this.dashBand(a) : -1;
     const col = band >= 0 && r < 3 ? BAND_COL[band] : drag && r >= 3 ? '#7dffb0' : r >= 7 ? '#ff6a8a' : r >= 5 ? '#ffd36a' : r >= 3 ? '#9fd8ff' : '#ffffff';
     const dur = Math.max(r >= 7 ? 110 : 150, Math.min(520, d / (.6 + r * .35))), s = BT_SCALE * (a.size || 1), dir = Math.sign(x - fx) || 1;
-    const H = 12 + r * 3, LEAN = dir * (.12 + r * .025), img = a.isMe ? playerImg() : a.img;
+    const H = (a.isMe ? 12 + r * 3 : 6 + r * 1.5), LEAN = a.isMe ? dir * (.12 + r * .025) : 0, img = a.isMe ? playerImg() : a.img, JA = a.isMe ? 'jump' : 'combat';
     // crouch
-    a.loopAnim = 'jump'; a.anim = 'jump'; a.frame = 0; a.fn = 99; a.fms = 1e9; a.once = true; await wait(Math.max(40, 110 - r * 10));
+    a.loopAnim = JA; a.anim = JA; a.frame = 0; a.fn = 99; a.fms = 1e9; a.once = true; await wait(Math.max(40, 110 - r * 10));
     // kick off: dust, a shock ring on the ground, a crack of sound
-    a.frame = 2; this.spark(fx, fy - 2, '#c8bca8', 6 + r * 2); B.fx.push({ kick: 1, x: fx, y: fy, t: 0, life: 260 + r * 30, col: r >= 4 ? col : '#d8ccb8', R: 14 + r * 4 }); sfx(r >= 4 ? 'dodge' : 'blip');
+    a.frame = a.isMe ? 2 : 0; this.spark(fx, fy - 2, '#c8bca8', 6 + r * 2); B.fx.push({ kick: 1, x: fx, y: fy, t: 0, life: 260 + r * 30, col: r >= 4 ? col : '#d8ccb8', R: 14 + r * 4 }); sfx(r >= 4 ? 'dodge' : 'blip');
     if (r >= 4) a.aura = col; if (r >= 6) B.flash = Math.max(B.flash || 0, .1);
     if (r >= 3) B.fx.push({ dline: 1, x1: fx, y1: y - 30 - H * .8, x2: x, y2: y - 30 - H * .8, col, w: 1 + r * .35, t: 0, life: 200 + r * 40 });
     const ghosts = (r < 2 ? 2 : r < 5 ? 4 : r < 7 ? 6 : 8) + (band > 0 ? band >> 1 : 0); let g = 0; const t0 = performance.now();
     while (true) {
       const k = Math.min(1, (performance.now() - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
       a.x = lerp(fx, x, e); a.y = lerp(fy, y, e);
-      a.lift = H * Math.sin(Math.PI * Math.min(1, k * 1.15)); a.lean = LEAN * Math.sin(Math.PI * k); a.frame = k < .8 ? 2 : 4;
-      if (img && g < ghosts && k >= g / ghosts) { B.fx.push({ ghost: 1, x: a.x, y: a.y - a.lift, t: 0, life: 150 + r * 35, img, anim: 'jump', fr: 2, s, flip: a.flip, col, a0: r >= 3 ? .5 : .28 }); g++; }
+      a.lift = H * Math.sin(Math.PI * Math.min(1, k * 1.15)); a.lean = LEAN * Math.sin(Math.PI * k); a.frame = a.isMe ? (k < .8 ? 2 : 4) : 0;
+      if (img && g < ghosts && k >= g / ghosts) { B.fx.push({ ghost: 1, x: a.x, y: a.y - a.lift, t: 0, life: 150 + r * 35, img, anim: JA, fr: a.isMe ? 2 : 0, s, flip: a.flip, col, a0: r >= 3 ? .5 : .28 }); g++; }
       if (k >= 1) break; await wait(16);
     }
     // land

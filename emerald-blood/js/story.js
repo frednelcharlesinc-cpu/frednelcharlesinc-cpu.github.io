@@ -906,9 +906,13 @@ async function halvardEvent() {
   else await say('halvard', f.shrineRead ? 'anger' : 'neutral', f.shrineRead ? 'The stone in the east woods? Old carvings. Half-truths. I\'ve read the real texts.' : 'Then prove it. Without the fire.');
   if (G.S.party.includes('kess')) await say('kessE', 'anger', "I've heard you sing over the cages at night, Halvard. Let's hear you sing now.");
   const r = await Battle.start({ enemies: ['halvard', 'acolyte'], noFlee: true, boss: true, bd: 'mill', intro: 'Inquisitor Halvard draws a staff of pale light!',
-    onTurn: async (B, Bt) => { const h = B.actors.find(a => a.key === 'halvard'); if (h && !h.taunt && h.hp < h.maxHp * .3) { h.taunt = true; await Bt.msg('Halvard: "She bit me, you know. Your sister. Same fire."', 1800); } } });
+    onTurn: async (B, Bt) => { const h = B.actors.find(a => a.key === 'halvard'), k = B.actors.find(a => a.id === 'kess' && !a.ko);
+      if (h && !h.ko && k && !B.kessBack && B.actors.filter(a => a.side === 'e' && !a.ko).length === 1) { B.kessBack = 1;
+        await Bt.msg('Kess: "His guard\'s down. He\'s yours, Ren. I won\'t take this from you."', 2000);
+        k.ko = true; k.benched = 1; k.alpha = 0; k.x = 2000; G.S.f.kessBenched = 1; Bt.hud(); }
+      if (h && !h.taunt && h.hp < h.maxHp * .3) { h.taunt = true; await Bt.msg('Halvard: "She bit me, you know. Your sister. Same fire."', 1800); } } });
   if (r === 'lose') { await Story.defeat(); return; }
-  f.halvardBeaten = true; World.remove('halvard');
+  f.halvardBeaten = true; World.remove('halvard'); if (G.S.f.kessBenched) { G.S.f.kessBenched = 0; if (G.S.allies) G.S.allies.kess = {}; }
   if (!Stones.has('heart')) { await narr('On Halvard\'s field desk, in a lead box stamped with the Crown Registry seal: a splinter of green stone the length of your hand. It is beating.'); await me('shock', '…A piece of the Heartstone. Nana\'s Heartstone.'); Stones.give('heart'); await narr('A LARGE stone. The moment you touch it your knees buckle. It will not answer you. Not yet.'); }
   await ending(r);
 }
