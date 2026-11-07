@@ -44,7 +44,11 @@
   .sky .star.never{opacity:.35}
   @keyframes twk{50%{box-shadow:0 0 16px var(--c)}}
   .sky .info{margin:8px 4px 4px;padding:8px 10px;border-radius:10px;background:rgba(10,18,26,.9);border:1px solid #2a3a4a;min-height:44px}
-  .sky .lit{font:800 10px Nunito;color:#9fb3c8;text-align:center;margin-top:-4px}</style>`;
+  .sky .lit{font:800 10px Nunito;color:#9fb3c8;text-align:center;margin-top:-4px}
+  .sky .star{margin-bottom:2px}.sky .slab{font:800 9px/1.1 Nunito,system-ui;text-align:center;max-width:88px;margin:0 0 10px;min-height:20px}
+  .tree2{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px;margin-top:8px}.tree2 .branch{border:1px solid #23384a;border-radius:10px;padding:6px;background:#0b1118}
+  .tree2 h4{margin:0 0 4px;font:900 12px Nunito}.tree2 .nd{border-left:3px solid #2a3a4a;padding:4px 6px;margin-bottom:4px;border-radius:4px;background:#0f1720;cursor:pointer}
+  .tree2 .nd.got{border-left-color:var(--c);background:#10201a}.tree2 .nd.open{border-left-color:#ffd36a}.tree2 .nd b{font-size:12px}.tree2 .nd span{display:block;font-size:11px;color:#b8c6d4}.tree2 .nd em{font-style:normal;font-size:10px;color:#8a9aac}</style>`;
   skillsMenuHTML = function () {
     const S = Skills.st(), people = ['me', ...S.party.filter(id => TREES[id])], who = people.includes(skillWho) ? skillWho : 'me', p = Power.now();
     let h = CSS + `<div class="stat" style="margin-bottom:6px"><h3>Power grade ${Power.badge(p)} <span class="muted">· ${BAND_NAME[p.band]}</span></h3>
@@ -58,7 +62,7 @@
       h += `<div class="col" style="--c:${c}"><h4 style="color:${c}">${BR_ICON[bn] || '✧'} ${bn}</h4><div class="line"></div>`;
       nodes.forEach((n, i) => {
         const g = Skills.has(who, n.id), ok = Skills.reqMet(who, n), big = i === nodes.length - 1;
-        h += `<div class="star ${g ? 'got' : ok ? 'open' : ''}${n.req === 'never' ? ' never' : ''}${big ? ' big' : ''}${sel && sel.who === who && sel.id === n.id ? ' sel' : ''}" data-star="${n.id}">${g ? '★' : n.cost}</div>`;
+        h += `<div class="star ${g ? 'got' : ok ? 'open' : ''}${n.req === 'never' ? ' never' : ''}${big ? ' big' : ''}${sel && sel.who === who && sel.id === n.id ? ' sel' : ''}" data-star="${n.id}">${g ? '★' : n.cost}</div><div class="slab" style="color:${g ? c : ok ? '#cfd8e2' : '#56667a'}">${n.name}</div>`;
       });
       h += `<div class="lit">${got}/${nodes.length}</div></div>`;
     }
@@ -69,6 +73,19 @@
       const why = n.req === 'never' ? 'End game.' : n.minGrade && GRADES.indexOf(p.grade) < GRADES.indexOf(n.minGrade) ? `Needs power grade ${n.minGrade}.` : !ok ? 'Light the star before it first.' : '';
       h += `<div class="info"><b style="font-size:15px">${n.name}</b> <span class="muted">· ${n.cost} SP</span><p style="margin:4px 0">${n.desc}</p>${g ? '<b style="color:#7dffb0">★ Lit</b>' : why ? `<span class="muted">🔒 ${why}</span>` : `<button class="btn pri" data-learn="${n.id}" ${afford ? '' : 'disabled'}>${afford ? 'Light this star' : 'Not enough SP'}</button>`}</div>`;
     } else h += `<div class="info"><span class="muted">Tap a star to see what it does.</span></div>`;
+    h += '</div>';
+    // the full details, branch by branch (like the old tree)
+    h += `<div class="tree2">`;
+    for (const [bn, nodes] of Object.entries(br)) {
+      const c = BR_COL[bn] || '#9fd8ff';
+      h += `<div class="branch" style="--c:${c}"><h4 style="color:${c}">${BR_ICON[bn] || '✧'} ${bn}</h4>`;
+      for (const n of nodes) {
+        const g = Skills.has(who, n.id), ok = Skills.reqMet(who, n), afford = (S.sp[who] || 0) >= n.cost;
+        const lock = n.req === 'never' ? '🔒 end game' : n.minGrade && GRADES.indexOf(p.grade) < GRADES.indexOf(n.minGrade) ? `🔒 needs grade ${n.minGrade}` : !ok ? '🔒 light the one above first' : '';
+        h += `<div class="nd ${g ? 'got' : ok ? 'open' : ''}" data-star="${n.id}"><b style="color:${g ? c : '#eaf2f8'}">${g ? '★ ' : ''}${n.name}</b> <em>· ${n.cost} SP</em><span>${n.desc}</span>${g ? '<em style="color:' + c + '">✔ learned</em>' : lock ? `<em>${lock}</em>` : `<button class="btn" data-learn="${n.id}" ${afford ? '' : 'disabled'} style="margin-top:3px;padding:2px 10px;font-size:11px">${afford ? 'Learn' : 'Not enough SP'}</button>`}</div>`;
+      }
+      h += '</div>';
+    }
     return h + '</div>';
   };
   bindSkillsMenu = function () {
