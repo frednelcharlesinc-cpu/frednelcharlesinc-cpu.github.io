@@ -203,7 +203,7 @@ HD.load();
 /* ---------- portraits: Ren's new busts (ren_v3) win over the older painted sets ---------- */
 (function () {
   const _s = styled;
-  styled = function (id) { if (!(G.settings && G.settings.artStyle === 'classic') && Art.port[id + '_v3']) return id + '_v3'; return _s(id); };
+  styled = function (id) { if (Art.port[id + '_v3'] && (!(G.settings && G.settings.artStyle === 'classic') || !Art.port[id])) return id + '_v3'; return _s(id); };
   PFIT.ren_v3 = 1;
 })();
 

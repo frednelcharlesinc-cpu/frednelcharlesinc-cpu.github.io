@@ -60,6 +60,7 @@ const Trial = {
 
   /* ---- the whole Trial, from the moment you walk into the Guild hall ---- */
   async run() {
+    trialFaces();
     const f = this.f(), S = G.S; if (f.trial !== 'open' || this.active) return; f.trial = 'running'; this.active = 1;
     // STAGE 0 — application
     await narr('The Great Hall of Highmark is packed wall to wall. Up at the front, a familiar bald head — Brom of Ashford, proctoring the vale\'s applicants.');
@@ -251,6 +252,14 @@ const Trial = {
     Story.trialEnd && await Story.trialEnd();
   }
 };
+/* the exam cast's faces download as soon as you're near the hall, so every line shows its face right away */
+function trialFaces() {
+  try { if (typeof Art === 'undefined' || G.S.f.trialWalked) return;
+    const want = { dax_v3: ['neutral', 'anger', 'respect', 'sad'], hobb_v3: ['laugh', 'neutral'], corwin_v3: ['smirk', 'neutral'], mirel_v3: ['scared', 'cry', 'happy', 'neutral'], tobias_v3: ['neutral'] };
+    for (const id in want) Art.prefetch(id, want[id]);
+    for (const id of ['brom', 'sylwen', 'garrick', 'liora']) { const a = artFor(id, 'neutral'); if (a && a.id) Art.prefetch(a.id, ['neutral', 'happy', 'sad', 'smirk', 'anger']); }
+  } catch (e) { }
+}
 /* licensed: Suspicion gains are halved */
 (function () {
   const _as = Story.addSus.bind(Story);
@@ -259,7 +268,7 @@ const Trial = {
   const _l = World.load.bind(World);
   World.load = async function (name, x, y, dir) {
     const r = await _l(name, x, y, dir);
-    try { trialRepair();
+    try { trialRepair(); if (name === 'hm_hall' || name === 'hm_city') trialFaces();
       if (G.S.f.trial === 'running' && !Trial.active) G.S.f.trial = 'open';   // a save made mid-Trial starts it over from the hall
       if (name === 'hm_hall' && G.S.f.trial === 'open' && G.S.f.hmAnn && G.mode === 'world') setTimeout(() => { if (G.S.f.trial === 'open' && !World.busy) Story.run(() => Trial.run()); }, 900); } catch (e) { }
     return r;
