@@ -19,7 +19,7 @@ const World = {
     this.ents.push(this.player);
     // party followers
     this.followers = [];
-    for (const m of G.S.party) {
+    for (const m of (G.S.followers ? G.S.party : [])) {   // party members wait off-screen; they appear in battle and story scenes
       const e = new Ent({ id: 'f_' + m, img: await npcImg(ALLY_SPRITE[m] || m), x, y, dir: this.player.dir, follower: true, ghost: true });
       this.ents.push(e); this.followers.push(e);
     }
