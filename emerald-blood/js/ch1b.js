@@ -228,7 +228,7 @@ async function talkTam() {
   f.h2 = 'done'; Story.gainXp(55); Opinion.add('hope', .5);
   Intel.add('you', 'Brother Tam: nineteen children under the mill sing to a D-stone "for the Prince-Regent". The inner door needs the Inquisitor\'s Seal — Sister Verity carries it on the supply road through the East Woods.');
   World.remove('tam');
-  if (G.S.map === 'woods' && !World.ent('convoy')) { const [x, y] = freeNear('woods', 38, 9); await World.addNpc({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
+  if (G.S.map === 'woods' && !World.ent('convoy')) { const [x, y] = freeNear('woods', 35, 16); await World.addNpc({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
   Story.quest('Ambush Sister Verity\'s supply convoy on the road through the East Woods and take the Inquisitor\'s Seal.');
 }
 // 3 — THE SUPPLY ROAD
@@ -284,8 +284,8 @@ async function convoyAmbush() {
   const wd = SCENES.woods, _wn = wd.npcs;
   wd.npcs = function () {
     const L = _wn.call(this), f = H();
-    if (f.h2 === 'shrine') { const [x, y] = freeNear('woods', 6, 6); L.push({ id: 'tam', sprite: 'acolyte', x, y, dir: 'right', name: 'Brother Tam', talk: talkTam, qm: () => '!' }); }
-    if (f.h2 === 'done' && !f.h3) { const [x, y] = freeNear('woods', 38, 9); L.push({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
+    if (f.h2 === 'shrine') { const [x, y] = freeNear('woods', 17, 22); L.push({ id: 'tam', sprite: 'acolyte', x, y, dir: 'right', name: 'Brother Tam', talk: talkTam, qm: () => '!' }); }
+    if (f.h2 === 'done' && !f.h3) { const [x, y] = freeNear('woods', 35, 16); L.push({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
     return L;
   };
   // no Seal, no inner door

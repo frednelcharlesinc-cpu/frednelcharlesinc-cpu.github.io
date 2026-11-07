@@ -122,16 +122,20 @@ const Trial = {
     await say('brom', 'neutral', 'The Quarry Gate. C-rank, stable two years. Objective: break the Core before the six-hour horn. Floor Two has a Sigil Door — one Guild Sigil of each colour opens it. Every team gets ONE sigil. Solos get two.');
     toast('You hold two Guild Sigils: <b style="color:#46ff95">Verdant</b> and <b style="color:#ff6a5a">Crimson</b>. The door also needs <b style="color:#5fb8ff">Azure</b>.', 4600);
 
-    // STAGE 3 — THE QUARRY GATE
-    await fadeOut(500); await fadeIn(500);
-    await narr('FLOOR ONE — THE QUARRY STEPS. Ledges that crumble if you look at them wrong. Somewhere below, things that chitter.');
-    await this.must({ enemies: ['gt_gloom', 'gt_rat', 'gt_gloom'], bd: 'warren', intro: 'The Quarry Steps — Gate-spawn!' });
-    await narr('Hobb\'s team passes you on a ledge. He tips an imaginary hat. "See you at the bottom, hood!"');
-    await narr('FLOOR TWO — THE HOLLOW MARKET. Rotten stalls, an old fountain full of dark water, and at the far end, a door of black stone with three empty sockets.');
-    await this.must({ enemies: ['gt_spawn', 'gt_imp'], bd: 'crypt', intro: 'The Hollow Market' });
-    await narr('A horn — not the Guild\'s. On the Watch Mirror a crystal goes dark. Later you will learn the name: Hobb Tanner. He held a Horned Brute off his team until they were through.');
+    // STAGE 3 — THE QUARRY GATE: four floors you walk yourself
+    const me_ = this;
+    await narr('The Gate\'s iron door opens. Green light, cold air, and a sound like breathing. You step through.');
+    await this.floor('gate1', 38, 5, 'down', [20, 45, 27, 47], [
+      { at: [0, 19, 47, 24], fn: async () => { await narr('Something chitters on the ledge below — then a dozen somethings.'); await me_.must({ enemies: ['gt_gloom', 'gt_rat', 'gt_gloom'], bd: 'warren', intro: 'The Quarry Steps — Gate-spawn!' }); } },
+      { at: [0, 33, 47, 38], fn: async () => narr('Hobb\'s team passes you on a ledge. He tips an imaginary hat. "See you at the bottom, hood!"') }],
+      'Floor One: climb down the Quarry Steps to the stairs at the bottom.');
+    await narr('FLOOR ONE — THE QUARRY STEPS. Behind you, the ledges crumble into the dark.');
+    await this.floor('gate2', 23, 46, 'up', [38, 25, 47, 30], [
+      { at: [0, 0, 47, 39], fn: async () => { await narr('A drowned village. Bell towers stand on islands of stone, and the black water between them is too still.'); await me_.must({ enemies: ['gt_spawn', 'gt_imp'], bd: 'crypt', intro: 'The Drowned Bells' }); } },
+      { at: [29, 0, 47, 34], fn: async () => narr('A horn — not the Guild\'s. On the Watch Mirror a crystal goes dark. Later you will learn the name: Hobb Tanner. He held a Horned Brute off his team until they were through.') }],
+      'Floor Two: cross the islands to the Sigil Door on the east side.');
     // the Sigil Door
-    await narr('The Sigil Door. You set Verdant and Crimson into their sockets. The third socket waits, cold and blue.');
+    await narr('The Sigil Door: a house of black stone at the end of the last island, its door sealed by three empty sockets. You set Verdant and Crimson into their sockets. The third socket waits, cold and blue.');
     await narr('Dax Merrin steps out of the dark on one side. Liora on the other. Dax has Azure and Crimson. Liora has Verdant and Azure.');
     const sd = await ask('me', 'neutral', '(You need an Azure.)', ['Ask Liora for her Azure.', 'Ask Dax for his Azure.', 'Fight the Mirror Shade that guards the spare Azure.']);
     if (sd === 0) {
@@ -150,24 +154,29 @@ const Trial = {
     if (hd === 0) { await narr('You put your shoulder under the stone. It is heavier than anything has a right to be. They make it through. Mirel says "thank you" four times.'); f.heldDoor = 1; if (typeof Opinion !== 'undefined') Opinion.add('hope', .5); }
     else await narr('You go through. Behind you, the door booms shut. You hear them hammering on it for a long time.');
     // FLOOR THREE
-    await narr('FLOOR THREE — THE WEEPING HALL. Every sound comes back wrong: footsteps from the left when they\'re on the right, a voice you know calling from a wall.');
-    await narr('Corwin\'s team is ahead of you. Corwin is laughing at the echoes. "It\'s a trick, idiots, it\'s just sound—"');
-    await narr('Something pale peels itself off the ceiling. Corwin doesn\'t finish the sentence. On the Mirror, a second crystal goes dark.');
-    const ms = await ask('me', 'shock', '(Another stalker drops toward Mirel\'s team. Mirel is closest.)', ['Run for Mirel.', 'Keep moving — you can\'t save everyone.']);
-    if (ms === 0 || f.heldDoor) {
-      await this.must({ enemies: ['gt_stalker', 'gt_stalker'], bd: 'crystal', intro: 'Pale Stalkers — they hunt the weakest first' });
-      if (ms === 0) { f.mirelSaved = 1; await say('mirel', null, '"You came back. Nobody comes back. …I\'m going to be a very good healer. I\'m going to owe you forever."'); }
-      else { await narr('You fight your own way through. By the time you look back, Mirel\'s team is gone — and on the Mirror, a third crystal has gone dark.'); }
-    } else await narr('You keep moving. Behind you, a scream that the hall repeats nine times. On the Mirror, a third crystal goes dark.');
-    // Dace in trouble
-    await narr('Near the hall\'s end, Dax Merrin is backed against a pillar, two stalkers on him, his short sword gone.');
-    const dd = await ask('me', 'neutral', '(He came here to spy on you. He hates you.)', ['Cut them off him.', 'Leave him. He made his choice.']);
-    if (dd === 0) {
-      await this.must({ enemies: ['gt_stalker', 'gt_stalker'], bd: 'crystal', intro: 'Pale Stalkers on Dax Merrin' });
-      f.daceSaved = 1; await say('dax', null, '"…I didn\'t need that." He doesn\'t thank you. He also doesn\'t look away.');
-    } else { await narr('You leave him. Later, you find out a stalker\'s claw caught his arm and he still made it through. When he sees you, his eyes say he knows exactly what you did.'); f.daceLeft = 1; }
+    await this.floor('gate3', 24, 45, 'up', [21, 9, 27, 12], [
+      { at: [0, 0, 47, 37], fn: async () => {
+        await narr('FLOOR THREE — THE WEEPING HALL. Roots as thick as houses have broken through an old temple. Every sound comes back wrong: footsteps from the left when they\'re on the right, a voice you know calling from a wall.');
+        await narr('Corwin\'s team is ahead of you. Corwin is laughing at the echoes. "It\'s a trick, idiots, it\'s just sound—"');
+        await narr('Something pale peels itself off the roots overhead. Corwin doesn\'t finish the sentence. On the Mirror, a second crystal goes dark.');
+        const ms = await ask('me', 'shock', '(Another stalker drops toward Mirel\'s team. Mirel is closest.)', ['Run for Mirel.', 'Keep moving — you can\'t save everyone.']);
+        if (ms === 0 || f.heldDoor) {
+          await me_.must({ enemies: ['gt_stalker', 'gt_stalker'], bd: 'crystal', intro: 'Pale Stalkers — they hunt the weakest first' });
+          if (ms === 0) { f.mirelSaved = 1; await say('mirel', null, '"You came back. Nobody comes back. …I\'m going to be a very good healer. I\'m going to owe you forever."'); }
+          else { await narr('You fight your own way through. By the time you look back, Mirel\'s team is gone — and on the Mirror, a third crystal has gone dark.'); }
+        } else await narr('You keep moving. Behind you, a scream that the hall repeats nine times. On the Mirror, a third crystal goes dark.'); } },
+      { at: [0, 0, 47, 22], fn: async () => {
+        await narr('Near the stairs, Dax Merrin is backed against a pillar, two stalkers on him, his short sword gone.');
+        const dd = await ask('me', 'neutral', '(He came here to spy on you. He hates you.)', ['Cut them off him.', 'Leave him. He made his choice.']);
+        if (dd === 0) {
+          await me_.must({ enemies: ['gt_stalker', 'gt_stalker'], bd: 'crystal', intro: 'Pale Stalkers on Dax Merrin' });
+          f.daceSaved = 1; await say('dax', null, '"…I didn\'t need that." He doesn\'t thank you. He also doesn\'t look away.');
+        } else { await narr('You leave him. Later, you find out a stalker\'s claw caught his arm and he still made it through. When he sees you, his eyes say he knows exactly what you did.'); f.daceLeft = 1; } } }],
+      'Floor Three: climb the Weeping Hall to the green light at the top.');
     // FLOOR FOUR — the Anomaly
-    await narr('FLOOR FOUR — THE CORE CHAMBER. A cavern under the quarry. In the middle, held up by chains as thick as a man, a pulsing green light.');
+    await this.floor('gate4', 24, 46, 'up', [12, 16, 36, 25], [
+      { at: [0, 0, 47, 32], fn: async () => narr('FLOOR FOUR — THE CORE CHAMBER. A ring of broken stone floating in green fire. Chained pillars. And above it all, a pulsing green light.') }],
+      'Floor Four: walk into the Core Chamber.');
     await narr('Then the light SURGES. The floor bucks. Every watch crystal on every wrist turns black. Somewhere far above, a horn that is not the Guild\'s starts blowing and doesn\'t stop.');
     await narr('The Gate just jumped from C to B. The Mirror can\'t see you. Nobody is coming.');
     await narr('The chains move. They were never holding the light up. They were WRAPPED around something — and it\'s standing.');
@@ -185,7 +194,7 @@ const Trial = {
     f.gateObjectiveDone = 1;
 
     // STAGE 4 — the ceremony
-    await fadeOut(600); await fadeIn(600);
+    await fadeOut(600); Trial.W = null; await World.load('hm_city', 31, 21, 'up'); await fadeIn(600);
     await narr('Daylight. The Gate Plaza is full again. The Gate turns overhead. Somebody is selling snacks. A little girl on her father\'s shoulders is waving a blue Guild flag.');
     const dead = f.mirelSaved ? ['Hobb Tanner', 'Corwin'] : ['Hobb Tanner', 'Corwin', 'Mirel'];
     await say('brom', 'sad', `${dead.length === 2 ? 'Two' : 'Three'} of ours did not walk out of the Quarry Gate. ${dead.join(', ')}. Remember their names.`);

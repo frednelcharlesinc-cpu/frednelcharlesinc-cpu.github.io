@@ -1341,7 +1341,7 @@ async function realmAmbush() {
   await narr('Your knees fold. The last thing you feel is a single arm lifting you out of the snow like you weigh nothing.');
   await fadeOut(900);
   f.vaneMet = true; World.remove('vane');
-  G.S.ret = { map: 'realm', x: 23, y: 12 }; Story.heal(true);
+  G.S.ret = { map: 'realm', x: 23, y: 18 }; Story.heal(true);
   await World.load('r_hut', 7, 4, 'left'); await fadeIn(900);
   banner('The Old Man\'s Hut', '');
   await hutWake();
@@ -1360,8 +1360,8 @@ async function hutWake() {
   await say('vane', 'sad', 'The air is so thick with mana it eats you from the inside. That ache in your chest? That\'s the mountain chewing. A week, and you\'ll be dead.');
   await me('sad', '…Then why did you save me?');
   await say('vane', 'neutral', '…Hm. Good question. Ask me again in a few years.');
-  await say('vane', 'neutral', 'Dawn. The standing stones, east of the hut. I\'ll teach you how to breathe. Don\'t be late. The poison won\'t be.');
-  Story.quest('Meet the old man at the standing stones east of the hut.');
+  await say('vane', 'neutral', 'Dawn. The standing stones, down the slope south of the hut. I\'ll teach you how to breathe. Don\'t be late. The poison won\'t be.');
+  Story.quest('Meet the old man at the standing stones, down the slope south of the hut.');
 }
 async function talkVaneStone() {
   const f = F();
@@ -1478,7 +1478,7 @@ async function vaneYears() {
   await fadeOut(900);
   await Story.timeSkip();
   f.adultVane = true;
-  await World.load('realm', 28, 15, 'right'); await fadeIn(900);
+  await World.load('realm', 21, 26, 'left'); await fadeIn(900);
   banner('Five Years Later', 'The Realm of No Return');
   await vaneFinal();
 }
