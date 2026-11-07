@@ -1,5 +1,5 @@
-/* Difficulty tuning — EXP is 4x harder to earn, every enemy and rival has 3x health */
-const XP_RATE = 0.25, FOE_HP = 3;
+/* Difficulty tuning — EXP at its normal rate (XP_RATE), every enemy and rival has 3x health (FOE_HP) */
+const XP_RATE = 1, FOE_HP = 3;
 (function () {
   const inner = Story.gainXp;
   // already-scaled amounts (battle wins, banked EXP released at a breakthrough) go straight through
