@@ -117,7 +117,7 @@ const Trial = {
     await narr('Coloured tokens from a bag. Six teams of three. Corwin gets Hobb and two boys from Millbrook. Mirel ends up with three strangers who don\'t learn her name.');
     await say('brom', 'sad', 'You. Hood. You go in alone. I can\'t put your eyes in a team of strangers, and I can\'t put strangers\' lives next to your eyes. …Don\'t make that face. It\'s the kindest insult I\'ve got.');
     await say('dax', null, '"I don\'t take a team." / "I don\'t either," says a voice by the door — Liora, a spear across her back, already bored.');
-    await narr('Everyone gets a plain grey Guild veil over the lower face — the Veil Rule: no names, no faces, only what you do. Eyes stay uncovered.');
+    await narr('A clerk sets out a basket of plain grey cloth masks. "Optional," she says. A few applicants tie one on. Most don\'t bother.');
     await say('brom', 'neutral', 'Each of you gets a watch crystal and a Recall Stone. Break the stone and you\'re pulled out — safe, and failed. Killing another applicant is forbidden. The Mirror sees everything.');
     await say('brom', 'neutral', 'The Quarry Gate. C-rank, stable two years. Objective: break the Core before the six-hour horn. Floor Two has a Sigil Door — one Guild Sigil of each colour opens it. Every team gets ONE sigil. Solos get two.');
     toast('You hold two Guild Sigils: <b style="color:#46ff95">Verdant</b> and <b style="color:#ff6a5a">Crimson</b>. The door also needs <b style="color:#5fb8ff">Azure</b>.', 4600);
