@@ -5,32 +5,33 @@
    Every colour is a step up in power. Only once the aura burns RED can you break through to the next grade. */
 const GRADES = ['E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS'];
 const GRADE_XP = [0, 150, 400, 800, 1400, 2300, 3600, 5500, 8000];
-const BAND_COL = ['#46e070', '#4aa8ff', '#ffd34a', '#ff9a3a', '#b48aff', '#ff5050'], BAND_NAME = ['green', 'blue', 'yellow', 'orange', 'purple', 'red'];
-const BAND3 = [0, 2, 5]; // older three-step values (rival ranks, lore) map onto the six colours
-const AURA_LINE = ['New to this grade. The power is raw and unsteady.', 'Your mana runs cool and steady now.', 'Halfway. The aura has started to show.', 'It burns hotter. People notice when you walk in.', 'Dense and heavy. The air bends around you.', 'On the edge. One more push and you break through.'];
+const BAND_COL = ['#f4f7ff', '#46e070', '#4aa8ff', '#ffd34a', '#ff9a3a', '#b48aff', '#c9d2dc', '#2b2233', '#ff5050'], BAND_NAME = ['white', 'green', 'blue', 'yellow', 'orange', 'purple', 'silver', 'black', 'red'];
+const NB = BAND_COL.length;   // nine colours a grade
+const BAND3 = [1, 3, 8]; // older three-step values (rival ranks, lore) map onto the six colours
+const AURA_LINE = ['New to this grade. The power is raw, white, unshaped.', 'It takes a colour. Green — alive, but unsteady.', 'Your mana runs cool and steady now.', 'The aura has started to show.', 'It burns hotter. People notice when you walk in.', 'Dense and heavy. The air bends around you.', 'Silver. Sharp and cold — your aura has an edge now.', 'Black. It swallows the light around you. Few ever get here.', 'On the edge. One more push and you break through.'];
 const Power = {
   xp() { const S = G.S; if (S.xpTotal === undefined) S.xpTotal = Math.max(0, (S.lvl - 1) * 90 + (S.xp || 0)); return S.xpTotal; },
   of(xp) {
     let i = 0; while (i < GRADES.length - 1 && xp >= GRADE_XP[i + 1]) i++;
-    const lo = GRADE_XP[i], hi = GRADE_XP[i + 1], frac = hi ? Math.min(.999, (xp - lo) / (hi - lo)) : .999, band = Math.min(5, Math.floor(frac * 6));
-    return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + (band >> 1), cstep: i * 6 + band };
+    const lo = GRADE_XP[i], hi = GRADE_XP[i + 1], frac = hi ? Math.min(.999, (xp - lo) / (hi - lo)) : .999, band = Math.min(NB - 1, Math.floor(frac * NB));
+    return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + Math.floor(band / 3), cstep: i * 6 + band * 5 / (NB - 1), col: i * NB + band };
   },
   now() { return this.of(this.xp()); },
   badge(p) { p = p || this.now(); return `<span class="grade" style="--gc:${BAND_COL[p.band]}">${p.grade}</span>`; }
 };
 // replaces level-ups: every colour is a real step, and a grade only breaks after red
-const COLOUR_GIFT = [null, { hp: 4, atk: 1 }, { hp: 4, mp: 1 }, { hp: 4, atk: 1 }, { hp: 4, mp: 1 }, { hp: 4, atk: 1 }];
+const COLOUR_GIFT = [null, { hp: 3, atk: 1 }, { hp: 3, mp: 1 }, { hp: 3 }, { hp: 3, atk: 1 }, { hp: 3, mp: 1 }, { hp: 3 }, { hp: 3, atk: 1 }, { hp: 3, mp: 1 }];
 Story.gainXp = function (n) {
   const S = G.S, before = Power.now(); S.xpTotal = Power.xp() + n; const after = Power.now();
   S.lvl = after.step + 1;
-  if (after.cstep <= before.cstep) return false;
+  if (after.col <= before.col) return false;
   const st = S.stats; S.sp = S.sp || {}; const allies = Object.keys(ALLY), shows = [];
-  for (let c = before.cstep + 1; c <= after.cstep; c++) {
-    const band = c % 6; let sp = 0;
+  for (let c = before.col + 1; c <= after.col; c++) {
+    const band = c % NB; let sp = 0;
     if (band === 0) { st.maxHp += 6; st.maxMp += 2; st.def += 1; sp = 1; }
-    else { const g = COLOUR_GIFT[band]; st.maxHp += g.hp; st.atk += g.atk || 0; st.maxMp += g.mp || 0; if (band === 2 || band === 4) sp = 1; }
+    else { const g = COLOUR_GIFT[band]; st.maxHp += g.hp; st.atk += g.atk || 0; st.maxMp += g.mp || 0; if (band === 3 || band === 5 || band === 7) sp = 1; }
     if (sp) { S.sp.me = (S.sp.me || 0) + 1; for (const w of allies) S.sp[w] = (S.sp[w] || 0) + 1; }
-    shows.push([{ grade: GRADES[Math.floor(c / 6)], band }, band === 0, sp]);
+    shows.push([{ grade: GRADES[Math.floor(c / NB)], band }, band === 0, sp]);
   }
   st.hp = st.maxHp; st.mp = st.maxMp;
   for (const k in S.allies) S.allies[k] = {};
@@ -145,7 +146,7 @@ function skillsMenuHTML() {
   const p = Power.now();
   let h = `<div class="stat" style="margin-bottom:6px"><h3>Power grade ${Power.badge(p)} <span class="muted">· ${BAND_NAME[p.band]} · ${Power.xp()} / ${p.hi} EXP</span></h3>
     <div class="gbar"><i style="width:${p.frac * 100}%;background:${BAND_COL[p.band]}"></i></div>
-    <p class="muted">Your aura climbs six colours each grade: ${BAND_COL.map((c, i) => `<b style="color:${c}">${BAND_NAME[i]}</b>`).join(' → ')}. Every colour makes you stronger; yellow, purple and the breakthrough also give everyone a Skill Point. You can only break through to the next grade once your aura burns red.</p>
+    <p class="muted">Your aura climbs nine colours each grade: ${BAND_COL.map((c, i) => `<b style="color:${c}">${BAND_NAME[i]}</b>`).join(' → ')}. Every colour makes you stronger; yellow, purple and the breakthrough also give everyone a Skill Point. You can only break through to the next grade once your aura burns red.</p>
     <div class="btnrow">${people.map(w => `<button class="btn ${w === who ? 'pri' : ''}" data-who="${w}">${TREES[w].name()} · ${S.sp[w] || 0} SP</button>`).join('')}</div></div>`;
   h += '<div class="tree">';
   for (const [bn, nodes] of Object.entries(TREES[who].branches)) {
@@ -177,7 +178,7 @@ function bindSkillsMenu() {
       const g = c.createRadialGradient(me.x, me.y - 28 * s, 4, me.x, me.y - 28 * s, (34 + p.band * 4) * s);
       g.addColorStop(0, `rgba(${rgb},${k})`); g.addColorStop(1, `rgba(${rgb},0)`); c.fillStyle = g;
       c.fillRect(me.x - 60 * s, me.y - 90 * s, 120 * s, 110 * s); c.restore();
-      if (p.band >= 3 && Math.random() < .08 + p.band * .04) B.fx.push({ x: me.x + rnd(-14, 14) * s, y: me.y - rnd(0, 50) * s, vx: rnd(-.2, .2), vy: rnd(-1.4, -.5), life: rnd(350, 700), t: 0, col, s: rnd(1.2, 2.2) });
+      if (p.band >= 4 && Math.random() < .08 + p.band * .027) B.fx.push({ x: me.x + rnd(-14, 14) * s, y: me.y - rnd(0, 50) * s, vx: rnd(-.2, .2), vy: rnd(-1.4, -.5), life: rnd(350, 700), t: 0, col, s: rnd(1.2, 2.2) });
     } catch (e) { }
     return out;
   };

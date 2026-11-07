@@ -192,15 +192,22 @@ const Cal = {
 /* ---------------- THE COLOUR CURVE ----------------
    Every colour costs more than the one before it — the climb gets steeper with each step,
    not just at the letters. 6 colours × 8 grades. */
-const COLOUR_XP = (() => { const a = [0]; for (let n = 0; n < 48; n++) a.push(a[n] + Math.round(540 * Math.pow(1.11, n))); return a; })();
-for (let i = 0; i < GRADE_XP.length; i++) GRADE_XP[i] = COLOUR_XP[Math.min(48, i * 6)];
+const COLOUR_XP = (() => {
+  // grade walls stay exactly where they were (old saves keep their grade); each grade's span is now split into nine colours, each a little steeper
+  const old = [0]; for (let n = 0; n < 48; n++) old.push(old[n] + Math.round(540 * Math.pow(1.11, n)));
+  const a = [];
+  for (let g = 0; g < 8; g++) { const lo = old[g * 6], hi = old[g * 6 + 6], w = []; let s = 0; for (let k = 0; k < NB; k++) { w.push(Math.pow(1.11, k * 6 / NB)); s += w[k]; }
+    let acc = lo; for (let k = 0; k < NB; k++) { a.push(Math.round(acc)); acc += (hi - lo) * w[k] / s; } }
+  a.push(old[48]); return a;
+})();
+for (let i = 0; i < GRADE_XP.length; i++) GRADE_XP[i] = COLOUR_XP[Math.min(8 * NB, i * NB)];
 Power.of = function (xp) {
   let i = 0; while (i < GRADES.length - 1 && xp >= GRADE_XP[i + 1]) i++;
-  let c = i * 6; while (c < Math.min(47, i * 6 + 5) && xp >= COLOUR_XP[c + 1]) c++;
-  const band = c - i * 6, lo = GRADE_XP[i], hi = GRADE_XP[i + 1];
+  let c = i * NB; while (c < Math.min(8 * NB - 1, i * NB + NB - 1) && xp >= COLOUR_XP[c + 1]) c++;
+  const band = c - i * NB, lo = GRADE_XP[i], hi = GRADE_XP[i + 1];
   const frac = hi ? Math.min(.999, (xp - lo) / (hi - lo)) : .999;
   const clo = COLOUR_XP[c], chi = COLOUR_XP[c + 1] || clo + 1, cfrac = Math.min(.999, (xp - clo) / (chi - clo));
-  return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + (band >> 1), cstep: c, clo, chi, cfrac };
+  return { i, grade: GRADES[i], band, frac, lo, hi, step: i * 3 + Math.floor(band / 3), cstep: i * 6 + band * 5 / (NB - 1), col: c, clo, chi, cfrac };
 };
 // older saves keep the grade they've earned
 (function () {
@@ -212,7 +219,7 @@ Power.of = function (xp) {
   const _h = skillsMenuHTML;
   skillsMenuHTML = function () {
     const p = Power.now(); let h = _h();
-    h = h.replace(/<div class="gbar"><i style="width:[^"]*"><\/i><\/div>/, `<div class="gbar"><i style="width:${(p.cfrac * 100).toFixed(1)}%;background:${BAND_COL[p.band]}"></i></div><p class="muted" style="margin:2px 0 0">To ${p.band < 5 ? BAND_NAME[p.band + 1] : 'the wall'}: ${Math.max(0, p.chi - Power.xp())} EXP · each colour costs more than the last.</p>`);
+    h = h.replace(/<div class="gbar"><i style="width:[^"]*"><\/i><\/div>/, `<div class="gbar"><i style="width:${(p.cfrac * 100).toFixed(1)}%;background:${BAND_COL[p.band]}"></i></div><p class="muted" style="margin:2px 0 0">To ${p.band < NB - 1 ? BAND_NAME[p.band + 1] : 'the wall'}: ${Math.max(0, p.chi - Power.xp())} EXP · each colour costs more than the last.</p>`);
     return h.replace(/ · \d+ \/ \d+ EXP/, ` · ${Power.xp()} EXP`);
   };
 })();

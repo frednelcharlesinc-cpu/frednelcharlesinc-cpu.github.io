@@ -217,7 +217,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
   font-size:clamp(14px,2.3vw,19px);line-height:1.4;color:#f4f1e8;text-shadow:0 2px 4px #000,0 0 10px #000;background:linear-gradient(transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent);padding:8px 16px}
 #cineCap.on{opacity:1}#cineCap b{display:block;font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:clamp(13px,2vw,16px);margin-bottom:4px;letter-spacing:1px}#cineCap.narr span{font-style:italic;color:#e0e6dc}
 #cineSkip{position:absolute;top:max(8px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:4;background:rgba(0,0,0,.55);color:#cfe;border:1px solid #46ff9566;border-radius:8px;padding:6px 12px;font-size:13px;font-family:inherit}
-.sockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.sockrow b{min-width:58px}.sock{border:1px dashed #3a5a46;border-radius:7px;padding:3px 8px;font-size:13px;color:#8aa}.sock.on{border-style:solid;color:#e8fff0}.sock.small{border-color:#7fe8a8}.sock.medium{border-color:#ffd88a}.stat.lore.locked{opacity:.55}.grade{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 6px;border-radius:7px;font-family:'Press Start 2P';font-size:11px;color:#0b120e;background:var(--gc);box-shadow:0 0 8px var(--gc)}
+.sockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.sockrow b{min-width:58px}.sock{border:1px dashed #3a5a46;border-radius:7px;padding:3px 8px;font-size:13px;color:#8aa}.sock.on{border-style:solid;color:#e8fff0}.sock.small{border-color:#7fe8a8}.sock.medium{border-color:#ffd88a}.stat.lore.locked{opacity:.55}.grade{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:1px 6px;border-radius:7px;font-family:'Press Start 2P';font-size:11px;color:#0b120e;background:var(--gc);box-shadow:0 0 8px var(--gc)}.grade[style*="#2b2233"]{color:#efe6ff;box-shadow:0 0 8px #9a7ad0,inset 0 0 0 1px #8a7aa0}
 .gbar{height:8px;background:#0e1a13;border-radius:5px;overflow:hidden;margin:6px 0;border:1px solid #2f5a40}.gbar i{display:block;height:100%}
 .tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.branch h4{margin:2px 0 6px;color:var(--green);font-family:'Nunito';font-weight:900;letter-spacing:.5px;font-size:14px}
 .node{border:1px solid #2f5a40;border-radius:9px;padding:7px;margin-bottom:6px;display:flex;flex-direction:column;gap:4px;font-size:13px}.node b{color:#e8fff0}.node span{color:#9ab8a6}.node em{font-style:normal;font-size:12px;color:#7a9}
@@ -341,7 +341,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/dialog.js?v=bfab4e25"></script>
 <script src="js/portraits.js?v=1a4da5aa"></script>
 <script src="js/cine.js?v=e6f916fc"></script>
-<script src="js/battle.js?v=9967262a"></script>
+<script src="js/battle.js?v=c2c45632"></script>
 <script src="js/battlefit.js?v=fbe1321b"></script>
 <script src="js/monsters.js?v=e5527527"></script>
 <script src="js/realm.js?v=6409dd68"></script>
@@ -349,14 +349,14 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/stones.js?v=13341d9c"></script>
 <script src="js/lore.js?v=a4fdbd03"></script>
 <script src="js/guild.js?v=40919a2a"></script>
-<script src="js/progress.js?v=f3a5d317"></script>
+<script src="js/progress.js?v=e3ff8655"></script>
 <script src="js/dungeons.js?v=c16410de"></script>
 <script src="js/quests.js?v=add5e8ed"></script>
 <script src="js/worldmap.js?v=13613828"></script>
 <script src="js/events.js?v=1a9175a7"></script>
 <script src="js/companions.js?v=52521027"></script>
 <script src="js/bonds.js?v=0049ac74"></script>
-<script src="js/bloodlust.js?v=59229c73"></script>
+<script src="js/bloodlust.js?v=1d8f3e25"></script>
 <script src="js/ui.js?v=870d549e"></script>
 <script src="js/ch1.js?v=d4034dfd"></script>
 <script src="js/passives.js?v=1094c07a"></script>
@@ -374,7 +374,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/combat5.js?v=11886a6d"></script>
 <script src="js/elements.js?v=afbfe461"></script>
 <script src="js/flurry.js?v=0f39fb8d"></script>
-<script src="js/journey.js?v=c06fe982"></script>
+<script src="js/journey.js?v=4c4ce8ee"></script>
 <script src="js/renown.js?v=eafcfcd3"></script>
 <script src="js/contracts.js?v=86c041f1"></script>
 <script src="js/raids.js?v=e8b96980"></script>
@@ -409,8 +409,8 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/dawn.js?v=f1254a27"></script>
 <script src="js/festival.js?v=73a8f8e0"></script>
 <script src="js/guilds.js?v=a2389185"></script>
-<script src="js/kess.js?v=658c15ac"></script>
-<script src="js/dashup.js?v=2374ad46"></script>
+<script src="js/kess.js?v=8f5a857d"></script>
+<script src="js/dashup.js?v=1cb89aa7"></script>
 <script src="js/solo.js?v=245dfe39"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').then(function(r){document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')r.update().catch(function(){});});setInterval(function(){r.update().catch(function(){});},300000);}).catch(function(){});
 var hadSW=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!hadSW){hadSW=true;return;}if(document.getElementById('updBar'))return;var b=document.createElement('div');b.id='updBar';b.textContent='A new version of the game is ready — tap here to load it (your progress is saved)';b.style.cssText='position:fixed;left:50%;top:max(6px,env(safe-area-inset-top));transform:translateX(-50%);z-index:999;padding:8px 14px;border-radius:12px;background:#46ff95;color:#06210f;font:800 12px Nunito,system-ui;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:90vw;text-align:center';b.onclick=function(){try{if(window.save&&window.G&&G.S&&G.mode==='world')save();}catch(e){}location.reload();};document.body.appendChild(b);});}</script>

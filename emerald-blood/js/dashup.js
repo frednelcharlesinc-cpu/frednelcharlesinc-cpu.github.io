@@ -16,10 +16,10 @@
       const m = key.match(/^ge_(\w+?)_r$/); if (m) { const g = stepGrade(Rivals.ge(m[1])); return { i: g.i, band: g.band }; }
     }
     const t = typeof TIER !== 'undefined' && TIER[key]; const i = Math.max(0, G8.indexOf(t || 'E'));
-    return { i, band: (a.E && a.E.band) || (a.E && a.E.boss ? 3 : 0) };           // everyone else: their grade, bosses mid-aura
+    return { i, band: (a.E && a.E.band) || (a.E && a.E.boss ? 4 : 1) };           // everyone else: their grade, bosses mid-aura
   };
   Battle.dashBand = function (a) { const p = powerOf(a); return p ? p.band : -1; };
-  Battle.dashRank = function (a) { const p = powerOf(a); return p ? p.i + p.band * .08 : this.rankOf(a); };
+  Battle.dashRank = function (a) { const p = powerOf(a); return p ? p.i + p.band * .05 : this.rankOf(a); };
   const _dash = Battle.dash.bind(Battle);
   Battle.dash = async function (a, x, y, ms) {
     const r = await _dash(a, x, y, ms);

@@ -4,8 +4,8 @@
 (function () {
   const K = ALLY.kess; if (!K) return;
   /* three colours above Ren */
-  const kessStep = () => { const p = Power.now(); return Math.min(GRADES.length * 6 - 1, p.cstep + 3); };
-  const kessGrade = () => { const c = kessStep(); return { grade: GRADES[Math.floor(c / 6)], band: c % 6 }; };
+  const kessStep = () => { const p = Power.now(); return Math.min(GRADES.length * NB - 1, p.col + 3); };
+  const kessGrade = () => { const c = kessStep(); return { grade: GRADES[Math.floor(c / NB)], band: c % NB }; };
   window.kessGrade = kessGrade;
   Object.defineProperty(K, 'lvUp', { configurable: true, get: () => 1 });               // three colours ≈ a step and a half of stats
   K.badge = () => { const g = kessGrade(); return `<span class="grade" style="--gc:${BAND_COL[g.band]}">${g.grade}</span> <span class="muted" style="font-size:12px">${BAND_NAME[g.band]}</span>`; };
