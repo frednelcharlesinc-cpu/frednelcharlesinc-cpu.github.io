@@ -125,17 +125,17 @@ const Trial = {
     // STAGE 3 — THE QUARRY GATE: four floors you walk yourself
     const me_ = this;
     await narr('The Gate\'s iron door opens. Green light, cold air, and a sound like breathing. You step through.');
-    await this.floor('gate1', 38, 5, 'down', [20, 45, 27, 47], [
-      { at: [0, 19, 47, 24], fn: async () => { await narr('Something chitters on the ledge below — then a dozen somethings.'); await me_.must({ enemies: ['gt_gloom', 'gt_rat', 'gt_gloom'], bd: 'warren', intro: 'The Quarry Steps — Gate-spawn!' }); } },
-      { at: [0, 33, 47, 38], fn: async () => narr('Hobb\'s team passes you on a ledge. He tips an imaginary hat. "See you at the bottom, hood!"') }],
-      'Floor One: climb down the Quarry Steps to the stairs at the bottom.');
-    await narr('FLOOR ONE — THE QUARRY STEPS. Behind you, the ledges crumble into the dark.');
-    await this.floor('gate2', 23, 46, 'up', [38, 25, 47, 30], [
-      { at: [0, 0, 47, 39], fn: async () => { await narr('A drowned village. Bell towers stand on islands of stone, and the black water between them is too still.'); await me_.must({ enemies: ['gt_spawn', 'gt_imp'], bd: 'crypt', intro: 'The Drowned Bells' }); } },
-      { at: [29, 0, 47, 34], fn: async () => narr('A horn — not the Guild\'s. On the Watch Mirror a crystal goes dark. Later you will learn the name: Hobb Tanner. He held a Horned Brute off his team until they were through.') }],
-      'Floor Two: cross the islands to the Sigil Door on the east side.');
+    await this.floor('gate1', 24, 5, 'down', [22, 29, 26, 31], [
+      { at: [16, 14, 34, 23], fn: async () => { await narr('A camp in the middle of the cave. Blue banners, cold ashes, bedrolls still laid out. A team that came in two years ago and never came out.'); await narr('Something chitters behind the tent — then a dozen somethings.'); await me_.must({ enemies: ['gt_gloom', 'gt_rat', 'gt_gloom'], bd: 'warren', intro: 'The Quarry Steps — Gate-spawn!' }); } },
+      { at: [0, 26, 47, 33], fn: async () => narr('Hobb\'s team passes you on a ledge. He tips an imaginary hat. "See you at the bottom, hood!"') }],
+      'Floor One: find your way down through the crystal cave to the green portal at the bottom.');
+    await narr('FLOOR ONE — THE CRYSTAL SEAM. You step into the portal. Behind you, the crystals go dark one by one.');
+    await this.floor('gate2', 4, 6, 'down', [22, 29, 25, 31], [
+      { at: [7, 0, 47, 33], fn: async () => { await narr('A drowned village. Bell towers stand on islands of stone, and the black water between them is too still.'); await me_.must({ enemies: ['gt_spawn', 'gt_imp'], bd: 'crypt', intro: 'The Drowned Bells' }); } },
+      { at: [20, 15, 47, 33], fn: async () => narr('A horn — not the Guild\'s. On the Watch Mirror a crystal goes dark. Later you will learn the name: Hobb Tanner. He held a Horned Brute off his team until they were through.') }],
+      'Floor Two: cross the drowned village to the Sigil Door, the stone arch at the bottom.');
     // the Sigil Door
-    await narr('The Sigil Door: a house of black stone at the end of the last island, its door sealed by three empty sockets. You set Verdant and Crimson into their sockets. The third socket waits, cold and blue.');
+    await narr('The Sigil Door: an old stone arch at the far end of the drowned village, its way through sealed by three empty sockets. You set Verdant and Crimson into their sockets. The third socket waits, cold and blue.');
     await narr('Dax Merrin steps out of the dark on one side. Liora on the other. Dax has Azure and Crimson. Liora has Verdant and Azure.');
     const sd = await ask('me', 'neutral', '(You need an Azure.)', ['Ask Liora for her Azure.', 'Ask Dax for his Azure.', 'Fight the Mirror Shade that guards the spare Azure.']);
     if (sd === 0) {
@@ -154,8 +154,8 @@ const Trial = {
     if (hd === 0) { await narr('You put your shoulder under the stone. It is heavier than anything has a right to be. They make it through. Mirel says "thank you" four times.'); f.heldDoor = 1; if (typeof Opinion !== 'undefined') Opinion.add('hope', .5); }
     else await narr('You go through. Behind you, the door booms shut. You hear them hammering on it for a long time.');
     // FLOOR THREE
-    await this.floor('gate3', 24, 45, 'up', [21, 9, 27, 12], [
-      { at: [0, 0, 47, 37], fn: async () => {
+    await this.floor('gate3', 24, 31, 'up', [21, 2, 27, 5], [
+      { at: [0, 0, 47, 28], fn: async () => {
         await narr('FLOOR THREE — THE WEEPING HALL. Roots as thick as houses have broken through an old temple. Every sound comes back wrong: footsteps from the left when they\'re on the right, a voice you know calling from a wall.');
         await narr('Corwin\'s team is ahead of you. Corwin is laughing at the echoes. "It\'s a trick, idiots, it\'s just sound—"');
         await narr('Something pale peels itself off the roots overhead. Corwin doesn\'t finish the sentence. On the Mirror, a second crystal goes dark.');
@@ -165,7 +165,7 @@ const Trial = {
           if (ms === 0) { f.mirelSaved = 1; await say('mirel', null, '"You came back. Nobody comes back. …I\'m going to be a very good healer. I\'m going to owe you forever."'); }
           else { await narr('You fight your own way through. By the time you look back, Mirel\'s team is gone — and on the Mirror, a third crystal has gone dark.'); }
         } else await narr('You keep moving. Behind you, a scream that the hall repeats nine times. On the Mirror, a third crystal goes dark.'); } },
-      { at: [0, 0, 47, 22], fn: async () => {
+      { at: [0, 0, 47, 12], fn: async () => {
         await narr('Near the stairs, Dax Merrin is backed against a pillar, two stalkers on him, his short sword gone.');
         const dd = await ask('me', 'neutral', '(He came here to spy on you. He hates you.)', ['Cut them off him.', 'Leave him. He made his choice.']);
         if (dd === 0) {

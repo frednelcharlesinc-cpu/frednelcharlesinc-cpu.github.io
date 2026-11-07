@@ -16,7 +16,7 @@ const MapFog = {
     if ((S.heard || {})[L.id]) return 1;
     return 0;
   },
-  ROADS: [['thornvale', 'ashford'], ['ashford', 'woods'], ['ashford', 'mill'], ['ashford', 'highmark'], ['woods', 'realm']],
+  ROADS: [['thornvale', 'ashford'], ['ashford', 'woods'], ['ashford', 'mill'], ['ashford', 'highmark'], ['woods', 'realm'], ['woods', 'woods_n'], ['woods', 'woods_e'], ['woods', 'woods_w']],
   draw(cv) {
     const img = cv.previousElementSibling; if (!img) return;
     const W = cv.width = img.naturalWidth || 1600, H = cv.height = img.naturalHeight || 1120, c = cv.getContext('2d');

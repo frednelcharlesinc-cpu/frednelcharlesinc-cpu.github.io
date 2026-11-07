@@ -30,7 +30,7 @@ const QDEF = {
   q_gourds: { name: 'The Pumpkin Problem', rank: 'E', type: 'Hunt', rp: 30, gold: 20, xp: 35, desc: 'The Hollow\'s pumpkin patch has… got up and walked off. Put down 4 Gourdlings. Do not ask the farmer how.', goal: QK(['m_gourd'], 4, 'Gourdlings') },
   q_letter: { name: 'A Letter for the Mill Road', rank: 'E', type: 'Delivery', rp: 30, gold: 20, xp: 30, desc: 'Deliver a sealed letter to old Aldo, who lives alone near the mill.', give: 'letter', goal: { kind: 'deliver', item: 'letter', npc: 'aldo' } },
   q_chests: { name: 'Treasure Hunter', rank: 'E', type: 'Exploration', rp: 40, gold: 30, xp: 40, desc: 'The Guild buys maps of where old caches are hidden. Find and open 5 chests anywhere in the vale.', goal: { kind: 'chest', n: 5 } },
-  q_warren: { name: 'Clear the Goblin Warren', rank: 'E', type: 'Dungeon', rp: 90, gold: 80, xp: 120, desc: 'There is a cave in the north-east of the East Woods. Goblins come out of it. Make them stop. Their king is in the deepest chamber.', goal: { kind: 'dungeon', id: 'd_warren' } },
+  q_warren: { name: 'Clear the Goblin Warren', rank: 'E', type: 'Dungeon', rp: 90, gold: 80, xp: 120, desc: 'There is an old gatehouse in the top corner of the West Woods. Goblins come out of it. Make them stop. Their king is in the deepest chamber.', goal: { kind: 'dungeon', id: 'd_warren' } },
   // ---------- D ----------
   q_fenwick: { name: 'Fever at the Fenwick Farm', rank: 'D', type: 'Delivery', rp: 50, gold: 35, xp: 50, desc: 'Carry Maren\'s medicine to the Fenwick farmer camped by the spring in the woods. Quickly — the children are sick.', give: 'parcel', goal: { kind: 'deliver', item: 'parcel', npc: 'fenwick' } },
   q_bones: { name: 'Dust of the Dead', rank: 'D', type: 'Gathering', rp: 55, gold: 45, xp: 60, desc: 'An alchemist wants 4 Grave Dust from the Sunken Crypt. She pays double for not asking questions.', goal: { kind: 'item', item: 'gravedust', n: 4 } },
@@ -92,8 +92,8 @@ const Quests = {
     if (g.kind === 'talk') return `${(q.met || []).length}/${g.npcs.length} witnesses`;
     if (g.kind === 'deliver') return `Bring the ${QITEM[g.item].name} to ${QNPC[g.npc].name}`;
     if (g.kind === 'dungeon') return `Defeat the master of ${DUNGEONS[g.id].title}`;
-    if (g.kind === 'bounty') return `Hunt ${ENEMY[g.enemy].name} (${g.map === 'woods' ? 'East Woods' : g.map === 'mill' ? 'near the mill' : DUNGEONS[g.map] ? DUNGEONS[g.map].title : g.map})`;
-    if (g.kind === 'defend') return `Meet the caravan at the East Woods entrance`;
+    if (g.kind === 'bounty') return `Hunt ${ENEMY[g.enemy].name} (${/^woods/.test(g.map) ? ({ woods: 'South Woods', woods_n: 'North Woods', woods_e: 'East Woods', woods_w: 'West Woods' })[g.map] : g.map === 'mill' ? 'near the mill' : DUNGEONS[g.map] ? DUNGEONS[g.map].title : g.map})`;
+    if (g.kind === 'defend') return `Meet the caravan on the East Woods wagon road`;
     if (g.kind === 'rescue') return `Find ${QNPC[g.npc].name} in ${DUNGEONS[g.map].title}`;
     return '';
   },

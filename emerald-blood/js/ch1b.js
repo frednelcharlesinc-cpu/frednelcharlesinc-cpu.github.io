@@ -208,7 +208,7 @@ async function tamThroughMaren() {
   const f = H();
   await say('maren', 'sad', 'Tam. Of course it\'s Tam. He comes for burn-salve every week — for his own hands. He holds the censer too close on purpose. Punishing himself, I think.');
   await say('maren', 'neutral', 'He prays alone at the old shrine in the East Woods every evening. If you go, go gently. He\'s more afraid of you than you are of him.');
-  f.h2 = 'shrine'; Story.quest('Meet Brother Tam at the old stone shrine in the East Woods — north-west, past the Green Eclipse camp. He kneels on the west side of it.');
+  f.h2 = 'shrine'; Story.quest('Meet Brother Tam at the ruined shrine in the South Woods, just inside the woods by the old rune stone at the crossroads.');
 }
 async function talkTam() {
   const f = H(); if (f.h2 !== 'shrine') return;
@@ -228,8 +228,8 @@ async function talkTam() {
   f.h2 = 'done'; Story.gainXp(55); Opinion.add('hope', .5);
   Intel.add('you', 'Brother Tam: nineteen children under the mill sing to a D-stone "for the Prince-Regent". The inner door needs the Inquisitor\'s Seal — Sister Verity carries it on the supply road through the East Woods.');
   World.remove('tam');
-  if (G.S.map === 'woods' && !World.ent('convoy')) { const [x, y] = freeNear('woods', 35, 16); await World.addNpc({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
-  Story.quest('Ambush Sister Verity\'s supply convoy on the road through the East Woods and take the Inquisitor\'s Seal.');
+  if (G.S.map === 'woods_e' && !World.ent('convoy')) { const [x, y] = freeNear('woods', 35, 16); await World.addNpc({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
+  Story.quest('Ambush Sister Verity\'s supply convoy on the wagon road in the East Woods (east from the crossroads) and take the Inquisitor\'s Seal.');
 }
 // 3 — THE SUPPLY ROAD
 async function convoyAmbush() {

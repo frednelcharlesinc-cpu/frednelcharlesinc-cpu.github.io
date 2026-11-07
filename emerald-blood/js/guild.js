@@ -66,7 +66,7 @@ async function questBoard() {
 const _victory = Battle.victory.bind(Battle);
 Battle.victory = async function () {
   const B = this.B, q = Guild.q();
-  if (typeof q.lupine === 'number' && G.S.map === 'woods' && B.actors.some(a => a.side === 'e' && /lupine/.test(a.key))) { q.lupine++; setTimeout(() => { if (q.lupine >= 3) Guild.complete('lupine'); else toast(`Lupine packs culled: ${q.lupine}/3`, 2200); }, 2500); }
+  if (typeof q.lupine === 'number' && /^woods/.test(G.S.map) && B.actors.some(a => a.side === 'e' && /lupine/.test(a.key))) { q.lupine++; setTimeout(() => { if (q.lupine >= 3) Guild.complete('lupine'); else toast(`Lupine packs culled: ${q.lupine}/3`, 2200); }, 2500); }
   if (B.cfg.bout) B.cfg.boutWon = true;
   return _victory();
 };

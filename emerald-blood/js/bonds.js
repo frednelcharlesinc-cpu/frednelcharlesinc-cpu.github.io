@@ -203,7 +203,7 @@ companionsMenuHTML = function () {
   const own = Mounts.owned();
   h += `<div class="stat" style="margin-top:6px"><h3>Wild mounts</h3><p class="muted">Tame them in the world. Stronger mounts need a higher power grade — most want a fight first. Riding is faster; a flying mount ignores walls and water.</p></div>`;
   for (const [id, M] of Object.entries(MOUNTS)) if (!own[id]) {
-    const where = M.where[0] === 'd_crystal' ? 'the Crystal Hollow' : { woods: 'the East Woods', mill: 'near the Old Mill' }[M.where[0]];
+    const where = M.where[0] === 'd_crystal' ? 'the Crystal Hollow' : { woods: 'the South Woods', woods_n: 'the North Woods', woods_e: 'the East Woods', woods_w: 'the West Woods', mill: 'near the Old Mill' }[M.where[0]];
     h += `<div class="stat comp" style="margin-top:6px"><canvas data-cart="mount_${id}" data-pix="m:${M.kind}" width="64" height="64"></canvas><div><h3>${M.name} <span class="muted">· grade ${M.grade}${M.fly ? ' · flies' : ''}</span></h3><p class="muted">${M.desc}</p><p class="muted">Wild — ${where}.${M.fight ? ' Must be beaten first.' : ''}</p></div></div>`;
   }
   h += `<div class="stat" style="margin-top:6px"><h3>Other familiars</h3><p class="muted">Everyone of note has one. Bring their partner into your party to bond with them.</p></div>`;

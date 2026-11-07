@@ -311,7 +311,7 @@ function companionsMenuHTML() {
   let h = `<div class="stat"><h3>Mounts</h3><p class="muted">Tame wild mounts in the world. Stronger mounts need a higher power grade — and most of them want a fight first. Riding is faster; a flying mount ignores walls and water. Mounts fight beside you in battle.</p>
     <p>Riding: <b>${S.riding ? MOUNTS[S.riding].name : 'on foot'}</b>${S.riding && !Mounts.allowedHere() ? ' <span class="muted">(stabled while you\'re indoors / underground)</span>' : ''} ${S.riding ? '<button class="btn" data-ride="">Dismount</button>' : ''}</p></div>`;
   for (const [id, M] of Object.entries(MOUNTS)) {
-    const where = M.where[0] === 'd_crystal' ? 'the Crystal Hollow' : { woods: 'the East Woods', mill: 'near the Old Mill' }[M.where[0]];
+    const where = M.where[0] === 'd_crystal' ? 'the Crystal Hollow' : { woods: 'the South Woods', woods_n: 'the North Woods', woods_e: 'the East Woods', woods_w: 'the West Woods', mill: 'near the Old Mill' }[M.where[0]];
     h += `<div class="stat comp" style="margin-top:6px"><canvas data-mcv="${M.kind}" width="64" height="64"></canvas><div><h3>${M.name} <span class="muted">· grade ${M.grade}${M.fly ? ' · flies' : ''}</span></h3><p class="muted">${M.desc}</p><p>${own[id] ? (S.riding === id ? '<b style="color:#7dffb0">Riding</b>' : `<button class="btn" data-ride="${id}">Ride</button>`) : `<span class="muted">Wild — found in ${where}.${M.fight ? ' Must be beaten first.' : ''}</span>`} · In battle: <b>${M.act.name}</b></p></div></div>`;
   }
   h += `<div class="stat" style="margin-top:6px"><h3>Familiars</h3><p class="muted">Every great fighter has one. They act on their own in battle — striking, healing or shielding — about one turn in three.</p></div>`;

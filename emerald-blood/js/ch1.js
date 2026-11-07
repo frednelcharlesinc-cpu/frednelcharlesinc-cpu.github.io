@@ -716,7 +716,7 @@ async function gePosters() {
   const mb = MAPLOC.find(l => l.id === 'millbrook'), kb = MAPLOC.find(l => l.id === 'kettle');
   if (mb) Object.assign(mb, { x: .655, y: .695, text: 'Ferry village on the Ashen River, west of Ashford. Oswin the ferryman counts every wagon that crosses. Taverns: the Drowned Duck.', scene: ['millbrook', 45, 17, 'left'] });
   if (kb) Object.assign(kb, { x: .70, y: .76, text: 'Wheat village south of Ashford on the grain road. The Inquisition seized its granary. Taverns: the Sheaf & Sickle.', scene: ['kettlebrook', 23, 2, 'down'] });
-  const _can = Travel.canFrom.bind(Travel), VALE = ['ashford', 'woods', 'mill', 'millbrook', 'kettlebrook'];
+  const _can = Travel.canFrom.bind(Travel), VALE = ['ashford', 'woods', 'woods_n', 'woods_e', 'woods_w', 'mill', 'millbrook', 'kettlebrook'];
   Travel.canFrom = function () { const m = G.S.map; return _can() || VALE.includes(m) || (SCENES[m] && SCENES[m].map && G.S.ret && VALE.includes(G.S.ret.map)); };
 })();
 
@@ -791,7 +791,7 @@ const Chapter = {
   const _pe = Story.prologueEnd; Story.prologueEnd = async function () { await _pe.apply(this, arguments); Chapter.snap(); };
   // saves that were already inside Chapter I get a restart point the first time they're loaded in the vale
   const _l = World.load.bind(World);
-  World.load = async function (name, x, y, dir) { const r = await _l(name, x, y, dir); try { if (G.S && G.S.chapter === 1 && !G.S.f.chapter1Done && !Chapter.has() && ['ashford', 'woods', 'millbrook', 'kettlebrook'].includes(name)) Chapter.snap(); } catch (e) { } return r; };
+  World.load = async function (name, x, y, dir) { const r = await _l(name, x, y, dir); try { if (G.S && G.S.chapter === 1 && !G.S.f.chapter1Done && !Chapter.has() && ['ashford', 'woods', 'woods_n', 'woods_e', 'woods_w', 'millbrook', 'kettlebrook'].includes(name)) Chapter.snap(); } catch (e) { } return r; };
   const _rm = UI.renderMenu.bind(UI);
   UI.renderMenu = function () {
     _rm();

@@ -80,7 +80,7 @@ const GIntel = {
     let P = typeof CHESTPOS !== 'undefined' && CHESTPOS;
     if (!P) { try { P = await (await fetch('assets/chests.json')).json(); } catch (e) { return null; } }
     const S = G.S, g = this.st(), out = [];
-    for (const mk of ['ashford', 'woods', 'mill', 'millbrook', 'kettlebrook']) {
+    for (const mk of ['ashford', 'woods', 'woods_n', 'woods_e', 'woods_w', 'mill', 'millbrook', 'kettlebrook']) {
       const M = G.maps[mk], sc = SCENES[mk]; if (!M || !sc || !P[mk]) continue;
       for (const [x, y] of P[mk]) { const key = `${mk}:${x},${y}`; if (!(S.chests || {})[key] && !g.marks[key]) out.push([mk, x, y, key, +M.w, +M.h, sc.title || mk]); }
     }

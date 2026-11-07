@@ -51,7 +51,7 @@ const Stones = {
   // the world: Registry patrols stop anyone carrying an unsealed stone
   patrol() {
     const S = G.S; if (!S || !World.scene || World.busy || G.mode !== 'world') return;
-    if (!['ashford', 'woods', 'a_terrace', 'a_river', 'a_chapel', 'a_lower'].includes(S.map) || !this.unregistered()) return;
+    if (!['ashford', 'woods', 'woods_n', 'woods_e', 'woods_w', 'a_terrace', 'a_river', 'a_chapel', 'a_lower'].includes(S.map) || !this.unregistered()) return;
     if (S.steps % 37 !== 0) return;
     // wardens are rare: a long quiet spell after every stop, and only a small chance each check
     if ((S.steps || 0) - (S.lastStop ?? -9999) < 450) return;

@@ -73,7 +73,7 @@ const Ct = {
   },
   // hunts count kills; bounties ambush you; help jobs trigger when you arrive
   onWin(keys) {
-    const st = this.st(); const map = G.S.map;
+    const st = this.st(); const map = /^woods/.test(G.S.map) ? 'woods' : G.S.map;
     for (const o of st.active.slice()) if (o.type === 'hunt' && o.map === map) {
       const k = keys.filter(x => o.tgt.includes(x.replace(/_(dire|ancient)$/, ''))).length; if (!k) continue;
       o.got = Math.min(o.n, o.got + k); toast(`${o.name}: ${o.got}/${o.n}`, 1800);
@@ -103,7 +103,7 @@ const Ct = {
     const r = _st(e);
     try {
       if (e.isPlayer && !this.busy && G.mode === 'world' && G.S.ct && this.grass.has(e.x + ',' + e.y)) {
-        const o = G.S.ct.active.find(x => x.type === 'bounty' && x.map === G.S.map);
+        const o = G.S.ct.active.find(x => x.type === 'bounty' && (x.map === G.S.map || (x.map === 'woods' && /^woods/.test(G.S.map))));
         if (o && Math.random() < .07) {
           this.lastEnc = G.S.steps;
           Story.run(async () => {

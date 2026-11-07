@@ -573,7 +573,7 @@ async function talkTobb() {
       f.crateQuest = true;
       await say('tobb', 'anger', 'Bandits hit my cart on the east road. Took a whole crate of tonics! Bring it back and I\'ll pay 40 gold and three tonics.');
       if (f.tobbKnows) await say('tobb', 'shame', "I'd ask the guard, but they won't go in those woods. You people are, ah, hardier. Supposedly.");
-      G.S.side = "Recover Tobb's crate from the bandits in the East Woods (east road)."; toast("Side quest: Tobb's stolen crate");
+      G.S.side = "Recover Tobb's crate from the bandits in the East Woods (east from the crossroads)."; toast("Side quest: Tobb's stolen crate");
     } else if (o === 'Return the crate') {
       f.crateDone = true; f.hasCrate = false; G.S.gold += 40; G.S.items.tonic += 3; G.S.side = ''; sfx('coin');
       if (f.tobbKnows) {

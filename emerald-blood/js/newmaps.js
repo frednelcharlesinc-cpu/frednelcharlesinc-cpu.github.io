@@ -125,7 +125,7 @@
       if (inR(w.goal, x, y)) { Trial.W = null; World.busy = true; UI.controls(false); w.res(); return true; }
       return false;
     } });
-  SCENES.gate1 = FLOOR('gate1', 'Floor One — The Quarry Steps', 'Inside the Gate', 'rgba(0,30,20,.18)');
+  SCENES.gate1 = FLOOR('gate1', 'Floor One — The Crystal Seam', 'Inside the Gate', 'rgba(0,30,20,.18)');
   SCENES.gate2 = FLOOR('gate2', 'Floor Two — The Drowned Bells', 'Inside the Gate', 'rgba(0,20,40,.14)');
   SCENES.gate3 = FLOOR('gate3', 'Floor Three — The Weeping Hall', 'Inside the Gate', 'rgba(0,30,10,.2)');
   SCENES.gate4 = FLOOR('gate4', 'Floor Four — The Core Chamber', 'Inside the Gate', 'rgba(0,40,20,.2)');

@@ -38,7 +38,7 @@ const DOSSIERS = [
       await say('quill', null, '"She\'ll be there tomorrow. So will her Wardens. The Ledger doesn\'t sell courage. Only directions."');
       f.h2 = 'done';
       Intel.add('you', 'The Silent Ledger: the inner door needs the Inquisitor\'s Seal — Sister Verity carries it on the supply road through the East Woods, by the dead oak.');
-      Story.quest('Ambush Sister Verity\'s supply convoy on the road through the East Woods and take the Inquisitor\'s Seal.');
+      Story.quest('Ambush Sister Verity\'s supply convoy on the wagon road in the East Woods (east from the crossroads) and take the Inquisitor\'s Seal.');
     } },
   { id: 'halvard', title: 'How Halvard Fights', price: 3000,
     show: f => f.learnedMill && !f.millDone && !f.ledgerHalvard, done: f => !!f.ledgerHalvard,

@@ -33,7 +33,7 @@ const MAPLOC = [
   { id: 'millbrook', name: 'Millbrook', kind: 'village', x: .55, y: .52, text: 'A sleepy river village on the road to Aurel. (Not yet reachable.)' },
   { id: 'kettle', name: 'Kettlebrook', kind: 'village', x: .40, y: .66, text: 'Farming village in the southern woods. (Not yet reachable.)' },
   // ---- dungeons
-  { id: 'dg_warren', name: 'The Goblin Warren', kind: 'dungeon', x: .775, y: .715, text: 'Rank E dungeon in the East Woods.', scene: ['woods', 43, 8, 'down'], dungeon: 'd_warren' },
+  { id: 'dg_warren', name: 'The Goblin Warren', kind: 'dungeon', x: .775, y: .715, text: 'Rank E dungeon in the West Woods.', scene: ['woods', 43, 8, 'down'], dungeon: 'd_warren' },
   { id: 'dg_crypt', name: 'The Sunken Crypt', kind: 'dungeon', x: .675, y: .685, text: 'Rank D dungeon beneath the ruined chapel by Ashford.', scene: ['ashford', 7, 3, 'down'], dungeon: 'd_crypt' },
   { id: 'dg_mire', name: 'The Drowned Mine', kind: 'dungeon', x: .665, y: .62, text: 'Rank C dungeon beside the Old Mill.', scene: ['mill', 5, 5, 'down'], dungeon: 'd_mire' },
   { id: 'dg_crystal', name: 'The Crystal Hollow', kind: 'dungeon', x: .72, y: .665, text: 'Rank B dungeon in the old quarry north-east of Ashford.', scene: ['ashford', 51, 3, 'down'], dungeon: 'd_crystal' },
@@ -45,7 +45,7 @@ const KIND = { capital: ['♛', '#ffd34a'], city: ['🔔', '#d6a8ff'], village: 
 const Travel = {
   unlocked() { return !!(G.S && G.S.rank && !G.S.kid); },
   visited(id) { const L = MAPLOC.find(l => l.id === id); if (!L || !L.scene) return false; return !!(G.S.visited && G.S.visited[L.scene[0]]) && (!L.dungeon || (G.S.visited[L.dungeon])); },
-  canFrom() { const m = G.S.map; return ['ashford', 'woods', 'mill'].includes(m) || (SCENES[m] && SCENES[m].map && G.S.ret && ['ashford', 'woods', 'mill'].includes(G.S.ret.map)); },
+  canFrom() { const m = G.S.map; return ['ashford', 'woods', 'woods_n', 'woods_e', 'woods_w', 'mill'].includes(m) || (SCENES[m] && SCENES[m].map && G.S.ret && ['ashford', 'woods', 'woods_n', 'woods_e', 'woods_w', 'mill'].includes(G.S.ret.map)); },
   async go(id) {
     const L = MAPLOC.find(l => l.id === id); if (!L || !L.scene) return;
     if (!this.canFrom()) { toast('You can only fast travel from the Ashford region.'); return; }
