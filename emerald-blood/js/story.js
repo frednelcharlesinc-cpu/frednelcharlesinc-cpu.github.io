@@ -942,7 +942,7 @@ async function ending() {
     await narr('At the edge of the clearing, a figure in tinted glasses watches you. When you look up, she nods once — and is gone.');
   }
   // Part V: the Guild Trial — Greyspire's gate only opens for licensed hunters
-  if (typeof Trial !== 'undefined' && !f.trial) { await Trial.open(); await fadeOut(600); await World.load('ashford', 53, 12, 'up'); save(); UI.hud(); await fadeIn(600); return; }
+  if (typeof Trial !== 'undefined' && f.trial !== 'done') { if (!f.trial) await Trial.open(); else Story.quest('The Guild Trial: take the carriage from the south side of Ashford\'s Market Square to Highmark, and hear the announcement in the Great Hall.'); await fadeOut(600); await World.load('ashford', 53, 12, 'up'); save(); UI.hud(); await fadeIn(600); return; }
   await Story.trialEnd();
 }
 Story.trialEnd = async function () {

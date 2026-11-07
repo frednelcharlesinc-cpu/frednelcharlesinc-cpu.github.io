@@ -96,8 +96,8 @@ const Dawn = {
 
   async run() {
     const f = G.S.f; if (f.dawnDone) return;
-    try { await this.dream(); await this.speech(); await this.liora(); } catch (e) { console.error(e); }
-    f.dawnDone = 1; save();
+    try { await this.dream(); await this.speech(); await this.liora(); f.dawnDone = 1; } catch (e) { console.error(e); }
+    save();
   }
 };
 (function () {

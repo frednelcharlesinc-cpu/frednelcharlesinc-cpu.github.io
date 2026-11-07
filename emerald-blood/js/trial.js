@@ -255,7 +255,8 @@ const Trial = {
   const _l = World.load.bind(World);
   World.load = async function (name, x, y, dir) {
     const r = await _l(name, x, y, dir);
-    try { if (G.S.f.trial === 'running' && !Trial.active) G.S.f.trial = 'open';   // a save made mid-Trial starts it over from the hall
+    try { const F0 = G.S.f; if (F0.chapter1Done && F0.halvardBeaten && F0.trial !== 'done' && !G.S.kid) { delete F0.chapter1Done; delete F0.dawnDone; delete F0.dawnDream; F0.trial = 'open'; F0.hmAnn = 0; Story.quest('The Guild Trial: take the carriage from the south side of Ashford\'s Market Square to Highmark, and hear the announcement in the Great Hall.'); toast('<b>The Guild Trial</b> is still ahead of you — take the carriage from Ashford\'s Market Square to Highmark.', 5000); }
+      if (G.S.f.trial === 'running' && !Trial.active) G.S.f.trial = 'open';   // a save made mid-Trial starts it over from the hall
       if (name === 'hm_hall' && G.S.f.trial === 'open' && G.S.f.hmAnn && G.mode === 'world') setTimeout(() => { if (G.S.f.trial === 'open' && !World.busy) Story.run(() => Trial.run()); }, 900); } catch (e) { }
     return r;
   };
