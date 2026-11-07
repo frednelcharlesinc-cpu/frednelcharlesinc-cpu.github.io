@@ -374,8 +374,9 @@ const Battle = {
   // the DASH: crouch, kick off the ground, fly at them, land. Higher rank = faster, higher, flashier.
   async dash(a, x, y, ms) {
     const B = this.B, fx = a.x, fy = a.y, d = Math.hypot(x - fx, y - fy); if (d < 2) return;
-    const r = this.rankOf(a), drag = a.isMe || (ALLY[a.id] && ALLY[a.id].drag) || a.key === 'dread';
-    const col = drag && r >= 3 ? '#7dffb0' : r >= 7 ? '#ff6a8a' : r >= 5 ? '#ffd36a' : r >= 3 ? '#9fd8ff' : '#ffffff';
+    const r = this.dashRank ? this.dashRank(a) : this.rankOf(a), drag = a.isMe || (ALLY[a.id] && ALLY[a.id].drag) || a.key === 'dread';
+    const band = this.dashBand ? this.dashBand(a) : -1;
+    const col = band >= 0 && r < 3 ? BAND_COL[band] : drag && r >= 3 ? '#7dffb0' : r >= 7 ? '#ff6a8a' : r >= 5 ? '#ffd36a' : r >= 3 ? '#9fd8ff' : '#ffffff';
     const dur = Math.max(r >= 7 ? 110 : 150, Math.min(520, d / (.6 + r * .35))), s = BT_SCALE * (a.size || 1), dir = Math.sign(x - fx) || 1;
     const H = 12 + r * 3, LEAN = dir * (.12 + r * .025), img = a.isMe ? playerImg() : a.img;
     // crouch
@@ -384,7 +385,7 @@ const Battle = {
     a.frame = 2; this.spark(fx, fy - 2, '#c8bca8', 6 + r * 2); B.fx.push({ kick: 1, x: fx, y: fy, t: 0, life: 260 + r * 30, col: r >= 4 ? col : '#d8ccb8', R: 14 + r * 4 }); sfx(r >= 4 ? 'dodge' : 'blip');
     if (r >= 4) a.aura = col; if (r >= 6) B.flash = Math.max(B.flash || 0, .1);
     if (r >= 3) B.fx.push({ dline: 1, x1: fx, y1: y - 30 - H * .8, x2: x, y2: y - 30 - H * .8, col, w: 1 + r * .35, t: 0, life: 200 + r * 40 });
-    const ghosts = r < 2 ? 2 : r < 5 ? 4 : r < 7 ? 6 : 8; let g = 0; const t0 = performance.now();
+    const ghosts = (r < 2 ? 2 : r < 5 ? 4 : r < 7 ? 6 : 8) + (band > 0 ? band >> 1 : 0); let g = 0; const t0 = performance.now();
     while (true) {
       const k = Math.min(1, (performance.now() - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
       a.x = lerp(fx, x, e); a.y = lerp(fy, y, e);
