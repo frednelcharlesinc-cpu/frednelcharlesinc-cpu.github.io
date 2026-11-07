@@ -32,7 +32,7 @@ const HQ = {
   on(id) { return this.st()[id] === 'on'; }, done(id) { return this.st()[id] === 'done'; },
   take(id) { if (this.st()[id]) return; this.st()[id] = 'on'; sfx('blip'); toast(`Contract taken: <b style="color:#ffd36a">${HMQ[id].name}</b> — ${HMQ[id].desc}`, 5200); },
   finish(id) { const q = HMQ[id]; this.st()[id] = 'done'; G.S.gold += q.gold; Story.gainXp(q.xp); UI.hud(); sfx('level');
-    toast(`<b style="color:#46ff95">Contract complete</b> — ${q.name}. +${q.gold} gold, +${q.xp} XP.`, 4200);
+    toast(`<b style="color:#46ff95">Contract complete</b> — ${q.name}. +${q.gold} gold, +${Story.xpShow ? Story.xpShow(q.xp) : q.xp} EXP.`, 4200);
     try { if (typeof Rep !== 'undefined') Rep.deed(q.fame, q.name, null, q.fame); } catch (e) { } },
   async board() {
     const ids = Object.keys(HMQ), open = ids.filter(id => !this.st()[id]);

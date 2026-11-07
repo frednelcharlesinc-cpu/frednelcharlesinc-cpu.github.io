@@ -822,8 +822,8 @@ const Battle = {
     let q = Math.min(1, st.perf * .08) + Math.min(1.2, st.pp * .15) + Math.min(.8, st.pd * .1);
     if (clean) q += gap >= 0 ? 1 : .4;
     q *= qk; if (gap <= -2) q *= .25; q = Math.min(3, q);
-    const xp = Math.max(1, Math.round(base * gapM * grind * (1 + q)));
-    G.S.gold += gold; const ups = Story.gainXp(xp);
+    const xp = Math.max(1, Math.round(base * gapM * grind * (1 + q) * (typeof XP_RATE !== 'undefined' ? XP_RATE : 1)));
+    G.S.gold += gold; const ups = Story.gainXpRaw ? Story.gainXpRaw(xp) : Story.gainXp(xp);
     const parts = [];
     if (gap <= -2) parts.push('far below your rank ×0.1'); else if (gap === -1) parts.push('below your rank'); else if (gap >= 1) parts.push(gap >= 2 ? 'far above your rank!' : 'above your rank');
     if (st.perf) parts.push(`${st.perf} perfect hit${st.perf > 1 ? 's' : ''}`); if (st.pp) parts.push(`${st.pp} perfect parr${st.pp > 1 ? 'ies' : 'y'}`); if (st.pd) parts.push(`${st.pd} perfect dodge${st.pd > 1 ? 's' : ''}`);

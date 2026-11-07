@@ -61,7 +61,7 @@ async function grantLoot(L) {
   if (L.gold) { S.gold += L.gold; parts.push(`<b style="color:#ffd34a">${L.gold} gold</b>`); }
   if (L.tonic) { S.items.tonic += L.tonic; parts.push(`${L.tonic} Tonic${L.tonic > 1 ? 's' : ''}`); }
   if (L.ether) { S.items.ether += L.ether; parts.push(`${L.ether} Ether${L.ether > 1 ? 's' : ''}`); }
-  if (L.crystal) { parts.push(`${L.crystal} Mana Crystal${L.crystal > 1 ? 's' : ''} (+${L.crystal * 60} EXP)`); }
+  if (L.crystal) { parts.push(`${L.crystal} Mana Crystal${L.crystal > 1 ? 's' : ''} (+${Story.xpShow ? Story.xpShow(L.crystal * 60) : L.crystal * 60} EXP)`); }
   if (L.qitem) { Quests.addItem(L.qitem, L.n || 1); parts.push(`<b style="color:#9fd8ff">${QITEM[L.qitem].name}${(L.n || 1) > 1 ? ' ×' + L.n : ''}</b>`); }
   sfx('coin'); toast('Found ' + parts.join(' · '), 3200); UI.hud();
   if (L.crystal) Story.gainXp(L.crystal * 60);

@@ -222,7 +222,7 @@ async function questBoard() {
     if (Guild.rankIdx(Q.rank) > ri) { await narr(`"${Q.name}" — ${Q.rank}-rank or higher. Brom will tear your card in half if he catches you.`); continue; }
     if (Quests.state(id) === 'done') { await narr(`"${Q.name}" — stamped COMPLETE.`); continue; }
     if (Quests.state(id) === 'on') { await narr(`${Q.name}: ${Q.desc}  — Progress: ${Quests.progress(id)}`); const a = await ask(null, null, 'Keep this quest?', ['Keep it', 'Abandon it']); if (a === 1) { delete qx[id]; toast('Quest abandoned.'); } continue; }
-    const a = await ask(null, null, `${Q.type.toUpperCase()} · ${Q.name}: ${Q.desc}  Reward: ${Q.rp + Q.xp} EXP, ${Q.gold}g.`, ['Accept', 'Leave it']);
+    const a = await ask(null, null, `${Q.type.toUpperCase()} · ${Q.name}: ${Q.desc}  Reward: ${Story.xpShow ? Story.xpShow(Q.rp + Q.xp) : Q.rp + Q.xp} EXP, ${Q.gold}g.`, ['Accept', 'Leave it']);
     if (a === 0) Quests.accept(id);
   }
 }

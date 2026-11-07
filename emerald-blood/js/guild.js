@@ -54,7 +54,7 @@ async function questBoard() {
     const id = ids[c], Q = QUESTS[id];
     if (q[id] === 'done') { await narr(`"${Q.name}" — stamped COMPLETE. Brom has drawn a small, grudging smiley face next to your name.`); continue; }
     if (Guild.rankIdx(S.rank) < Guild.rankIdx(Q.rank)) { await narr(`"${Q.name}" — ${Q.rank}-rank or higher. Not yet.`); continue; }
-    await narr(`${Q.name}: ${Q.desc}  (Reward: ${Q.rp} EXP, ${Q.gold}g)`);
+    await narr(`${Q.name}: ${Q.desc}  (Reward: ${Story.xpShow ? Story.xpShow(Q.rp) : Q.rp} EXP, ${Q.gold}g)`);
     if (id === 'range') { const sc = await targetRange(); await narr(`You hit ${sc} of 10.`); if (sc >= 7) Guild.complete('range'); else await say('tilda', 'happy', 'Ha! Close. Come back when your hands stop shaking.'); continue; }
     if (id === 'arm') { const w = await armWrestle('Tilda', 1.05); if (w) { await say('tilda', 'shock', '…You cheated. You must have. Nobody beats me. …Again tomorrow?'); Guild.complete('arm'); } else await say('tilda', 'happy', 'HA! Dwarf arms, human! Dwarf arms!'); continue; }
     if (id === 'bouts') { await provingBouts(); return; }

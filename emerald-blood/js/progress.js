@@ -85,7 +85,7 @@ Story.rankCheck = function () {
   if (GRADES.indexOf(p.grade) > GRADES.indexOf(S.rank)) { S.rank = p.grade; toast(`The Guild re-stamps your card: <b style="color:${TIER_COL[p.grade]}">${p.grade}-RANK</b>.`, 3600); }
 };
 if (typeof Guild !== 'undefined') {
-  Guild.award = function (xp, gold, why) { G.S.gold += gold || 0; sfx('coin'); toast(`<b>${why}</b> — +${xp} EXP${gold ? ` · +${gold}g` : ''}`, 3200); Story.gainXp(xp); };
+  Guild.award = function (xp, gold, why) { G.S.gold += gold || 0; sfx('coin'); toast(`<b>${why}</b> — +${Story.xpShow ? Story.xpShow(xp) : xp} EXP${gold ? ` · +${gold}g` : ''}`, 3200); Story.gainXp(xp); };
   Guild.rp = () => Power.xp();
 }
 

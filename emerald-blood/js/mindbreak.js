@@ -84,7 +84,7 @@ const MIND = {
       await fadeIn(500); } catch (e) { }
     this.pending = false;
     const bank = G.S.xpBank || 0; G.S.xpBank = 0;
-    Story.gainXp(Math.max(1, bank));
+    (Story.gainXpRaw || Story.gainXp).call(Story, Math.max(1, bank));
     G.S.f.breaks = (G.S.f.breaks || 0) + 1;
   };
   const _try = Break.try.bind(Break);
