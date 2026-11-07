@@ -185,7 +185,7 @@ const Battle = {
     for (let i = 0; i < allies.length; i++) {
       const id = allies[i], A = ALLY[id], st = G.S.allies[id] || {};
       const lv = G.S.lvl - 1 + (A.lvUp || 0);
-      const maxHp = A.hp + lv * 7 + Skills.allyBonus(id).hp, maxMp = A.mp + lv * 2;
+      const maxHp = A.hp + lv * 7 + Skills.allyBonus(id).hp, maxMp = A.mp + lv * 2 + (Skills.allyBonus(id).mp || 0);
       B.actors.push(this.mk({ side: 'p', id, name: A.name, color: A.color, atkAnim: A.atkAnim, img: await npcImg(A.sprite), hp: st.hp ?? maxHp, maxHp, mp: st.mp ?? maxMp, maxMp,
         atk: A.atk + lv * 2 + Skills.allyBonus(id).atk, def: A.def + lv + Skills.allyBonus(id).def, spd: A.spd + Skills.allyBonus(id).spd, arts: A.arts, slot: pSlots[i + 1] }));
     }

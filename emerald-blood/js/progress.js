@@ -28,9 +28,9 @@ Story.gainXp = function (n) {
   const st = S.stats; S.sp = S.sp || {}; const allies = Object.keys(ALLY), shows = [];
   for (let c = before.col + 1; c <= after.col; c++) {
     const band = c % NB; let sp = 0;
-    if (band === 0) { st.maxHp += 6; st.maxMp += 2; st.def += 1; sp = 1; }
-    else { const g = COLOUR_GIFT[band]; st.maxHp += g.hp; st.atk += g.atk || 0; st.maxMp += g.mp || 0; if (band === 3 || band === 5 || band === 7) sp = 1; }
-    if (sp) { S.sp.me = (S.sp.me || 0) + 1; for (const w of allies) S.sp[w] = (S.sp[w] || 0) + 1; }
+    if (band === 0) { st.maxHp += 6; st.maxMp += 2; st.def += 1; sp = 3; }
+    else { const g = COLOUR_GIFT[band]; st.maxHp += g.hp; st.atk += g.atk || 0; st.maxMp += g.mp || 0; sp = 2; }
+    if (sp) { S.sp.me = (S.sp.me || 0) + sp; for (const w of allies) S.sp[w] = (S.sp[w] || 0) + sp; }
     shows.push([{ grade: GRADES[Math.floor(c / NB)], band }, band === 0, sp]);
   }
   st.hp = st.maxHp; st.mp = st.maxMp;
@@ -134,7 +134,7 @@ const Skills = {
     if (n.art && !G.S.arts.includes(n.art)) G.S.arts.push(n.art);
     return true;
   },
-  allyBonus(who) { const b = { atk: 0, def: 0, hp: 0, spd: 0 }; const T = TREES[who]; if (!T) return b; for (const br of Object.values(T.branches)) for (const n of br) if (n.ally && this.has(who, n.id)) for (const k in n.ally) b[k] += n.ally[k]; return b; },
+  allyBonus(who) { const b = { atk: 0, def: 0, hp: 0, spd: 0, mp: 0 }; const T = TREES[who]; if (!T) return b; for (const br of Object.values(T.branches)) for (const n of br) if (n.ally && this.has(who, n.id)) for (const k in n.ally) b[k] += n.ally[k]; return b; },
   artMul(who, k) { let m = 1; const T = TREES[who]; if (T) for (const br of Object.values(T.branches)) for (const n of br) if (n.artMul && n.artMul[k] && this.has(who, n.id)) m *= n.artMul[k]; if (who === 'me' && k === 'crimson' && this.has('me', 't2')) m *= 1.25; return m; },
   reflex(who) { let m = 1; if (who === 'me' && this.has('me', 'e3')) m *= 1.2; const T = TREES[who]; if (T && who !== 'me') for (const br of Object.values(T.branches)) for (const n of br) if (n.reflex && this.has(who, n.id)) m *= n.reflex; return m; }
 };

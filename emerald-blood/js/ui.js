@@ -209,7 +209,7 @@ const UI = {
   closeMenu() { $('#menu').classList.add('hide'); World.busy = false; this.controls(true); save(); },
   renderMenu() {
     const S = G.S, s = S.stats, t = this.menuTab;
-    const tabs = ['party', 'skills', 'passives', 'arts', 'martial', 'stones', 'items', 'quests', 'calendar', 'renown', 'feats', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ feats: 'Trophies', party: 'Party', skills: 'Skills', passives: 'Passives', arts: 'Arts', martial: 'Martial Arts', stones: 'Stones', items: 'Items', quests: 'Quests', calendar: 'Calendar', renown: 'Renown', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
+    const tabs = ['party', 'attributes', 'skills', 'mastery', 'passives', 'arts', 'martial', 'stones', 'items', 'quests', 'calendar', 'renown', 'feats', 'map', 'companions', 'world', 'settings'].map(k => `<button data-t="${k}" class="${t === k ? 'on' : ''}">${{ feats: 'Trophies', party: 'Party', attributes: 'Attributes', mastery: 'Mastery', skills: 'Skill Tree', passives: 'Passives', arts: 'Arts', martial: 'Martial Arts', stones: 'Stones', items: 'Items', quests: 'Quests', calendar: 'Calendar', renown: 'Renown', map: 'Map', companions: 'Companions', world: 'World', settings: 'Settings' }[k]}</button>`).join('');
     let body = '';
     if (t === 'party') {
       body = `<div class="grid2"><div class="stat"><h3>${esc(S.name)} · ${Power.badge()}</h3><p>HP <b>${s.hp}/${s.maxHp}</b> · MP <b>${s.mp}/${s.maxMp}</b></p><p>ATK <b>${s.atk}</b> · DEF <b>${s.def}</b> · SPD <b>${Math.floor(s.spd)}</b></p><p>EXP <b>${Power.xp()}/${Power.now().hi}</b> · <span style="color:${BAND_COL[Power.now().band]}">${BAND_NAME[Power.now().band]}</span> · Gold <b>${S.gold}</b></p><p>Hood: <b>${S.f.hoodGiven ? (S.hood ? 'up' : 'down') : '—'}</b> · Suspicion <b>${Math.floor(S.sus)}/5</b></p><p>Guild rank: ${S.rank ? `<b style="color:${TIER_COL[S.rank]}">${S.rank}-RANK</b>` : '<b>unregistered</b>'} · Element: <b style="color:#46ff95">none — raw mana</b></p></div>` +
@@ -234,6 +234,10 @@ const UI = {
       body = worldMenuHTML();
     } else if (t === 'map') {
       body = mapMenuHTML();
+    } else if (t === 'attributes') {
+      body = typeof attrHTML === 'function' ? attrHTML() : '';
+    } else if (t === 'mastery') {
+      body = typeof masteryHTML === 'function' ? masteryHTML() : '';
     } else if (t === 'martial') {
       body = typeof MARTIAL !== 'undefined' ? MARTIAL.html() : '';
     } else if (t === 'companions') {
@@ -257,6 +261,7 @@ const UI = {
     bindTap($('#mClose'), () => this.closeMenu());
     if (t === 'stones') bindStonesMenu();
     if (t === 'martial' && typeof MARTIAL !== 'undefined') MARTIAL.bind();
+    if (t === 'mastery' && typeof masteryBind === 'function') masteryBind();
     if (t === 'skills') bindSkillsMenu();
     if (t === 'passives' && typeof bindPassivesMenu === 'function') bindPassivesMenu();
     if (t === 'map') bindMapMenu();
