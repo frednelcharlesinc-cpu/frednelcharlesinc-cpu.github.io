@@ -33,7 +33,9 @@ function cmdIcon(label) {
 }
 const BT_SCALE = 1.5;
 // where the enemy side stands (mirror of the party), as fractions of the screen so every phone gets the same layout
-function BT_ESLOTS() { const W = G.view.w, FH = G.view.fullH || G.view.h; return [[W * .26, FH * .65], [W * .16, FH * .80], [W * .32, FH * .55], [W * .09, FH * .58]]; } // fighters stand close to the camera so you can see them clearly
+function BT_ESLOTS() { const W = G.view.w, FH = G.view.fullH || G.view.h; return [[W * .29, FH * .67], [W * .15, FH * .82], [W * .17, FH * .53], [W * .40, FH * .53]]; }
+/* enemy captions (trait, passives): shown in full for the opening seconds, then only for whoever is acting or being targeted — keeps the field readable */
+function BT_TIP(B, a) { const now = performance.now(); if (!B.tip0) B.tip0 = now; const T = B.targeting; if ((T && T.list[T.i] === a) || B.cur === a) return 1; return 1 - Math.max(0, Math.min(1, (now - B.tip0 - 6000) / 600)); } // fighters stand close to the camera so you can see them clearly
 const ENEMY = {
   lupine: { name: 'Ashen Lupine', hp: 38, atk: 10, def: 2, spd: 12, dodge: .2, parry: 0, brk: 40, xp: 14, gold: 6,
     skills: [{ name: 'Claw', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Frenzy', w: .5, hits: [{ anim: 'slash', m: .55, w: 480 }, { anim: 'halfslash', m: .55, w: 300 }, { anim: 'slash', m: .7, w: 380 }] }] },
@@ -176,7 +178,7 @@ const Battle = {
     // party
     const W = G.view.w, FH = G.view.fullH || G.view.h;
     // the two sides face each other across open ground: three rows of depth (far, middle, near), the near row lowest on screen
-    const pSlots = cfg.slots || [[W * .74, FH * .65], [W * .84, FH * .80], [W * .68, FH * .55]];
+    const pSlots = cfg.slots || [[W * .70, FH * .67], [W * .84, FH * .82], [W * .82, FH * .53]];
     const eSlots = BT_ESLOTS();
     const S = G.S.stats;
     const SB = Stones.bonus(); B.sb = SB;
@@ -972,7 +974,7 @@ const Battle = {
         c.fillStyle = a.broken ? '#fff' : '#ffd34a'; c.fillRect(x, y + 5, bw * Math.min(1, a.brk / a.brkMax), 2);
         c.font = '800 12px "Nunito"'; c.textAlign = 'center'; c.lineJoin = 'round'; c.strokeStyle = '#000'; c.lineWidth = 3; c.strokeText(a.name, a.x - 7, y - 3); c.fillStyle = '#ffb4a8'; c.fillText(a.name, a.x - 7, y - 3);
         const tr = TIER[a.key]; if (tr) { const tx = a.x - 7 + c.measureText(a.name).width / 2 + 9; c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(tx - 6, y - 12, 12, 11); c.fillStyle = TIER_COL[tr]; c.font = '700 8px "Press Start 2P"'; c.fillText(tr, tx, y - 3); }
-        if (a.E.trait) { c.font = '800 12px "Nunito"'; c.fillStyle = 'rgba(0,0,0,.78)'; const tw = c.measureText(a.E.trait).width, lx = Math.max(tw / 2 + 5, Math.min(W - tw / 2 - 5, a.x)); c.fillRect(lx - tw / 2 - 3, a.y + 6, tw + 6, 13); c.fillStyle = '#f2e6c4'; c.fillText(a.E.trait, lx, a.y + 16); }
+        const tipA = BT_TIP(B, a); if (a.E.trait && tipA > .02) { c.globalAlpha = tipA; c.font = '800 12px "Nunito"'; c.fillStyle = 'rgba(0,0,0,.78)'; const tw = c.measureText(a.E.trait).width, lx = Math.max(tw / 2 + 5, Math.min(W - tw / 2 - 5, a.x)); c.fillRect(lx - tw / 2 - 3, a.y + 6, tw + 6, 13); c.fillStyle = '#f2e6c4'; c.fillText(a.E.trait, lx, a.y + 16); c.globalAlpha = 1; }
         if (a.shield) { c.fillStyle = '#cfd8e8'; for (let i = 0; i < a.shield; i++) c.fillRect(a.x - 12 + i * 9, y - 22, 7, 5); }
         if (a.stance) { c.fillStyle = '#cfe8ff'; c.font = '700 8px "Press Start 2P"'; c.fillText('STANCE', a.x, y - 24); }
         if (a.frostOn) { c.strokeStyle = 'rgba(160,230,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(a.x, a.y - 30 * (a.size || 1), 20 * (a.size || 1), 34 * (a.size || 1), 0, 0, 7); c.stroke(); }

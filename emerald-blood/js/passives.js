@@ -195,9 +195,9 @@ function bindPassivesMenu() { $$('#menuCard [data-pv]').forEach(b => bindTap(b, 
   const _rd = BT.render.bind(BT);
   BT.render = function (c, t) {
     _rd(c, t); const B = this.B; if (!B || B.clashOn) return;
-    for (const a of B.actors) if (a.side === 'e' && !a.ko && a.passTxt) {
+    for (const a of B.actors) if (a.side === 'e' && !a.ko && a.passTxt && BT_TIP(B, a) > .02) { c.save(); c.globalAlpha = BT_TIP(B, a);
       c.font = '800 10px "Nunito"'; c.textAlign = 'center'; const tw = c.measureText(a.passTxt).width, lx = Math.max(tw / 2 + 5, Math.min(G.view.w - tw / 2 - 5, a.x)), y = a.y + (a.E.trait ? 22 : 8);
-      c.fillStyle = 'rgba(30,18,0,.8)'; c.fillRect(lx - tw / 2 - 3, y, tw + 6, 12); c.fillStyle = '#ffd88a'; c.fillText(a.passTxt, lx, y + 9);
+      c.fillStyle = 'rgba(30,18,0,.8)'; c.fillRect(lx - tw / 2 - 3, y, tw + 6, 12); c.fillStyle = '#ffd88a'; c.fillText(a.passTxt, lx, y + 9); c.restore();
     }
   };
 })();

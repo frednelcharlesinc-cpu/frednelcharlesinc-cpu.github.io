@@ -124,7 +124,7 @@
     for (const a of B.actors) if (a.side === 'e' && !a.ko && !B.clashOn && a.next && a.next.hits && !(this.me() && this.me().sight)) {
       const h = a.next.hits, proj = h.some(x => x.proj), mag = h.some(x => x.anim === 'spellcast'), unp = h.some(x => x.unp);
       const icon = unp ? '!!' : proj ? '➶' : mag ? '✦' : '⚔', col = unp ? '#ff6a6a' : proj ? '#ffcf7a' : mag ? '#9fd8ff' : '#e8e8e8';
-      const x = a.x + 30, y = a.y - 84 - (a.size ? (a.size - 1) * 40 : 0);
+      c.font = '800 12px "Nunito"'; const x = a.x - 7 - c.measureText(a.name).width / 2 - 13, y = a.y - 83;   // sits just left of the name, never on top of it
       c.save(); c.fillStyle = 'rgba(0,0,0,.7)'; c.beginPath(); c.arc(x, y, 8, 0, 7); c.fill(); c.strokeStyle = col; c.lineWidth = 1.2; c.stroke();
       c.fillStyle = col; c.font = '900 10px "Nunito"'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(icon, x, y + .5); if (h.length > 1) { c.font = '900 8px "Nunito"'; c.fillText('×' + h.length, x + 11, y + 6); } c.restore();
     }

@@ -256,7 +256,10 @@ const UI = {
         <div class="stat"><h3>Diorama lens</h3><p>Soft focus, warm light, glowing lamps.</p><button class="btn" data-s="lens">${G.settings.noLens ? 'Off' : 'On'}</button></div><div class="stat"><h3>Timing ring</h3><p>Shows when enemy hits land.</p><button class="btn" data-s="ring">${st.ring ? 'On' : 'Off'}</button></div><div class="stat"><h3>Text speed</h3><button class="btn" data-s="text">${['Slow', 'Normal', 'Fast'][st.text ?? 1]}</button></div><div class="stat"><h3>Weather & day/night</h3><p>Living world outdoors: clock, rain, fog, wildlife.</p><button class="btn" data-s="noAmbient">${st.noAmbient ? 'Off' : 'On'}</button></div><div class="stat"><h3>Camera</h3><p>Normal frames you like a handheld Pokémon game. Close is tighter, Wide shows more of the map.</p><button class="btn" data-s="cam">${{ close: 'Close', normal: 'Normal', wide: 'Wide' }[camMode()]}</button></div><div class="stat"><h3>Portrait style</h3><p>Ren & Kairo's dialogue faces.</p><button class="btn" data-s="artStyle">${st.artStyle === 'classic' ? 'Classic' : 'New'}</button></div></div>
         <div class="btnrow"><button class="btn" id="mName">Rename hero</button><button class="btn" id="mSave">Save now</button><button class="btn" id="mCredits">Credits</button><button class="btn" id="mTitle">Title screen</button></div>`;
     }
-    $('#menuCard').innerHTML = `<h2>MENU</h2><div class="tabs">${tabs}<button id="mClose" style="margin-left:auto;border-color:#2f8a55;color:var(--green)">Close ✕</button></div>${body}`;
+    // landscape layout: every tab always visible in a side column, the page scrolls on its own beside it
+    const old = $('#menuCard .mbody'), keep = old && old.dataset.t === t ? old.scrollTop : 0;
+    $('#menuCard').innerHTML = `<div class="mside"><div class="mhead"><h2>MENU</h2><button id="mClose">Close ✕</button></div><div class="tabs">${tabs}</div></div><div class="mbody" data-t="${t}">${body}</div>`;
+    if (keep) $('#menuCard .mbody').scrollTop = keep;
     $$('#menuCard .tabs button[data-t]').forEach(b => bindTap(b, () => { this.menuTab = b.dataset.t; sfx('blip'); this.renderMenu(); }));
     bindTap($('#mClose'), () => this.closeMenu());
     if (t === 'stones') bindStonesMenu();
