@@ -251,3 +251,11 @@ const Dom = {
     return out;
   };
 })();
+/* Ren's Stage II wears its own sprite sheet (assets/hd/ren_t2 — the user's Emerald Sovereign art) */
+(function () {
+  const swap = (B, set) => { try { if (!B || typeof HD === 'undefined' || !HD.on() || !HD.img[set]) return; const im = HD.sheet(set, HD.meta[set].faces !== 'left'); if (!im) return; im.__hd.me = 1; B.renBts = im; } catch (e) { } };
+  const _f = Burst.fire.bind(Burst);
+  Burst.fire = async function (a) { const st = this.stage(a); const r = await _f(a); if (a.isMe && st === 2) { swap(Battle.B, 'ren_t2'); if (HD.meta.ren_t2.anims.land) { const n = performance.now(); HD.act = { name: 'land', t0: n, end: n + 900 }; } } return r; };
+  const _e = Burst.end.bind(Burst);
+  Burst.end = function (a) { const r = _e(a); if (a.isMe) swap(Battle.B, HD.battleSet()); return r; };
+})();
