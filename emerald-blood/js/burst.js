@@ -1,12 +1,14 @@
-/* ================= AURA BURST =================
+/* ================= KAIGEN (開眼, "opening the eyes") / KAKUSEI (覚醒, "awakening") =================
+   One ultimate per fighter, shouted aloud. Drags call theirs KAIGEN — the moment they stop hiding their eyes and their
+   war-bred blood wakes. Humans call theirs KAKUSEI — their will rising. Same system, two names, so you hear who's who.
    Every strong human or Drag has one: the moment a fighter becomes everything they are.
    · Heroes: an AURA gauge fills from perfect hits, perfect parries/dodges and the hits you take. When it's full,
-     "✦ AURA BURST" appears in the menu (a free action). A cut-in, then 3 turns of that fighter's own transformation —
+     "✦ KAIGEN" (or "✦ KAKUSEI") appears in the menu (a free action). A cut-in, then 3 turns of that fighter's own transformation —
      and afterwards they're SPENT for 2 turns (slower, softer). Once per battle.
    · Rivals and strong humans/Drags you fight burst too, once, when pushed below half health.
    (Monsters, demons and Monarchs will get DOMINIONS — and an Aura Burst is how you crack one.) */
 const BURST = {
-  me:     { n: 'ECLIPSE', sub: 'Emerald Ascension — Azure and Crimson as one', col: '#9dffc8', d: 'Ascension opens for free; Azure and Crimson cost nothing and every Art hits 30% harder.' },
+  me:     { n: 'EMERALD SOVEREIGN', sub: 'Ascension, Azure and Crimson as one', col: '#9dffc8', d: 'Ascension opens for free; Azure and Crimson cost nothing and every Art hits 30% harder.' },
   kess:   { n: 'NIGHTFALL', sub: 'Living Shadow', col: '#b48aff', d: 'Her shadow strikes after every hit (60%), and she slips most blows.' },
   liora:  { n: 'GHOST UNBOUND', sub: 'The ghost walks beside her', col: '#dfeeff', d: 'Ghost Stance fully awake: the ghost hits for 100%, and +20% attack.' },
   oren:   { n: 'FORGEHEART', sub: 'The forge answers', col: '#ff7a3a', d: '+40% attack, +6 DEF, and every hit sets the foe burning.' },
@@ -26,7 +28,8 @@ const EBURST = {   // enemies: [name, line, colour]
   kairo_spar: ['SCAR SPARK', 'Kairo: "Heh. Just a taste."', '#ff7a3a']
 };
 const Burst = {
-  gain(a, n) { if (!a || a.side !== 'p' || G.S.kid || a.burstUsed || !this.has(a)) return; const was = a.ab || 0; a.ab = Math.min(100, was + n); if (was < 100 && a.ab >= 100) { Battle.text(a, 'AURA BURST READY', BURST[this.key(a)].col, -86, true); sfx('level'); } },
+  word(a) { const drag = a.side === 'p' ? (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) : !!(a.E && a.E.drag); return drag ? 'KAIGEN' : 'KAKUSEI'; },
+  gain(a, n) { if (!a || a.side !== 'p' || G.S.kid || a.burstUsed || !this.has(a)) return; const was = a.ab || 0; a.ab = Math.min(100, was + n); if (was < 100 && a.ab >= 100) { Battle.text(a, this.word(a) + ' READY', BURST[this.key(a)].col, -86, true); sfx('level'); } },
   key(a) { return a.isMe ? 'me' : a.id; },
   has(a) { const k = this.key(a); if (!BURST[k]) return false; if (k === 'me') return !G.S.kid; return true; },
   async cut(who, title, sub, col, side) {
@@ -37,7 +40,7 @@ const Burst = {
   },
   async fire(a) {
     const k = this.key(a), D = BURST[k], B = Battle.B; a.burstUsed = 1; a.ab = 0; a.burst = 3;
-    await this.cut(k === 'me' ? 'me' : k === 'kess' ? 'kessE' : k, 'AURA BURST — ' + D.n, D.sub, D.col, 'p');
+    await this.cut(k === 'me' ? 'me' : k === 'kess' ? 'kessE' : k, this.word(a) + ' — ' + D.n, D.sub, D.col, 'p');
     Battle.spark(a.x, a.y - 40, D.col, 40); Battle.text(a, D.n, D.col, -60, true);
     if (k === 'me') { if (!a.sight) { a.sightSpd = a.spd * .4; a.spd += a.sightSpd; a.sightAtk = Math.round(a.atk * .3); a.atk += a.sightAtk; } a.sight = Math.max(a.sight || 0, 3); a.eclipse = 3; }
     if (k === 'kess') { Ghost.start(a, 3, .6, true); a.bDodge = 1; }
@@ -57,7 +60,7 @@ const Burst = {
     const D = EBURST[e.key]; e.eburst = 4; e.eburstUsed = 1;
     await Battle.msg(D[1], 1600);
     const who = /^vane/.test(e.key) ? 'vane' : /^halvard/.test(e.key) ? 'halvard' : /liora/.test(e.key) ? 'liora' : /kairo/.test(e.key) ? 'kairo' : e.key.replace(/_[a-z]+$/, '').replace(/^ge_/, '');
-    await this.cut(who, 'AURA BURST — ' + D[0], e.name, D[2], 'e');
+    await this.cut(who, this.word(e) + ' — ' + D[0], e.name, D[2], 'e');
     e.ebAtk = Math.round(e.atk * .3); e.atk += e.ebAtk; e.spd += 3; e.def = (e.def || 0) + 3; const h = Math.round(e.maxHp * .1); e.hp = Math.min(e.maxHp, e.hp + h);
     Battle.text(e, D[0], D[2], -60, true); Battle.spark(e.x, e.y - 40, D[2], 34); Battle.hud();
   }
@@ -109,7 +112,7 @@ const Burst = {
     CombatX.menu = function (a, L, done, resolve, reopen) {
       _m(a, L, done, resolve, reopen);
       try { if (a.side === 'p' && Burst.has(a) && !a.burstUsed && (a.ab || 0) >= 100) { const D = BURST[Burst.key(a)];
-        L.unshift([`✦ AURA BURST — ${D.n}`, `${D.d} Lasts 3 turns, then ${a.name} is SPENT for 2 (slower, softer). Free action — doesn't end your turn.`, async () => { Battle.closeMenu(); await Burst.fire(a); reopen(); }]);
+        L.unshift([`✦ ${Burst.word(a)} — ${D.n}`, `${D.d} Lasts 3 turns, then ${a.name} is SPENT for 2 (slower, softer). Free action — doesn't end your turn.`, async () => { Battle.closeMenu(); await Burst.fire(a); reopen(); }]);
         L[0].mart = 1; } } catch (e) { }
     };
   }
