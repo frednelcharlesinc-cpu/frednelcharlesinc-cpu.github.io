@@ -134,6 +134,11 @@ const Burst = {
         c.fillStyle = C.col; c.globalAlpha = .9; c.fillRect(0, y - 3, w, 3); c.fillRect(0, y + bh, w, 3); c.globalAlpha = 1;
         for (let i = 0; i < 14; i++) { c.globalAlpha = .18; c.fillStyle = C.col; const lx = ((i * 97 + performance.now() * .9 * dir) % (w + 200)) - 100; c.fillRect(lx, y + 6 + (i * 37) % (bh - 12), 120, 2); }
         c.globalAlpha = 1;
+        if (C.ban && C.ban.naturalWidth) { const bw = C.ban.naturalWidth, bhh = C.ban.naturalHeight, sc = Math.max(w / bw, bh / bhh), dw = bw * sc, dh = bhh * sc;
+          c.save(); c.beginPath(); c.rect(0, y, w, bh); c.clip(); c.globalAlpha = .9; c.drawImage(C.ban, (w - dw) / 2 + (1 - k) * 30 * dir, y + (bh - dh) / 2, dw, dh);
+          const gr = c.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, 'rgba(4,6,8,.75)'); gr.addColorStop(.32, 'rgba(4,6,8,.15)'); gr.addColorStop(.6, 'rgba(4,6,8,.15)'); gr.addColorStop(1, 'rgba(4,6,8,.8)'); c.globalAlpha = 1; c.fillStyle = gr; c.fillRect(0, y, w, bh); c.restore(); }
+        if (C.fig && C.fig.naturalWidth) { const fw = C.fig.naturalWidth, fh = C.fig.naturalHeight, sh = fh * .62, dh = bh * 1.08, dw = fw * dh / sh;
+          c.save(); c.beginPath(); c.rect(0, y, w, bh); c.clip(); c.drawImage(C.fig, 0, 0, fw, sh, w * .03, y + bh - dh * .98, dw, dh); c.restore(); }
         if (C.img && C.img.width) { const iw = C.img.width, ih = C.img.height, sy = ih * .16, sh = ih * .3, dw = bh * (iw / sh) * .9, dx = C.side === 'p' ? w * .06 : w - w * .06 - dw;
           c.save(); c.beginPath(); c.rect(0, y, w, bh); c.clip(); c.drawImage(C.img, 0, sy, iw, sh, dx, y + bh * .05, dw, bh * .9); c.restore(); }
         c.textAlign = C.side === 'p' ? 'right' : 'left'; const tx = C.side === 'p' ? w * .86 : w * .05;
@@ -258,4 +263,17 @@ const Dom = {
   Burst.fire = async function (a) { const st = this.stage(a); const r = await _f(a); if (a.isMe && st === 2) { swap(Battle.B, 'ren_t2'); if (HD.meta.ren_t2.anims.land) { const n = performance.now(); HD.act = { name: 'land', t0: n, end: n + 900 }; } } return r; };
   const _e = Burst.end.bind(Burst);
   Burst.end = function (a) { const r = _e(a); if (a.isMe) swap(Battle.B, HD.battleSet()); return r; };
+})();
+
+/* Ren's own Transcension cut-in art: robed Stage I / flame-aura Stage II, with the glowing-eyes banner behind */
+(function () {
+  const L = n => { const i = new Image(); i.src = 'assets/burst/' + n; return i; };
+  const R = { p1: L('ren_p1.png'), p2: L('ren_p2.png'), eyes: L('ren_eyes.jpg') };
+  const _c = Burst.cut.bind(Burst);
+  Burst.cut = async function (who, title, sub, col, side) {
+    if (who !== 'me') return _c(who, title, sub, col, side);
+    const B = Battle.B; if (!B) return; let st = 1; try { const me = B.actors.find(a => a.isMe); if (me) st = this.stage(me); } catch (e) { }
+    B.cutin = { img: null, fig: st === 2 ? R.p2 : R.p1, ban: R.eyes, title, sub, col, t0: performance.now(), side }; B.flash = 1; B.flashCol = '255,255,255'; sfx('art'); B.shake = 10;
+    await wait(1250); if (B.cutin && B.cutin.title === title) B.cutin = null;
+  };
 })();
