@@ -95,7 +95,7 @@ const Ambient = {
     if (now > this.wNext && !World.busy) {
       const opts = [['clear', 5], ['rain', 3], ['fog', 2], ['wind', 2]], tot = opts.reduce((s, o) => s + o[1], 0); let r = Math.random() * tot, k = 'clear';
       for (const [n, w] of opts) { if ((r -= w) < 0) { k = n; break; } }
-      if (k !== this.weather) { this.weather = k; this.wFade = 0; const msg = { rain: 'Rain rolls in over the vale.', fog: 'A grey fog creeps in off the river.', wind: 'The wind picks up. Leaves everywhere.', clear: 'The sky clears.' }[k]; if (G.mode === 'world') toast(msg, 2200); }
+      if (k !== this.weather) { this.weather = k; this.wFade = 0; const msg = { rain: 'Rain rolls in over the vale. <b>Hoods up, heads down</b> — nobody looks at faces in the rain (Suspicion gains halved, fewer ambushes on you).', fog: 'A grey fog creeps in off the river. <b>Hard to see — for them too</b> (Suspicion gains −25%, you spot enemies first more often).', wind: 'The wind picks up. Leaves everywhere.', clear: 'The sky clears.' }[k]; if (G.mode === 'world') toast(msg, k === 'rain' || k === 'fog' ? 4200 : 2200); }
       this.wNext = now + rnd(100000, 200000);
     }
     this.wFade = Math.min(1, this.wFade + dt / 2500);

@@ -372,7 +372,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/veil.js?v=ec534125"></script>
 <script src="js/leaf.js?v=a1c16ded"></script>
 <script src="js/tavern.js?v=85bf2c56"></script>
-<script src="js/ambient.js?v=34fbb2f5"></script>
+<script src="js/ambient.js?v=ce7920c0"></script>
 <script src="js/combat2.js?v=025cb856"></script>
 <script src="js/combat3.js?v=c523eeb8"></script>
 <script src="js/combat4.js?v=efb654d2"></script>
@@ -389,7 +389,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/raids.js?v=e8b96980"></script>
 <script src="js/ledger.js?v=b6e4a733"></script>
 <script src="js/btsprites.js?v=ebdd79da"></script>
-<script src="js/hdsprites.js?v=34178972"></script>
+<script src="js/hdsprites.js?v=b7ff5182"></script>
 <script src="js/town.js?v=b3553885"></script>
 <script src="js/charge.js?v=7e71c6e8"></script>
 <script src="js/guildhall.js?v=783719e1"></script>
@@ -429,6 +429,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/dashup.js?v=1cb89aa7"></script>
 <script src="js/solo.js?v=245dfe39"></script>
 <script src="js/fxsheets.js?v=972ca6b8"></script>
+<script src="js/worldfeel.js?v=3f87deae"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').then(function(r){document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')r.update().catch(function(){});});setInterval(function(){r.update().catch(function(){});},300000);}).catch(function(){});
 var hadSW=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!hadSW){hadSW=true;return;}if(document.getElementById('updBar'))return;var b=document.createElement('div');b.id='updBar';b.textContent='A new version of the game is ready — tap here to load it (your progress is saved)';b.style.cssText='position:fixed;left:50%;top:max(6px,env(safe-area-inset-top));transform:translateX(-50%);z-index:999;padding:8px 14px;border-radius:12px;background:#46ff95;color:#06210f;font:800 12px Nunito,system-ui;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:90vw;text-align:center';b.onclick=function(){try{if(window.save&&window.G&&G.S&&G.mode==='world')save();}catch(e){}location.reload();};document.body.appendChild(b);});}</script>
 </body>

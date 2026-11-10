@@ -187,7 +187,7 @@ HD.load();
     if (!fr || !img) return _draw.call(this, c, cx, cy, t);
     const x = this.px - cx, y = this.py - cy + 3;
     if (x < -60 || y < -10 || x > G.view.w + 60 || y > G.view.h + 100) return;
-    c.fillStyle = 'rgba(0,0,0,.24)'; c.beginPath(); c.ellipse(x, y - 1, 11, 4, 0, 0, 7); c.fill();
+    WorldFeel.shadow(c, x, y);
     const want = this.face || (this.isPlayer ? 'right' : 'left'), flip = (this.dir === 'left' || this.dir === 'right' || moving) && want !== faces;
     const bob = moving ? Math.abs(Math.sin(ph * Math.PI * 2)) * .8 : 0;
     const sway = 0;
@@ -197,6 +197,7 @@ HD.load();
     const k = h / fr[6];
     c.drawImage(img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
     c.restore();
+    if (WorldFeel.wet(this)) WorldFeel.reflect(c, img, fr, k, x, y, flip, t, this.alpha);
   };
 })();
 
