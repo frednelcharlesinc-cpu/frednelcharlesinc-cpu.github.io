@@ -33,6 +33,19 @@ function cmdIcon(label) {
 }
 const BT_SCALE = 1.5;
 // where the enemy side stands (mirror of the party), as fractions of the screen so every phone gets the same layout
+/* the painted Azure orb (assets/fx/azure.png): 160px cells, 6 per row */
+const AZFX = { img: null, A: { form: [0, 1, 2, 3, 4, 5, 6], idle: [7, 8, 9, 10, 11, 12], swallow: [13, 14, 15, 16, 17, 18], release: [19, 20, 21, 22, 23] },
+  load() { if (this.img !== null) return; this.img = 0; loadImg('assets/fx/azure.png?v=1', true).then(im => { this.img = im; }).catch(() => { }); },
+  ok() { this.load(); return !!(this.img && this.img.width); }, n(k) { return this.A[k].length; },
+  draw(c, k, i, x, y, sc, al) { const f = this.A[k][i], S = 160, d = 62 * (sc || 1); c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(x, y, 2, x, y, d * .62); g.addColorStop(0, 'rgba(80,200,255,.45)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.globalAlpha = al == null ? 1 : al; c.beginPath(); c.arc(x, y, d * .62, 0, 7); c.fill();
+    c.globalCompositeOperation = 'source-over'; c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(this.img, (f % 6) * S, (f / 6 | 0) * S, S, S, x - d / 2, y - d / 2, d, d); c.restore(); } };
+/* the painted Crimson sphere (assets/fx/crimson.png): 228x184 cells, 6 per row — gather 0-5, charged 6-11, thrown 12-17, explosion 18-23 */
+const CRFX = { img: null,
+  load() { if (this.img !== null) return; this.img = 0; loadImg('assets/fx/crimson.png?v=1', true).then(im => { this.img = im; }).catch(() => { }); },
+  ok() { this.load(); return !!(this.img && this.img.width); },
+  draw(c, f, x, y, sc, ang, ox, al) { const W = 228, H = 184; c.save(); c.translate(x, y); if (ang) c.rotate(ang); c.globalAlpha = al == null ? 1 : al; c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+    c.drawImage(this.img, (f % 6) * W, (f / 6 | 0) * H, W, H, (-W / 2 - (ox || 0)) * sc, -H / 2 * sc, W * sc, H * sc); c.restore(); },
+  glow(c, x, y, R, al) { c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(x, y, 2, x, y, R); g.addColorStop(0, `rgba(255,80,50,${.5 * al})`); g.addColorStop(1, 'rgba(255,60,40,0)'); c.fillStyle = g; c.beginPath(); c.arc(x, y, R, 0, 7); c.fill(); c.restore(); } };
 function BT_ESLOTS() { const W = G.view.w, FH = G.view.fullH || G.view.h; return [[W * .29, FH * .67], [W * .15, FH * .82], [W * .17, FH * .53], [W * .40, FH * .53]]; }
 /* enemy captions (trait, passives): shown in full for the opening seconds, then only for whoever is acting or being targeted — keeps the field readable */
 function BT_TIP(B, a) { const now = performance.now(); if (!B.tip0) B.tip0 = now; const T = B.targeting; if ((T && T.list[T.i] === a) || B.cur === a) return 1; return 1 - Math.max(0, Math.min(1, (now - B.tip0 - 6000) / 600)); } // fighters stand close to the camera so you can see them clearly
@@ -531,7 +544,7 @@ const Battle = {
       await this.play(a, 'spellcast', 7, 80); sfx('chant');
       a.azure = 3; if (!a.baseSpd) a.baseSpd = a.spd; a.spd = a.baseSpd * 1.45; a.wait *= .6;
       B.orb = { owner: a, x: a.x - 30, y: a.y - 80, charges: 3 + (Skills.has('me', 't1') ? 1 : 0), born: performance.now() };
-      this.text(a, 'AZURE TIDE', '#5fd8ff', -40, true); B.fx.push({ orb: 1, kind: 'draw', x: a.x - 30, y: a.y - 70, t: 0, life: 900 });
+      this.text(a, 'AZURE TIDE', '#5fd8ff', -40, true); B.fx.push({ orb: 1, kind: 'draw', seq: 'form', x: a.x - 30, y: a.y - 70, t: 0, life: 800 });
     } else if (A.type === 'draw') {
       B.dimCol = '0,20,40'; await this.play(a, 'spellcast', 7, 80);
       let es = this.alive('e'); const cx = es.reduce((s, t) => s + t.x, 0) / es.length, cy = es.reduce((s, t) => s + t.y, 0) / es.length;
@@ -675,7 +688,7 @@ const Battle = {
     const ranged = sk.hits[0].anim === 'spellcast' || sk.hits.every(h => h.proj);
     if (B.orb && t.side === 'p' && (ranged || el) && !isCounter) {
       await this.msg(`The Azure orb swallows ${sk.name}!`, 900); sfx('heal'); B.flash = .3; const o = B.orb.owner; o.mp = Math.min(o.maxMp, o.mp + 2);
-      B.fx.push({ orb: 1, kind: 'draw', x: B.orb.x, y: B.orb.y, t: 0, life: 700 }); this.text(o, 'ABSORBED +2 MP', '#5fd8ff', -40);
+      B.fx.push({ orb: 1, kind: 'draw', seq: 'swallow', x: B.orb.x, y: B.orb.y, t: 0, life: 750 }); this.text(o, 'ABSORBED +2 MP', '#5fd8ff', -40);
       if (--B.orb.charges <= 0) { B.orb = null; this.text(o, 'The orb is full — it bursts', '#5fd8ff', -60); } this.hud(); return;
     }
     if (!ranged) await this.dash(e, t.x - 54, t.y + 2, 280);
@@ -995,8 +1008,10 @@ const Battle = {
       c.fillStyle = b.done ? (b.res === 'perfect' ? '#ffd34a' : b.res === 'good' ? '#c9f7d6' : '#ff6a6a') : '#ffffff';
       c.save(); c.shadowColor = c.fillStyle; c.shadowBlur = 8; c.fillRect(px - 1.5, Y - hh / 2 - 5, 3, hh + 10); c.restore(); }
     if (B.orb) { const o = B.orb, ow = o.owner; o.x = lerp(o.x, ow.x - 34, .08); o.y = lerp(o.y, ow.y - 82 + Math.sin(t / 300) * 5, .08);
+      if (AZFX.ok()) { if (!B.fx.some(p => p.orb && p.seq && p.t < p.life)) AZFX.draw(c, 'idle', (t / 110) % 6 | 0, o.x, o.y, 1 + Math.sin(t / 400) * .03); }
+      else {
       c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(o.x, o.y, 1, o.x, o.y, 22); g.addColorStop(0, 'rgba(230,250,255,.95)'); g.addColorStop(.35, 'rgba(80,200,255,.75)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.beginPath(); c.arc(o.x, o.y, 22, 0, 7); c.fill();
-      c.strokeStyle = 'rgba(120,220,255,.7)'; c.lineWidth = 1.5; for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(o.x, o.y, 12 + i * 4, t / (200 + i * 80) + i, t / (200 + i * 80) + i + 2); c.stroke(); } c.restore();
+      c.strokeStyle = 'rgba(120,220,255,.7)'; c.lineWidth = 1.5; for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(o.x, o.y, 12 + i * 4, t / (200 + i * 80) + i, t / (200 + i * 80) + i + 2); c.stroke(); } c.restore(); }
       c.fillStyle = '#bfefff'; c.font = '700 7px "Press Start 2P"'; c.textAlign = 'center'; c.fillText('◆'.repeat(o.charges), o.x, o.y + 30); }
     for (const a of B.actors) if (!a.ko && (a.sight || a.azure)) { c.save(); c.globalCompositeOperation = 'lighter'; const col = a.azure ? '80,200,255' : '70,255,140'; const g = c.createRadialGradient(a.x, a.y - 30, 6, a.x, a.y - 30, 46); g.addColorStop(0, `rgba(${col},.0)`); g.addColorStop(.7, `rgba(${col},${.16 + Math.sin(t / 180) * .06})`); g.addColorStop(1, `rgba(${col},0)`); c.fillStyle = g; c.fillRect(a.x - 50, a.y - 80, 100, 100); c.restore(); }
     if (T) { const a = T.list[T.i]; const y = a.y - 92 + Math.sin(t / 150) * 3; c.fillStyle = T.side === 'e' ? '#ffd34a' : '#46ff95'; c.beginPath(); c.moveTo(a.x - 7, y); c.lineTo(a.x + 7, y); c.lineTo(a.x, y + 9); c.fill(); }
@@ -1022,6 +1037,10 @@ const Battle = {
         if (p.t < 90) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(230,255,240,${1 - p.t / 90})`; c.lineWidth = 2; c.beginPath(); c.moveTo(p.x - 16, p.y + 6); c.lineTo(p.x + 16, p.y - 6); c.stroke(); c.restore(); }
         continue; }
       const k = p.t / p.life;
+      if (p.orb && p.seq && AZFX.ok()) {   // the painted Azure orb: forming, swallowing, bursting
+        const n = AZFX.n(p.seq), fx = B.orb && p.seq !== 'release' ? B.orb.x : p.x, fy = B.orb && p.seq !== 'release' ? B.orb.y : p.y;
+        AZFX.draw(c, p.seq, Math.min(n - 1, k * n | 0), fx, fy, p.seq === 'release' ? 1.5 + k * .5 : 1, p.seq === 'release' ? 1 - Math.max(0, k - .7) / .3 : 1); continue;
+      }
       if (p.orb) {
         const R = p.kind === 'draw' ? 38 * (1 - k * .55) : 8 + 26 * k, col = p.kind === 'draw' ? '80,200,255' : '255,60,50';
         c.save(); c.globalCompositeOperation = 'lighter';
@@ -1043,6 +1062,14 @@ const Battle = {
       if (p.field) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(70,255,140,${.8 * (1 - k)})`; c.lineWidth = 2;
         for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + p.t / 400; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 34, p.y + Math.sin(an) * 40); c.lineTo(p.x + Math.cos(an + Math.PI / 3) * 34, p.y + Math.sin(an + Math.PI / 3) * 40); c.stroke(); }
         c.fillStyle = `rgba(70,255,140,${.12 * (1 - k)})`; c.beginPath(); c.ellipse(p.x, p.y, 34, 40, 0, 0, 7); c.fill(); c.restore(); continue; }
+      if (p.sphere && CRFX.ok()) { if (p.life === 0) continue;
+        CRFX.glow(c, p.x, p.y, p.r * 2.4, 1);
+        if (p.px != null && (p.px !== p.x || p.py !== p.y)) { p.ang = Math.atan2(p.y - p.py, p.x - p.px); p.fly = 1; } p.px = p.x; p.py = p.y;
+        if (p.fly) CRFX.draw(c, 14 + ((t / 70 | 0) % 3), p.x, p.y, .5, p.ang, 48);
+        else if (p.r < 25) CRFX.draw(c, Math.max(0, Math.min(5, (p.r - 4) / 21 * 6 | 0)), p.x, p.y, .5);
+        else CRFX.draw(c, 6 + ((t / 90 | 0) % 6), p.x, p.y, .5 * (1 + Math.sin(t / 120) * .04));
+        continue; }
+      if (p.burst && p.red && CRFX.ok()) { CRFX.glow(c, p.x, p.y, 40 + k * 110, 1 - k); CRFX.draw(c, 19 + Math.min(4, k * 5 | 0), p.x, p.y, .95 + k * .25, 0, 0, k > .8 ? (1 - k) / .2 : 1); continue; }
       if (p.sphere) { if (p.life === 0) continue; c.save(); c.globalCompositeOperation = 'lighter'; const R = p.r;
         const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, R * 1.9); g.addColorStop(0, 'rgba(255,240,230,1)'); g.addColorStop(.3, 'rgba(255,70,50,.95)'); g.addColorStop(.7, 'rgba(170,10,20,.5)'); g.addColorStop(1, 'rgba(120,0,0,0)');
         c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, R * 1.9, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,140,110,.8)'; c.lineWidth = 2;

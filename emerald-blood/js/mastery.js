@@ -114,7 +114,7 @@ const MASTERY = {
     const B = B_(), o = B.orb, ow = o.owner, l = o.lv || 0;
     await Battle.msg(`${t !== ow ? 'The Azure orb throws itself in front of ' + t.name + ' — and ' : 'The Azure orb '}swallows ${sk.name}!`, 900);
     sfx('heal'); B.flash = .3; ow.mp = Math.min(ow.maxMp, ow.mp + 2);
-    B.fx.push({ orb: 1, kind: 'draw', x: o.x, y: o.y, t: 0, life: 700 }); Battle.text(ow, 'ABSORBED +2 MP', '#5fd8ff', -40);
+    B.fx.push({ orb: 1, kind: 'draw', seq: 'swallow', x: o.x, y: o.y, t: 0, life: 750 }); Battle.text(ow, 'ABSORBED +2 MP', '#5fd8ff', -40);
     await afterSwallow(e, sk, l);
     if (--o.charges <= 0) { B.orb = null; Battle.text(ow, 'The orb is full — it bursts', '#5fd8ff', -60); }
     Battle.hud();
@@ -242,7 +242,7 @@ const MASTERY = {
     const cx = es.reduce((q, t) => q + t.x, 0) / es.length, cy = es.reduce((q, t) => q + t.y, 0) / es.length - 70;
     await Battle.msg('AZURE RECOIL', 700); sfx('chant');
     const ox = o ? o.x : a.x - 30, oy = o ? o.y : a.y - 80;
-    B.fx.push({ orb: 1, kind: 'draw', x: ox, y: oy, t: 0, life: 900 }); B.dim = .6; B.dimCol = '0,20,50';
+    B.fx.push({ orb: 1, kind: 'draw', seq: 'release', x: ox, y: oy, t: 0, life: 800 }); B.dim = .6; B.dimCol = '0,20,50';
     const fake = o || { x: ox, y: oy }; const t0 = performance.now();
     while (true) { const k = Math.min(1, (performance.now() - t0) / 420); fake.x = ox + (cx - ox) * k; fake.y = oy + (cy - oy) * k - Math.sin(k * Math.PI) * 30; if (k >= 1) break; await wait(16); }
     B.flash = .9; B.flashCol = '120,220,255'; B.shake = 18; sfx('crit');
