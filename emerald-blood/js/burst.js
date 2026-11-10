@@ -1,9 +1,9 @@
-/* ================= KAIGEN (開眼, "opening the eyes") / KAKUSEI (覚醒, "awakening") =================
-   One ultimate per fighter, shouted aloud. Drags call theirs KAIGEN — the moment they stop hiding their eyes and their
-   war-bred blood wakes. Humans call theirs KAKUSEI — their will rising. Same system, two names, so you hear who's who.
+/* ================= TRANSCENSION =================
+   One ultimate per fighter, shouted aloud: the moment a fighter transcends what they were. Stage I (half-open) first,
+   Stage II (full release + finisher) through the story. The only thing that cracks a monster's Dominion.
    Every strong human or Drag has one: the moment a fighter becomes everything they are.
    · Heroes: an AURA gauge fills from perfect hits, perfect parries/dodges and the hits you take. When it's full,
-     "✦ KAIGEN" (or "✦ KAKUSEI") appears in the menu (a free action). A cut-in, then 3 turns of that fighter's own transformation —
+     "✦ TRANSCENSION" appears in the menu (a free action). A cut-in, then 3 turns of that fighter's own transformation —
      and afterwards they're SPENT for 2 turns (slower, softer). Once per battle.
    · Rivals and strong humans/Drags you fight burst too, once, when pushed below half health.
    (Monsters, demons and Monarchs will get DOMINIONS — and an Aura Burst is how you crack one.) */
@@ -28,7 +28,7 @@ const EBURST = {   // enemies: [name, line, colour]
   kairo_spar: ['SCAR SPARK', 'Kairo: "Heh. Just a taste."', '#ff7a3a']
 };
 const Burst = {
-  word(a) { const drag = a.side === 'p' ? (a.isMe || (ALLY[a.id] && ALLY[a.id].drag)) : !!(a.E && a.E.drag); return drag ? 'KAIGEN' : 'KAKUSEI'; },
+  word(a) { return 'TRANSCENSION'; },
   gain(a, n) { if (!a || a.side !== 'p' || G.S.kid || a.burstUsed || !this.has(a)) return; const was = a.ab || 0; a.ab = Math.min(100, was + n); if (was < 100 && a.ab >= 100) { Battle.text(a, this.word(a) + ' READY', BURST[this.key(a)].col, -86, true); sfx('level'); } },
   key(a) { return a.isMe ? 'me' : a.id; },
   has(a) { const k = this.key(a); if (!BURST[k]) return false; if (k === 'me') return !G.S.kid; return true; },
@@ -48,7 +48,6 @@ const Burst = {
     if (k === 'oren') { a.bAtk = Math.round(a.atk * .4); a.atk += a.bAtk; a.bDef = 6; a.def += 6; a.bBurn = 1; }
     if (k === 'dace') { a.bAtk = Math.round(a.atk * .3); a.atk += a.bAtk; a.bDef = 8; a.def += 8; a.bVow = 1; }
     if (k === 'tamsin') { a.bAtk = Math.round(a.atk * .25); a.atk += a.bAtk; a.bSpd = 3; a.spd += 3; a.bBurn = 1; }
-    try { if (B.dominion) { B.dominion.hp = (B.dominion.hp || 3) - 1; Battle.text(a, 'THE DOMINION CRACKS', '#ffffff', -100, true); } } catch (e) { }
     Battle.hud();
   },
   end(a) {
@@ -147,4 +146,108 @@ const Burst = {
   // fresh each battle
   const _st = Battle.start.bind(Battle);
   Battle.start = function (cfg) { return _st(cfg); };
+})();
+/* ================= TRANSCENSION STAGES, FINISHERS, AND THE FIRST DOMINION =================
+   · STAGE I (half-open): what every fighter starts with — 2 turns, weaker effects, SPENT for 1 turn after.
+   · STAGE II (full release): unlocked by that fighter's story moment, or by mastering Stage I (8 uses).
+     3 turns at full strength — and once during it, the fighter's FINISHER.
+   · DOMINIONS: monsters, demons and Monarchs rewrite the battlefield. Only a Transcension cracks one:
+     Stage I cracks it, perfect hits during a release crack it further, Stage II shatters it outright. */
+const FINISH = {
+  me: { n: 'ECLIPSE CONVERGENCE', m: 3.2, all: 1, d: 'Azure and Crimson merge into one beam that tears through every enemy.' },
+  kess: { n: 'THOUSAND SHADOWS', m: 2.4, all: 1, d: 'Every shadow on the field strikes at once.' },
+  liora: { n: 'ELEVENTH GHOST', m: 3, d: 'Eleven ghosts, one spear, one target.' },
+  oren: { n: 'WORLD ANVIL', m: 2.8, all: 1, d: 'The ground becomes the forge. Everything on it burns.' },
+  dace: { n: 'VOW BREAKER', m: 3.4, d: 'A single cleave with everything he swore.' },
+  tamsin: { n: 'FIRESTORM', m: 2.2, all: 1, d: 'A storm of torch-fire over the whole field.' }
+};
+const UNLOCK = { me: () => G.S.f.chapter1Done, kess: () => G.S.f.kessOath, liora: () => G.S.f.trialWalked };
+Object.assign(Burst, {
+  uses(k) { const S = G.S; S.kaigen = S.kaigen || {}; return S.kaigen[k] || 0; },
+  stage(a) { const k = this.key(a); return (UNLOCK[k] && UNLOCK[k]()) || this.uses(k) >= 8 ? 2 : 1; }
+});
+(function () {
+  const _fire = Burst.fire.bind(Burst);
+  Burst.fire = async function (a) {
+    const k = this.key(a), st = this.stage(a), B = Battle.B;
+    const D = BURST[k], keepN = D.n, keepSub = D.sub;
+    if (st === 1) { D.n = keepN + ' · I'; D.sub = 'Half-open — ' + keepSub; }
+    try { await _fire(a); } finally { D.n = keepN; D.sub = keepSub; }
+    G.S.kaigen = G.S.kaigen || {}; const before = this.uses(k); G.S.kaigen[k] = before + 1;
+    if (st === 1) {   // weaker: 2 turns, softer numbers, a shorter crash
+      a.burst = 2; a.stage1 = 1; if (a.bAtk) { const cut = Math.round(a.bAtk * .4); a.atk -= cut; a.bAtk -= cut; } if (a.bDef) { a.def -= 3; a.bDef -= 3; }
+      if (k === 'me' && a.eclipse) a.eclipse = 2; if (typeof Ghost !== 'undefined' && a.ghostT) { a.ghostT = 2; a.ghostMult = (a.ghostMult || 1) * .7; }
+      if (before + 1 === 8 && !(UNLOCK[k] && UNLOCK[k]())) setTimeout(() => toast(`<b style="color:${D.col}">${esc(a.name)} has mastered the half-open ${this.word(a)}.</b> The full release — Stage II — is unlocked.`, 5200), 1200);
+    } else { a.stage1 = 0; a.finisher = 1; }
+    if (B && B.dominion && !B.dominion.gone) { if (st === 2) Dom.shatter(); else Dom.crack(a, 1); }
+  };
+  const _end = Burst.end.bind(Burst);
+  Burst.end = function (a) { _end(a); a.finisher = 0; if (a.stage1) { a.spent = 1; a.stage1 = 0; } };
+  // the finisher, once, during a Stage II release
+  const _m = CombatX.menu.bind(CombatX);
+  CombatX.menu = function (a, L, done, resolve, reopen) {
+    _m(a, L, done, resolve, reopen);
+    try { const k = Burst.key(a), F = FINISH[k]; if (a.side === 'p' && a.burst > 0 && a.finisher && F) {
+      const it = [`✦ ${F.n}`, `${F.d} Your ${Burst.word(a)} finisher — once per release. Ends your turn.`, async () => { Battle.closeMenu(); a.finisher = 0; await finisher(a, F); done(); }]; it.mart = 1; L.unshift(it); } } catch (e) { }
+  };
+  async function finisher(a, F) {
+    const BT = Battle, B = BT.B, k = Burst.key(a), col = BURST[k].col;
+    await Burst.cut(k === 'me' ? 'me' : k === 'kess' ? 'kessE' : k, F.n, BURST[k].n, col, 'p');
+    const ts = F.all ? BT.alive('e') : [BT.alive('e').sort((x, y) => y.hp - x.hp)[0]];
+    if (k === 'me' && typeof FXS !== 'undefined' && FXS.ok('eclipse')) { FXS.play('eclipse', 'merge', a.x - 40, a.y - 60, { dur: 700, sc: .6 }); await wait(700); FXS.play('eclipse', 'charged', a.x - 40, a.y - 60, { dur: 500, sc: .7 }); await wait(500);
+      for (const t of ts) FXS.play('eclipse', 'beam', (a.x + t.x) / 2, t.y - 40, { dur: 600, sc: 1.4, flip: true }); await wait(450); for (const t of ts) FXS.play('eclipse', 'collapse', t.x, t.y - 40, { dur: 800, sc: 1 }); }
+    B.flash = 1.4; B.flashCol = '255,255,255'; B.shake = 18; sfx('crit');
+    for (const t of ts) { if (!t || t.ko) continue; BT.spark(t.x, t.y - 40, col, 30); BT.resolveHit(a, t, F.m, 'perfect', { unblockable: 1, src: 'finisher' }); await wait(160); }
+    if (B.dominion && !B.dominion.gone) Dom.shatter();
+    BT.hud();
+  }
+  // Stage II unlocked by story: tell the player once
+  setInterval(() => { try { if (!G.S || G.S.kid) return; G.S.f.kgSeen = G.S.f.kgSeen || {}; for (const k in UNLOCK) if (UNLOCK[k]() && !G.S.f.kgSeen[k] && (k === 'me' || (G.S.party || []).includes(k))) { G.S.f.kgSeen[k] = 1; const nm = k === 'me' ? G.S.name : (ALLY[k] || {}).name; setTimeout(() => toast(`<b style="color:${BURST[k].col}">${esc(nm)}'s Transcension — full release unlocked.</b> Stage II: 3 turns, full power, and a finisher.`, 5200), 800); } } catch (e) { } }, 4000);
+  // drowned perfect hits during a release crack a Dominion
+  const _rh = Battle.resolveHit.bind(Battle);
+  Battle.resolveHit = function (a, t, m, grade, opts) { const r = _rh(a, t, m, grade, opts); try { const B = this.B; if (B && B.dominion && !B.dominion.gone && a && a.side === 'p' && a.burst > 0 && grade === 'perfect' && !(opts && opts.echo)) Dom.crack(a, 1); } catch (e) { } return r; };
+})();
+/* ---------- DOMINIONS ---------- */
+const DOMINION = {
+  reef_wyrm: { n: 'DROWNED DOMINION', at: .7, col: '95,240,255', line: 'Thalassar: "Down here, the sea decides who breathes."',
+    rule: 'The deep pulls: your party moves at half speed, and every turn the tide crushes everyone for 6% of their health. A TRANSCENSION is the only way to break it.' }
+};
+const Dom = {
+  async open(e) {
+    const D = DOMINION[e.key], B = Battle.B; e.domDone = 1;
+    B.dim = .7; B.dimCol = '0,20,40'; B.shake = 16; sfx('break'); await Battle.msg(D.line, 1800);
+    await Burst.cut(e.key === 'reef_wyrm' ? 'reef_wyrm' : e.key, D.n, e.name, `rgb(${D.col})`, 'e');
+    B.dim = 0; B.dominion = { key: e.key, n: D.n, col: D.col, hp: 3, owner: e, t0: performance.now() };
+    for (const p of Battle.alive('p')) { p.domSpd = p.spd * .5; p.spd -= p.domSpd; }
+    await Battle.msg(D.n + ' — ' + D.rule, 3200); Battle.hud();
+  },
+  crack(a, n) { const d = Battle.B.dominion; d.hp -= n; Battle.text(a, d.hp > 0 ? `DOMINION CRACKS (${d.hp})` : 'DOMINION BREAKS', '#ffffff', -100, true); Battle.B.flash = .7; sfx('break'); if (d.hp <= 0) this.shatter(); },
+  shatter() {
+    const B = Battle.B, d = B.dominion; if (!d || d.gone) return; d.gone = 1; B.flash = 1.4; B.flashCol = '200,250,255'; B.shake = 20; sfx('crit');
+    for (const p of B.actors) if (p.side === 'p' && p.domSpd) { p.spd += p.domSpd; p.domSpd = 0; }
+    const o = d.owner; if (o && !o.ko) { o.broken = 2; o.brk = o.brkMax; Battle.text(o, 'DOMINION SHATTERED — STUNNED', '#ffffff', -70, true); }
+    setTimeout(() => toast(`<b>${d.n} shattered.</b> The world is yours again.`, 3000), 300); Battle.hud();
+  }
+};
+(function () {
+  const _rh = Battle.resolveHit.bind(Battle);
+  Battle.resolveHit = function (a, t, m, grade, opts) { const r = _rh(a, t, m, grade, opts); try { if (t && t.side === 'e' && DOMINION[t.key] && !t.domDone && !t.ko && t.hp < t.maxHp * DOMINION[t.key].at) t.pendDom = 1; } catch (e) { } return r; };
+  const _et = Battle.enemyTurn.bind(Battle);
+  Battle.enemyTurn = async function (e) {
+    try {
+      if (e.pendDom && !e.domDone && !e.ko) { e.pendDom = 0; await Dom.open(e); }
+      const d = this.B && this.B.dominion; if (d && !d.gone && d.owner === e) { for (const p of this.alive('p')) { const h = Math.max(1, Math.round(p.maxHp * .06)); this.damage(p, h, false); this.text(p, 'THE TIDE -' + h, `rgb(${d.col})`, -20); } this.hud(); await wait(300); }
+    } catch (er) { console.warn(er); }
+    return _et(e);
+  };
+  const _r = Battle.render.bind(Battle);
+  Battle.render = function (c, t) {
+    const B = this.B, d = B && B.dominion;
+    if (d && !d.gone) { const w = G.view.w, h = G.view.fullH || G.view.h; c.save(); c.fillStyle = `rgba(${d.col},.12)`; c.fillRect(0, 0, w, h); c.restore(); }
+    const out = _r(c, t);
+    try { if (d && !d.gone) { const w = G.view.w, h = G.view.fullH || G.view.h; c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(${d.col},.25)`; c.lineWidth = 2;
+      for (let i = 0; i < 9; i++) { const y = ((t / 18 + i * 60) % (h + 60)) - 30; c.beginPath(); for (let x = 0; x <= w; x += 20) c.lineTo(x, y + Math.sin(x / 50 + t / 400 + i) * 6); c.stroke(); }
+      c.font = '800 12px Nunito, sans-serif'; c.fillStyle = `rgba(${d.col},.9)`; c.textAlign = 'center'; c.fillText(`${d.n} · cracks left: ${d.hp}`, w * .27, h * .34); c.restore(); } } catch (e) { }
+    return out;
+  };
 })();
