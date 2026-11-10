@@ -169,6 +169,16 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .tabs button{padding:6px 12px;border-radius:8px;background:var(--panel2);border:2px solid var(--line);font-size:14px}
 .tabs button.on{border-color:var(--green);color:var(--green)}
+#medit{position:fixed;inset:0;pointer-events:none;z-index:60;font-family:Nunito,sans-serif}
+#medit .me-top{pointer-events:auto;position:absolute;top:max(6px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;gap:5px;flex-wrap:wrap}
+#medit button{background:rgba(12,22,16,.88);color:#e8f5ec;border:2px solid #2f5a40;border-radius:9px;padding:5px 9px;font:700 12.5px Nunito,sans-serif}
+#medit button.on{border-color:#46ff95;color:#46ff95}
+#medit .me-gap{flex:1}
+#medit .me-done{border-color:#46ff95;color:#46ff95}
+#medit .me-pal{pointer-events:auto;position:absolute;bottom:max(6px,env(safe-area-inset-bottom));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px;background:rgba(8,14,10,.72);border-radius:12px}
+#medit .me-pal button{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding:3px 4px;min-width:66px}
+#medit .me-pal span{font-size:10px;opacity:.85;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me-out{position:fixed;left:10%;right:10%;top:30%;height:30%;z-index:70;font:11px monospace}
 #menuCard:has(> .mside){display:flex;gap:12px;width:min(900px,100%);height:100%;overflow:hidden;padding:10px 12px}
 #menuCard .mside{flex:0 0 212px;display:flex;flex-direction:column;min-height:0}
 #menuCard .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -345,7 +355,7 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
   setTimeout(function(){ if(window.G&&G.mode==='boot'){ var t=document.getElementById('loadTxt'); add('Still loading after 25s — stuck at: '+(t?t.textContent:'?')+' ('+(document.getElementById('loadBar')||{style:{}}).style.width+')'); } },25000);
 })();
 </script>
-<script src="js/core.js?v=90476a67"></script>
+<script src="js/core.js?v=a7d96ae2"></script>
 <script src="js/world.js?v=94056333"></script>
 <script src="js/dialog.js?v=bfab4e25"></script>
 <script src="js/portraits.js?v=1a4da5aa"></script>
