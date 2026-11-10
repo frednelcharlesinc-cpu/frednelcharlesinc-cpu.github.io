@@ -34,6 +34,11 @@ const WorldFeel = {
     c.restore();
     c.save(); c.globalAlpha = .18; c.strokeStyle = '#dff6ff'; c.lineWidth = 1; for (let i = 0; i < 2; i++) { const yy = top + 10 + i * 9 + Math.sin(t / 300 + i) * 1.5; c.beginPath(); c.moveTo(x - 9 + i * 3, yy); c.lineTo(x + 9 - i * 3, yy); c.stroke(); } c.restore();
   },
+  propShadow(c, x, y, r) {
+    const s = this.sun(); c.save(); c.translate(x - s.dx * 1.5, y - 2); c.scale(1, .32);
+    const g = c.createRadialGradient(0, 0, 1, 0, 0, r); g.addColorStop(0, `rgba(0,0,0,${s.day ? .32 : .22})`); g.addColorStop(.65, 'rgba(0,0,0,.14)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, 7); c.fill(); c.restore();
+  },
   weather() { try { return typeof Ambient !== 'undefined' && Ambient.outdoors && Ambient.outdoors() ? Ambient.weather : 'clear'; } catch (e) { return 'clear'; } }
 };
 (function () {
@@ -49,5 +54,44 @@ const WorldFeel = {
     const s = this.scene, w = WorldFeel.weather(); if (!s || w !== 'rain' || !e || !e.isPlayer) return _os(e);
     const had = Object.prototype.hasOwnProperty.call(s, 'encRate'), old = s.encRate; s.encRate = (old ?? .11) * .7;
     try { return _os(e); } finally { if (had) s.encRate = old; else delete s.encRate; }
+  };
+})();
+/* ---------- grass that reacts: tall grass sways as you pass, and kicks up leaves when you run ---------- */
+(function () {
+  const bent = new Map();   // "x,y" -> time bent
+  const bits = [];
+  const _os = World.onStep.bind(World);
+  World.onStep = function (e) {
+    try {
+      if (e && (e.isPlayer || e.follower) && this.grass && this.grass.has(e.x + ',' + e.y)) {
+        bent.set(e.x + ',' + e.y, performance.now());
+        const run = e.move && e.move.ms < 160, n = run ? 6 : 2;
+        for (let i = 0; i < n; i++) bits.push({ x: e.x * 32 + 16 + rnd(-8, 8), y: e.y * 32 + 22, vx: rnd(-.6, .6), vy: rnd(-1.6, -.6), t0: performance.now(), life: rnd(450, 800), c: Math.random() < .5 ? '#5aa63a' : '#8acd4a' });
+        if (typeof sfx === 'function' && Math.random() < .5) try { sfx('step'); } catch (er) { }
+      }
+    } catch (er) { }
+    return _os(e);
+  };
+  const _r = World.render.bind(World);
+  World.render = function (c, t) {
+    const out = _r(c, t);
+    try {
+      if (!this.map || this.loading || G.mode !== 'world') return out;
+      const cx = Math.round(this.cam.x), cy = Math.round(this.cam.y), now = performance.now();
+      // the blades over the bent tile: a little tuft that leans and springs back
+      for (const [k, t0] of bent) {
+        const a = (now - t0) / 700; if (a > 1) { bent.delete(k); continue; }
+        const [x, y] = k.split(',').map(Number), px = x * 32 + 16 - cx, py = y * 32 + 30 - cy, lean = Math.sin(a * Math.PI * 3) * (1 - a) * 5;
+        c.save(); c.strokeStyle = 'rgba(70,140,45,.85)'; c.lineWidth = 2; c.lineCap = 'round';
+        for (const o of [-9, -4, 2, 7, 11]) { c.beginPath(); c.moveTo(px + o, py); c.quadraticCurveTo(px + o + lean * .5, py - 6, px + o + lean, py - 11); c.stroke(); }
+        c.restore();
+      }
+      for (let i = bits.length - 1; i >= 0; i--) {
+        const b = bits[i], k = (now - b.t0) / b.life; if (k > 1) { bits.splice(i, 1); continue; }
+        b.x += b.vx; b.y += b.vy; b.vy += .06;
+        c.globalAlpha = 1 - k; c.fillStyle = b.c; c.fillRect(b.x - cx, b.y - cy, 2, 2); c.globalAlpha = 1;
+      }
+    } catch (er) { }
+    return out;
   };
 })();

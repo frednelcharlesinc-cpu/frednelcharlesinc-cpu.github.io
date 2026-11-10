@@ -229,7 +229,8 @@ const World = {
       if (o.anim === 'fire') md = P['fire' + (Math.floor(t / 120 + o.p.x) % 4)];
       const [sx, sy, sw, sh] = md.r, x = o.dx - cx, y = o.dy - cy;
       if (x > w || y > h || x + sw < 0 || y + sh < 0) return;
-      c.drawImage(PI, sx, sy, sw, sh, x, y, sw, sh);
+      if (md.sh && typeof WorldFeel !== 'undefined') WorldFeel.propShadow(c, o.p.x * TILE + 16 - cx + (md.door !== undefined ? (md.tw * TILE) / 2 - 16 : 0), o.by - cy, md.sh);
+      c.drawImage(md.img ? (G.img[md.img] || PI) : PI, sx, sy, sw, sh, x, y, sw, sh);
     };
     this.flat.forEach(drawProp);
     if (typeof Ambient !== 'undefined') try { Ambient.ground(c, cx, cy, t, w, h); } catch (e) { }

@@ -52,7 +52,7 @@ const Ambient = {
         const tw = (md.tw || 4) * 32 * s;
         for (const fx of [.28, .72]) this.mapLights.push({ x: dx + w * fx, y: p.y * 32 - 34, r: 44, c: '255,186,100' });
         if (/^tav_/.test(p.k)) for (const o of [-34, 34]) this.mapLights.push({ x: (p.x + md.door + .5) * 32 + o, y: p.y * 32 + 31 - 86, r: 60, c: '255,200,110' });
-      } else if (p.k === 'lamp') this.mapLights.push({ x: p.x * 32 + 16, y: p.y * 32 - 40, r: 70, c: '255,214,140' });
+      } else if (p.k === 'lamp' || p.k === 'n_lamp') this.mapLights.push({ x: p.x * 32 + 16, y: p.y * 32 - 40, r: 70, c: '255,214,140' });
       else if (/^fire|firepit/.test(p.k)) this.mapLights.push({ x: p.x * 32 + 16, y: p.y * 32 + 10, r: 80, c: '255,140,50' });
     }
     // chickens and cats in towns
