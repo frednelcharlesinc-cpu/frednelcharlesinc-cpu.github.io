@@ -150,6 +150,9 @@
     spawnExtras = async function (W, name) {   // eslint-disable-line no-global-assign
       await _spawn(W, name);
       if (isWoods(name)) for (const e of W.ents) if (/^cave_/.test(e.id)) e.img = BLANK;
+      // dungeons painted from the user's sheets get their own wall torches
+      const tk = { d_cinder: 'fc_dcinder_torch', d_fang: 'fc_dfang_torch' }[name];
+      if (tk && G.props[tk]) for (const p of W.extraProps) if (p.k === 'fire0' && p.anim === 'fire') { p.k = tk; delete p.anim; }
     };
   }
 
@@ -224,7 +227,7 @@ const MiniMap = {
     for (const e of World.ents) {
       if (/^chest_/.test(e.id) && seen(e.x, e.y) && !(G.S.chests || {})[e.id.slice(6)]) dot(e.x, e.y, '#ffd34a', s * .9 + 1);
       if (/^cave_|^stairs$/.test(e.id) && seen(e.x, e.y)) dot(e.x, e.y, '#c58aff', s + 1.5);
-      if (e.id === 'boss' && seen(e.x, e.y)) dot(e.x, e.y, '#ff4a4a', s + 1.5);
+      if (/^(boss|lt_\d|dxsb_\d)$/.test(e.id) && seen(e.x, e.y)) dot(e.x, e.y, '#ff4a4a', s + 1.5);
     }
     for (const L of World.lights) { const tx = Math.floor(L.x / TILE), ty = Math.floor(L.y / TILE); if (!L.follow && seen(tx, ty) && World.map.dungeon === undefined) dot(tx, ty, '#ff9a3a', s * .8 + 1); }
     for (const e of (World.scene.exits || [])) if (seen(e.x, e.y)) { c.fillStyle = e.msg ? '#8a8a8a' : '#46ff95'; c.fillRect(X + e.x * s - 1, Y + e.y * s - 1, ((e.x2 || e.x) - e.x + 1) * s + 2, ((e.y2 || e.y) - e.y + 1) * s + 2); }

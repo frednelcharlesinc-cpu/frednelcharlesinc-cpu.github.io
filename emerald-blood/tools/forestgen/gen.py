@@ -24,7 +24,7 @@ BIOME = {
                tall=['#1f4a34', '#2e6a48', '#3f8a5a'], water='#245f5c', wall='s_wall', stone='#5d6a5a', ptype='mud'),
  'west': dict(g=['#6f9a2e', '#7cab34', '#5f8a28'], acc=['#a8d050', '#d8e070', '#3f6a20'], path='#9a9468', pathacc=['#7a7650', '#b8b488'],
               tall=['#2f6a1a', '#45852a', '#64a83a'], water='#3a8e9a', wall='w_wall', stone='#8f8c6a', ptype='flag'),
- 'dun_n': dict(floor='#55657a', wallc='#1c232c', wall='n_wall'), 'dun_e': dict(floor='#6e4e36', wallc='#24160e', wall='e_wall'),
+ 'dun_n': dict(floor='#55657a', wallc='#1c232c', wall='n_wall', tiles='dfang', nfloor=5, nwall=3), 'dun_e': dict(floor='#6e4e36', wallc='#1a1010', wall='e_wall', tiles='dcinder', nfloor=4, nwall=3, lava=4),
  'dun_s': dict(floor='#355a4a', wallc='#0f1d17', wall='s_wall'), 'dun_w': dict(floor='#66664a', wallc='#202010', wall='w_wall'),
 }
 
@@ -49,6 +49,9 @@ for b in 'nesw':
     c = load(f'{b}_cave'); addp(f'fc_{b}cave', rs(c, 150 / c.width))
     f = load(f'{b}_fall', SMALL)
     addp(f'fc_{b}fall', f.resize((64, 176) if b in 'ne' else (96, 190), Image.LANCZOS))
+import glob as _g
+for _f in sorted(_g.glob(SPR + 'd*_*.png')):
+    _n = os.path.basename(_f)[:-4]; addp('fc_' + _n, load(_n))
 addp('fc_ancient', rs(load('n_tree3'), 2.0))
 addp('fc_grandtree', rs(load('w_tree3'), 1.5))
 addp('fc_swampking', rs(load('s_tree3'), 1.25))
@@ -333,11 +336,19 @@ def paint_dungeon(m):
     wall = load(B['wall'], SMALL).resize((32, 32), Image.LANCZOS)
     dark = hexc(B['wallc'])
     k = m.k
+    if 'tiles' in B:   # the user's dungeon sheet: real floor & wall tiles
+        fl_t = [load(f"{B['tiles']}_floor{i}", SMALL) for i in range(B['nfloor'])]
+        wl_t = [load(f"{B['tiles']}_wall{i}", SMALL) for i in range(B['nwall'])]
+        wts = [6] + [2] * (len(fl_t) - 1)
+        for y in range(m.h):
+            for x in range(m.w):
+                if k[y, x] == 7: canvas.alpha_composite(rs_.choice(len(fl_t), p=np.array(wts) / sum(wts)) and fl_t[rs_.choice(range(1, len(fl_t)))] or fl_t[0], (x * T, y * T))
+        for (x, y) in m.data.get('lava', []): canvas.alpha_composite(load(f"{B['tiles']}_floor{B['lava']}", SMALL), (x * T, y * T))
     for y in range(m.h):
         for x in range(m.w):
             if k[y, x] == 8:
                 below_floor = y + 1 < m.h and k[y + 1, x] == 7
-                if below_floor: canvas.alpha_composite(wall, (x * T, y * T))
+                if below_floor: canvas.alpha_composite(wl_t[rs_.randint(len(wl_t))] if 'tiles' in B else wall, (x * T, y * T))
                 else: d.rectangle([x * T, y * T, x * T + 31, y * T + 31], fill=tuple(int(c) for c in dark))
     # shadow under walls
     arr = np.array(canvas).astype(float)

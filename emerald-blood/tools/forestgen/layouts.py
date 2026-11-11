@@ -213,32 +213,119 @@ m.exit(x=0, y=23, y2=25, msg='The river path winds west toward the ruins of the 
 m.finish(density=.55, trees=W(['fc_wtree1', 'fc_wtree2', 'fc_wtree3'], [4, 5, 1]), bushes=['fc_w_bush1', 'fc_w_bush2', 'fc_w_bush3'], rocks=['fc_w_rock1', 'fc_w_rock2'])
 MAPS['fc_west'] = m
 
-# ============================== DUNGEONS
-def dungeon(key, biome, seed, variant):
-    m = M(key, 40, 30, biome, seed); m.k[:] = 8
-    rng = m.rng
+# ============================== DUNGEONS (grand: ~12 rooms, loops, a lever vault, secret passages, secret bosses)
+THEME = {
+ 'd_fang':   dict(gear='alphatalisman', gear2='hidecoat', part='alphaheart', sb=[('rime_alpha', 'The White Hound', 'Older than the den. Its fur is frost; its eyes are two cold coins.'), ('m_skeleton', 'The Frozen Huntsman', 'A hunter, frozen mid-step, bow still drawn. The ice cracks as it turns.')],
+              cluetext='Scratched into the ice: FIRST THE MOON ROSE. THEN A STAR FELL. LAST, THE SUN.'),
+ 'd_cinder': dict(gear='embercharm', gear2='drakemail', part='drakegem', sb=[('m_drake', 'Ashmother', 'The wyrmling\'s mother was never gone. She was only sleeping under the coals.'), ('m_tusker', 'The Molten Boar', 'Its hide has cooled into black glass. Its blood has not.')],
+              cluetext='Burned into the wall: FIRST THE MOON ROSE. THEN A STAR FELL. LAST, THE SUN.'),
+ 'd_shrine': dict(gear='trollmail', gear2='scalevest', part='trollblood', sb=[('m_troll', 'The Tidelord', 'The shrine\'s old god was a troll in a crown of shells. It is still here.'), ('m_lizard', 'The First Signatory', 'A lizardman wearing a guild founder\'s chain. "I signed first," it hisses.')],
+              cluetext='Carved under the waterline: FIRST THE MOON ROSE. THEN A STAR FELL. LAST, THE SUN.'),
+ 'd_vault':  dict(gear='bonemail', gear2='dustcharm', part='soulember', sb=[('m_minotaur', 'The Green Guard Captain', 'A Drag war-captain\'s armour, filled with something that remembers how to fight.'), ('m_skeleton', 'The Nameless Drag', 'Its name was chiseled off its tomb. It wants it back.')],
+              cluetext='In old Drag letters, under your fingers: FIRST THE MOON ROSE. THEN A STAR FELL. LAST, THE SUN.'),
+}
+def dungeon2(key, biome, seed):
+    W_, H_ = 76, 52
+    m = M(key, W_, H_, biome, seed); m.k[:] = 8; rng = m.rng
     def room(x0, y0, x1, y1): m.k[y0:y1 + 1, x0:x1 + 1] = 7
-    def hall(pts, r=.9): m.line(pts, r, 7)
-    room(16, 23, 24, 27)                         # entrance hall
-    room(3, 14, 11, 20); room(28, 14, 36, 20)    # side caves
-    room(13, 2, 27, 9)                           # the lair
-    room(5, 3, 9, 7); room(31, 24, 36, 27)       # hidden nooks
-    if variant % 2: hall([(20, 23), (20, 16), (10, 16)], 1.2); hall([(20, 16), (20, 9)], 1.2); hall([(20, 16), (28, 17)])
-    else: hall([(20, 23), (17, 18), (20, 9)], 1.3); hall([(17, 18), (11, 17)]); hall([(20, 13), (28, 16)])
-    hall([(7, 14), (7, 7)], .7); hall([(32, 20), (33, 24)], .7)
-    # rough the walls up
-    for y in range(1, 29):
-        for x in range(1, 39):
-            if m.k[y, x] == 8 and rng.random() < .12 and (m.k[y - 1, x] == 7 or m.k[y + 1, x] == 7 or m.k[y, x - 1] == 7 or m.k[y, x + 1] == 7) and m.k[y + 1, x] != 8:
-                pass
-    m.k[28, 20] = 7
-    m.col[m.k == 8] = 1
-    m.data['dungeon'] = {'start': [20, 27], 'exit': [20, 28], 'boss': [20, 5], 'bossRoom': [13, 2, 27, 9],
-                         'chests': [[5, 15], [35, 19], [33, 26], [7, 4], [24, 3]], 'gather': [[9, 19], [30, 15]],
-                         'torches': [[17, 23], [23, 23], [4, 14], [10, 14], [29, 14], [35, 14], [14, 2], [26, 2], [18, 9], [22, 9]]}
+    def hall(a, b, r=.9):
+        (x0, y0), (x1, y1) = a, b
+        if rng.random() < .5: m.line([(x0, y0), (x1, y0), (x1, y1)], r, 7)
+        else: m.line([(x0, y0), (x0, y1), (x1, y1)], r, 7)
+    lair = (28, 2, 47, 11); room(*lair)
+    ent = (32, 42, 43, 47); room(*ent); m.k[48, 37:39] = 7
+    rooms = []
+    for r in range(3):
+        for c in range(4):
+            if r == 2 and c in (1, 2): continue   # the entrance hall sits here
+            cx0, cy0 = 8 + c * 15, 14 + r * 9
+            w, h = rng.randint(8, 12), rng.randint(5, 7)
+            x0 = cx0 + rng.randint(0, 13 - w); y0 = cy0 + rng.randint(0, 8 - h)
+            rooms.append([x0, y0, x0 + w - 1, y0 + h - 1])
+    for R in rooms: room(*R)
+    ctr = lambda R: ((R[0] + R[2]) // 2, (R[1] + R[3]) // 2)
+    inner = list(range(len(rooms)))
+    nodes = inner + ['lair', 'ent']
+    P = lambda n: ctr(rooms[n]) if isinstance(n, int) else (ctr(lair) if n == 'lair' else ctr(ent))
+    conn = {nodes[-1]}; left = set(nodes[:-1]); edges = []
+    while left:
+        a, b = min(((a, b) for a in conn for b in left), key=lambda e: abs(P(e[0])[0] - P(e[1])[0]) + abs(P(e[0])[1] - P(e[1])[1]))
+        edges.append((a, b)); conn.add(b); left.remove(b)
+    for _ in range(3):
+        a, b = rng.sample(inner, 2)
+        if (a, b) not in edges: edges.append((a, b))
+    for a, b in edges: hall(P(a), P(b), .9 if rng.random() < .6 else 1.3)
+    # hidden rooms out on the edges of the map: two secret rooms and the lever vault
+    ys = rng.sample([16, 24, 33], 3)
+    specials = [[1, ys[0], 6, ys[0] + 5], [69, ys[1], 74, ys[1] + 5], [69 if abs(ys[2] - ys[1]) > 7 else 1, ys[2], 74 if abs(ys[2] - ys[1]) > 7 else 6, ys[2] + 5]]
+    if specials[2][0] == 1 and abs(ys[2] - ys[0]) <= 7: specials[2] = [69, 42 - 5, 74, 42]
+    for R in specials: room(*R)
+    def link(R):
+        c = ctr(R); n = min(inner, key=lambda j: abs(P(j)[0] - c[0]) + abs(P(j)[1] - c[1]))
+        door = (R[2] + 1, c[1]) if R[0] < 10 else (R[0] - 1, c[1])
+        m.line([c, (P(n)[0], c[1]), P(n)], .6, 7)
+        return door
+    lever = min(inner, key=lambda i: abs(ctr(rooms[i])[0] - 38) + abs(ctr(rooms[i])[1] - 24))
+    clue = max(inner, key=lambda i: abs(ctr(rooms[i])[0] - ctr(rooms[lever])[0]) + abs(ctr(rooms[i])[1] - ctr(rooms[lever])[1]))
+    secretR, VR = specials[:2], specials[2]
+    data = {'cracks': [], 'secret': [], 'gate': None, 'levers': [], 'clue': None, 'relic': None, 'theme': key}
+    for R in secretR: data['cracks'].append(link(R))
+    data['gate'] = link(VR)
+    m.k[49:, :] = 8; m.k[:, 0] = 8; m.k[:, W_ - 1] = 8; m.k[0, :] = 8
+    m.col[:] = 0; m.col[m.k == 8] = 1
+    for (x, y) in data['cracks'] + [data['gate']]: m.col[y, x] = 1   # sealed until opened in the game
+    # levers along the lever-hall's back wall, the clue on the far room's back wall
+    LR = rooms[lever]; xs = [LR[0] + 1 + j * max(2, (LR[2] - LR[0] - 2) // 2) for j in range(3)]
+    for sym, x in zip(['sun', 'moon', 'star'], xs): data['levers'].append({'x': x, 'y': LR[1], 'sym': sym})
+    CR = rooms[clue]; data['clue'] = [(CR[0] + CR[2]) // 2, CR[1] - 1]
+    data['relic'] = [ctr(VR)[0], VR[1] + 1]
+    for j, SR in enumerate(secretR): data['secret'].append({'x': ctr(SR)[0], 'y': ctr(SR)[1], 'i': j})
+    taken = {tuple(data['relic']), (ctr(lair)[0], 5), (ctr(lair)[0], 6), (37, 47), (37, 48)} | {(L['x'], L['y']) for L in data['levers']} | {(data['clue'][0], data['clue'][1] + 1)} | {(s['x'], s['y']) for s in data['secret']}
+    chests = []
+    def free_in(R, n):
+        out = []
+        for _ in range(60):
+            x, y = rng.randint(R[0], R[2]), rng.randint(R[1], R[3])
+            if (x, y) in taken or m.col[y, x] or any(abs(x - a) + abs(y - b) < 3 for a, b in out): continue
+            out.append((x, y)); taken.add((x, y)); taken.add((x, y + 1)); taken.add((x, y - 1))
+            if len(out) == n: break
+        return out
+    for i in inner: chests += free_in(rooms[i], 1 + (rng.random() < .5))
+    for SR in secretR: chests += free_in(SR, 2)
+    chests += free_in(VR, 3)
+    lairc = [ctr(lair)[0] + 4, lair[1] + 1]; chests.append(tuple(lairc)); taken.add(tuple(lairc))   # the great chest, last
+    torches = []
+    for R in [lair, ent] + rooms + specials:
+        for x in (R[0] + 1, R[2] - 1):
+            if (x, R[1]) not in taken and m.k[R[1] - 1, x] == 8: torches.append([x, R[1]]); taken.add((x, R[1]))
+    gather = [list(t) for i in inner[:3] for t in free_in(rooms[i], 1)]
+    m.data['dungeon'] = {'start': [37, 47], 'exit': [37, 48], 'boss': [ctr(lair)[0], 6], 'bossRoom': list(lair), 'chests': [list(c) for c in chests], 'gather': gather, 'torches': torches}
+    m.data['dx'] = data
+    # decoration from the user's sheets (or simple rubble)
+    t = {'dun_e': 'dcinder', 'dun_n': 'dfang'}.get(biome)
+    keep = set(taken) | {(x, y) for (x, y) in data['cracks'] + [data['gate']]}
+    for (x, y) in list(keep): keep |= {(x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    m.data['lava'] = []
+    if t:
+        boss = 'fc_dcinder_throne' if t == 'dcinder' else 'fc_dfang_altar'
+        bx = ctr(lair)[0]; m.props.append({'k': boss, 'x': bx, 'y': 3})
+        for x in range(bx - 3, bx + 4): m.col[3, x] = 1; keep.add((x, 3))
+        pil = ['fc_dcinder_pillar'] if t == 'dcinder' else ['fc_dfang_pillar', 'fc_dfang_pillar2']
+        for (x, y) in [(lair[0] + 2, 5), (lair[2] - 2, 5), (lair[0] + 2, 9), (lair[2] - 2, 9)]: m.props.append({'k': rng.choice(pil), 'x': x, 'y': y}); m.col[y, x] = 1; keep.add((x, y))
+        soft = ['fc_dcinder_bones'] if t == 'dcinder' else ['fc_dfang_bones', 'fc_dfang_antlers', 'fc_dfang_nest']
+        hard = ['fc_dcinder_coal', 'fc_dcinder_rubble'] if t == 'dcinder' else ['fc_dfang_crystal1', 'fc_dfang_crystal2', 'fc_dfang_crystal3', 'fc_dfang_stalag1', 'fc_dfang_stalag2', 'fc_dfang_stalag3', 'fc_dfang_rock1']
+        for y in range(1, H_ - 1):
+            for x in range(1, W_ - 1):
+                if m.k[y, x] != 7 or (x, y) in keep or m.col[y, x]: continue
+                n8 = sum(m.k[y + dy, x + dx] == 7 for dx in (-1, 0, 1) for dy in (-1, 0, 1)) - 1
+                wallnear = m.k[y - 1, x] == 8 or m.k[y + 1, x] == 8 or m.k[y, x - 1] == 8 or m.k[y, x + 1] == 8
+                r = rng.random()
+                if wallnear and n8 >= 5 and r < .12: m.props.append({'k': rng.choice(hard), 'x': x, 'y': y}); m.col[y, x] = 1
+                elif n8 == 8 and r < .04: m.props.append({'k': rng.choice(soft), 'x': x, 'y': y})
+                elif t == 'dcinder' and n8 == 8 and r < .05: m.data['lava'].append((x, y)); m.col[y, x] = 1
     return m
-for key, b, s, v in [('d_fang', 'dun_n', 11, 0), ('d_cinder', 'dun_e', 12, 1), ('d_shrine', 'dun_s', 13, 0), ('d_vault', 'dun_w', 14, 1)]:
-    MAPS[key] = dungeon(key, b, s, v)
+for key, b, s in [('d_fang', 'dun_n', 11), ('d_cinder', 'dun_e', 12), ('d_shrine', 'dun_s', 13), ('d_vault', 'dun_w', 14)]:
+    MAPS[key] = dungeon2(key, b, s); MAPS[key].data['dx'].update({k: v for k, v in THEME[key].items()})
 
 # ============================== write
 maps = json.load(open('/home/claude/eb/maps_orig.json'))

@@ -31,5 +31,9 @@ chat's pushes instead of overwriting them).
 6. **Log** every cross-lane touch in the list below (newest first).
 
 ## Cross-lane log
+- 2026-11-11 · B (new files): `js/lieutenants.js` + `js/dungeonx.js` — every dungeon with a boss room gets 4 lieutenants (boss keys) and a Right-Hand that
+  joins the boss fight. They ADD enemies to `ENEMY` (`lt_<dungeon>_<n>`, `rh_<dungeon>`, `sb_<dungeon>_<n>`) and wrap `Battle.start` only to append the
+  Right-Hand when `window.__rhFor` is set by a dungeon boss talk. Relics/secret bosses grant gear via `Gear.give` and `Gear.st().gear.own`. No edits to A's files.
+  Shared touches: index.html (2 script tags after pool.js), maps.json (d_fang/d_cinder/d_shrine/d_vault rebuilt 76x52), chests.json (fc_* keys), sw.js bump.
 - 2026-11-11 · B → A: moved the Kess arc trail marks and camp in `kessarc.js` to fit the new Old Grove map (fc_west).
 - 2026-11-11 · A: merged B's forest push by hand (before this system existed); nothing lost.
