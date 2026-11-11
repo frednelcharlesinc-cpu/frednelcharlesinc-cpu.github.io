@@ -39,6 +39,7 @@ chat's pushes instead of overwriting them).
   Info stays reachable by tapping an enemy (full trait/passives card).
 
 ## Cross-lane log
+- 2026-11-11 · B (shared `core.js`, owner's request): tighter default — `CAM_TILES` close 5.5 / normal 6.5 / wide 9; min tiles across 9 (8 in dungeons).
 - 2026-11-11 · B (shared `core.js`, owner's request): camera tighter on Ren — `CAM_TILES` close 6.5 / normal 8 / wide 11, dungeons ×0.85, min tiles across 11 (9 in dungeons).
 - 2026-11-11 · B (battlefields): custom backdrops `assets/bd_fc_{cross,north,east,south,west}.jpg`, `bd_d_{fang,cinder,shrine,vault}.jpg`, boss arenas
   `bd_d_fang_boss` / `bd_d_cinder_boss` (GND .52, registered in `BTBD.GND` from `lieutenants.js`). Fights in those maps that ask for a generic bd
