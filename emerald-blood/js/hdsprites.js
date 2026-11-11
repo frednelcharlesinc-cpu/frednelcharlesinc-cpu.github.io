@@ -27,6 +27,7 @@ const HD = {
   /* named characters with their own full sets */
   setOf(name, key) {
     if (/^kairo(_b|_h)?$/.test(name) || /^kairo_duel/.test(key || '')) return 'kairo';
+    if (key && this.meta && this.meta['c_' + key] && key !== name) return 'c_' + key;   // a sheet made for this exact enemy beats the shared one
     if (/_c?h$/.test(name)) return null;   // hooded disguises keep their hooded figure
     const b = String(name).replace(/^ge_/, '').replace(/_(bt|eyes|e|c|w|cw|r)$/, '').replace(/_(bt|eyes|e|c|w|cw|r)$/, '');
     return this.meta && this.meta['c_' + b] ? 'c_' + b : null;
