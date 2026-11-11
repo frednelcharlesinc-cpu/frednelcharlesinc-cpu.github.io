@@ -47,7 +47,7 @@
     }
     await say(null, null, 'A voice like the deep sea, inside your skull: "Little Drag. They chained me here to guard what you are looking for. Show me you are worth the key."');
     const r = await Battle.start({ enemies: ['reef_wyrm'], noFlee: true, boss: true, bd: 'crystal', music: 'boss', intro: 'A-RANK — THALASSAR, THE DROWNED WYRM' });
-    if (r !== 'win') { Story.heal(true); await narr('You wake at the bottom of the den, coughing up seawater. Somehow, you are alive. It let you go.'); await World.go('woods_n', 7, 23, 'down'); return; }
+    if (r !== 'win') { Story.heal(true); await narr('You wake at the bottom of the den, coughing up seawater. Somehow, you are alive. It let you go.'); { const b = typeof FCL !== 'undefined' ? FCL.fc_north.npc.reefback : [7, 23]; await World.go('woods_n', b[0], b[1], 'down'); } return; }
     f.reefWyrm = 1; World.remove('reef_wyrm');
     await narr('The wyrm sinks into the coral. Its chains go slack — and one link, larger than the rest, rolls to your feet. It is warm, and it hums.');
     await say(null, null, '"…Free. After so long. Take the link, little Drag. When the Seven come home, you will need it."');
@@ -64,6 +64,6 @@
     await fadeOut(600); await World.load('reef', 23, 56, 'up'); await fadeIn(700);
   };
   if (N) for (const k of Object.keys(N)) if (/den under the rocks/i.test(String(N[k]))) N[k] = enter;
-  if (N) { const ks = []; for (let y = 16; y <= 23; y++) for (let x = 1; x <= 9; x++) { const cx = 5.2, cy = 19.8; if (((x + .5 - cx) / 4.2) ** 2 + ((y + .5 - cy) / 3.4) ** 2 <= 1) ks.push(x + ',' + y); } for (const k of ks) N[k] = enter; }
+  if (N && typeof FCL === 'undefined') { const ks = []; for (let y = 16; y <= 23; y++) for (let x = 1; x <= 9; x++) { const cx = 5.2, cy = 19.8; if (((x + .5 - cx) / 4.2) ** 2 + ((y + .5 - cy) / 3.4) ** 2 <= 1) ks.push(x + ',' + y); } for (const k of ks) N[k] = enter; }
   if (typeof GATHER_SPOTS !== 'undefined') GATHER_SPOTS.reef = [[14, 39], [32, 27], [36, 25]];
 })();
