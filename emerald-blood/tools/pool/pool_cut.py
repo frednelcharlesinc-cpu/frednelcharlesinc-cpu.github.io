@@ -166,7 +166,7 @@ def build(key):
     bust = {}
     if life_h:
         for kk, nm, im in allf:
-            if kk == 'life' and (nm.startswith('em_') or nm in ('g_point', 'g_wave', 'g_cross', 'g_bow', 'work')) and im.height < life_h * .74: bust.setdefault(nm, im)
+            if kk == 'life' and (nm.startswith('em_') or nm in ('g_point', 'g_wave', 'g_cross', 'g_bow', 'work')) and im.height < life_h * .86: bust.setdefault(nm, im)
         for nm in bust: A.pop(nm, None)
         if 'work' in bust: print('  work loop is waist-up — kept out of the world')
     portraits(key, bust)
