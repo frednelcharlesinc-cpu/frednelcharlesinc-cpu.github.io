@@ -36,14 +36,15 @@
   };
   const _def = BT.defend.bind(BT);
   BT.defend = function (e, t, h) {
-    return _def(e, t, h).then(r => { try { if (t.side === 'p') { if (r === 'pparry' || r === 'pdodge') Chain.add(1); else if (r === 'parry' || r === 'dodge') { } else Chain.reset(); } } catch (x) { } return r; });
+    return _def(e, t, h).then(r => { try { if (typeof FightStyle !== 'undefined') FightStyle.react(this, t, r); } catch (x) { } try { if (t.side === 'p') { if (r === 'pparry' || r === 'pdodge') Chain.add(1); else if (r === 'parry' || r === 'dodge') { } else Chain.reset(); } } catch (x) { } return r; });
   };
 
   /* ---------------- hits: knockback, flash, slash marks, dissolves, SECOND WIND ---------------- */
   function slashMark(t, a, big) {
     const B = B_(); if (!B) return;
-    const col = a && a.isMe ? (a.glow ? '120,255,170' : '235,255,245') : a && a.side === 'p' ? '255,235,200' : '255,200,190';
-    B.fx.push({ slashm: 1, x: t.x, y: t.y - 32 * BT_SCALE * (t.size || 1) * .9, ang: rnd(-.9, -.35) * (Math.random() < .5 ? 1 : -1), col, big, t: 0, life: big ? 320 : 240 });
+    const St = typeof FightStyle !== 'undefined' ? FightStyle.of(a) : null;   // the attacker's martial art decides colour + shape (js/fightstyle.js)
+    const col = St ? (a && a.isMe && !a.glow && St === FightStyle.T.me ? '235,255,245' : St.col) : a && a.isMe ? (a.glow ? '120,255,170' : '235,255,245') : a && a.side === 'p' ? '255,235,200' : '255,200,190';
+    B.fx.push({ slashm: 1, mark: St && St.mark, x: t.x, y: t.y - 32 * BT_SCALE * (t.size || 1) * .9, ang: rnd(-.9, -.35) * (Math.random() < .5 ? 1 : -1), col, big, t: 0, life: big ? 320 : 240 });
     B.fx.push({ ringfx: 1, x: t.x, y: t.y - 30 * BT_SCALE * (t.size || 1) * .9, col, t: 0, life: big ? 380 : 260, R: big ? 46 : 30 });
   }
   const _dmg = BT.damage.bind(BT);
@@ -115,7 +116,8 @@
     // slash marks, rings, motes
     for (const p of B.fx) {
       const k = Math.max(0, p.t) / p.life;
-      if (p.slashm) { c.save(); c.globalCompositeOperation = 'lighter'; c.translate(p.x, p.y); c.rotate(p.ang); const L = (p.big ? 58 : 42) * Math.min(1, k * 4), a = 1 - k; c.strokeStyle = `rgba(${p.col},${a})`; c.lineCap = 'round'; c.lineWidth = (p.big ? 5 : 3.2) * (1 - k * .6); c.beginPath(); c.moveTo(-L, 0); c.quadraticCurveTo(0, -5, L, 0); c.stroke(); c.strokeStyle = `rgba(255,255,255,${a})`; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-L * .8, 0); c.quadraticCurveTo(0, -4, L * .8, 0); c.stroke(); c.restore(); }
+      if (p.slashm && p.mark && typeof FightStyle !== 'undefined') FightStyle.draw(c, p, k);
+      else if (p.slashm) { c.save(); c.globalCompositeOperation = 'lighter'; c.translate(p.x, p.y); c.rotate(p.ang); const L = (p.big ? 58 : 42) * Math.min(1, k * 4), a = 1 - k; c.strokeStyle = `rgba(${p.col},${a})`; c.lineCap = 'round'; c.lineWidth = (p.big ? 5 : 3.2) * (1 - k * .6); c.beginPath(); c.moveTo(-L, 0); c.quadraticCurveTo(0, -5, L, 0); c.stroke(); c.strokeStyle = `rgba(255,255,255,${a})`; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-L * .8, 0); c.quadraticCurveTo(0, -4, L * .8, 0); c.stroke(); c.restore(); }
       else if (p.ringfx) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(${p.col},${(1 - k) * .8})`; c.lineWidth = 2.5 * (1 - k) + .5; c.beginPath(); if (p.flat) c.ellipse(p.x, p.y, p.R * k, p.R * k * .3, 0, 0, 7); else c.arc(p.x, p.y, 6 + p.R * k, 0, 7); c.stroke(); c.restore(); }
       else if (p.mote) { if (p.t < 0) continue; p.x += p.vx; p.y += p.vy; p.vy *= .995; c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = (1 - k) * .9; c.fillStyle = p.col; c.fillRect(p.x - p.r / 2, p.y - p.r / 2, p.r, p.r); c.restore(); }
     }

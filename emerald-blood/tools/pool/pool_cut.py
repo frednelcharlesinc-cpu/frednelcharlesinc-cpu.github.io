@@ -1,5 +1,6 @@
 """Animation pool cutter.
-usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle> [--left] [--h=260]
+usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12> [--left] [--h=260]
+  battle12 / monster12 : the 12 rows x 12 frames sheets (spec.py BATTLE12 / MONSTER12)
 Cuts a standard Life or Battle sheet (see spec.py / *_template.png), stores the frames under src/<key>/<kind>/,
 then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every sheet that character has.
   --left : the sheet's side views face LEFT (they get mirrored to face right)
@@ -7,9 +8,13 @@ then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every
 import sys, os, json, numpy as np
 from PIL import Image
 from scipy import ndimage as nd
-from spec import LIFE, BATTLE
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, '..', 'out', 'assets', 'hd')
-SP = '/tmp/claude-0/-home-claude/7a5a8c55-a33b-57be-9427-8927ce3db7fc/scratchpad/'
+from spec import LIFE, BATTLE, BATTLE12, MONSTER12
+SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12}
+HERE = os.path.dirname(os.path.abspath(__file__))
+# works in eb-build/pool (writes to eb-build/out) and in the repo copy tools/pool (writes to the game's own assets)
+GAME = os.path.join(HERE, '..', 'out') if os.path.isdir(os.path.join(HERE, '..', 'out', 'assets')) else os.path.join(HERE, '..', '..')
+OUT = os.path.join(GAME, 'assets', 'hd')
+SP = os.environ.get('POOL_SCRATCH', '/tmp/')
 
 def runs(v, minlen=1):
     out, s = [], None
@@ -21,7 +26,7 @@ def runs(v, minlen=1):
     return out
 
 def cut_sheet(path, kind, left=False):
-    spec = LIFE if kind == 'life' else BATTLE
+    spec = SPECS[kind]
     rgb = np.array(Image.open(path).convert('RGB')).astype(float); H, W = rgb.shape[:2]
     border = np.concatenate([rgb[:4].reshape(-1, 3), rgb[-4:].reshape(-1, 3), rgb[:, :4].reshape(-1, 3), rgb[:, -4:].reshape(-1, 3)])
     bg = np.median(border, 0); dist = np.sqrt(((rgb - bg) ** 2).sum(-1)); mask = dist > 48
@@ -104,15 +109,16 @@ def cut_sheet(path, kind, left=False):
             al *= nd.binary_dilation(mask[ya:yb, x0:x1], iterations=2)   # stay inside what survived the clean-up
             m = al > .3
             m = al > .3; l2, k2 = nd.label(nd.binary_dilation(m, iterations=2))
-            if k2: sz = nd.sum(m, l2, range(1, k2 + 1)); big = sz.max(); al *= np.isin(l2, [j + 1 for j, s in enumerate(sz) if s >= big * (.04 if kind == 'battle' else .12)])
+            if k2: sz = nd.sum(m, l2, range(1, k2 + 1)); big = sz.max(); al *= np.isin(l2, [j + 1 for j, s in enumerate(sz) if s >= big * (.04 if kind != 'life' else .12)])
             out = np.clip((c - bg * (1 - al[..., None])) / np.maximum(al[..., None], .3), 0, 255)
             im = Image.fromarray(np.dstack([out, al * 255]).astype(np.uint8)); bb = im.getbbox()
             if not bb: continue
             im = im.crop(bb)
-            if left and (kind == 'battle' or nm == 'walk_side'): im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            if left and (kind != 'life' or nm == 'walk_side'): im = im.transpose(Image.FLIP_LEFT_RIGHT)
             frames.append((nm, im))
     return frames
 
+TORSO = ('light', 'heavy', 'special', 'parry', 'guard', 'cmbA', 'cmbB', 'thrust', 'pparry', 'combo', 'lunge', 'roar', 'taunt')
 def anchor(im, torso=False):
     a = np.array(im)[..., 3] > 100; H, W = a.shape; rows = np.where(a.sum(1) >= 3)[0]; feet = rows.max() + 1 if len(rows) else H
     band = a[int(H * .15):int(H * .5)] if torso else a[max(0, int(feet - H * .55)):max(1, int(feet - H * .08))]
@@ -121,7 +127,7 @@ def anchor(im, torso=False):
 PEXPR = {'em_talk': 'neutral', 'em_nod': 'closed', 'em_laugh': 'happy', 'em_angry': 'anger', 'em_sad': 'sad', 'em_shock': 'shock'}
 def portraits(key, bust):
     # waist-up emotes become the character's dialogue portraits — only if they don't have painted ones yet
-    PD = os.path.join(HERE, '..', 'out', 'assets', 'portraits'); AJ = os.path.join(HERE, '..', 'out', 'assets', 'art.json')
+    PD = os.path.join(GAME, 'assets', 'portraits'); AJ = os.path.join(GAME, 'assets', 'art.json')
     em = {PEXPR[n]: im for n, im in bust.items() if n in PEXPR}
     if not em: return
     art = json.load(open(AJ)); P = art.setdefault('portraits', {})
@@ -133,6 +139,26 @@ def portraits(key, bust):
         can.save(os.path.join(PD, f'{key}_{e}.png'), optimize=True); can.save(os.path.join(PD, f'{key}_{e}.webp'), quality=88)
     P[key] = sorted(em); mine.append(key) if key not in mine else None; art['v'] = art.get('v', 1) + 1; json.dump(art, open(AJ, 'w'))
     print('  portraits from emotes:', ', '.join(sorted(em)))
+def twelve(Bt, C):
+    # the 12x12 sheets: every game animation gets its own frames
+    q = lambda L, i, n: L[i * len(L) // n:(i + 1) * len(L) // n] or L
+    o = dict(combat=C, idle=C, walk=Bt('walk') or C, run=Bt('run') or Bt('walk') or C, special=Bt('special'), spellcast=Bt('special'),
+             guard=Bt('guard'), dodge=Bt('dodge'), hurt=Bt('hurt'), ko=Bt('ko'), victory=Bt('victory'))
+    if Bt('cmbA'):   # people
+        a, b, h, t, pp, pd = Bt('cmbA'), Bt('cmbB'), Bt('heavy'), Bt('thrust'), Bt('pparry'), Bt('pdodge')
+        o.update(draw=Bt('draw'), victory2=Bt('taunt'), fist=q(a, 0, 3), cmb1=q(a, 0, 3), cmb2=q(a, 1, 3), cmb3=q(a, 2, 3), cmb4=q(b, 0, 3), cmb5=q(b, 1, 3), cmb6=q(b, 2, 3),
+                 slash=h, halfslash=q(h, 1, 2), backslash=b, thrust=t, thr=t, parry=Bt('parry') or Bt('guard'), pdodge=pd or Bt('dodge'),
+                 pp1=q(pp, 0, 3), pp2=q(pp, 1, 3), pp3=q(pp, 2, 3), ppfin=pp, rise=Bt('rise'), jump=Bt('jump'), land=Bt('land'))
+        for i in range(4): o['pd%d' % (i + 1)] = q(pd, i, 4)
+    else:   # monsters
+        l, c, h, u, r = Bt('light'), Bt('combo'), Bt('heavy'), Bt('lunge'), Bt('roar')
+        o.update(draw=r, fist=q(l, 0, 2), cmb1=q(l, 0, 3), cmb2=q(l, 1, 3), cmb3=q(l, 2, 3), cmb4=q(c, 0, 3), cmb5=q(c, 1, 3), cmb6=q(c, 2, 3),
+                 slash=h, halfslash=q(h, 1, 2), backslash=c, thrust=u, thr=u, spellcast=r or Bt('special'), parry=Bt('guard'), pdodge=Bt('dodge'),
+                 jump=q(Bt('dodge'), 0, 2), land=q(Bt('dodge'), 1, 2), enraged=Bt('enraged'))
+        for k in ('pp1', 'pp2', 'pp3', 'ppfin'): o[k] = Bt('guard')
+        for i in range(4): o['pd%d' % (i + 1)] = Bt('dodge')
+    return {k: v for k, v in o.items() if v}
+
 def build(key):
     root = os.path.join(HERE, 'src', key); kinds = [k for k in ('life', 'battle') if os.path.isdir(os.path.join(root, k))]
     allf = []; idx = {}
@@ -147,7 +173,7 @@ def build(key):
     for kind, nm, im in allf:
         r = refimg[kind] or im; s = HT / r.height; im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
         if x + im.width > AW: x = 0; y += rh + 2; rh = 0
-        ax, ay = anchor(im, torso=(kind == 'battle' and nm in ('light', 'heavy', 'special', 'parry', 'guard')))
+        ax, ay = anchor(im, torso=(kind == 'battle' and nm in TORSO))
         items.append((im, x, y)); frames.append([x, y, im.width, im.height, round(ax, 1), round(ay, 1), float(HT - 2)])
         idx.setdefault(kind + ':' + nm, []).append(len(frames) - 1); x += im.width + 2; rh = max(rh, im.height)
     sheet = Image.new('RGBA', (AW, y + rh + 2))
@@ -165,6 +191,7 @@ def build(key):
         hurt=Bt('hurt') or C[:1], ko=Bt('ko') or Bt('hurt') or C[:1], jump=Bt('dodge') or C[:1], land=C[:1])
     for k in ('pp1', 'pp2', 'pp3', 'ppfin'): A[k] = A['parry']
     for k in ('pdodge', 'pd1', 'pd2', 'pd3', 'pd4'): A[k] = A['dodge']
+    if Bt('cmbA') or Bt('lunge'): A.update(twelve(Bt, C))
     # world
     idl = L('idle') or C[:1]; side = L('walk_side') or C
     A.update(ow_down=idl[:1], ow_idle=idl, ow_down_walk=L('walk_down') or side, ow_up=(L('walk_up') or idl)[:1], ow_up_walk=L('walk_up') or L('walk_down') or side,
@@ -181,10 +208,10 @@ def build(key):
     portraits(key, bust)
     meta = json.load(open(os.path.join(OUT, 'hd.json')))
     old = meta.get('c_' + key)
-    if key.startswith(('m_', 'b_')) or '--monster' in sys.argv:   # monsters: row 6's last frames are ENRAGED, used when they berserk
-        en = Bt('victory')
+    if key.startswith(('m_', 'b_')) or '--monster' in sys.argv or Bt('lunge'):   # monsters: row 6's last frames are ENRAGED, used when they berserk
+        en = Bt('enraged') or Bt('victory')
         if en: A['enraged'] = en
-        if old and 'desperate' in old.get('anims', {}) and en: A['desperate'] = en
+        if old and 'desperate' in old.get('anims', {}) and en: A['desperate'] = Bt('desperate') or en
     # keep the size the game already draws this character at (a drake is long and low, not human-tall)
     if old and old.get('frames') and '--rescale' not in sys.argv:
         try:
@@ -211,12 +238,12 @@ def build(key):
 if __name__ == '__main__':
     path, key, kind = sys.argv[1], sys.argv[2], sys.argv[3]
     left = '--left' in sys.argv
-    fr = cut_sheet(path, kind, left)
+    fr = cut_sheet(path, kind, left); spec_kind = kind; kind = 'life' if kind == 'life' else 'battle'
     d = os.path.join(HERE, 'src', key, kind); os.makedirs(d, exist_ok=True)
     for f in os.listdir(d): os.remove(os.path.join(d, f))
     man = []
     for i, (nm, im) in enumerate(fr): fn = '%02d_%s.png' % (i, nm); im.save(os.path.join(d, fn)); man.append([nm, fn])
     json.dump(man, open(os.path.join(d, 'frames.json'), 'w'))
-    want = sum(c for _, g in (LIFE if kind == 'life' else BATTLE) for _, c in g)
+    want = sum(c for _, g in SPECS[spec_kind] for _, c in g)
     print('%s %s: cut %d/%d frames' % (key, kind, len(fr), want))
     build(key)

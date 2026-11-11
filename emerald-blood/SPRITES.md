@@ -42,6 +42,21 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Custom (non-template) sheets: see `art11/build_rt2.py` (Ren Stage II), `art13/build.py` (Hesk, Nix), `art14/build.py` (Corvin, Bertrand) —
   manual boxes per row, same output format.
 
+## 12 × 12 sheets (owner's standard from 2026-11-11)
+- Prompts: MASTER A (people) / MASTER B (monsters) / boss line — rows in `tools/pool/spec.py` BATTLE12 / MONSTER12.
+- Cut: `python3 tools/pool/pool_cut.py <sheet> <key> battle12|monster12` (works from the repo copy; writes straight into assets/).
+  Every game anim gets its own frames: cmb1–6 from COMBO A/B, pp1–3/ppfin from the perfect-parry counter, pd1–4 from the perfect dodge, rise, victory2 (taunt).
+  Monsters: RAGE row → `enraged`; `desperate` only if the old set had it (it's a gameplay buff in mobs.js).
+- Weapons must match the character every time (see the weapon list in COORDINATION "For A").
+- Red Veil stays as it is for now (owner, 2026-11-11).
+
+## Fighting styles (js/fightstyle.js)
+- `FightStyle.T[key]` = {n, col, mark, dodge, parry}; key = hero id / enemy key base / sprite family. Unknown fighters use `DEF`.
+- Add a line there for every new character so their hits, parries and dodges look like their own martial art.
+
+## Sharp drawing
+- Always draw HD frames with `HD.dI(...)` (not `c.drawImage`): it picks a pre-halved copy so shrunk art stays clean.
+
 ## Wardrobe (js/wardrobe.js)
 - Outfits: any HD set named `<base>_o_<id>` or `c_<hero>_o_<id>` appears in the Wardrobe by itself. Cut an outfit sheet with
   `pool_cut.py <sheet> ren_o_ronin battle` (→ `c_ren_o_ronin`); optional set fields `label`, `unlock` (a `G.S.f` flag).

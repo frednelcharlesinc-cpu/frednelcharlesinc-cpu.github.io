@@ -46,8 +46,8 @@
     const bob = (st % 2 ? 1.2 : 0) * (run ? 1.5 : 1), lean = run && side ? .07 : 0;
     c.save(); if (this.alpha != null) c.globalAlpha = this.alpha;
     c.translate(x, y - bob); if (flip) c.scale(-1, 1); if (lean) c.rotate(lean);
-    if (src) c.drawImage(src, 0, 0, fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
-    else c.drawImage(img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
+    if (src) HD.dI(c, src, 0, 0, fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
+    else HD.dI(c, img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
     c.restore();
   };
 })();

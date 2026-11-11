@@ -53,15 +53,39 @@ const HD = {
     c.__hd = { frames: [[0, 0, f[2], f[3], faceLeft ? f[2] - f[4] : f[4], f[5], f[6]]], anims: {}, single: 1, faces: faceLeft ? 'left' : 'right' };
     return (this.npcCv[k] = c);
   },
+  /* SHARP DRAWING (Chat C, 2026-11-11): the art is drawn big and shown small. Shrinking it with smoothing off
+     drops pixels (jaggy, shimmering edges). Draw from a pre-halved copy of the atlas instead (a mip), with smoothing on,
+     so lines stay clean at every zoom; anything shown at full size or bigger stays pixel-crisp. */
+  mips: new WeakMap(),
+  mip(img, L) {
+    let m = this.mips.get(img); if (!m) this.mips.set(img, m = [img]);
+    for (let i = m.length; i <= L; i++) {
+      const p = m[i - 1], w = Math.max(1, Math.ceil(p.width / 2)), h = Math.max(1, Math.ceil(p.height / 2));
+      if (w < 64 || h < 64) return m[i - 1];
+      const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+      x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(p, 0, 0, w, h); m.push(c);
+    }
+    return m[L];
+  },
+  dI(c, img, sx, sy, sw, sh, dx, dy, dw, dh) {
+    let T = 1; try { const t = c.getTransform(); T = Math.hypot(t.a, t.b); } catch (e) {}
+    const eff = Math.abs(dw / sw) * T, sm = c.imageSmoothingEnabled, sq = c.imageSmoothingQuality;
+    if (eff >= .92 || !(img.width > 0)) { c.imageSmoothingEnabled = false; c.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh); c.imageSmoothingEnabled = sm; return; }
+    let L = 0; while (eff * (1 << (L + 1)) <= 1 && L < 4) L++;
+    const m = L ? this.mip(img, L) : img, f = m.width / img.width;
+    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+    c.drawImage(m, sx * f, sy * f, Math.max(1, sw * f), Math.max(1, sh * f), dx, dy, dw, dh);
+    c.imageSmoothingEnabled = sm; c.imageSmoothingQuality = sq;
+  },
   /* draw one frame with the feet at (x, y), standing height h */
   blit(c, img, fr, x, y, h, extra) {
     if (!fr) return;
     const k = h / fr[6];
     if (extra && (extra.rot || extra.sy)) {
       c.save(); c.translate(x, y); if (extra.rot) c.rotate(extra.rot); if (extra.sy) c.scale(1, extra.sy);
-      c.drawImage(img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k); c.restore(); return;
+      HD.dI(c, img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k); c.restore(); return;
     }
-    c.drawImage(img, fr[0], fr[1], fr[2], fr[3], Math.round(x - fr[4] * k), Math.round(y - fr[5] * k), Math.round(fr[2] * k), Math.round(fr[3] * k));
+    HD.dI(c, img, fr[0], fr[1], fr[2], fr[3], Math.round(x - fr[4] * k), Math.round(y - fr[5] * k), Math.round(fr[2] * k), Math.round(fr[3] * k));
   },
   NBT: { combat: 2, slash: 6, halfslash: 6, backslash: 13, spellcast: 7, thrust: 8, jump: 5, hurt: 6, walk: 9, run: 8 },
   bt(c, img, anim, f, x, y, s) {
@@ -196,7 +220,7 @@ HD.load();
     c.save(); if (this.alpha != null) c.globalAlpha = this.alpha;
     c.translate(x, y - bob); if (sway) c.rotate(sway); if (flip) c.scale(-1, 1); c.scale(1, breathe);
     const k = h / fr[6];
-    c.drawImage(img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
+    HD.dI(c, img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
     c.restore();
     if (WorldFeel.wet(this)) WorldFeel.reflect(c, img, fr, k, x, y, flip, t, this.alpha);
   };
@@ -233,7 +257,7 @@ HD.load();
       if (r && r[1]) {
         sz = sz || 1; const [im, fr] = r, k = HD.OW_H * sz / fr[6];
         c.save(); if (alpha !== undefined) c.globalAlpha = alpha; c.translate(x, y + 2 * sz); if (dir === 'left') c.scale(-1, 1);
-        c.drawImage(im, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k); c.restore(); return;
+        HD.dI(c, im, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k); c.restore(); return;
       }
     }
     return _ow(c, img, anim, dir, f, x, y, alpha, sz);

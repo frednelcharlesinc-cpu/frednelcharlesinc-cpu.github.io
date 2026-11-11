@@ -17,3 +17,33 @@ BATTLE = [  # side view, facing right
 ]
 SUB = {'em_talk': 'talk', 'em_nod': 'nod', 'em_laugh': 'laugh', 'em_angry': 'angry', 'em_sad': 'sad', 'em_shock': 'shock',
        'g_point': 'point', 'g_wave': 'wave', 'g_bow': 'bow', 'g_cross': 'arms crossed', 'g_kneel': 'kneel', 'g_sit': 'sit'}
+
+# 12 × 12 sheets (2026-11-11, Chat C): every row is 12 frames. Same order as the prompts in SPRITES.md.
+BATTLE12 = [  # people: heroes, rivals, human bosses — side view facing right
+  ('STANCE', [('combat', 12)]),
+  ('ADVANCE', [('walk', 6), ('run', 6)]),
+  ('DRAW', [('draw', 6), ('taunt', 6)]),
+  ('COMBO A', [('cmbA', 12)]),
+  ('COMBO B', [('cmbB', 12)]),
+  ('HEAVY', [('heavy', 12)]),
+  ('THRUST / RANGED', [('thrust', 12)]),
+  ('SIGNATURE ART', [('special', 12)]),
+  ('GUARD & PARRY', [('guard', 3), ('parry', 3), ('pparry', 6)]),
+  ('DODGE', [('dodge', 4), ('pdodge', 8)]),
+  ('HURT & KO', [('hurt', 4), ('ko', 4), ('rise', 4)]),
+  ('JUMP & VICTORY', [('jump', 3), ('land', 3), ('victory', 6)]),
+]
+MONSTER12 = [  # monsters and monster bosses — side view facing right
+  ('IDLE', [('combat', 12)]),
+  ('PROWL', [('walk', 6), ('run', 6)]),
+  ('LIGHT ATTACK', [('light', 12)]),
+  ('COMBO', [('combo', 12)]),
+  ('HEAVY ATTACK', [('heavy', 12)]),
+  ('LUNGE', [('lunge', 12)]),
+  ('SPECIAL', [('special', 12)]),
+  ('ROAR / CAST', [('roar', 12)]),
+  ('BRACE & DEFLECT', [('guard', 12)]),
+  ('EVADE', [('dodge', 12)]),
+  ('HURT & KO', [('hurt', 4), ('ko', 8)]),
+  ('RAGE', [('enraged', 6), ('desperate', 6)]),
+]
