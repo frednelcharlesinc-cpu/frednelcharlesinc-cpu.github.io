@@ -207,7 +207,7 @@ const A2 = {
     }
     for (const id of ['hesk', 'rg1', 'rg2', 'pipx', 'bessx']) World.remove(id);
     f.a2 = 'seen';
-    const [bx, by] = freeNear('ashford', 27, 23); await World.addNpc({ id: 'bess', sprite: 'pipmom', x: bx, y: by, dir: 'down', name: "Pip's Mother", talk: () => A2.bess(), qm: () => '!' });
+    const [bx, by] = freeNear('ashford', 27, 23); await World.addNpc({ id: 'bess', sprite: 'pipmom', x: bx, y: by, dir: 'down', name: "Pip's Mother", talk: () => A2.bess(), qm: () => '!' }); World.pose('bess', 'g_sit');
     Story.quest("Pip's mother is sitting by the fountain. Talk to her.");
   },
   async bess() {
@@ -340,7 +340,7 @@ const A4 = {
   },
   async meet() {
     const f = AF(); if (f.a4 !== 'note') return; f.a4 = 'met';
-    const [nx, ny] = freeNear('mill', 17, 21); await World.addNpc({ id: 'nixm', sprite: 'nix', x: nx, y: ny, dir: 'down', name: 'Brother Nix' });
+    const [nx, ny] = freeNear('mill', 17, 21); await World.addNpc({ id: 'nixm', sprite: 'nix', x: nx, y: ny, dir: 'down', name: 'Brother Nix' }); World.pose('nixm', 'g_sit');
     await narr('Moonrise. The mill-race is a black ribbon of water below the road. On the stone lip of the sluice sits a boy in white robes, a white dove on his knee. A bandage is wound tight across his eyes.');
     await narr('He is murmuring to the dove. Not prayer-speech — the old Drag tongue. The words Nana used to sing you to sleep with.');
     await say('nix', 'calm', '"You came. I asked Psalm to find the one who still smells of Thornvale smoke. She\'s never wrong."');

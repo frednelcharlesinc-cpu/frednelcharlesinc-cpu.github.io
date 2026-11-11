@@ -455,8 +455,9 @@ h1{font-family:'Press Start 2P';font-size:clamp(18px,3.4vw,30px);color:var(--gre
 <script src="js/gear2.js?v=5948fa9c"></script>
 <script src="js/burst.js?v=d9f13ecb"></script>
 <script src="js/wild.js?v=0670838c"></script>
-<script src="js/arcs.js?v=01564786"></script>
+<script src="js/arcs.js?v=cda3ac68"></script>
 <script src="js/kessarc.js?v=e0427bed"></script>
+<script src="js/pool.js?v=c7e8f6b7"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').then(function(r){document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')r.update().catch(function(){});});setInterval(function(){r.update().catch(function(){});},300000);}).catch(function(){});
 var hadSW=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!hadSW){hadSW=true;return;}if(document.getElementById('updBar'))return;var b=document.createElement('div');b.id='updBar';b.textContent='A new version of the game is ready — tap here to load it (your progress is saved)';b.style.cssText='position:fixed;left:50%;top:max(6px,env(safe-area-inset-top));transform:translateX(-50%);z-index:999;padding:8px 14px;border-radius:12px;background:#46ff95;color:#06210f;font:800 12px Nunito,system-ui;box-shadow:0 4px 14px rgba(0,0,0,.5);max-width:90vw;text-align:center';b.onclick=function(){try{if(window.save&&window.G&&G.S&&G.mode==='world')save();}catch(e){}location.reload();};document.body.appendChild(b);});}</script>
 </body>
