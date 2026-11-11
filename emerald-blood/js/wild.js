@@ -62,5 +62,8 @@ const WILD = {
     return r;
   };
   const _r = Battle.render.bind(Battle);
-  Battle.render = function (c, t) { const out = _r(c, t); try { const B = this.B; if (B) for (const e of B.actors) if (e.berserk && !e.ko) { c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(e.x, e.y - 30, 4, e.x, e.y - 30, 60); g.addColorStop(0, `rgba(255,30,30,${.3 + Math.sin(t / 90) * .1})`); g.addColorStop(1, 'rgba(255,30,30,0)'); c.fillStyle = g; c.beginPath(); c.arc(e.x, e.y - 30, 62, 0, 7); c.fill(); c.restore(); } } catch (e) { } return out; };
+  Battle.render = function (c, t) {
+    const sw = []; try { const B = this.B; if (B) for (const e of B.actors) if (e.berserk && !e.ko && e.anim === 'combat' && e.img && e.img.__hd && e.img.__hd.anims.enraged) { e.anim = 'enraged'; sw.push(e); } } catch (x) { }
+    let out; try { out = _r(c, t); } finally { for (const e of sw) if (e.anim === 'enraged') e.anim = 'combat'; }
+    try { const B = this.B; if (B) for (const e of B.actors) if (e.berserk && !e.ko) { c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(e.x, e.y - 30, 4, e.x, e.y - 30, 60); g.addColorStop(0, `rgba(255,30,30,${.3 + Math.sin(t / 90) * .1})`); g.addColorStop(1, 'rgba(255,30,30,0)'); c.fillStyle = g; c.beginPath(); c.arc(e.x, e.y - 30, 62, 0, 7); c.fill(); c.restore(); } } catch (e) { } return out; };
 })();

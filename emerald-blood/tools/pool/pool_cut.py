@@ -35,6 +35,12 @@ def cut_sheet(path, kind, left=False):
         if h < 24 and w < 160:
             reg = lab0[sl] == i + 1
             if (sat[sl][reg] < 14).mean() > .85 and 115 < mean[sl][reg].mean() < 185: mask[sl] &= ~reg
+    # ground lines the artist drew under each row: long, thin, horizontal — erase them (feet stay)
+    for y in range(3, H - 3):
+        rr = runs(mask[y], int(W * .3))
+        for x0, x1 in rr:
+            thin = ~mask[y - 3, x0:x1] & ~mask[y + 3, x0:x1]
+            for dy in (-2, -1, 0, 1, 2): mask[y + dy, x0:x1] &= ~thin
     # 1. rows
     body = mask[:, int(W * .14):]; prof = nd.uniform_filter1d(body.sum(1).astype(float), 5)
     ys = np.where(prof > 1)[0]; top, bot = (int(ys.min()), int(ys.max()) + 1) if len(ys) else (0, H)
@@ -55,7 +61,7 @@ def cut_sheet(path, kind, left=False):
         for i, sl in enumerate(objs):
             h = sl[0].stop - sl[0].start
             w = sl[1].stop - sl[1].start
-            if h < bh * .42 and not (w > bh * .55 and h > bh * .18 and (sl[1].start + sl[1].stop) / 2 > W * .14): continue   # labels, sparks, dust (but keep a body lying flat)
+            if h < bh * .42 and not (any(g[0] == 'ko' for g in groups) and w > bh * .55 and h > bh * .18 and (sl[1].start + sl[1].stop) / 2 > W * .14): continue   # labels, sparks, dust (but keep a body lying flat)
             reg = lab[sl] == i + 1; fill = (band[sl] & reg).sum() / max(1, reg.sum())
             cxm = (sl[1].start + sl[1].stop) / 2
             if cxm < W * .12 or (sl[1].stop < W * .17 and (h < bh * .7 or fill < .3)): continue   # the label gutter
@@ -71,6 +77,8 @@ def cut_sheet(path, kind, left=False):
                         dens = keep[:, a:b].sum(0); lo, hi = int((b - a) * .3), int((b - a) * .7); m = a + lo + int(np.argmin(dens[lo:hi]))
                         cols[i:i + 1] = [[a, m], [m, b]]; done = False; break
                 if done: break
+            hs = [np.where(keep[:, a:b].any(1))[0] for a, b in cols]; hh = [(h.max() - h.min()) if len(h) else 0 for h in hs]
+            if hh and len(cols) > 2: cols = [c for c, h in zip(cols, hh) if h >= max(hh) * .5]   # a lone spark or dust cloud isn't a frame
             n = max(1, len(cols))
         while len(cols) > n:   # too many: merge the closest pair, or drop the thinnest
             gaps = [(cols[i + 1][0] - cols[i][1], i) for i in range(len(cols) - 1)]
@@ -93,6 +101,7 @@ def cut_sheet(path, kind, left=False):
             sub = keep[:, x0:x1]; ys = np.where(sub.any(1))[0]
             ya, yb = y0 + max(0, ys.min() - 2), y0 + min(bh, ys.max() + 3)
             c = rgb[ya:yb, x0:x1]; d = dist[ya:yb, x0:x1]; al = np.clip((d - 30) / 40, 0, 1)
+            al *= nd.binary_dilation(mask[ya:yb, x0:x1], iterations=2)   # stay inside what survived the clean-up
             m = al > .3
             m = al > .3; l2, k2 = nd.label(nd.binary_dilation(m, iterations=2))
             if k2: sz = nd.sum(m, l2, range(1, k2 + 1)); big = sz.max(); al *= np.isin(l2, [j + 1 for j, s in enumerate(sz) if s >= big * (.04 if kind == 'battle' else .12)])
@@ -170,8 +179,29 @@ def build(key):
         for nm in bust: A.pop(nm, None)
         if 'work' in bust: print('  work loop is waist-up — kept out of the world')
     portraits(key, bust)
-    A = {k: v for k, v in A.items() if v}
     meta = json.load(open(os.path.join(OUT, 'hd.json')))
+    old = meta.get('c_' + key)
+    if key.startswith(('m_', 'b_')) or '--monster' in sys.argv:   # monsters: row 6's last frames are ENRAGED, used when they berserk
+        en = Bt('victory')
+        if en: A['enraged'] = en
+        if old and 'desperate' in old.get('anims', {}) and en: A['desperate'] = en
+    # keep the size the game already draws this character at (a drake is long and low, not human-tall)
+    if old and old.get('frames') and '--rescale' not in sys.argv:
+        try:
+            oa = old['anims']; of = old['frames'][(oa.get('combat') or oa.get('ow_down'))[0]]; ratio = of[3] / of[6]
+            for kind, ref_name in (('battle', 'combat'), ('life', 'idle')):
+                ids = idx.get(kind + ':' + ref_name)
+                if not ids: continue
+                if kind == 'life' and not oa.get('ow_down'): continue
+                if kind == 'life': of2 = old['frames'][oa['ow_down'][0]]; ratio2 = of2[3] / of2[6]
+                else: ratio2 = ratio
+                nh = frames[ids[0]][3]; nref = round(nh / ratio2, 1)
+                for k2, L2 in idx.items():
+                    if k2.startswith(kind + ':'):
+                        for j in L2: frames[j][6] = nref
+            print('  kept the old on-screen size')
+        except Exception as e: print('  (size match skipped:', e, ')')
+    A = {k: v for k, v in A.items() if v}
     meta['c_' + key] = dict(img='c_%s.png' % key, faces='right', frames=frames, anims=A, pool=kinds)
     meta['v'] = meta.get('v', 20) + 1; open(os.path.join(OUT, 'hd.json'), 'w').write(json.dumps(meta, separators=(',', ':')))
     pv = Image.new('RGBA', sheet.size, (40, 60, 50, 255)); pv.alpha_composite(sheet)

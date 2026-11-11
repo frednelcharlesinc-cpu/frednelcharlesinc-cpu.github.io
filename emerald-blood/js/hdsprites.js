@@ -82,7 +82,7 @@ const HD = {
       list = H.anims[A.name] || list; i = list[Math.min(list.length - 1, Math.floor((now - A.t0) / (A.end - A.t0) * list.length))];
     } else {
       if (H.me && anim === 'slash' && this.meVar && H.anims[this.meVar]) list = H.anims[this.meVar];   // each strike of a combo gets its own swing
-      if (anim === 'combat' || anim === 'desperate') i = list[Math.floor(now / 520) % list.length];
+      if (anim === 'combat' || anim === 'desperate' || anim === 'enraged') i = list[Math.floor(now / (anim === 'enraged' ? 300 : 520)) % list.length];
       else i = list[Math.min(list.length - 1, Math.floor(f * list.length / n))];
     }
     const fr = H.frames[i] || H.frames[list[0]] || H.frames[0];

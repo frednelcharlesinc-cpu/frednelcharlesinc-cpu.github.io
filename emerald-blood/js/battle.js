@@ -37,7 +37,7 @@ const BT_SCALE = 1.5;
 const AZFX = { img: null, A: { form: [0, 1, 2, 3, 4, 5, 6], idle: [7, 8, 9, 10, 11, 12], swallow: [13, 14, 15, 16, 17, 18], release: [19, 20, 21, 22, 23] },
   load() { if (this.img !== null) return; this.img = 0; loadImg('assets/fx/azure.png?v=1', true).then(im => { this.img = im; }).catch(() => { }); },
   ok() { this.load(); return !!(this.img && this.img.width); }, n(k) { return this.A[k].length; },
-  draw(c, k, i, x, y, sc, al) { const f = this.A[k][i], S = 160, d = 62 * (sc || 1); c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(x, y, 2, x, y, d * .62); g.addColorStop(0, 'rgba(80,200,255,.45)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.globalAlpha = al == null ? 1 : al; c.beginPath(); c.arc(x, y, d * .62, 0, 7); c.fill();
+  draw(c, k, i, x, y, sc, al) { const f = this.A[k][i], S = 160, d = 62 * .62 * (sc || 1);   // kept small: it floats beside Ren, not over him c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(x, y, 2, x, y, d * .62); g.addColorStop(0, 'rgba(80,200,255,.45)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.globalAlpha = al == null ? 1 : al; c.beginPath(); c.arc(x, y, d * .62, 0, 7); c.fill();
     c.globalCompositeOperation = 'source-over'; c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(this.img, (f % 6) * S, (f / 6 | 0) * S, S, S, x - d / 2, y - d / 2, d, d); c.restore(); } };
 /* the painted Crimson sphere (assets/fx/crimson.png): 228x184 cells, 6 per row — gather 0-5, charged 6-11, thrown 12-17, explosion 18-23 */
 const CRFX = { img: null,
@@ -543,7 +543,7 @@ const Battle = {
     } else if (A.type === 'azure') {
       await this.play(a, 'spellcast', 7, 80); sfx('chant');
       a.azure = 3; if (!a.baseSpd) a.baseSpd = a.spd; a.spd = a.baseSpd * 1.45; a.wait *= .6;
-      B.orb = { owner: a, x: a.x - 30, y: a.y - 80, charges: 3 + (Skills.has('me', 't1') ? 1 : 0), born: performance.now() };
+      B.orb = { owner: a, x: a.x + 46, y: a.y - 138, charges: 3 + (Skills.has('me', 't1') ? 1 : 0), born: performance.now() };
       this.text(a, 'AZURE TIDE', '#5fd8ff', -40, true); B.fx.push({ orb: 1, kind: 'draw', seq: 'form', x: a.x - 30, y: a.y - 70, t: 0, life: 800 });
     } else if (A.type === 'draw') {
       B.dimCol = '0,20,40'; await this.play(a, 'spellcast', 7, 80);
@@ -565,7 +565,7 @@ const Battle = {
         actors: [{ port: 'me', expr: artHas('me', 'shout') ? 'shout' : 'anger', x: 320, y: 400, scale: 3.4 }], ev: [[500, s => { s.flash = .9; s.flashCol = '255,60,40'; s.shake = 16; sfx('crit'); }]] }]);
       // Ren never moves: he gathers the red aura into a sphere over his palm and hurls it across the field
       a.anim = 'spellcast'; a.frame = 3; a.once = false; a.loopAnim = 'spellcast';
-      const sp = { sphere: 1, x: a.x - 34, y: a.y - 46, r: 4, t: 0, life: 99999 }; B.fx.push(sp); sfx('chant');
+      const sp = { sphere: 1, x: a.x - 58, y: a.y - 124, r: 4, t: 0, life: 99999 };   // gathered above and ahead of him, not over his body B.fx.push(sp); sfx('chant');
       for (let i = 0; i < 40; i++) { sp.r = 4 + i * .55; if (i % 6 === 0) this.spark(sp.x + rnd(-30, 30), sp.y + rnd(-30, 30), '#ff5a4a', 2); await wait(16); }
       const g = await this.qte(t, rnd(420, 560), '#ff4a4a', a);
       sfx('crit'); const x0 = sp.x, y0 = sp.y, t1 = performance.now();
@@ -1007,7 +1007,7 @@ const Battle = {
       const px = xOf(b.done ? b.at : b.pos());
       c.fillStyle = b.done ? (b.res === 'perfect' ? '#ffd34a' : b.res === 'good' ? '#c9f7d6' : '#ff6a6a') : '#ffffff';
       c.save(); c.shadowColor = c.fillStyle; c.shadowBlur = 8; c.fillRect(px - 1.5, Y - hh / 2 - 5, 3, hh + 10); c.restore(); }
-    if (B.orb) { const o = B.orb, ow = o.owner; o.x = lerp(o.x, ow.x - 34, .08); o.y = lerp(o.y, ow.y - 82 + Math.sin(t / 300) * 5, .08);
+    if (B.orb) { const o = B.orb, ow = o.owner; o.x = lerp(o.x, ow.x + (ow.side === 'p' ? 46 : -46), .08); o.y = lerp(o.y, ow.y - 138 * (ow.size || 1) + Math.sin(t / 300) * 5, .08);   // up and behind his shoulder, clear of the sprite
       if (AZFX.ok()) { if (!B.fx.some(p => p.orb && p.seq && p.t < p.life)) AZFX.draw(c, 'idle', (t / 110) % 6 | 0, o.x, o.y, 1 + Math.sin(t / 400) * .03); }
       else {
       c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(o.x, o.y, 1, o.x, o.y, 22); g.addColorStop(0, 'rgba(230,250,255,.95)'); g.addColorStop(.35, 'rgba(80,200,255,.75)'); g.addColorStop(1, 'rgba(80,200,255,0)'); c.fillStyle = g; c.beginPath(); c.arc(o.x, o.y, 22, 0, 7); c.fill();
@@ -1063,11 +1063,11 @@ const Battle = {
         for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + p.t / 400; c.beginPath(); c.moveTo(p.x + Math.cos(an) * 34, p.y + Math.sin(an) * 40); c.lineTo(p.x + Math.cos(an + Math.PI / 3) * 34, p.y + Math.sin(an + Math.PI / 3) * 40); c.stroke(); }
         c.fillStyle = `rgba(70,255,140,${.12 * (1 - k)})`; c.beginPath(); c.ellipse(p.x, p.y, 34, 40, 0, 0, 7); c.fill(); c.restore(); continue; }
       if (p.sphere && CRFX.ok()) { if (p.life === 0) continue;
-        CRFX.glow(c, p.x, p.y, p.r * 2.4, 1);
+        CRFX.glow(c, p.x, p.y, p.r * 1.7, 1);
         if (p.px != null && (p.px !== p.x || p.py !== p.y)) { p.ang = Math.atan2(p.y - p.py, p.x - p.px); p.fly = 1; } p.px = p.x; p.py = p.y;
-        if (p.fly) CRFX.draw(c, 14 + ((t / 70 | 0) % 3), p.x, p.y, .5, p.ang, 48);
-        else if (p.r < 25) CRFX.draw(c, Math.max(0, Math.min(5, (p.r - 4) / 21 * 6 | 0)), p.x, p.y, .5);
-        else CRFX.draw(c, 6 + ((t / 90 | 0) % 6), p.x, p.y, .5 * (1 + Math.sin(t / 120) * .04));
+        if (p.fly) CRFX.draw(c, 14 + ((t / 70 | 0) % 3), p.x, p.y, .38, p.ang, 48);
+        else if (p.r < 25) CRFX.draw(c, Math.max(0, Math.min(5, (p.r - 4) / 21 * 6 | 0)), p.x, p.y, .34);
+        else CRFX.draw(c, 6 + ((t / 90 | 0) % 6), p.x, p.y, .34 * (1 + Math.sin(t / 120) * .04));
         continue; }
       if (p.burst && p.red && CRFX.ok()) { CRFX.glow(c, p.x, p.y, 40 + k * 110, 1 - k); CRFX.draw(c, 19 + Math.min(4, k * 5 | 0), p.x, p.y, .95 + k * .25, 0, 0, k > .8 ? (1 - k) / .2 : 1); continue; }
       if (p.sphere) { if (p.life === 0) continue; c.save(); c.globalCompositeOperation = 'lighter'; const R = p.r;
