@@ -212,14 +212,14 @@ const MiniMap = {
   },
   draw(c) {
     if (!this.on()) return;
-    const M = World.map, [k, f] = this.fog(), s = this.big ? 3 : 1, w = Math.round(M.w * s), h = Math.round(M.h * s);
+    const M = World.map, [k, f] = this.fog(), zk = G.view.h / 336, s = (this.big ? 3 : 1) * zk, w = Math.round(M.w * s), h = Math.round(M.h * s);   // same size on screen at any zoom
     if (this.ckey !== k + s) {
       const cv = this.cache || (this.cache = document.createElement('canvas')); cv.width = w; cv.height = h; const x = cv.getContext('2d');
       x.clearRect(0, 0, w, h); x.fillStyle = 'rgba(6,10,8,.55)'; x.fillRect(0, 0, w, h);
       for (let yy = 0; yy < M.h; yy++) { const row = M.mm[yy]; for (let xx = 0; xx < M.w; xx++) if (f[yy * M.w + xx] === '1') { x.fillStyle = this.C[row[xx]] || '#333'; x.fillRect(xx * s, yy * s, s, s); } }
       this.ckey = k + s;
     }
-    const vw = G.view.w, pad = 10, X = Math.round(vw - w - pad), Y = this.big ? Math.round(G.view.h * .5 - h / 2) : 40;
+    const vw = G.view.w, pad = 10 * zk, X = Math.round(vw - w - pad), Y = this.big ? Math.round(G.view.h * .5 - h / 2) : Math.round(40 * zk);
     this.box = [X, Y, w, h];
     c.save(); c.globalAlpha = this.big ? .95 : .8; c.drawImage(this.cache, X, Y); c.globalAlpha = 1;
     c.strokeStyle = 'rgba(70,255,149,.35)'; c.lineWidth = 1.5; c.strokeRect(X - .5, Y - .5, w + 1, h + 1);
@@ -234,7 +234,7 @@ const MiniMap = {
     for (const e of (World.scene.exits || [])) if (seen(e.x, e.y)) { c.fillStyle = e.msg ? '#8a8a8a' : '#46ff95'; c.fillRect(X + e.x * s - 1, Y + e.y * s - 1, ((e.x2 || e.x) - e.x + 1) * s + 2, ((e.y2 || e.y) - e.y + 1) * s + 2); }
     const p = World.player, bl = .6 + .4 * Math.sin(performance.now() / 180);
     c.fillStyle = `rgba(70,255,149,${bl})`; c.beginPath(); c.arc(X + p.px / TILE * s, Y + (p.py - 8) / TILE * s, s + 1, 0, 7); c.fill();
-    c.fillStyle = '#fff'; c.font = '700 7px Nunito, sans-serif'; c.textAlign = 'right'; c.fillText(this.big ? 'tap to shrink' : 'MAP', X + w - 2, Y - 3);
+    c.fillStyle = '#fff'; c.font = `700 ${Math.max(5, 7 * zk).toFixed(1)}px Nunito, sans-serif`; c.textAlign = 'right'; c.fillText(this.big ? 'tap to shrink' : 'MAP', X + w - 2, Y - 3);
     c.restore();
   }
 };

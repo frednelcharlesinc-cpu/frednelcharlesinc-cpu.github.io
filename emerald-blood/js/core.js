@@ -39,12 +39,12 @@ const BATTLE_STRIP = 92;
 const BATTLE_UNITS = 372;
 // THE OVERWORLD CAMERA IS MEASURED IN TILES, not a zoom number: the same framing on every phone, in either orientation.
 // Normal ≈ a handheld Pokémon screen: 12 tiles tall, and never fewer than 15 tiles across. Settings → Camera picks Close / Normal / Wide.
-const CAM_TILES = { close: 9, normal: 10.5, wide: 14 };
-const DUNGEON_ZOOM = .8;   // dungeons sit the camera closer still (fewer tiles tall)
+const CAM_TILES = { close: 6.5, normal: 8, wide: 11 };   // tight on Ren: you see him and what's right around him
+const DUNGEON_ZOOM = .85;   // dungeons sit the camera closer still (fewer tiles tall)
 function camMode() { const s = G.settings || {}; return s.cam || (s.wideCam ? 'wide' : 'normal'); }
 function setView(mode) {
   let z = 1;
-  if (mode === 'world' || mode === 'dialog') { const dun = typeof World !== 'undefined' && World.scene && World.scene.dungeon, tall = (CAM_TILES[camMode()] || 10.5) * (dun ? DUNGEON_ZOOM : 1), across = Math.max(dun ? 12 : 15, tall * 1.5);
+  if (mode === 'world' || mode === 'dialog') { const dun = typeof World !== 'undefined' && World.scene && World.scene.dungeon, tall = (CAM_TILES[camMode()] || 8) * (dun ? DUNGEON_ZOOM : 1), across = Math.max(dun ? 9 : 11, tall * 1.5);
     const sc = Math.min(cv.height / (tall * 32), cv.width / (across * 32)); z = sc / G.view.base; }
   if (mode === 'battle') z = VIEW_H / BATTLE_UNITS;   // battles are framed a little wider than story scenes
   G.view.scale = G.view.base * z; G.view.fullH = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
