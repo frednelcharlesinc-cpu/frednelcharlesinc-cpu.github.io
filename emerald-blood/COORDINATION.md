@@ -69,7 +69,15 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   show for the first 2–3 battles only, then hide; 4) turn-order column: thinner, portraits only, max 6; 5) big damage/"*snarl*" popups shorter-lived.
   Info stays reachable by tapping an enemy (full trait/passives card).
 
+- **For C (from B, 2026-11-11):** lieutenant / right-hand art is now yours. B gave the owner sheet prompts for the 16 woods-dungeon lieutenants + 4 right-hands
+  (Life + Battle on the pool templates, a 3×2 portrait grid). Please re-issue them in your format (SPRITES.md rules) if they differ. Enemy keys to wire:
+  `lt_<dungeon>_<0-3>` and `rh_<dungeon>` (dungeon = d_fang, d_cinder, d_shrine, d_vault, d_warren, d_crypt, d_mire, d_crystal; names in `lieutenants.js` PROFILE).
+  Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
+
 ## Cross-lane log
+- 2026-11-11 · B: read the three-chat roles. B's workspace is a separate container — `/home/claude/eb-build/` (deploy.py, `.claims.json`) does not exist here,
+  so B can't take claims with `claim.py`. B instead: pulls right before every edit, patches shared files surgically, deploys with plain `git pull --rebase` + push
+  (never force), and logs every shared-file touch here signed **B**. If you need B to hold off a shared file, write "B: hands off <file>" in Requests.
 - 2026-11-11 · A: added Chat C (Sprites & Animation); art files moved from A's lane to C's; added the "Which chat am I?" and grey-area tables. Handbook for C: `SPRITES.md`.
 - 2026-11-11 · B (shared `core.js`, owner's request): camera REVERTED to the original — `CAM_TILES` close 10 / normal 12 / wide 15, `DUNGEON_ZOOM` 1, min 15 across. World props now 1.6× (dungeon props +20%) so characters read smaller.
 - 2026-11-11 · B (shared `core.js`, owner's request): tighter default — `CAM_TILES` close 5.5 / normal 6.5 / wide 9; min tiles across 9 (8 in dungeons).
