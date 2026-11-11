@@ -16,8 +16,8 @@ def hexc(h): h = h.lstrip('#'); return np.array([int(h[i:i+2], 16) for i in (0, 
 BIOME = {
  'cross': dict(g=['#5f9a3a', '#6aa842', '#4f8a30'], acc=['#7fbf4a', '#e8d86a', '#f2f2f2', '#d77aa8'], path='#b39264', pathacc=['#8c6c46', '#cdb284'],
                tall=['#2f6a24', '#3f8a2e', '#5aa83c'], water='#3f7fc4', wall='n_wall', stone='#9a958a', ptype='dirt'),
- 'north': dict(g=['#dbe7f1', '#e9f1f8', '#c9d9e7'], acc=['#ffffff', '#b8cadb', '#a7bccd'], path='#aebfce', pathacc=['#93a7b8', '#c4d2de'],
-               tall=['#6f8796', '#8aa1ae', '#b8c9d3'], water='#86b8dc', wall='n_wall', stone='#8d9eb0', ptype='snow'),
+ 'north': dict(g=['#dbe7f1', '#e9f1f8', '#c9d9e7'], acc=['#ffffff', '#b8cadb', '#a7bccd'], path='#c2d1de', pathacc=['#a9bccc', '#d6e1ea'],
+               tall=['#4f6e5e', '#6d8c7c', '#a7c2b4'], water='#86b8dc', wall='n_wall', stone='#8d9eb0', ptype='snow'),
  'east': dict(g=['#8a6a2c', '#9a7432', '#7a5c26'], acc=['#c4441e', '#e07a22', '#f0a830', '#6a3a1a'], path='#a4784a', pathacc=['#7e5634', '#c09468'],
               tall=['#8a2e14', '#b0421c', '#d0662a'], water='#2f4a66', wall='e_wall', stone='#8a6a4e', ptype='dirt'),
  'south': dict(g=['#33503a', '#3c5c40', '#2b4632'], acc=['#4f7a4a', '#2a3e30', '#5ad0c0', '#a070d0'], path='#5a5236', pathacc=['#463f28', '#6e6544'],
@@ -121,6 +121,7 @@ class M:
                 for dx in (0, 1): s.k[y + r, sx + dx] = 4
         s.cliffbands.append((y, x0, x1, rows))
     def tall(s, cx, cy, rx, ry):
+        rx, ry = rx * .6, ry * .65
         for y in range(s.h):
             for x in range(s.w):
                 d = ((x + .5 - cx) / rx) ** 2 + ((y + .5 - cy) / ry) ** 2
@@ -148,7 +149,8 @@ class M:
         rng = s.rng
         nearpath = ndimage.binary_dilation(np.isin(k, (1, 4, 5)), iterations=keepout)
         # big-scale noise for clumps & clearings
-        nz = np.array(Image.fromarray((np.random.RandomState(s.seed).rand(s.h // 4 + 2, s.w // 4 + 2) * 255).astype(np.uint8)).resize((s.w, s.h), Image.BICUBIC)) / 255
+        nz = np.array(Image.fromarray((np.random.RandomState(s.seed).rand(s.h // 7 + 2, s.w // 7 + 2) * 255).astype(np.uint8)).resize((s.w, s.h), Image.BICUBIC)) / 255
+        nz = np.clip((nz - nz.mean()) / (nz.std() + 1e-6) * .22 + .5, 0, 1)
         taken = np.zeros_like(s.col)
         cells = [(x, y) for y in range(s.h) for x in range(s.w)]; rng.shuffle(cells)
         ex_tiles = set()
@@ -161,8 +163,8 @@ class M:
             if k[y, x] != 0 or s.col[y, x] or (x, y) in s.res or (x, y) in ex_tiles: continue
             edge = min(x, y, s.w - 1 - x, s.h - 1 - y) < border
             if nearpath[y, x] and not edge: continue
-            p = (density + (nz[y, x] - .5) * .9) if not edge else .95
-            sp = 1 if edge else 2
+            p = (density + (nz[y, x] - .5) * 2.2) if not edge else .95
+            sp = 1 if (edge or nz[y, x] > .62) else 2
             if rng.random() > p: continue
             if taken[max(0, y - sp):y + sp + 1, max(0, x - sp):x + sp + 1].any(): continue
             # cliff faces: don't plant trees in the row right below a cliff (they'd hide it) unless border
@@ -197,8 +199,9 @@ def paint(m):
     g = [hexc(c) for c in B['g']]
     n1 = vnoise(H, W, 48, m.seed + 1); n2 = vnoise(H, W, 12, m.seed + 2); n3 = rs_.rand(H, W)
     img = g[0] * (1 - n1[..., None]) + g[1] * n1[..., None]
-    img = img * (1 - .35 * (n2[..., None] > .62)) + g[2] * .35 * (n2[..., None] > .62)
-    img += (n3[..., None] - .5) * 10
+    w2 = np.clip((n2[..., None] - .45) * 1.6, 0, 1) * .3
+    img = img * (1 - w2) + g[2] * w2
+    img += (n3[..., None] - .5) * 8
     canvas = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).convert('RGBA')
     d = ImageDraw.Draw(canvas)
     # ground speckles (leaves, flowers, snow glints, moss)
@@ -221,10 +224,10 @@ def paint(m):
         tex = texfn()
         base[mask] = tex[mask]
     # path
-    pm = organic(np.isin(k, (1, 5, 4)).astype(float), m.seed + 5, blur=8, jitter=.45)
+    pm = organic(np.isin(k, (1, 5, 4)).astype(float), m.seed + 5, blur=6, jitter=.28)
     def pathtex():
         pc = hexc(B['path']); nn = vnoise(H, W, 6, m.seed + 6)
-        t = pc * (.88 + .24 * nn[..., None]) + (rs_.rand(H, W)[..., None] - .5) * 12
+        t = pc * (.93 + .12 * nn[..., None]) + (rs_.rand(H, W)[..., None] - .5) * 9
         im = Image.fromarray(np.clip(t, 0, 255).astype(np.uint8)); dd = ImageDraw.Draw(im)
         if B['ptype'] == 'flag':
             for yy in range(0, H, 14):
@@ -247,19 +250,19 @@ def paint(m):
     base[edge, :3] = base[edge, :3] * .82
     layer(pm, pathtex)
     # tall grass
-    tm = organic((k == 6).astype(float), m.seed + 7, blur=8, jitter=.7)
+    tm = organic((k == 6).astype(float), m.seed + 7, blur=7, jitter=.9)
     tall_ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); td = ImageDraw.Draw(tall_ov)
     ys, xs = np.where(tm[::2, ::2])
     tc = B['tall']
     order = np.argsort(ys)
     for yy, xx in zip(ys[order] * 2, xs[order] * 2):
-        if rs_.rand() < .55:
-            hgt = 6 + rs_.randint(7); c = tc[rs_.randint(2)]
+        if rs_.rand() < .42:
+            hgt = 5 + rs_.randint(8); c = tc[rs_.randint(2)]
             lean = rs_.randint(-3, 4)
             td.line([xx, yy + 4, xx + lean, yy + 4 - hgt], fill=c, width=2 if rs_.rand() < .3 else 1)
             td.point((xx + lean, yy + 4 - hgt), fill=tc[2])
     sh = ndimage.binary_dilation(tm, iterations=1)
-    base[sh, :3] = base[sh, :3] * .86 + np.array(hexc(tc[0])) * .14
+    base[sh, :3] = base[sh, :3] * .9 + np.array(hexc(tc[0])) * .1
     tall_np = np.array(tall_ov).astype(float); a = tall_np[..., 3:4] / 255
     base[..., :3] = base[..., :3] * (1 - a) + tall_np[..., :3] * a
     # water
@@ -279,20 +282,23 @@ def paint(m):
             x, y = rs_.randint(0, W), rs_.randint(0, H)
             if wm[y, x]: base[y:y + 2, x:x + 2, :3] = hexc(['#6af0d8', '#b98af0'][rs_.randint(2)])
     canvas = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8)).convert('RGBA'); d = ImageDraw.Draw(canvas)
-    # bridges (planks)
+    # bridges / boardwalks: continuous decks, planks across the direction of travel, rails only on open sides
     for y in range(m.h):
         for x in range(m.w):
-            if k[y, x] == 5:
-                horiz = (x > 0 and k[y, x - 1] in (1, 5)) or (x < m.w - 1 and k[y, x + 1] in (1, 5))
-                vert = (y > 0 and k[y - 1, x] in (1, 5)) or (y < m.h - 1 and k[y + 1, x] in (1, 5))
-                X, Y = x * T, y * T
-                d.rectangle([X, Y, X + 31, Y + 31], fill='#6b4a2a')
-                if vert and not horiz:
-                    for i in range(0, 32, 6): d.rectangle([X, Y + i, X + 31, Y + i + 4], fill=['#9a6e40', '#8a6036'][(i // 6) % 2]); d.line([X, Y + i + 5, X + 31, Y + i + 5], fill='#4a301a')
-                    d.rectangle([X, Y, X + 2, Y + 31], fill='#4a301a'); d.rectangle([X + 29, Y, X + 31, Y + 31], fill='#4a301a')
-                else:
-                    for i in range(0, 32, 6): d.rectangle([X + i, Y, X + i + 4, Y + 31], fill=['#9a6e40', '#8a6036'][(i // 6) % 2]); d.line([X + i + 5, Y, X + i + 5, Y + 31], fill='#4a301a')
-                    d.rectangle([X, Y, X + 31, Y + 2], fill='#4a301a'); d.rectangle([X, Y + 29, X + 31, Y + 31], fill='#4a301a')
+            if k[y, x] != 5: continue
+            nb = lambda a, b: 0 <= a < m.w and 0 <= b < m.h and k[b, a] in (1, 4, 5)
+            horiz = nb(x - 1, y) or nb(x + 1, y); vert = nb(x, y - 1) or nb(x, y + 1)
+            X, Y = x * T, y * T
+            d.rectangle([X, Y, X + 31, Y + 31], fill='#7a5432')
+            if vert and not horiz:
+                for i in range(0, 32, 8): d.rectangle([X, Y + i, X + 31, Y + i + 6], fill=['#a2774a', '#94693e'][(y * 4 + i // 8) % 2]); d.line([X, Y + i + 7, X + 31, Y + i + 7], fill='#5a3a20')
+            else:
+                for i in range(0, 32, 8): d.rectangle([X + i, Y, X + i + 6, Y + 31], fill=['#a2774a', '#94693e'][(x * 4 + i // 8) % 2]); d.line([X + i + 7, Y, X + i + 7, Y + 31], fill='#5a3a20')
+            rail = '#4a2e18'
+            if not nb(x - 1, y) and not (0 <= x - 1 and k[y, x - 1] == 5): d.rectangle([X, Y, X + 2, Y + 31], fill=rail)
+            if not nb(x + 1, y) and not (x + 1 < m.w and k[y, x + 1] == 5): d.rectangle([X + 29, Y, X + 31, Y + 31], fill=rail)
+            if not nb(x, y - 1) and not (0 <= y - 1 and k[y - 1, x] == 5): d.rectangle([X, Y, X + 31, Y + 2], fill=rail)
+            if not nb(x, y + 1) and not (y + 1 < m.h and k[y + 1, x] == 5): d.rectangle([X, Y + 29, X + 31, Y + 31], fill=rail)
     # cliffs
     wall = load(B['wall'], SMALL).resize((32, 32), Image.LANCZOS)
     body = wall.crop((0, 12, 32, 32)).resize((32, 32), Image.LANCZOS)

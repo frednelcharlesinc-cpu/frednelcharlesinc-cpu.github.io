@@ -39,11 +39,12 @@ const BATTLE_STRIP = 92;
 const BATTLE_UNITS = 372;
 // THE OVERWORLD CAMERA IS MEASURED IN TILES, not a zoom number: the same framing on every phone, in either orientation.
 // Normal ≈ a handheld Pokémon screen: 12 tiles tall, and never fewer than 15 tiles across. Settings → Camera picks Close / Normal / Wide.
-const CAM_TILES = { close: 10, normal: 12, wide: 15 };
+const CAM_TILES = { close: 9, normal: 10.5, wide: 14 };
+const DUNGEON_ZOOM = .8;   // dungeons sit the camera closer still (fewer tiles tall)
 function camMode() { const s = G.settings || {}; return s.cam || (s.wideCam ? 'wide' : 'normal'); }
 function setView(mode) {
   let z = 1;
-  if (mode === 'world' || mode === 'dialog') { const tall = CAM_TILES[camMode()] || 12, across = Math.max(15, tall * 1.5);
+  if (mode === 'world' || mode === 'dialog') { const dun = typeof World !== 'undefined' && World.scene && World.scene.dungeon, tall = (CAM_TILES[camMode()] || 10.5) * (dun ? DUNGEON_ZOOM : 1), across = Math.max(dun ? 12 : 15, tall * 1.5);
     const sc = Math.min(cv.height / (tall * 32), cv.width / (across * 32)); z = sc / G.view.base; }
   if (mode === 'battle') z = VIEW_H / BATTLE_UNITS;   // battles are framed a little wider than story scenes
   G.view.scale = G.view.base * z; G.view.fullH = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
@@ -86,7 +87,7 @@ async function boot() {
   initBT();
   step(0.25, 'Gathering the townsfolk…');
   G.img.props = await loadImg('assets/props.png?v=4');
-  await Promise.all([['props2', 2], ['props3', 1], ['props4', 1], ['props5', 1]].map(async ([n, v]) => { try { const [p, i] = await Promise.all([loadJSON(`assets/${n}.json?v=${v}`), loadImg(`assets/${n}.png?v=${v}`)]); Object.assign(G.props, p); G.img[n] = i; } catch (e) { console.warn(n, e); } }));
+  await Promise.all([['props2', 2], ['props3', 1], ['props4', 1], ['props5', '2fa87873']].map(async ([n, v]) => { try { const [p, i] = await Promise.all([loadJSON(`assets/${n}.json?v=${v}`), loadImg(`assets/${n}.png?v=${v}`)]); Object.assign(G.props, p); G.img[n] = i; } catch (e) { console.warn(n, e); } }));
   const partNames = Object.keys(G.man.parts);
   let n = 0;
   await Promise.all(partNames.map(async p => { G.img['part_' + p] = await loadImg('assets/parts/' + p + '.png'); step(0.25 + 0.5 * (++n / partNames.length)); }));
@@ -470,7 +471,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<':
 let lastT = 0;
 function loop(t) {
   const dt = Math.min(50, t - (lastT || t)); lastT = t; G.t = t;
-  if (G.view.mode !== G.mode) { G.view.mode = G.mode; setView(G.mode); }
+  { const vk = G.mode + (typeof World !== 'undefined' && World.scene && World.scene.dungeon ? ':dungeon' : ''); if (G.view.mode !== vk) { G.view.mode = vk; setView(G.mode); } }
   ctx.setTransform(G.view.scale, 0, 0, G.view.scale, 0, 0); ctx.imageSmoothingEnabled = false;
   try {
     if (G.mode === 'world' || G.mode === 'dialog') { World.update(dt); World.render(ctx, t); }

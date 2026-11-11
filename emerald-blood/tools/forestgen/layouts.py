@@ -333,8 +333,9 @@ FCL = {}
 for key, m in MAPS.items():
     img = paint_dungeon(m) if key.startswith('d_') else paint(m)
     img.convert('RGB').save(f'{REPO}/assets/map_{key}.webp', 'WEBP', quality=88, method=6)
+    import hashlib; ver = hashlib.md5(open(f'{REPO}/assets/map_{key}.webp', 'rb').read()).hexdigest()[:8]   # cache-buster: phones always get the matching image
     entry = {'w': m.w, 'h': m.h, 'col': [''.join(str(int(v)) for v in row) for row in m.col], 'props': m.props,
-             'grass': m.data.get('grass', []), 'ext': 'webp', 'v': 1, 'fc': 1, 'mm': minimap_rows(m)}
+             'grass': m.data.get('grass', []), 'ext': 'webp', 'v': ver, 'fc': 1, 'mm': minimap_rows(m)}
     if 'dungeon' in m.data:
         entry['dungeon'] = m.data.pop('dungeon'); entry['dungeon']['style'] = {'d_fang': 'crypt', 'd_cinder': 'warren', 'd_shrine': 'mire', 'd_vault': 'crypt'}[key]
     maps[key] = entry
