@@ -44,6 +44,7 @@ for sheet,items in SPEC.items():
     if name=='w_mural': s=0.4
     if name=='w_stairs': s=0.5
     if name in('n_camp','e_camp'): s=0.42
+    if name.endswith('_wall'): img.resize((64,64),Image.LANCZOS).save(OUT+name+'64.png')
     if name.endswith('_wall') or name=='twall' or name=='tcobble' or name=='tgrass': img=img.resize((32,32),Image.LANCZOS)
     elif name.endswith('_fall'): img=img.resize((44 if name[0] in 'ne' else 80,170 if name[0] in 'ne' else 150),Image.LANCZOS)
     elif 'chest' in name: img=img.resize((22,max(1,round(22*img.height/img.width))),Image.LANCZOS)

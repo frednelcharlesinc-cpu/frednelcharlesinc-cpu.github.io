@@ -103,7 +103,7 @@
     b_fang: { name: 'Hollowfang, the Den Mother', img: 'lupine_alpha', boss: 1, size: 1.5, hp: 230, atk: 15, def: 4, spd: 15, dodge: .25, parry: .05, brk: 100, xp: 110, gold: 110,
       howl: 1, howlName: 'BLOOD HOWL', howlKey: 'lupine', howlText: 'LEAPS IN', trait: 'Howls for her pack when wounded',
       skills: [{ name: 'Rending Claw', hits: [MH('slash', 1.1, 520), MH('halfslash', .9, 320)] }, { name: 'Frost Fang', w: .35, hits: [MH('thrust', 1.6, 700)] }, { name: 'Den Pounce', w: .25, hits: [MH('jump', 2, 900, 1)] }] },
-    b_cinder: { name: 'Smoulder, the Cinder Wyrmling', img: 'm_drake', boss: 1, size: 1.35, hp: 300, atk: 17, def: 6, spd: 12, dodge: .1, parry: .05, brk: 120, xp: 150, gold: 150, trait: 'fire — its breath scorches the whole party',
+    b_cinder: { name: 'Smoulder, the Cinder Wyrmling', img: 'm_drake', boss: 1, size: 2.1, hp: 300, atk: 17, def: 6, spd: 12, dodge: .1, parry: .05, brk: 120, xp: 150, gold: 150, trait: 'fire — its breath scorches the whole party',
       skills: [{ name: 'Tail Lash', hits: [MH('slash', 1.1, 560)] }, { name: 'Ember Breath', w: .35, hits: [MH('spellcast', 1.5, 900)] }, { name: 'Ash Storm', w: .25, hits: [MH('spellcast', .6, 420), MH('spellcast', .6, 260), MH('spellcast', .9, 380)] }] },
     b_shrine: { name: 'Ssarak, the Drowned Priest', img: 'm_lizard', boss: 1, size: 1.5, hp: 360, atk: 18, def: 6, spd: 13, dodge: .2, parry: .2, brk: 130, xp: 190, gold: 180, regen: .04, trait: 'water — the shrine\'s tide heals it every turn',
       skills: [{ name: 'Trident', hits: [MH('thrust', 1.1, 480)] }, { name: 'Undertow', w: .4, hits: [MH('thrust', .7, 420), MH('thrust', .7, 240), MH('thrust', 1, 300)] }, { name: 'Drowning Psalm', w: .2, hits: [MH('spellcast', 1.9, 1000, 1)] }] },

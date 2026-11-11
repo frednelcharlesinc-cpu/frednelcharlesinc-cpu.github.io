@@ -43,7 +43,7 @@
     const k = `sb_${id}_${i}`; if (ENEMY[k]) return ENEMY[k];
     const [base, name] = DX(id).sb[i], B = ENEMY[base] || ENEMY.m_skeleton;
     return (ENEMY[k] = Object.assign({}, B, { name, img: B.img || base, boss: 1, hp: Math.round(B.hp * 3.2), atk: Math.round(B.atk * 1.45), def: (B.def || 0) + 3, brk: Math.round((B.brk || 50) * 1.8),
-      xp: Math.round((B.xp || 20) * 6), gold: Math.round((B.gold || 10) * 6), size: Math.max(1.45, B.size || 1), trait: 'SECRET BOSS — stronger than the lord of this place' + (B.trait ? ' · ' + B.trait : '') }));
+      xp: Math.round((B.xp || 20) * 6), gold: Math.round((B.gold || 10) * 6), size: Math.max(window.isDragon && isDragon(B) ? 2.2 : 1.45, B.size || 1), trait: 'SECRET BOSS — stronger than the lord of this place' + (B.trait ? ' · ' + B.trait : '') }));
   }
   const gearName = g => (typeof RECIPES !== 'undefined' && RECIPES[g] ? RECIPES[g].n : g);
   const partName = p => (typeof PARTS !== 'undefined' && PARTS[p] ? PARTS[p].n : p);
@@ -112,7 +112,7 @@
     if (!f[`dx_${id}_relic`]) W.ents.push(new Ent({ id: 'dxrelic', x: D.relic[0], y: D.relic[1], dir: 'down', img: Pick.sheet('chest_gold_c'), pickup: 1, name: 'Relic chest', talk: () => relic(id) }));
     for (const s of D.secret) {
       if (f[`dx_${id}_sb${s.i}`]) continue; const E = mkSB(id, s.i); let img; try { img = await npcImg(E.img); } catch (e) { continue; }
-      W.ents.push(new Ent({ id: 'dxsb_' + s.i, x: s.x, y: s.y, dir: 'down', img, size: 1.45, name: E.name, ai: 'turn', turns: ['down', 'left', 'right'], talk: () => secretBoss(id, s.i) }));
+      W.ents.push(new Ent({ id: 'dxsb_' + s.i, x: s.x, y: s.y, dir: 'down', img, size: window.isDragon && isDragon(E) ? 2.3 : 1.55, name: E.name, ai: 'turn', turns: ['down', 'left', 'right'], talk: () => secretBoss(id, s.i) }));
     }
   }
   const _load = World.load.bind(World);

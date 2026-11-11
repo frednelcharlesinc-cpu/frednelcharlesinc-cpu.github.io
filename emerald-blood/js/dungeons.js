@@ -116,7 +116,7 @@ async function spawnExtras(W, name) {
     const dd = DUNGEONS[name];
     if (!S.f['clear_' + name]) {
       const B = ENEMY[dd.boss];
-      W.ents.push(new Ent({ id: 'boss', x: D.boss[0], y: D.boss[1], dir: 'down', img: await npcImg(B.img || dd.boss), size: Math.min(1.6, B.size || 1), name: B.name, talk: () => dungeonBoss(name) }));
+      W.ents.push(new Ent({ id: 'boss', x: D.boss[0], y: D.boss[1], dir: 'down', img: await npcImg(B.img || dd.boss), size: Math.min(window.isDragon && isDragon(B) ? 2.4 : 1.8, Math.max(1.3, B.size || 1)), name: B.name, talk: () => dungeonBoss(name) }));
     }
     // map-wide light follows the player
     const fl = W.lights[W.lights.length - 1]; W.followLight = fl;

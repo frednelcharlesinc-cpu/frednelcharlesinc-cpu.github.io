@@ -34,28 +34,28 @@ def load(n, src=SPR):
 
 PROPS = {}   # key -> Image
 def addp(key, img): PROPS[key] = img; return key
+BIG = 1.3   # the world is built bigger than the people in it
+def rs(img, f): return img.resize((max(1, round(img.width * f)), max(1, round(img.height * f))), Image.LANCZOS)
 for b in 'nesw':
-    for i in (1, 2, 3): addp(f'fc_{b}tree{i}', load(f'{b}_tree{i}'))
+    for i in (1, 2, 3): addp(f'fc_{b}tree{i}', rs(load(f'{b}_tree{i}'), BIG))
 for n in ['n_bush1', 'n_bush2', 'n_bush3', 'e_bush1', 'e_bush2', 'e_bush3', 's_bush1', 's_bush2', 'w_bush1', 'w_bush2', 'w_bush3',
           'n_rock1', 'n_rock2', 'e_rock1', 'e_rock2', 's_rock1', 's_rock2', 's_rock3', 'w_rock1', 'w_rock2', 'w_rock3',
           'n_log', 'e_log', 's_log1', 's_log2', 'w_log1', 'w_log2', 'n_statue', 'e_statue', 's_statue', 'w_statue', 'n_ruins', 'e_ruins',
           's_arch', 's_tablet', 'w_mural', 'n_camp', 'e_camp', 's_tent', 's_roll', 'w_tent', 'w_roll', 'n_sign', 'e_sign', 's_sign', 'w_sign',
           's_dead', 's_stump', 's_mush1', 's_mush2', 's_mush3', 's_mush4', 's_moss', 'ttree1', 'ttree2', 'ttree3', 'tbush1', 'tbush2', 'tbush3',
           'pot1', 'barrel', 'crates', 'lantern', 'well', 'n_bridge', 'e_bridge']:
-    addp('fc_' + n, load(n))
-# set pieces resized to the world
-def rs(img, f): return img.resize((max(1, round(img.width * f)), max(1, round(img.height * f))), Image.LANCZOS)
+    addp('fc_' + n, load(n) if ('sign' in n or n in ('lantern', 'pot1', 'barrel', 'crates')) else rs(load(n), BIG))
 for b in 'nesw':
-    c = load(f'{b}_cave'); addp(f'fc_{b}cave', rs(c, 150 / c.width))
+    c = load(f'{b}_cave'); addp(f'fc_{b}cave', rs(c, 196 / c.width))
     f = load(f'{b}_fall', SMALL)
-    addp(f'fc_{b}fall', f.resize((64, 176) if b in 'ne' else (96, 190), Image.LANCZOS))
+    addp(f'fc_{b}fall', f.resize((70, 205) if b in 'ne' else (104, 215), Image.LANCZOS))
 import glob as _g
 for _f in sorted(_g.glob(SPR + 'd*_*.png')):
     _n = os.path.basename(_f)[:-4]; addp('fc_' + _n, load(_n))
-addp('fc_ancient', rs(load('n_tree3'), 2.0))
-addp('fc_grandtree', rs(load('w_tree3'), 1.5))
-addp('fc_swampking', rs(load('s_tree3'), 1.25))
-addp('fc_emberking', rs(load('e_tree3'), 1.6))
+addp('fc_ancient', rs(load('n_tree3'), 2.5))
+addp('fc_grandtree', rs(load('w_tree3'), 1.95))
+addp('fc_swampking', rs(load('s_tree3'), 1.6))
+addp('fc_emberking', rs(load('e_tree3'), 2.0))
 
 def pack():
     items = sorted(PROPS.items(), key=lambda kv: -kv[1].height)
@@ -300,22 +300,22 @@ def paint(m):
             if not nb(x, y - 1) and not (0 <= y - 1 and k[y - 1, x] == 5): d.rectangle([X, Y, X + 31, Y + 2], fill=rail)
             if not nb(x, y + 1) and not (y + 1 < m.h and k[y + 1, x] == 5): d.rectangle([X, Y + 29, X + 31, Y + 31], fill=rail)
     # cliffs
-    wall = load(B['wall'], SMALL).resize((32, 32), Image.LANCZOS)
-    body = wall.crop((0, 12, 32, 32)).resize((32, 32), Image.LANCZOS)
+    W64 = load(B['wall'] + '64', SMALL)
     stone = hexc(B['stone'])
     for (cy, x0, x1, rows) in m.cliffbands:
-        # soft shadow cast on the ground below
         sh = Image.new('RGBA', (W, H), (0, 0, 0, 0)); sd = ImageDraw.Draw(sh)
-        for i in range(14):
-            sd.rectangle([x0 * T, (cy + rows) * T + i, (x1 + 1) * T, (cy + rows) * T + i], fill=(0, 0, 0, int(90 * (1 - i / 14))))
+        for i in range(16):
+            sd.rectangle([x0 * T, (cy + rows) * T + i, (x1 + 1) * T, (cy + rows) * T + i], fill=(0, 0, 0, int(100 * (1 - i / 16))))
         canvas = Image.alpha_composite(canvas, sh); d = ImageDraw.Draw(canvas)
+        lower = W64.crop((0, 24, 64, 64)).resize((64, 64), Image.LANCZOS)
         for x in range(x0, x1 + 1):
             for r in range(rows):
                 y = cy + r
                 if k[y, x] == 3:
-                    tile = wall if r == 0 else body
-                    if r == rows - 1:
-                        tile = Image.fromarray((np.array(tile).astype(float) * [.8, .8, .8, 1]).astype(np.uint8))
+                    src = W64 if r == 0 else lower
+                    half = 0 if r == 0 else (r - 1) % 2
+                    tile = src.crop(((x % 2) * 32, half * 32, (x % 2) * 32 + 32, half * 32 + 32))
+                    if r == rows - 1: tile = Image.fromarray((np.array(tile).astype(float) * [.78, .78, .78, 1]).astype(np.uint8))
                     canvas.alpha_composite(tile, (x * T, y * T))
                 elif k[y, x] == 4:
                     X, Y = x * T, y * T
@@ -342,20 +342,30 @@ def paint_dungeon(m):
     wall = load(B['wall'], SMALL).resize((32, 32), Image.LANCZOS)
     dark = hexc(B['wallc'])
     k = m.k
-    if 'tiles' in B:   # the user's dungeon sheet: real floor & wall tiles
-        fl_t = [load(f"{B['tiles']}_floor{i}", SMALL) for i in range(B['nfloor'])]
-        wl_t = [load(f"{B['tiles']}_wall{i}", SMALL) for i in range(B['nwall'])]
-        wts = [6] + [2] * (len(fl_t) - 1)
+    if 'tiles' in B:   # the user's dungeon sheet: real floor & wall tiles, drawn at 2x2 tiles so the stones read at the people's scale
+        fl_t = [load(f"{B['tiles']}_floor{i}_64", SMALL) for i in range(B['nfloor'])]
+        wl_t = [load(f"{B['tiles']}_wall{i}_64", SMALL) for i in range(B['nwall'])]
+        pick = {}
         for y in range(m.h):
             for x in range(m.w):
-                if k[y, x] == 7: canvas.alpha_composite(rs_.choice(len(fl_t), p=np.array(wts) / sum(wts)) and fl_t[rs_.choice(range(1, len(fl_t)))] or fl_t[0], (x * T, y * T))
-        for (x, y) in m.data.get('lava', []): canvas.alpha_composite(load(f"{B['tiles']}_floor{B['lava']}", SMALL), (x * T, y * T))
+                if k[y, x] != 7: continue
+                bk = (x // 2, y // 2)
+                if bk not in pick: pick[bk] = 0 if rs_.rand() < .5 else rs_.randint(1, len(fl_t))
+                canvas.alpha_composite(fl_t[pick[bk]].crop(((x % 2) * 32, (y % 2) * 32, (x % 2) * 32 + 32, (y % 2) * 32 + 32)), (x * T, y * T))
+        lava64 = load(f"{B['tiles']}_floor{B['lava']}_64", SMALL) if 'lava' in B else None
+        for (x, y) in m.data.get('lava', []): canvas.alpha_composite(lava64.crop(((x % 2) * 32, (y % 2) * 32, (x % 2) * 32 + 32, (y % 2) * 32 + 32)), (x * T, y * T))
+    wpick = {}
     for y in range(m.h):
         for x in range(m.w):
-            if k[y, x] == 8:
-                below_floor = y + 1 < m.h and k[y + 1, x] == 7
-                if below_floor: canvas.alpha_composite(wl_t[rs_.randint(len(wl_t))] if 'tiles' in B else wall, (x * T, y * T))
-                else: d.rectangle([x * T, y * T, x * T + 31, y * T + 31], fill=tuple(int(c) for c in dark))
+            if k[y, x] != 8: continue
+            f1 = y + 1 < m.h and k[y + 1, x] == 7                       # face, lower half
+            f2 = y + 2 < m.h and k[y + 1, x] == 8 and k[y + 2, x] == 7  # face, upper half
+            if 'tiles' in B and (f1 or f2):
+                bk = x // 2
+                if bk not in wpick: wpick[bk] = rs_.randint(len(wl_t))
+                canvas.alpha_composite(wl_t[wpick[bk]].crop(((x % 2) * 32, 32 if f1 else 0, (x % 2) * 32 + 32, 64 if f1 else 32)), (x * T, y * T))
+            elif f1: canvas.alpha_composite(wall, (x * T, y * T))
+            else: d.rectangle([x * T, y * T, x * T + 31, y * T + 31], fill=tuple(int(c) for c in dark))
     # shadow under walls
     arr = np.array(canvas).astype(float)
     for y in range(m.h):

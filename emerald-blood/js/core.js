@@ -87,7 +87,7 @@ async function boot() {
   initBT();
   step(0.25, 'Gathering the townsfolk…');
   G.img.props = await loadImg('assets/props.png?v=4');
-  await Promise.all([['props2', 2], ['props3', 1], ['props4', 1], ['props5', '2fa87873']].map(async ([n, v]) => { try { const [p, i] = await Promise.all([loadJSON(`assets/${n}.json?v=${v}`), loadImg(`assets/${n}.png?v=${v}`)]); Object.assign(G.props, p); G.img[n] = i; } catch (e) { console.warn(n, e); } }));
+  await Promise.all([['props2', 2], ['props3', 1], ['props4', 1], ['props5', 'b8ca90ec']].map(async ([n, v]) => { try { const [p, i] = await Promise.all([loadJSON(`assets/${n}.json?v=${v}`), loadImg(`assets/${n}.png?v=${v}`)]); Object.assign(G.props, p); G.img[n] = i; } catch (e) { console.warn(n, e); } }));
   const partNames = Object.keys(G.man.parts);
   let n = 0;
   await Promise.all(partNames.map(async p => { G.img['part_' + p] = await loadImg('assets/parts/' + p + '.png'); step(0.25 + 0.5 * (++n / partNames.length)); }));

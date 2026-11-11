@@ -98,7 +98,7 @@
     for (let i = 0; i < 4; i++) {
       if (K[i] || cleared || !sp[i]) continue;
       const E = ENEMY[`lt_${id}_${i}`]; let img = null; try { img = await npcImg(E.img); } catch (e) { continue; }
-      W.ents.push(new Ent({ id: `lt_${i}`, x: sp[i][0], y: sp[i][1], dir: 'down', img, size: 1.15, name: E.name, ai: 'turn', turns: ['down', 'left', 'right'], talk: () => fightLt(id, i) }));
+      W.ents.push(new Ent({ id: `lt_${i}`, x: sp[i][0], y: sp[i][1], dir: 'down', img, size: isDragon(E) ? 1.7 : 1.15, name: E.name, ai: 'turn', turns: ['down', 'left', 'right'], talk: () => fightLt(id, i) }));
     }
     if (!open(id)) for (const [x, y] of doors(id)) {
       if (W.col[y]) W.col[y][x] = 1;
@@ -156,5 +156,9 @@
     try { if (eligible(name)) { await populate(World, name); if (typeof MiniMap !== 'undefined') MiniMap.ckey = ''; } } catch (e) { console.warn('lieutenants', e); }
     return r;
   };
+  /* DRAGON SCALE — drakes, wyrms and dragons are BIG: regular ones 1.7x, boss dragons 2.1x (battle), bigger in the world too */
+  const isDragon = E => !!E && (/drake|wyrm|dragon|wyrmling/i.test(E.name || '') || /^m_(drake|cavewyrm)$/.test(E.img || ''));
+  for (const k in ENEMY) { const E = ENEMY[k]; if (isDragon(E)) E.size = Math.max(E.size || 1, E.boss ? 2.1 : 1.7); }
+  window.isDragon = isDragon;
   window.Lieutenants = { PROFILE, keys, nKeys, spots, doors, gateSheet };
 })();

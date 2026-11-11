@@ -31,6 +31,8 @@ chat's pushes instead of overwriting them).
 6. **Log** every cross-lane touch in the list below (newest first).
 
 ## Cross-lane log
+- 2026-11-11 · B → A (sizes): `lieutenants.js` scales every dragon in `ENEMY` at load — drakes/wyrms ≥1.7, boss dragons ≥2.1 (`window.isDragon`).
+  `dungeons.js` boss ents: size cap 1.6→1.8 (2.4 for dragons). World props ~30% bigger, cliffs/dungeon walls & floors drawn at 64px stones.
 - 2026-11-11 · B (shared `core.js`, surgical): camera closer — `CAM_TILES` normal 12→10.5 (close 9, wide 14), dungeons ×0.8 via `DUNGEON_ZOOM`;
   the render loop re-frames when entering/leaving a dungeon (`G.view.mode` key gets `:dungeon`). `props5` atlas version is now a content hash
   (`tools/forestgen` bump) and fc_/d_ maps carry `v` = image hash — fixes phones mixing a cached old atlas/ground with new layouts (the "chopped trees" bug).
