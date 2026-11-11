@@ -5,14 +5,14 @@
    A trail to read in the West Woods, a solo fight against a Drag in a Registry collar,
    the Catcher who sold Kess's mother — and a knife, and a choice that isn't Ren's.
    ===================================================================================== */
-Object.assign(CHAR, { bertrand: { name: 'Bertrand the Catcher', sprite: 'hunter' }, corvin: { name: 'Corvin', sprite: 'rebel2' } });
+Object.assign(CHAR, { bertrand: { name: 'Bertrand the Catcher', sprite: 'bertrand' }, corvin: { name: 'Corvin', sprite: 'corvin' } });
 Object.assign(ENEMY, {
   catcher: { name: 'Catcher', img: 'bandit', trait: 'Paid by the head', hp: 82, atk: 12, def: 4, spd: 12, dodge: .12, parry: .15, brk: 55, xp: 24, gold: 12,
     skills: [{ name: 'Cudgel', hits: [{ anim: 'slash', m: 1.05, w: 540 }] }, { name: 'Net and Strike', w: .35, hits: [{ anim: 'thrust', m: .6, w: 420 }, { anim: 'slash', m: .9, w: 360 }] }] },
-  corvin_e: { name: 'Corvin the Collared', drag: 1, img: 'rebel2', trait: 'A licensed Drag — the Crown lets him keep his eyes if he brings them other people\'s', hp: 195, atk: 14, def: 5, spd: 16, dodge: .25, parry: .25, brk: 75, xp: 70, gold: 30,
+  corvin_e: { name: 'Corvin the Collared', drag: 1, img: 'corvin', trait: 'A licensed Drag — the Crown lets him keep his eyes if he brings them other people\'s', hp: 195, atk: 14, def: 5, spd: 16, dodge: .25, parry: .25, brk: 75, xp: 70, gold: 30,
     skills: [{ name: 'Glaive Sweep', hits: [{ anim: 'slash', m: .9, w: 520 }, { anim: 'slash', m: .7, w: 320 }] }, { name: 'Collar Hook', w: .3, hits: [{ anim: 'thrust', m: .55, w: 300 }, { anim: 'thrust', m: .55, w: 260 }, { anim: 'thrust', m: 1.1, w: 520 }] },
       { name: 'Drag Rush', w: .2, hits: [{ anim: 'thrust', m: .4, w: 220 }, { anim: 'thrust', m: .4, w: 200 }, { anim: 'thrust', m: .4, w: 190 }, { anim: 'slash', m: .9, w: 420 }] }] },
-  bertrand: { name: 'Old Bertrand, the Catcher', img: 'hunter', boss: 1, trait: "CATCHER'S ROPE — every third turn he lassos one of your fighters and they lose a turn. Forty years of knots.", hp: 270, atk: 15, def: 6, spd: 11, dodge: .1, parry: .35, brk: 90, xp: 120, gold: 70,
+  bertrand: { name: 'Old Bertrand, the Catcher', img: 'bertrand', boss: 1, trait: "CATCHER'S ROPE — every third turn he lassos one of your fighters and they lose a turn. Forty years of knots.", hp: 270, atk: 15, def: 6, spd: 11, dodge: .1, parry: .35, brk: 90, xp: 120, gold: 70,
     skills: [{ name: 'Hook and Haul', hits: [{ anim: 'slash', m: .8, w: 520 }, { anim: 'thrust', m: .9, w: 380 }] }, { name: 'Old Man\'s Patience', w: .3, hits: [{ anim: 'slash', m: .5, w: 260 }, { anim: 'slash', m: .5, w: 230 }, { anim: 'slash', m: .5, w: 210 }, { anim: 'thrust', m: 1.2, w: 600 }] },
       { name: 'Sack and Cudgel', w: .2, hits: [{ anim: 'slash', m: 1.8, w: 900, unp: 1 }] }] }
 });
@@ -43,7 +43,7 @@ const KA = {
       f.ka = 'camp'; sfx('level');
       await say('kessE', 'neutral', '"South. The old ford — there\'s a hollow there where you can\'t see a fire from the road. That\'s where I\'d go if I were a coward with a cage."');
       Story.quest('The trail leads south to a hidden camp by the old ford (south-west of the West Woods). Edda and the children are there.');
-      if (G.S.map === 'woods_w' && !World.ent('corvin')) { const [x, y] = freeNear('woods_w', 16, 31); await World.addNpc({ id: 'corvin', sprite: 'rebel2', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); }
+      if (G.S.map === 'woods_w' && !World.ent('corvin')) { const [x, y] = freeNear('woods_w', 16, 31); await World.addNpc({ id: 'corvin', sprite: 'corvin', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); }
     } else toast(`<b style="color:#c99bff">Trail</b> ${f.kaSign.length}/3`, 1600);
   },
   async camp() {
@@ -114,6 +114,10 @@ const KA = {
     else if (c4 === 1) { await say('kessE', 'shock', '"…"'); await say('kessE', 'happy', '"You really are an idiot. …Maybe."'); }
     else await narr('You sit with her until the sun is all the way up. Neither of you says anything. It\'s the best conversation you\'ve had in weeks.');
     await say('kessE', 'neutral', '"The Glass Road\'s finished — too many people know about it now. But…" She touches the rim of her spectacles. "Maybe there\'s a road where nobody needs glasses. You keep talking like there is."');
+    await narr('When she stands up, her shadow doesn\'t quite stand up with her. It stays a beat behind — then catches up, darker than it should be in the morning sun.');
+    await say('kessE', 'shock', '"…Did you see that?"');
+    await me('happy', '"Twelve years of holding your breath. I think it just let go."');
+    toast('<b style="color:#c99bff">Kess awakened her Aura Burst — NIGHTFALL.</b> Fill her gauge in battle to release it. Full Transcension comes later.', 5200); sfx('level');
     f.ka = 'done'; Story.gainXp(140); G.S.gold += 40; Story.heal(true);
     try { if (typeof Bonds !== 'undefined' && Bonds.gain) Bonds.gain('kess', f.kessChose ? 60 : 40); } catch (e) { }
     toast(`<b style="color:#c99bff">Kess</b> trusts you more. ${f.kessChose ? '(She chose for herself — and she knows you let her.)' : ''}`, 3800);
@@ -124,7 +128,7 @@ const KA = {
 (function () {
   const W = SCENES.woods_w; if (!W) return;
   KA_SIGNS.forEach(([x, y], i) => { const prev = W.tiles[x + ',' + y]; W.tiles[x + ',' + y] = async () => { if (AF().ka === 'woods' && !(AF().kaSign || []).includes(i)) return KA.sign(i); if (prev) return prev(); }; });
-  const _n = W.npcs; W.npcs = function () { const L = _n.call(this) || []; if (AF().ka === 'camp') { const [x, y] = freeNear('woods_w', 16, 31); L.push({ id: 'corvin', sprite: 'rebel2', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); } return L; };
+  const _n = W.npcs; W.npcs = function () { const L = _n.call(this) || []; if (AF().ka === 'camp') { const [x, y] = freeNear('woods_w', 16, 31); L.push({ id: 'corvin', sprite: 'corvin', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); } return L; };
   // the trail marks
   const _r = World.render.bind(World);
   World.render = function (c, t) { const out = _r(c, t);

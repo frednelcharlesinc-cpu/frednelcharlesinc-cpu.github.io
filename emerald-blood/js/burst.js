@@ -28,10 +28,10 @@ const EBURST = {   // enemies: [name, line, colour]
   kairo_spar: ['SCAR SPARK', 'Kairo: "Heh. Just a taste."', '#ff7a3a']
 };
 const Burst = {
-  word(a) { return 'TRANSCENSION'; },
+  word(a) { try { if (a && a.side === 'p' && this.stage && this.stage(a) === 1) return 'AURA BURST'; } catch (e) { } return 'TRANSCENSION'; },
   gain(a, n) { if (!a || a.side !== 'p' || G.S.kid || a.burstUsed || !this.has(a)) return; const was = a.ab || 0; a.ab = Math.min(100, was + n); if (was < 100 && a.ab >= 100) { Battle.text(a, this.word(a) + ' READY', BURST[this.key(a)].col, -86, true); sfx('level'); } },
   key(a) { return a.isMe ? 'me' : a.id; },
-  has(a) { const k = this.key(a); if (!BURST[k]) return false; if (k === 'me') return !G.S.kid; return true; },
+  has(a) { const k = this.key(a); if (!BURST[k]) return false; if (k === 'me') return !G.S.kid; if (k === 'kess') { const f = G.S.f; return f.ka === 'done' || !!f.kessOath || !!f.chapter1Done || (G.S.chapter || 1) >= 2; } return true; },
   async cut(who, title, sub, col, side) {
     const B = Battle.B; if (!B) return; let img = null;
     try { const af = artFor(who, 'anger') || artFor(who, 'neutral'); if (af && af.img) { if (af.img.lazy) { await Promise.race([Art.fetch(af.img), wait(700)]); const a2 = artFor(who, 'anger') || artFor(who, 'neutral'); img = a2 && a2.img && !a2.img.lazy ? a2.img : null; } else img = af.img; } } catch (e) { }
@@ -176,13 +176,13 @@ Object.assign(Burst, {
   Burst.fire = async function (a) {
     const k = this.key(a), st = this.stage(a), B = Battle.B;
     const D = BURST[k], keepN = D.n, keepSub = D.sub;
-    if (st === 1) { D.n = keepN + ' · I'; D.sub = 'Half-open — ' + keepSub; }
+    if (st === 1) { D.sub = 'Half-open — ' + keepSub; }
     try { await _fire(a); } finally { D.n = keepN; D.sub = keepSub; }
     G.S.kaigen = G.S.kaigen || {}; const before = this.uses(k); G.S.kaigen[k] = before + 1;
     if (st === 1) {   // weaker: 2 turns, softer numbers, a shorter crash
       a.burst = 2; a.stage1 = 1; if (a.bAtk) { const cut = Math.round(a.bAtk * .4); a.atk -= cut; a.bAtk -= cut; } if (a.bDef) { a.def -= 3; a.bDef -= 3; }
       if (k === 'me' && a.eclipse) a.eclipse = 2; if (typeof Ghost !== 'undefined' && a.ghostT) { a.ghostT = 2; a.ghostMult = (a.ghostMult || 1) * .7; }
-      if (before + 1 === 8 && !(UNLOCK[k] && UNLOCK[k]())) setTimeout(() => toast(`<b style="color:${D.col}">${esc(a.name)} has mastered the half-open ${this.word(a)}.</b> The full release — Stage II — is unlocked.`, 5200), 1200);
+      if (before + 1 === 8 && !(UNLOCK[k] && UNLOCK[k]())) setTimeout(() => toast(`<b style="color:${D.col}">${esc(a.name)} has mastered the Aura Burst.</b> The full release — TRANSCENSION — is unlocked.`, 5200), 1200);
     } else { a.stage1 = 0; a.finisher = 1; }
     if (B && B.dominion && !B.dominion.gone) { if (st === 2) Dom.shatter(); else Dom.crack(a, 1); }
   };
@@ -207,7 +207,7 @@ Object.assign(Burst, {
     BT.hud();
   }
   // Stage II unlocked by story: tell the player once
-  setInterval(() => { try { if (!G.S || G.S.kid) return; G.S.f.kgSeen = G.S.f.kgSeen || {}; for (const k in UNLOCK) if (UNLOCK[k]() && !G.S.f.kgSeen[k] && (k === 'me' || (G.S.party || []).includes(k))) { G.S.f.kgSeen[k] = 1; const nm = k === 'me' ? G.S.name : (ALLY[k] || {}).name; setTimeout(() => toast(`<b style="color:${BURST[k].col}">${esc(nm)}'s Transcension — full release unlocked.</b> Stage II: 3 turns, full power, and a finisher.`, 5200), 800); } } catch (e) { } }, 4000);
+  setInterval(() => { try { if (!G.S || G.S.kid) return; G.S.f.kgSeen = G.S.f.kgSeen || {}; for (const k in UNLOCK) if (UNLOCK[k]() && !G.S.f.kgSeen[k] && (k === 'me' || (G.S.party || []).includes(k))) { G.S.f.kgSeen[k] = 1; const nm = k === 'me' ? G.S.name : (ALLY[k] || {}).name; setTimeout(() => toast(`<b style="color:${BURST[k].col}">${esc(nm)}'s TRANSCENSION unlocked.</b> Beyond the Aura Burst: 3 turns, full power, and a finisher.`, 5200), 800); } } catch (e) { } }, 4000);
   // drowned perfect hits during a release crack a Dominion
   const _rh = Battle.resolveHit.bind(Battle);
   Battle.resolveHit = function (a, t, m, grade, opts) { const r = _rh(a, t, m, grade, opts); try { const B = this.B; if (B && B.dominion && !B.dominion.gone && a && a.side === 'p' && a.burst > 0 && grade === 'perfect' && !(opts && opts.echo)) Dom.crack(a, 1); } catch (e) { } return r; };
@@ -215,7 +215,7 @@ Object.assign(Burst, {
 /* ---------- DOMINIONS ---------- */
 const DOMINION = {
   reef_wyrm: { n: 'DROWNED DOMINION', at: .7, col: '95,240,255', line: 'Thalassar: "Down here, the sea decides who breathes."',
-    rule: 'The deep pulls: your party moves at half speed, and every turn the tide crushes everyone for 6% of their health. A TRANSCENSION is the only way to break it.' }
+    rule: 'The deep pulls: your party moves at half speed, and every turn the tide crushes everyone for 6% of their health. An AURA BURST cracks it; a full TRANSCENSION shatters it.' }
 };
 const Dom = {
   async open(e) {
