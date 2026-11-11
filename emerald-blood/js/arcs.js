@@ -12,11 +12,12 @@
    the fight), a LEDGER deduction, and a two-wave DEFENCE. Every arc reaches back into the others.
    ===================================================================================== */
 const AF = () => G.S.f;
-const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'FINALE'];
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'FINALE'];
 const ARCS = [
   ['The Hooded Stranger', f => !!f.learnedMill],
   ['The Stone Tax', f => f.a2 === 'done' || (!!f.h1 && !f.a2)],
   ["The Inquisitor's Shadow", f => !!f.sealGot],
+  ['Smoke and Glass', f => f.ka === 'done' || (!!f.halvardBeaten && !f.ka) || (!!f.sealGot && !!G.S && !G.S.party.includes('kess') && !f.ka)],
   ['The Boy Who Prays', f => !!(f.nixSaved || f.nixLost) || (!!f.halvardBeaten && !f.a4)],
   ['The Old Mill', f => !!f.halvardBeaten],
   ["The Ferryman's Ledgers", f => f.a6 === 'done' || (!!f.trial && f.trial !== 'open' && !f.a6)],
@@ -24,7 +25,7 @@ const ARCS = [
 ];
 const Arcs = {
   async card(i) { const f = AF(); f.arcCard = f.arcCard || {}; if (f.arcCard[i]) return; f.arcCard[i] = 1;
-    try { await UI.chapterCard(i === 6 ? 'CHAPTER I — FINALE' : 'ARC ' + ROMAN[i], ARCS[i][0]); } catch (e) { } },
+    try { await UI.chapterCard(i === 7 ? 'CHAPTER I — FINALE' : 'ARC ' + ROMAN[i], ARCS[i][0]); } catch (e) { } },
   html() { const f = AF(); let cur = ARCS.findIndex(a => !a[1](f));
     return `<div class="stat" style="margin-top:6px"><h3 style="color:#46ff95">Chapter I — the Arcs</h3>` + ARCS.map((a, i) => { const ok = a[1](f), now = i === cur;
       return `<p style="margin:2px 0;${now ? 'color:#ffd36a' : ok ? '' : 'opacity:.5'}">${ok ? '<b style="color:#46ff95">✓</b>' : now ? '<b>▸</b>' : '○'} <b>${ROMAN[i]}</b> · ${a[0]}</p>`; }).join('') + '</div>'; },
@@ -72,7 +73,7 @@ Object.assign(ENEMY, {
     skills: [{ name: 'Censer Arc', hits: [{ anim: 'slash', m: .8, w: 480 }, { anim: 'slash', m: .8, w: 300 }] }, { name: 'Psalm of Ash', w: .3, hits: [{ anim: 'spellcast', m: 1.3, w: 700 }] },
       { name: 'Blind Flurry', w: .25, hits: [{ anim: 'thrust', m: .45, w: 260 }, { anim: 'thrust', m: .45, w: 230 }, { anim: 'thrust', m: .45, w: 210 }, { anim: 'slash', m: .7, w: 420 }] }] }
 });
-Object.assign(TIER, { reg_man: 'D', hesk: 'C', hesk2: 'C', cleaner: 'D', nix_b: 'C' });
+Object.assign(TIER, { reg_man: 'D', hesk: 'C', hesk2: 'C', cleaner: 'D', nix_b: 'C', catcher: 'D', corvin_e: 'C', bertrand: 'C' });
 
 /* STONE-FED: every third turn Hesk swallows a stone (heals, hits harder). A turn's warning first —
    break his guard in that window and the stone rolls away. */
@@ -328,7 +329,7 @@ const NIX_CP = [
 const A4 = {
   async dove() {
     const f = AF(); if (f.a4) return; f.a4 = 'note';
-    await Arcs.card(3);
+    await Arcs.card(4);
     await narr('Something lands on your shoulder. A white dove, soft as dust, with a strip of linen tied to its leg.');
     await narr('Written on the linen in charcoal, in letters that wobble like a child learned them and then stopped practising:');
     await narr('"ALL OF US OR NOBODY. MILL-RACE. MOONRISE."');
@@ -397,7 +398,7 @@ const A4 = {
       Story.quest('Nix ran back to Halvard. The Old Mill knows you\'re coming now. Go anyway.');
     }
     World.remove('nixm');
-    await Arcs.card(4);
+    await Arcs.card(5);
   }
 };
 
@@ -412,7 +413,7 @@ const LEDGER = [
 const A6 = {
   async call() {
     const f = AF(); if (f.a6 !== 'call') return; f.a6 = 'sent';
-    await Arcs.card(5);
+    await Arcs.card(6);
     const [x, y] = freeNear(G.S.map, World.player.x - 1, World.player.y); await World.addNpc({ id: 'tad', sprite: 'kid8', x, y, dir: 'right', name: 'Tad' });
     await narr('A small boy in a fisherman\'s jumper three sizes too big skids to a stop in front of you, out of breath. He has run all the way from the river.');
     await say('tad', null, '"You\'re the hooded one? Grandpa Oswin says come quick. Registry men came to the landing asking about his books. ALL his books. He told them the river ate them."');
@@ -497,10 +498,11 @@ const A6 = {
       const f = G.S && G.S.f; if (!f || G.S.kid) return r;
       if (name !== 'ashford' && name !== 'a_registry' && f.a2fresh) f.a2fresh = 0;
       if (name === 'ashford' && f.a2 === 'night' && !Sneak.on) setTimeout(() => { if (G.S.map === 'ashford' && AF().a2 === 'night') Sneak.begin(); }, 300);
-      if (name === 'ashford' && f.sealGot && !f.a4 && !f.halvardBeaten) Arcs.whenIdle(() => A4.dove());
+      if (name === 'ashford' && f.sealGot && !f.ka && !f.halvardBeaten && G.S.party.includes('kess')) Arcs.whenIdle(() => KA.signal());
+      else if (name === 'ashford' && f.sealGot && !f.a4 && !f.halvardBeaten && (f.ka === 'done' || !G.S.party.includes('kess'))) Arcs.whenIdle(() => A4.dove());
       if ((name === 'ashford' || name === 'a_inn') && f.a6 === 'call') Arcs.whenIdle(() => A6.call());
       if (name === 'mill' && f.a4 === 'note') Arcs.whenIdle(() => A4.meet());
-      else if (name === 'mill' && !f.halvardBeaten && !(f.arcCard || {})[4]) Arcs.whenIdle(() => Arcs.card(4));
+      else if (name === 'mill' && !f.halvardBeaten && !(f.arcCard || {})[5]) Arcs.whenIdle(() => Arcs.card(5));
     } catch (e) { console.warn(e); }
     return r;
   };
@@ -535,11 +537,11 @@ const A6 = {
     const _cr = Coach.ride.bind(Coach);
     Coach.ride = async function (to) { const f = AF();
       if (to === 'hm' && f.trial === 'open' && (f.a6 === 'call' || f.a6 === 'sent')) { await narr("Tad's words are still in your ears. Millbrook first — Oswin's ledgers. The Trial can wait one day."); return false; }
-      if (to === 'hm' && f.trial === 'open') await Arcs.card(6);
+      if (to === 'hm' && f.trial === 'open') await Arcs.card(7);
       return _cr(to); };
   }
   // the Quests page shows where you are in the chapter
   if (typeof questsMenuHTML === 'function') { const _q = questsMenuHTML; questsMenuHTML = function () { let h = _q(); try { if (G.S.chapter === 1 && !G.S.kid && !AF().chapter1Done) h = Arcs.html() + h; } catch (e) { } return h; }; }
   // restarting the chapter forgets the arcs
-  if (typeof CH1_FLAGS !== 'undefined') CH1_FLAGS.push('a2', 'a2alarm', 'a2down', 'a2step', 'a2stones', 'a2fresh', 'a2wait', 'pipTaken', 'bessKind', 'weaverClue', 'a4', 'nixSaved', 'nixLost', 'a6', 'a6sol', 'a6wrong', 'weaverPage', 'arcCard');
+  if (typeof CH1_FLAGS !== 'undefined') CH1_FLAGS.push('ka', 'kaSign', 'kessSpared', 'kessKilled', 'kessChose', 'corvinMet', 'a2', 'a2alarm', 'a2down', 'a2step', 'a2stones', 'a2fresh', 'a2wait', 'pipTaken', 'bessKind', 'weaverClue', 'a4', 'nixSaved', 'nixLost', 'a6', 'a6sol', 'a6wrong', 'weaverPage', 'arcCard');
 })();
