@@ -31,7 +31,7 @@ const BSKILL = {
   keen: { n: 'Keen Edge', c: 2, d: 'Your blade dulls 20% slower.' },
   whet: { n: 'Whetstone Master', c: 2, d: 'Whetstones restore the whole edge.' },
   razor: { n: 'Razor\'s Focus', c: 3, d: '+10% damage while your edge is WHITE.' },
-  carver: { n: 'Master Carver', c: 2, d: 'The carving sweet spot is twice as wide.' }
+  carver: { n: 'Master Carver', c: 2, d: 'Harvest one extra part from every big hunt.' }
 };
 Object.assign(Gear, {
   path(w) { return this.blade(w).path; },
@@ -158,7 +158,10 @@ const Moss = {
       if (w && t) {
         const dealt = Math.max(0, hp0 - t.hp), bl = Gear.blade(w), set = Gear.setOf(w);
         if (aimP && dealt) { aimP.hp -= dealt * 1.4; if (aimP.hp <= 0) { aimP.broken = 1; B.breaks = B.breaks || []; B.breaks.push([t, aimP]);
-          this.text(t, `${aimP.n.toUpperCase()} BROKEN!`, '#ffd34a', -44, true); sfx('break'); this.B.flash = .5;
+          sfx('break'); setTimeout(() => sfx('crit'), 90); this.B.flash = .75; this.B.flashCol = '255,214,90'; this.B.shake = 18;
+          this.B.pb = { t0: performance.now(), n: aimP.n, weak: aimP.weak, x: t.x, y: t.y - 42 * (t.size || 1) };
+          this.spark(t.x, t.y - 42, '#ffd34a', 30); this.spark(t.x, t.y - 42, '#ffffff', 16); this.spark(t.x, t.y - 42, '#ff9a3a', 12);
+          setTimeout(() => { try { Gear.aimBar(); } catch (e) { } }, 30);
           if (aimP.weak === 'atk') t.atk = Math.round(t.atk * .85); else if (aimP.weak === 'def') t.def = Math.max(0, (t.def || 0) - 3); else t.spd = Math.max(1, (t.spd || 1) - 2);
           const S = Gear.st(); S.breaks = S.breaks || {}; S.breaks[aimP.id] = (S.breaks[aimP.id] || 0) + 1; } }
         if (dealt && ((bl.path === 'drake' && Math.random() < bl.lv * .1) || (set === 'drakefire' && grade === 'perfect'))) { t.burn = 3; t.burnDmg = Math.max(2, Math.round(a.atk * .3)); this.text(t, 'BURNING', '#ff7a3a', -60); }
@@ -173,14 +176,39 @@ const Moss = {
   Battle.playerTurn = async function (a) { try { if (Gear.setOf(a.isMe ? 'me' : a.id) === 'moon') { a.mp = Math.min(a.maxMp, a.mp + 2); } Gear.aimBar(); } catch (e) { } return _pt(a); };
   // tempered glow
   const _r = Battle.render.bind(Battle);
-  Battle.render = function (c, t) { const out = _r(c, t); try { const B = this.B; if (B) for (const e of B.actors) if (e.side === 'e' && e.tempered && !e.ko) { c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(e.x, e.y - 30, 4, e.x, e.y - 30, 56); g.addColorStop(0, `rgba(255,90,40,${.22 + Math.sin(t / 160) * .08})`); g.addColorStop(1, 'rgba(255,90,40,0)'); c.fillStyle = g; c.beginPath(); c.arc(e.x, e.y - 30, 58, 0, 7); c.fill(); c.restore(); } } catch (e) { } return out; };
+  Battle.render = function (c, t) { const out = _r(c, t); try { const B = this.B; if (B) for (const e of B.actors) if (e.side === 'e' && e.tempered && !e.ko) { c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(e.x, e.y - 30, 4, e.x, e.y - 30, 56); g.addColorStop(0, `rgba(255,90,40,${.22 + Math.sin(t / 160) * .08})`); g.addColorStop(1, 'rgba(255,90,40,0)'); c.fillStyle = g; c.beginPath(); c.arc(e.x, e.y - 30, 58, 0, 7); c.fill(); c.restore(); }
+      const P = B && B.pb; if (P) { const k = (performance.now() - P.t0) / 1700; if (k >= 1) B.pb = null; else Gear.drawBreak(c, P, k); } } catch (e) { } return out; };
+  Gear.drawBreak = function (c, P, k) {
+    const w = G.view.w, h = G.view.h, gold = '#ffd34a';
+    // 1 — the crack at the part: a bursting ring and jagged gold fractures
+    if (k < .45) { const q = k / .45; c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 1 - q;
+      c.strokeStyle = gold; c.lineWidth = 6 * (1 - q) + 1; c.beginPath(); c.arc(P.x, P.y, 14 + q * 90, 0, 7); c.stroke();
+      c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.arc(P.x, P.y, 8 + q * 60, 0, 7); c.stroke();
+      c.strokeStyle = gold; c.lineWidth = 3;
+      for (let i = 0; i < 8; i++) { const a = i * .785 + .3; let x = P.x, y = P.y; c.beginPath(); c.moveTo(x, y);
+        for (let j = 1; j <= 3; j++) { const r = (12 + q * 40) * j / 3 + 6; x = P.x + Math.cos(a + (j % 2 ? .25 : -.2)) * r; y = P.y + Math.sin(a + (j % 2 ? .25 : -.2)) * r; c.lineTo(x, y); } c.stroke(); }
+      c.restore(); }
+    // 2 — the banner: pops in, holds, slides out
+    const inK = Math.min(1, k / .12), outK = k > .82 ? (k - .82) / .18 : 0, sc = inK < 1 ? .6 + inK * .55 : 1.15 - Math.min(.15, (k - .12) * .6);
+    const by = h * .44, bh = Math.max(50, h * .15);
+    c.save(); c.globalAlpha = 1 - outK; c.translate(w / 2 + outK * w * .3, by);
+    c.fillStyle = 'rgba(10,8,2,.82)'; c.beginPath(); c.moveTo(-w * .36, -bh / 2); c.lineTo(w * .38, -bh / 2); c.lineTo(w * .36, bh / 2); c.lineTo(-w * .38, bh / 2); c.closePath(); c.fill();
+    c.fillStyle = gold; c.fillRect(-w * .36, -bh / 2 - 3, w * .74, 3); c.fillRect(-w * .38, bh / 2, w * .74, 3);
+    c.scale(sc, sc); c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = `900 ${Math.round(bh * .2)}px Nunito, sans-serif`; c.fillStyle = '#fff3c4'; c.fillText('✦  PART BROKEN  ✦', 0, -bh * .27);
+    const gr = c.createLinearGradient(0, -bh * .1, 0, bh * .25); gr.addColorStop(0, '#fff6c8'); gr.addColorStop(.5, gold); gr.addColorStop(1, '#ff9a2a');
+    c.font = `900 ${Math.round(bh * .4)}px Nunito, sans-serif`; c.shadowColor = '#ff9a2a'; c.shadowBlur = 18; c.fillStyle = gr; c.fillText(P.n.toUpperCase(), 0, bh * .1); c.shadowBlur = 0;
+    c.font = `800 ${Math.round(bh * .17)}px Nunito, sans-serif`; c.fillStyle = '#ffb36a';
+    c.fillText((P.weak === 'atk' ? 'ATTACK DOWN' : P.weak === 'def' ? 'DEFENCE DOWN' : 'SPEED DOWN') + '  ·  part will drop', 0, bh * .38);
+    c.restore();
+  };
   // the aim bar: pick a body part to break
   Gear.aimBar = function () {
     const B = Battle.B; let bar = $('#aimBar'); if (!B) { if (bar) bar.remove(); return; }
-    const opts = []; for (const e of Battle.alive('e')) for (const p of (e.bparts || [])) if (!p.broken && !opts.some(o => o[0] === p.id)) opts.push([p.id, p.n]);
+    const opts = []; for (const e of Battle.alive('e')) for (const p of (e.bparts || [])) if (!p.broken && !opts.some(o => o[0] === p.id)) opts.push([p.id, p.n, Math.max(0, p.hp / p.max)]);
     if (!opts.length) { if (bar) bar.remove(); B.aim = null; return; }
     if (!bar) { bar = document.createElement('div'); bar.id = 'aimBar'; document.body.appendChild(bar); }
-    bar.innerHTML = '<span>Aim</span>' + [['', 'Body']].concat(opts).map(([k, n]) => `<button data-aim="${k}" class="${(B.aim || '') === k ? 'on' : ''}">${n}</button>`).join('');
+    bar.innerHTML = '<span>Aim</span>' + [['', 'Body']].concat(opts).map(([k, n, f]) => `<button data-aim="${k}" class="${(B.aim || '') === k ? 'on' : ''}">${f !== undefined && f < .5 ? '⚡ ' : ''}${n}${f !== undefined ? `<i style="display:block;height:3px;margin-top:2px;border-radius:2px;background:linear-gradient(90deg,${f < .35 ? '#ff7a3a' : '#ffd36a'} ${Math.round(f * 100)}%,rgba(255,255,255,.12) 0)"></i>` : ''}</button>`).join('');
     bar.querySelectorAll('[data-aim]').forEach(b => bindTap(b, () => { B.aim = b.dataset.aim || null; sfx('blip'); Gear.aimBar(); }));
   };
   const _ui = Battle.ui.bind(Battle);
@@ -199,7 +227,9 @@ const Moss = {
     try {
       for (const k in extra) Gear.give(k, extra[k]);
       if (Object.keys(extra).length) setTimeout(() => toast('<b style="color:#ffd36a">Broken parts:</b> ' + Object.entries(extra).map(([k, n]) => `<span style="color:${RARCOL(PARTS[k].rare)}">${PARTS[k].n} ×${n}</span>`).join(', '), 4200), 3000);
-      const big = es.filter(e => e.bparts && famOf(e)); if (big.length && r === 'win') { await wait(1400); await Gear.carve(famOf(big[0]), big.some(e => e.tempered)); }
+      const big = es.filter(e => e.bparts && famOf(e)); if (big.length && r === 'win') { const F = famOf(big[0]), got = {}, add = k => got[k] = (got[k] || 0) + 1;
+        add(F[1][Math.random() * 2 | 0]); if (Gear.sk('me', 'carver')) add(F[1][0]); if (Math.random() < .08 + (big.some(e => e.tempered) ? .2 : 0)) add(F[2]);
+        for (const k in got) Gear.give(k, got[k]); setTimeout(() => toast('<b style="color:#ffd36a">Harvested:</b> ' + Object.entries(got).map(([k, n]) => `<span style="color:${RARCOL(PARTS[k].rare)}">${PARTS[k].n} ×${n}</span>`).join(', '), 3400), 1800); }
       Contracts.check();
     } catch (e) { console.warn(e); }
     return r;
