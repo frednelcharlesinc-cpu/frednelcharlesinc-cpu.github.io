@@ -42,8 +42,8 @@
   function mkSB(id, i) {
     const k = `sb_${id}_${i}`; if (ENEMY[k]) return ENEMY[k];
     const [base, name] = DX(id).sb[i], B = ENEMY[base] || ENEMY.m_skeleton;
-    return (ENEMY[k] = Object.assign({}, B, { name, img: B.img || base, boss: 1, hp: Math.round(B.hp * 3.2), atk: Math.round(B.atk * 1.45), def: (B.def || 0) + 3, brk: Math.round((B.brk || 50) * 1.8),
-      xp: Math.round((B.xp || 20) * 6), gold: Math.round((B.gold || 10) * 6), size: Math.max(window.isDragon && isDragon(B) ? 2.2 : 1.45, B.size || 1), trait: 'SECRET BOSS — stronger than the lord of this place' + (B.trait ? ' · ' + B.trait : '') }));
+    return (ENEMY[k] = Object.assign({}, B, { name: name.split(',')[0], title: name, img: B.img || base, boss: 1, hp: Math.round(B.hp * 3.2), atk: Math.round(B.atk * 1.45), def: (B.def || 0) + 3, brk: Math.round((B.brk || 50) * 1.8),
+      xp: Math.round((B.xp || 20) * 6), gold: Math.round((B.gold || 10) * 6), size: Math.max(window.isDragon && isDragon(B) ? 2.2 : 1.45, B.size || 1), trait: 'Secret boss' + (B.trait ? ' · ' + B.trait.split(/ — |\(/)[0].trim() : '') }));
   }
   const gearName = g => (typeof RECIPES !== 'undefined' && RECIPES[g] ? RECIPES[g].n : g);
   const partName = p => (typeof PARTS !== 'undefined' && PARTS[p] ? PARTS[p].n : p);
@@ -85,7 +85,7 @@
     const D = DX(id), E = mkSB(id, i), k = `dx_${id}_sb${i}`;
     await narr(D.sb[i][2]);
     const c = await ask(null, null, `SECRET BOSS — ${E.name}. This one is stronger than the lord of the dungeon. Fight?`, ['Fight', 'Back away']); if (c !== 0) return;
-    const r = await Battle.start({ enemies: [`sb_${id}_${i}`], boss: true, noFlee: true, bd: DUNGEONS[id].bd, music: 'boss', intro: 'SECRET BOSS — ' + E.name.toUpperCase() });
+    const r = await Battle.start({ enemies: [`sb_${id}_${i}`], boss: true, noFlee: true, bd: DUNGEONS[id].bd, music: 'boss', intro: 'SECRET BOSS — ' + (E.title || E.name).toUpperCase() });
     if (r === 'lose') { await Story.defeat(); return; }
     if (r !== 'win') return;
     F()[k] = 1; World.ents = World.ents.filter(n => n.id !== 'dxsb_' + i);

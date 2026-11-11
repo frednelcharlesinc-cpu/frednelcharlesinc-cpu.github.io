@@ -85,7 +85,7 @@
   const exitsOf = key => D(key).exits.map(e => Object.assign({}, e));
 
   /* ---- THE CROSSROADS ---- */
-  Object.assign(H, { title: 'The Crossroads', subtitle: 'Where the four woods meet', map: 'fc_cross', npcs: npcsFor('woods'), exits: exitsOf('woods'), setup: setup('woods') });
+  Object.assign(H, { title: 'The Crossroads', subtitle: 'Where the four woods meet', map: 'fc_cross', bd: 'fc_cross', npcs: npcsFor('woods'), exits: exitsOf('woods'), setup: setup('woods') });
   Object.defineProperty(H, 'tiles', { configurable: true, get() { return this._t || (this._t = tilesFor('woods')); } });
 
   const forest = (key, title, sub, more) => {
@@ -93,34 +93,35 @@
     Object.defineProperty(s, 'tiles', { configurable: true, get() { return this._t || (this._t = tilesFor(key)); } });
     return s;
   };
-  forest('woods_n', 'The North Woods', 'Mistveil Pines', { weather: 'snow', bd: 'snow' });
-  forest('woods_e', 'The East Woods', 'Emberroot Wilds', { async onEnter() { if (G.S.q && G.S.q.toll === 'active') await tollMen(); } });
-  forest('woods_s', 'The South Woods', 'Glimmerfen', { bd: 'mire' });
-  forest('woods_w', 'The West Woods', 'The Old Grove');
+  forest('woods_n', 'The North Woods', 'Mistveil Pines', { weather: 'snow', bd: 'fc_north' });
+  forest('woods_e', 'The East Woods', 'Emberroot Wilds', { bd: 'fc_east', async onEnter() { if (G.S.q && G.S.q.toll === 'active') await tollMen(); } });
+  forest('woods_s', 'The South Woods', 'Glimmerfen', { bd: 'fc_south' });
+  forest('woods_w', 'The West Woods', 'The Old Grove', { bd: 'fc_west' });
 
   /* ---- dungeons: one under every forest ---- */
   if (typeof ENEMY !== 'undefined') Object.assign(ENEMY, {
-    b_fang: { name: 'Hollowfang, the Den Mother', img: 'lupine_alpha', boss: 1, size: 1.5, hp: 230, atk: 15, def: 4, spd: 15, dodge: .25, parry: .05, brk: 100, xp: 110, gold: 110,
-      howl: 1, howlName: 'BLOOD HOWL', howlKey: 'lupine', howlText: 'LEAPS IN', trait: 'Howls for her pack when wounded',
+    b_fang: { name: 'Hollowfang', title: 'Hollowfang, the Den Mother', img: 'lupine_alpha', boss: 1, size: 1.5, hp: 230, atk: 15, def: 4, spd: 15, dodge: .25, parry: .05, brk: 100, xp: 110, gold: 110,
+      howl: 1, howlName: 'BLOOD HOWL', howlKey: 'lupine', howlText: 'LEAPS IN', trait: 'Howls for her pack',
       skills: [{ name: 'Rending Claw', hits: [MH('slash', 1.1, 520), MH('halfslash', .9, 320)] }, { name: 'Frost Fang', w: .35, hits: [MH('thrust', 1.6, 700)] }, { name: 'Den Pounce', w: .25, hits: [MH('jump', 2, 900, 1)] }] },
-    b_cinder: { name: 'Smoulder, the Cinder Wyrmling', img: 'm_drake', boss: 1, size: 2.1, hp: 300, atk: 17, def: 6, spd: 12, dodge: .1, parry: .05, brk: 120, xp: 150, gold: 150, trait: 'fire — its breath scorches the whole party',
+    b_cinder: { name: 'Smoulder', title: 'Smoulder, the Cinder Wyrmling', img: 'm_drake', boss: 1, size: 2.1, hp: 300, atk: 17, def: 6, spd: 12, dodge: .1, parry: .05, brk: 120, xp: 150, gold: 150, trait: 'Fire breath hits everyone',
       skills: [{ name: 'Tail Lash', hits: [MH('slash', 1.1, 560)] }, { name: 'Ember Breath', w: .35, hits: [MH('spellcast', 1.5, 900)] }, { name: 'Ash Storm', w: .25, hits: [MH('spellcast', .6, 420), MH('spellcast', .6, 260), MH('spellcast', .9, 380)] }] },
-    b_shrine: { name: 'Ssarak, the Drowned Priest', img: 'm_lizard', boss: 1, size: 1.5, hp: 360, atk: 18, def: 6, spd: 13, dodge: .2, parry: .2, brk: 130, xp: 190, gold: 180, regen: .04, trait: 'water — the shrine\'s tide heals it every turn',
+    b_shrine: { name: 'Ssarak', title: 'Ssarak, the Drowned Priest', img: 'm_lizard', boss: 1, size: 1.5, hp: 360, atk: 18, def: 6, spd: 13, dodge: .2, parry: .2, brk: 130, xp: 190, gold: 180, regen: .04, trait: 'Heals every turn',
       skills: [{ name: 'Trident', hits: [MH('thrust', 1.1, 480)] }, { name: 'Undertow', w: .4, hits: [MH('thrust', .7, 420), MH('thrust', .7, 240), MH('thrust', 1, 300)] }, { name: 'Drowning Psalm', w: .2, hits: [MH('spellcast', 1.9, 1000, 1)] }] },
-    b_vault: { name: 'The Vault Warden', img: 'm_skeleton', boss: 1, size: 1.6, hp: 420, atk: 19, def: 8, spd: 11, dodge: .05, parry: .35, brk: 150, xp: 230, gold: 220, trait: 'A Drag guardian of bone — parries everything, break its guard',
+    b_vault: { name: 'The Vault Warden', img: 'm_skeleton', boss: 1, size: 1.6, hp: 420, atk: 19, def: 8, spd: 11, dodge: .05, parry: .35, brk: 150, xp: 230, gold: 220, trait: 'Parries a lot — break its guard',
       skills: [{ name: 'Green Guard Cut', hits: [MH('slash', 1.1, 560)] }, { name: 'Oath of Bone', w: .35, hits: [MH('slash', .7, 420), MH('halfslash', .8, 300), MH('backslash', 1, 380)] }, { name: 'Last Verdict', w: .2, hits: [MH('thrust', 2.1, 1000, 1)] }] }
   });
+  const BOSS_BD = { d_fang: 'd_fang_boss', d_cinder: 'd_cinder_boss' };
   const NEW_D = {
-    d_fang: { title: 'Hollow Fang Den', sub: 'Where the lupines drag what they kill', rank: 'E', boss: 'b_fang', bd: 'snow', light: '170,210,255', glow: '#9fd8ff', tint: 'rgba(4,8,16,.5)', map: 'woods_n',
+    d_fang: { title: 'Hollow Fang Den', sub: 'Where the lupines drag what they kill', rank: 'E', boss: 'b_fang', bd: 'd_fang', light: '170,210,255', glow: '#9fd8ff', tint: 'rgba(4,8,16,.5)', map: 'woods_n',
       enc: () => pickEnc([['lupine'], ['lupine', 'lupine'], ['lupine', 'lupine', 'lupine'], ['lupine_alpha'], ['lupine', 'm_ratfolk']]),
       intro: ['Bones carpet the deepest cave. On a heap of them lies a grey she-wolf the size of a cart, one eye milky, one eye on you.', ['Hollowfang', '*A growl that you feel in your teeth. The pack goes silent. She stands.*']] },
-    d_cinder: { title: 'Cinder Hollow', sub: 'A cave that is warm in winter — and getting warmer', rank: 'D', boss: 'b_cinder', bd: 'warren', light: '255,150,70', glow: '#ff7a2a', tint: 'rgba(14,6,2,.5)', map: 'woods_e',
+    d_cinder: { title: 'Cinder Hollow', sub: 'A cave that is warm in winter — and getting warmer', rank: 'D', boss: 'b_cinder', bd: 'd_cinder', light: '255,150,70', glow: '#ff7a2a', tint: 'rgba(14,6,2,.5)', map: 'woods_e',
       enc: () => pickEnc([['m_goblin_shaman'], ['m_tusker'], ['m_goblin', 'm_goblin_shaman'], ['bandit', 'bandit'], ['m_gourd', 'm_goblin_shaman']]),
       intro: ['Heat rolls out of the lair. Curled on a bed of glowing coals is a young drake — and around it, scratched in the rock, hundreds of claw marks in the shape of a great dragon\'s wing.', ['Smoulder', '*It opens one ember eye and breathes out a long, slow plume of fire. A warning. Then a second plume. Not a warning.*']] },
-    d_shrine: { title: 'The Sunken Shrine', sub: 'It drowned the night the Guild Accord was signed', rank: 'C', boss: 'b_shrine', bd: 'mire', light: '110,255,220', glow: '#5af0d0', tint: 'rgba(2,12,10,.52)', map: 'woods_s',
+    d_shrine: { title: 'The Sunken Shrine', sub: 'It drowned the night the Guild Accord was signed', rank: 'C', boss: 'b_shrine', bd: 'd_shrine', light: '110,255,220', glow: '#5af0d0', tint: 'rgba(2,12,10,.52)', map: 'woods_s',
       enc: () => pickEnc([['m_lizard'], ['m_lizard', 'm_lizard'], ['m_troll'], ['m_ghoul', 'm_lizard'], ['m_skeleton', 'm_skeleton']]),
       intro: ['Waist-deep black water fills the altar room. A lizardman in rotted priest\'s robes rises out of it, a guild seal hanging from its neck on a chain.', ['Ssarak', 'Sssealed… they sealed usss in with the tide… and you come wearing THEIR ssseal on your papers…']] },
-    d_vault: { title: 'The Drag Vault', sub: 'Sealed from the inside', rank: 'C', boss: 'b_vault', bd: 'crypt', light: '110,255,150', glow: '#46ff95', tint: 'rgba(2,10,4,.54)', map: 'woods_w',
+    d_vault: { title: 'The Drag Vault', sub: 'Sealed from the inside', rank: 'C', boss: 'b_vault', bd: 'd_vault', light: '110,255,150', glow: '#46ff95', tint: 'rgba(2,10,4,.54)', map: 'woods_w',
       enc: () => pickEnc([['m_skeleton'], ['m_skeleton', 'm_skeleton'], ['m_ghoul'], ['m_orc'], ['m_skeleton', 'm_ghoul']]),
       intro: ['In the last chamber a skeleton in green-lacquered armour stands guard before a sealed door. Two green sparks flare in its empty sockets — the same colour as yours.', ['The Vault Warden', '…Eyes of the blood. Then you know the oath. No? …Then you are not ready for what lies behind me. Prove it.']] }
   };
@@ -137,7 +138,7 @@
       const d = NEW_D[id]; if (!d) return _boss(id);
       const B = ENEMY[d.boss];
       await narr(d.intro[0]); CHAR._boss = { name: d.intro[1][0], sprite: B.img }; await say('_boss', null, d.intro[1][1]);
-      const r = await Battle.start({ enemies: [d.boss], boss: true, noFlee: true, bd: d.bd, intro: B.name.toUpperCase() });
+      const r = await Battle.start({ enemies: [d.boss], boss: true, noFlee: true, bd: G.img && BOSS_BD[id] ? BOSS_BD[id] : d.bd, intro: (B.title || B.name).toUpperCase() });
       if (r === 'lose') { await Story.defeat(); return; }
       if (r !== 'win') return;
       G.S.f['clear_' + id] = 1; World.ents = World.ents.filter(e => e.id !== 'boss');

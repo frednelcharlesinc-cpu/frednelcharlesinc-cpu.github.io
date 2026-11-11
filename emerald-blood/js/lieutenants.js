@@ -42,10 +42,11 @@
     P.lt = P.lt.map(b => ENEMY[b] ? b : pool(id)[0]);
     if (!ENEMY[P.rh[0]]) P.rh[0] = pool(id).sort((a, b) => ENEMY[b].hp - ENEMY[a].hp)[0];
     // the elites: lieutenants are a real fight; the right-hand is nearly a second boss
+    const tag = (t, B) => t + (B.trait ? ' · ' + B.trait.split(/ — |\(/)[0].trim() : '');   // short captions: what it is, and its one trick
     P.lt.forEach((b, i) => { const B = ENEMY[b]; ENEMY[`lt_${id}_${i}`] = Object.assign({}, B, { name: P.names[i], img: B.img || b, hp: Math.round(B.hp * 2.2), atk: Math.round(B.atk * 1.2), def: (B.def || 0) + 1,
-      brk: Math.round((B.brk || 40) * 1.5), xp: Math.round((B.xp || 10) * 3), gold: Math.round((B.gold || 5) * 3), size: Math.max(B.size || 1, 1.15), trait: 'LIEUTENANT — carries a key to the boss room' + (B.trait ? ' · ' + B.trait : '') }); });
-    { const B = ENEMY[P.rh[0]]; ENEMY[`rh_${id}`] = Object.assign({}, B, { name: P.rh[1], img: B.img || P.rh[0], hp: Math.round(B.hp * 2.4), atk: Math.round(B.atk * 1.3), def: (B.def || 0) + 2,
-      brk: Math.round((B.brk || 40) * 1.6), xp: Math.round((B.xp || 10) * 4), gold: Math.round((B.gold || 5) * 4), size: Math.max(B.size || 1, 1.3), trait: 'RIGHT HAND — fights beside the boss' + (B.trait ? ' · ' + B.trait : '') }); }
+      brk: Math.round((B.brk || 40) * 1.5), xp: Math.round((B.xp || 10) * 3), gold: Math.round((B.gold || 5) * 3), size: Math.max(B.size || 1, 1.15), trait: tag('Lieutenant', B) }); });
+    { const B = ENEMY[P.rh[0]]; ENEMY[`rh_${id}`] = Object.assign({}, B, { name: P.rh[1].split(',')[0], title: P.rh[1], img: B.img || P.rh[0], hp: Math.round(B.hp * 2.4), atk: Math.round(B.atk * 1.3), def: (B.def || 0) + 2,
+      brk: Math.round((B.brk || 40) * 1.6), xp: Math.round((B.xp || 10) * 4), gold: Math.round((B.gold || 5) * 4), size: Math.max(B.size || 1, 1.3), trait: tag('Right Hand', B) }); }
     P._ok = 1; return P;
   };
   const keys = id => { const S = G.S; S.ltKeys = S.ltKeys || {}; return S.ltKeys[id] = S.ltKeys[id] || [0, 0, 0, 0]; };
@@ -134,13 +135,20 @@
     if (eligible(id) && prof(id)) {
       if (!open(id)) { await gateTalk(id); return; }
       const R = ENEMY['rh_' + id];
-      if (R && !G.S.f['clear_' + id]) { window.__rhFor = id; await narr(`${R.name} steps out of the dark at the lord's side. Not a servant — a second blade.`); }
+      if (R && !G.S.f['clear_' + id]) { window.__rhFor = id; await narr(`${R.title || R.name} steps out of the dark at the lord's side. Not a servant — a second blade.`); }
     }
     try { return await _db(id); } finally { window.__rhFor = null; }
   };
+  /* every fight in the woods and their dungeons happens on that place's own battlefield (assets/bd_fc_*, bd_d_*) */
+  const LOCAL_BD = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', d_fang: 'd_fang', d_cinder: 'd_cinder', d_shrine: 'd_shrine', d_vault: 'd_vault' };
+  const GENERIC_BD = ['forest', 'field', 'snow', 'mire', 'warren', 'crypt', 'crystal'];
+  if (typeof BTBD !== 'undefined') for (const k of Object.values(LOCAL_BD).concat(['d_fang_boss', 'd_cinder_boss'])) BTBD.GND[k] = .52;
   const _bs = Battle.start.bind(Battle);
   Battle.start = function (cfg) {
     try {
+      if (typeof cfg === 'string') cfg = { enemies: [cfg] };
+      const loc = G.S && LOCAL_BD[G.S.map];
+      if (loc && cfg && typeof cfg === 'object' && (!cfg.bd || GENERIC_BD.includes(cfg.bd))) cfg = Object.assign({}, cfg, { bd: loc });
       const id = window.__rhFor;
       if (id && cfg && typeof cfg === 'object' && cfg.boss && Array.isArray(cfg.enemies) && cfg.enemies.includes(DUNGEONS[id].boss) && ENEMY['rh_' + id] && !cfg.enemies.includes('rh_' + id)) {
         window.__rhFor = null; cfg = Object.assign({}, cfg, { enemies: [...cfg.enemies, 'rh_' + id] });

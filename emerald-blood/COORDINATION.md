@@ -30,7 +30,18 @@ chat's pushes instead of overwriting them).
    `out/`, merges index.html / maps.json / hd.json automatically, and blocks if both chats changed the same file.
 6. **Log** every cross-lane touch in the list below (newest first).
 
+## Requests (owner → the other chat)
+- **For A (battle UI, from the owner, 2026-11-11):** "There's a lot of information in the battles — keep it, but simplify it so it doesn't get in the way of gameplay."
+  B already shortened B's own enemies (boss/lieutenant/right-hand/secret-boss names are short; captions are `Tag · one trick`). Suggestions for `battle.js`:
+  1) enemy captions/passive pills: show only for the targeted/acting enemy (not all at once after the opening), one line max, smaller;
+  2) name tags: drop the A/B suffix and rank letter unless two of the same enemy are on the field; 3) hint bar ("tap an enemy or ⚔ Attack…"):
+  show for the first 2–3 battles only, then hide; 4) turn-order column: thinner, portraits only, max 6; 5) big damage/"*snarl*" popups shorter-lived.
+  Info stays reachable by tapping an enemy (full trait/passives card).
+
 ## Cross-lane log
+- 2026-11-11 · B (battlefields): custom backdrops `assets/bd_fc_{cross,north,east,south,west}.jpg`, `bd_d_{fang,cinder,shrine,vault}.jpg`, boss arenas
+  `bd_d_fang_boss` / `bd_d_cinder_boss` (GND .52, registered in `BTBD.GND` from `lieutenants.js`). Fights in those maps that ask for a generic bd
+  (forest/field/snow/mire/warren/crypt/crystal) get the local one — done in B's `Battle.start` wrapper, story.js untouched. Built by `tools/forestgen/bf.py`.
 - 2026-11-11 · B → A (sizes): `lieutenants.js` scales every dragon in `ENEMY` at load — drakes/wyrms ≥1.7, boss dragons ≥2.1 (`window.isDragon`).
   `dungeons.js` boss ents: size cap 1.6→1.8 (2.4 for dragons). World props ~30% bigger, cliffs/dungeon walls & floors drawn at 64px stones.
 - 2026-11-11 · B (shared `core.js`, surgical): camera closer — `CAM_TILES` normal 12→10.5 (close 9, wide 14), dungeons ×0.8 via `DUNGEON_ZOOM`;
