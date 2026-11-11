@@ -85,6 +85,7 @@ def cut_sheet(path, kind, left=False):
             hs = [np.where(keep[:, a:b].any(1))[0] for a, b in cols]; hh = [(h.max() - h.min()) if len(h) else 0 for h in hs]
             if hh and len(cols) > 2: cols = [c for c, h in zip(cols, hh) if h >= max(hh) * .5]   # a lone spark or dust cloud isn't a frame
             n = max(1, len(cols))
+        if kind in ('battle12', 'monster12') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
         while len(cols) > n:   # too many: merge the closest pair, or drop the thinnest
             gaps = [(cols[i + 1][0] - cols[i][1], i) for i in range(len(cols) - 1)]
             g, i = min(gaps)
@@ -95,7 +96,16 @@ def cut_sheet(path, kind, left=False):
             dens = keep[:, a:b].sum(0); lo, hi = int((b - a) * .3), int((b - a) * .7)
             m = a + lo + int(np.argmin(dens[lo:hi])) if hi > lo else (a + b) // 2
             cols[i:i + 1] = [[a, m], [m, b]]
-        if len(cols) == sum(c for _, c in groups) or single: names = [nm for nm, c in groups for _ in range(c)] if not single else [groups[0][0]] * len(cols)
+        gapsplit = None
+        if not single and len(cols) > len(groups):   # the artist left a wider gap between moves: split there, whatever the frame counts
+            gl = sorted(((cols[i + 1][0] - cols[i][1], i) for i in range(len(cols) - 1)), reverse=True)
+            mg = sorted(g for g, _ in gl)[len(gl) // 2]
+            big = sorted(i for g, i in gl[:len(groups) - 1])
+            if len(big) == len(groups) - 1 and all(g > max(mg * 2.2, mg + 8) for g, _ in gl[:len(groups) - 1]):
+                gapsplit = []; edges = [-1] + big + [len(cols) - 1]
+                for gi, (nm, c) in enumerate(groups): gapsplit += [nm] * (edges[gi + 1] - edges[gi])
+        if gapsplit: names = gapsplit
+        elif len(cols) == sum(c for _, c in groups) or single: names = [nm for nm, c in groups for _ in range(c)] if not single else [groups[0][0]] * len(cols)
         else:   # a different number of frames than the layout: share them out in proportion
             tot = sum(c for _, c in groups); names = []
             for gi, (nm, c) in enumerate(groups):
@@ -192,6 +202,10 @@ def build(key):
     for k in ('pp1', 'pp2', 'pp3', 'ppfin'): A[k] = A['parry']
     for k in ('pdodge', 'pd1', 'pd2', 'pd3', 'pd4'): A[k] = A['dodge']
     if Bt('cmbA') or Bt('lunge'): A.update(twelve(Bt, C))
+    if A.get('hurt') and A.get('combat'):   # a hit flinches; lying-down frames belong to the KO
+        ch = sorted(frames[i][3] for i in A['combat'])[len(A['combat']) // 2]
+        down = [i for i in A['hurt'] if frames[i][3] < ch * .7]
+        if down and len(down) < len(A['hurt']): A['hurt'] = [i for i in A['hurt'] if i not in down]; A['ko'] = down + [i for i in A.get('ko', []) if i not in down]
     # world
     idl = L('idle') or C[:1]; side = L('walk_side') or C
     A.update(ow_down=idl[:1], ow_idle=idl, ow_down_walk=L('walk_down') or side, ow_up=(L('walk_up') or idl)[:1], ow_up_walk=L('walk_up') or L('walk_down') or side,

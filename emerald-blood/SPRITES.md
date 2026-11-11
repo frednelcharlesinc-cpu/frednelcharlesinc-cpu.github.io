@@ -50,6 +50,10 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Weapons must match the character every time (see the weapon list in COORDINATION "For A").
 - Red Veil stays as it is for now (owner, 2026-11-11).
 
+## Transcension sheets (js/transform.js)
+- One 12×12 sheet per hero per stage: cut with `pool_cut.py <sheet> <hero>_t2 battle12` → `c_<hero>_t2` (Ren: key `ren_t3` etc. — rename the built `c_ren_t3` set to `ren_t3`).
+- Kess's 12×12 sheet (2026-11-11) came in as a 1375-px JPG — ask for full-size PNGs; battle refs were scaled by 1/0.82 to match Ren's height.
+
 ## Fighting styles (js/fightstyle.js)
 - `FightStyle.T[key]` = {n, col, mark, dodge, parry}; key = hero id / enemy key base / sprite family. Unknown fighters use `DEF`.
 - Add a line there for every new character so their hits, parries and dodges look like their own martial art.
