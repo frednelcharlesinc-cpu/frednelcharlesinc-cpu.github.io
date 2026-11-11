@@ -51,8 +51,8 @@ const Arcs = {
 
 /* ---------------- new people ---------------- */
 Object.assign(CHAR, {
-  hesk: { name: 'Registrar Hesk', sprite: 'guard' }, regman: { name: 'Registry Man', sprite: 'guard' },
-  nix: { name: 'Nix', sprite: 'acolyte' }, tad: { name: 'Tad', sprite: 'kid8', kid: 1 }, tad2: { name: "Oswin's grandson", sprite: 'kid8', kid: 1 }
+  hesk: { name: 'Registrar Hesk', sprite: 'hesk' }, regman: { name: 'Registry Man', sprite: 'guard' },
+  nix: { name: 'Nix', sprite: 'nix' }, tad: { name: 'Tad', sprite: 'kid8', kid: 1 }, tad2: { name: "Oswin's grandson", sprite: 'kid8', kid: 1 }
 });
 if (typeof ART_ID !== 'undefined') Object.assign(ART_ID, { hesk: 'reg', regman: 'soldier', tad: 'mbkid' });
 
@@ -60,15 +60,15 @@ if (typeof ART_ID !== 'undefined') Object.assign(ART_ID, { hesk: 'reg', regman: 
 Object.assign(ENEMY, {
   reg_man: { name: 'Registry Man', img: 'guard', trait: 'Crown Registry — trained to take, not to fight fair', hp: 82, atk: 12, def: 5, spd: 11, dodge: .08, parry: .25, brk: 55, xp: 24, gold: 12,
     skills: [{ name: 'Baton Strike', hits: [{ anim: 'slash', m: 1, w: 560 }] }, { name: 'Seize', w: .35, hits: [{ anim: 'thrust', m: .7, w: 420 }, { anim: 'slash', m: .9, w: 360 }] }] },
-  hesk: { name: 'Registrar Hesk', img: 'guard', boss: 1, shield: 2, trait: 'STONE-FED — swallows stolen stones to heal and harden. Break his guard while he reaches and the stone drops.', hp: 270, atk: 15, def: 6, spd: 12, dodge: .1, parry: .3, brk: 85, xp: 110, gold: 80,
+  hesk: { name: 'Registrar Hesk', img: 'hesk', boss: 1, shield: 2, trait: 'STONE-FED — swallows stolen stones to heal and harden. Break his guard while he reaches and the stone drops.', hp: 270, atk: 15, def: 6, spd: 12, dodge: .1, parry: .3, brk: 85, xp: 110, gold: 80,
     skills: [{ name: 'Ledger Strike', hits: [{ anim: 'slash', m: .9, w: 520 }, { anim: 'slash', m: .7, w: 340 }] }, { name: 'Writ of Seizure', w: .3, hits: [{ anim: 'thrust', m: .6, w: 300 }, { anim: 'thrust', m: .6, w: 260 }, { anim: 'slash', m: 1.1, w: 480 }] },
       { name: 'Green Lantern', w: .2, hits: [{ anim: 'spellcast', m: 1.7, w: 900, unp: 1 }] }] },
-  hesk2: { name: 'Hesk, the Ash Ledger', img: 'guard', boss: 1, shield: 3, trait: 'STONE-FED — and now he burns what he can\'t own', hp: 330, atk: 17, def: 6, spd: 13, dodge: .1, parry: .3, brk: 95, xp: 150, gold: 100,
+  hesk2: { name: 'Hesk, the Ash Ledger', img: 'hesk', boss: 1, shield: 3, trait: 'STONE-FED — and now he burns what he can\'t own', hp: 330, atk: 17, def: 6, spd: 13, dodge: .1, parry: .3, brk: 95, xp: 150, gold: 100,
     skills: [{ name: 'Ledger Strike', hits: [{ anim: 'slash', m: .9, w: 520 }, { anim: 'slash', m: .8, w: 320 }] }, { name: 'Unwrite', w: .3, hits: [{ anim: 'thrust', m: .5, w: 280 }, { anim: 'thrust', m: .5, w: 240 }, { anim: 'thrust', m: .5, w: 220 }, { anim: 'slash', m: 1.2, w: 520 }] },
       { name: 'Burn the Record', w: .22, hits: [{ anim: 'spellcast', m: 1.9, w: 950, unp: 1 }] }] },
   cleaner: { name: 'Registry Cleaner', img: 'bandit', trait: 'They don\'t arrest. They burn.', hp: 88, atk: 13, def: 4, spd: 13, dodge: .15, parry: .15, brk: 55, xp: 26, gold: 14,
     skills: [{ name: 'Hatchet', hits: [{ anim: 'slash', m: 1.05, w: 540 }] }, { name: 'Torch Sweep', w: .35, hits: [{ anim: 'slash', m: .6, w: 380 }, { anim: 'slash', m: .8, w: 300 }] }] },
-  nix_b: { name: 'Brother Nix', drag: 1, img: 'acolyte', trait: 'ASH-BLIND — fights by sound. A Drag who believes his blood is a curse. Words reach him where blades can\'t.', hp: 230, atk: 14, def: 4, spd: 17, dodge: .3, parry: .3, brk: 80, xp: 90, gold: 0,
+  nix_b: { name: 'Brother Nix', drag: 1, img: 'nix', trait: 'ASH-BLIND — fights by sound. A Drag who believes his blood is a curse. Words reach him where blades can\'t.', hp: 230, atk: 14, def: 4, spd: 17, dodge: .3, parry: .3, brk: 80, xp: 90, gold: 0,
     skills: [{ name: 'Censer Arc', hits: [{ anim: 'slash', m: .8, w: 480 }, { anim: 'slash', m: .8, w: 300 }] }, { name: 'Psalm of Ash', w: .3, hits: [{ anim: 'spellcast', m: 1.3, w: 700 }] },
       { name: 'Blind Flurry', w: .25, hits: [{ anim: 'thrust', m: .45, w: 260 }, { anim: 'thrust', m: .45, w: 230 }, { anim: 'thrust', m: .45, w: 210 }, { anim: 'slash', m: .7, w: 420 }] }] }
 });
@@ -174,7 +174,7 @@ const A2 = {
     const f = AF(); if (f.a2) return; f.a2 = 'tax';
     await fadeOut(500); G.S.clock = 10 * 60; await World.load('ashford', 30, 26, 'up'); await wait(150);
     const put = async (id, sprite, x, y, dir) => { const [a, b] = freeNear('ashford', x, y); await World.addNpc({ id, sprite, x: a, y: b, dir, name: CHAR[id] ? CHAR[id].name : '' }); };
-    await put('hesk', 'guard', 30, 17, 'down'); await put('rg1', 'guard', 27, 18, 'down'); await put('rg2', 'guard', 33, 18, 'down'); await put('pipx', 'pip', 26, 23, 'right'); await put('bessx', 'pipmom', 24, 23, 'right');
+    await put('hesk', 'hesk', 30, 17, 'down'); await put('rg1', 'guard', 27, 18, 'down'); await put('rg2', 'guard', 33, 18, 'down'); await put('pipx', 'pip', 26, 23, 'right'); await put('bessx', 'pipmom', 24, 23, 'right');
     await fadeIn(500);
     await Arcs.card(1);
     await narr('A black wagon with iron-banded wheels stands by the fountain. On its side, painted in gold, the Crown Registry\'s open eye.');
@@ -240,7 +240,7 @@ const A2 = {
     const f = AF();
     if (f.a2 !== 'night') { await narr(f.a2 === 'done' ? 'The Registry shed. The lock is broken and nobody has come to fix it.' : 'A low shed by the river with a Crown Registry seal on the door. Locked.'); return; }
     Sneak.stop(); G.S.ret = { map: 'ashford', x: 39, y: 37 };
-    await fadeOut(500); await World.load('a_registry', 15, 16, 'up'); await fadeIn(500);
+    await fadeOut(500); await World.load('a_registry', 15, 12, 'up'); await fadeIn(500);
     await A2.inside();
   },
   async inside() {
@@ -257,7 +257,7 @@ const A2 = {
     const foes = ['hesk', 'reg_man']; if (alarm >= 2) foes.push('reg_man');
     const r = await Battle.start({ enemies: foes, noFlee: true, boss: true, bd: 'town', music: 'boss', intro: 'Registrar Hesk — the Crown Registry', onTurn: stoneFed('hesk', 3 + (alarm >= 3 ? 1 : 0)) });
     if (r === 'lose') { await Story.defeat(); f.a2 = 'night'; return; }
-    World.remove('hesk');
+    World.remove('hesk'); World.remove('pipc');
     await narr('Hesk staggers into the shelves. Lead boxes rain down around him and burst open, and the room fills with soft green light.');
     await say('hesk', 'anger', '"You can\'t steal from the Crown, you— it\'s ALL WRITTEN DOWN!"');
     await narr('He goes out through the back window like a man who has practised it. A whistle somewhere by the river — then nothing.');
@@ -305,11 +305,11 @@ const A2 = {
     Story.quest('Rest. Breathe. The Old Mill lead still stands — and the bells of the Hollow have been quiet for too long.');
   }
 };
-SCENES.a_registry = { map: 'hm_office', title: 'Crown Registry Storehouse', subtitle: 'Everything written down', music: 'night', bd: 'town', safe: true,
-  exits: [{ x: 14, x2: 17, y: 17, to: 'ashford', tx: 39, ty: 37, dir: 'down' }],
-  npcs() { const f = AF(), L = []; if (f.a2 === 'night') L.push({ id: 'hesk', sprite: 'guard', x: 13, y: 12, dir: 'down', name: 'Registrar Hesk', talk: () => A2.inside() }); return L; },
-  tiles: { '8,11': async () => narr('Ledgers. Thousands of names, every one in the same small, careful hand.') },
-  async setup(W) { W.tint = 'rgba(20,40,30,.35)'; } };
+SCENES.a_registry = { map: 'in_registry', title: 'Crown Registry Storehouse', subtitle: 'Everything written down', music: 'night', bd: 'town', safe: true,
+  exits: [{ x: 15, x2: 16, y: 13, to: 'ashford', tx: 39, ty: 37, dir: 'down' }],
+  npcs() { const f = AF(), L = []; if (f.a2 === 'night') L.push({ id: 'hesk', sprite: 'hesk', x: 11, y: 12, dir: 'right', name: 'Registrar Hesk', talk: () => A2.inside() }); if (f.a2 === 'night' && f.pipTaken) L.push({ id: 'pipc', sprite: 'pip', x: 2, y: 11, dir: 'right', name: 'Pip' }); return L; },
+  tiles: { '8,13': async () => narr('Ledgers. Thousands of names, every one in the same small, careful hand.') },
+  async setup(W) { W.tint = 'rgba(10,20,15,.12)'; W.lights.push({ x: 4 * 32, y: 13 * 32, r: 90, c: '255,200,120' }, { x: 18 * 32, y: 14 * 32, r: 80, c: '255,200,120' }, { x: 15 * 32, y: 9 * 32, r: 110, c: '90,255,150' }); } };
 
 /* =====================================================================================
    ARC IV — THE BOY WHO PRAYS
@@ -339,7 +339,7 @@ const A4 = {
   },
   async meet() {
     const f = AF(); if (f.a4 !== 'note') return; f.a4 = 'met';
-    const [nx, ny] = freeNear('mill', 17, 21); await World.addNpc({ id: 'nixm', sprite: 'acolyte', x: nx, y: ny, dir: 'down', name: 'Brother Nix' });
+    const [nx, ny] = freeNear('mill', 17, 21); await World.addNpc({ id: 'nixm', sprite: 'nix', x: nx, y: ny, dir: 'down', name: 'Brother Nix' });
     await narr('Moonrise. The mill-race is a black ribbon of water below the road. On the stone lip of the sluice sits a boy in white robes, a white dove on his knee. A bandage is wound tight across his eyes.');
     await narr('He is murmuring to the dove. Not prayer-speech — the old Drag tongue. The words Nana used to sing you to sleep with.');
     await say('nix', 'calm', '"You came. I asked Psalm to find the one who still smells of Thornvale smoke. She\'s never wrong."');
@@ -375,7 +375,7 @@ const A4 = {
     if (r === 'lose') { f.a4 = 'note'; await Story.defeat(); return; }
     for (let k = 0; k < 3; k++) if (!asked[k]) await cp(k, false);
     Story.gainXp(110);
-    await World.addNpc({ id: 'nixm', sprite: 'acolyte', x: nx, y: ny, dir: 'down', name: 'Brother Nix' });
+    await World.addNpc({ id: 'nixm', sprite: 'nix', x: nx, y: ny, dir: 'down', name: 'Brother Nix' });
     if (right >= 2) {
       f.nixSaved = 1; f.millGuards = true; Opinion.add('hope', 1); World.remove('acolyte'); World.remove('acolyte2');
       await narr('Nix sits down in the wet grass as if someone cut his strings. Psalm lands on his shoulder and stays there.');
