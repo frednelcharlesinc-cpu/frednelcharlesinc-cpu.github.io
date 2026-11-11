@@ -1,36 +1,67 @@
-# Emerald Blood — two chats, one game
+# Emerald Blood — three chats, one game
 
-The owner runs TWO Claude chats on this game at the same time, on purpose. Stay in your lane,
-claim before you touch anything shared, and always deploy with `deploy.py` (it merges the other
-chat's pushes instead of overwriting them).
+The owner runs **THREE** Claude chats on this game at the same time, on purpose — it's faster.
+Each chat has ONE job. Do your job, stay out of the others', and when in doubt use the table below.
 
-## Lanes
+## Which chat am I?
+The owner names your role in your first message ("You are Chat A / B / C"). If nobody told you, ask the owner
+before touching any file. Sign every claim and log line with your letter.
 
-**Chat A — Story & Combat** (the chat that built the arcs, Transcension, the animation pool)
-- story & quests: `story.js`, `ch1.js`, `ch1b.js`, `arcs.js`, `kessarc.js`, `trial.js`, `dawn.js`, `quests.js`, `hmquests.js`, `ledger.js`
-- combat: `battle*.js`, `combat*.js`, `burst.js`, `wild.js`, `gear*.js`, `passives.js`, `cores.js`, `clash.js`, `elements.js`, `fourcuts.js`, `mastery.js`
-- characters & art: `hdsprites.js`, `pool.js`, `portraits.js`, `fxsheets.js`, `assets/hd/`, `assets/portraits/`, `assets/fx/`, `pool/`
+| Chat | Name | Its job in one sentence |
+|---|---|---|
+| **A** | Story & Combat | What happens and how it plays: story, quests, dialogue, lore, battle rules & numbers, enemy/character stats, battle UI. |
+| **B** | World & Maps | Where it happens: maps, towns, forests, dungeons, props, chests, world camera, battle backdrops, dungeon lieutenants. |
+| **C** | Sprites & Animation | How everyone looks and moves: sprite sheets, walks, battle animations, emotes, portraits, visual effects. |
 
-**Chat B — World & Maps** (the chat that built the tile forests)
-- maps, towns, forests, dungeons: `forest4.js`, `fc_data.js`, `towns2.js`, `newmaps.js`, `dungeons.js`, `sewers.js`, `districts.js`, `worldmap.js`, `mapedit.js`, `worldfeel.js`, `reef.js`
-- `assets/map_*`, `assets/props*`, `tools/forestgen/`
+## Lanes (files each chat owns)
 
-**Shared — claim first, edit surgically, re-read right before writing**
-`index.html`, `assets/maps.json`, `assets/hd/hd.json`, `assets/chests.json`, `sw.js`, `core.js`, `world.js`, `ui.js`, `dialog.js`, `deploy.py`
+**Chat A — Story & Combat**
+- story & quests: `story.js`, `ch1.js`, `ch1b.js`, `arcs.js`, `kessarc.js`, `trial.js`, `dawn.js`, `quests.js`, `hmquests.js`, `ledger.js`, `lore.js`, `festival.js`, `events.js`
+- combat rules & numbers: `battle.js` (logic & battle UI), `combat*.js`, `burst.js`, `wild.js`, `gear*.js`, `passives.js`, `cores.js`, `clash.js`, `elements.js`, `fourcuts.js`, `mastery.js`, `mobs.js`
+- the `ENEMY` / `CHAR` definitions: names, stats, traits, and which sprite key each one uses
+
+**Chat B — World & Maps**
+- `forest4.js`, `fc_data.js`, `towns2.js`, `newmaps.js`, `dungeons.js`, `dungeonx.js`, `lieutenants.js`, `sewers.js`, `districts.js`, `worldmap.js`, `mapedit.js`, `worldfeel.js`, `reef.js`
+- `assets/map_*`, `assets/props*`, `assets/bd_*` (battle backdrops), `assets/chests.json`, `tools/forestgen/`
+
+**Chat C — Sprites & Animation** — read `SPRITES.md` first
+- `hdsprites.js`, `pool.js`, `btsprites.js`, `portraits.js`, `fxsheets.js`, `battlefx.js`
+- `assets/hd/` (the sets inside `hd.json`), `assets/portraits/`, `assets/fx/`, `assets/npc/`, `assets/burst/`,
+  `/home/claude/eb-build/pool/` + `tools/pool/`, and the `art*/` build scripts
+
+**Shared — claim first, patch surgically, re-read right before writing**
+`index.html`, `assets/maps.json` (B owns the map entries), `assets/hd/hd.json` (C owns the sets), `assets/art.json` (C owns portraits),
+`sw.js`, `core.js`, `world.js`, `ui.js`, `dialog.js`, `deploy.py`, this file.
+
+## Grey areas — who does it?
+| The owner asks for… | Who | How the others help |
+|---|---|---|
+| a new enemy or boss | **A** writes its stats, trait and fight; **C** makes it look right | A gives it a sprite key; C wires the sheet to that key |
+| a new NPC in a town | **A** writes who they are and what they say; **B** decides where they stand (if it's a map change) | C draws them |
+| a new map, room or dungeon | **B** | A adds the story/fights inside it in A's own files |
+| a new attack or skill | **A** (what it does) | **C** (how it looks: animation + VFX); A calls the anim name C provides |
+| a Transcension / transformation | **A** (mechanics, unlocks, cut-in timing) | **C** (sprite sheets, the swap, cut-in art) |
+| battle backdrops | **B** | — |
+| battle UI / HUD / captions | **A** | C only for icons/art |
+| walk cycles, emotes, poses in scenes | **C** | A may call `World.pose(...)` from story code |
+| image prompts for the owner | whoever needs the art: **C** for sprites/portraits/VFX, **B** for maps/props/backdrops | — |
+| lore, names, factions | **A** | — |
+Still unclear? Pick the chat whose one-sentence job above fits best — and say so in the log.
 
 ## Rules
-1. **Claim** shared files before editing: `python3 tools/claim.py take index.html --who A` (claims expire after 45 min).
-   `python3 tools/claim.py list` shows who holds what. Release when done: `claim.py release index.html --who A`.
+1. **Claim** shared files before editing: `python3 tools/claim.py take index.html --who A|B|C` (claims expire after 45 min).
+   `python3 tools/claim.py list` shows who holds what. Release when done: `claim.py release index.html --who <you>`.
 2. **Never rewrite a whole shared file** from memory. Patch it (exact string replace / JSON key update), re-reading it first.
-3. **Cross-lane needs**: story content that needs a map spot reads coordinates from the map data where possible.
-   If Chat B moves something the story depends on, Chat B updates the story's coordinates and logs it below.
-   If Chat A needs a new map or room, it asks (owner relays), or adds its own new file and logs it.
-4. **New files are free** — prefer adding a new file in your lane over editing someone else's.
-5. **Deploy only with `python3 /home/claude/eb-build/deploy.py "msg"`** — it locks, pulls the other chat's pushes into
-   `out/`, merges index.html / maps.json / hd.json automatically, and blocks if both chats changed the same file.
-6. **Log** every cross-lane touch in the list below (newest first).
+3. **Don't edit another chat's files.** If you must (a coordinate moved, a hook needed), make the smallest possible patch and log it here.
+4. **Cross-lane needs**: story content that needs a map spot reads coordinates from the map data where possible.
+   If B moves something the story depends on, B updates the story's coordinates and logs it below.
+5. **New files are free** — prefer adding a new file in your lane over editing someone else's.
+6. **Deploy only with `python3 /home/claude/eb-build/deploy.py "msg"`** — it locks, pulls the other chats' pushes into
+   `out/`, merges index.html / maps.json / hd.json / art.json automatically, and BLOCKS if two chats changed the same file.
+   If it blocks: merge that file by hand (keep both chats' changes), then deploy again. Never force-push.
+7. **Log** every cross-lane touch and every request for another chat below (newest first). Requests start with "For A/B/C:".
 
-## Requests (owner → the other chat)
+## Requests (owner → a chat)
 - **For A (battle UI, from the owner, 2026-11-11):** "There's a lot of information in the battles — keep it, but simplify it so it doesn't get in the way of gameplay."
   B already shortened B's own enemies (boss/lieutenant/right-hand/secret-boss names are short; captions are `Tag · one trick`). Suggestions for `battle.js`:
   1) enemy captions/passive pills: show only for the targeted/acting enemy (not all at once after the opening), one line max, smaller;
@@ -39,6 +70,7 @@ chat's pushes instead of overwriting them).
   Info stays reachable by tapping an enemy (full trait/passives card).
 
 ## Cross-lane log
+- 2026-11-11 · A: added Chat C (Sprites & Animation); art files moved from A's lane to C's; added the "Which chat am I?" and grey-area tables. Handbook for C: `SPRITES.md`.
 - 2026-11-11 · B (shared `core.js`, owner's request): camera REVERTED to the original — `CAM_TILES` close 10 / normal 12 / wide 15, `DUNGEON_ZOOM` 1, min 15 across. World props now 1.6× (dungeon props +20%) so characters read smaller.
 - 2026-11-11 · B (shared `core.js`, owner's request): tighter default — `CAM_TILES` close 5.5 / normal 6.5 / wide 9; min tiles across 9 (8 in dungeons).
 - 2026-11-11 · B (shared `core.js`, owner's request): camera tighter on Ren — `CAM_TILES` close 6.5 / normal 8 / wide 11, dungeons ×0.85, min tiles across 11 (9 in dungeons).
