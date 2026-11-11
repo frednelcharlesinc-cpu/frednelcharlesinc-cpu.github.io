@@ -70,6 +70,7 @@ m = M('fc_north', 64, 48, 'north', 202)
 m.cliff(4, 2, 24, rows=3)
 m.cliff(22, 1, 62, stairs=(22, 58))
 falls(m, 44, 22, 'n')
+m.pond(51, 3.2, 3.2, 1.7); m.river([(50, 4), (48, 10), (46, 15), (45, 21)], 1.1)   # snowmelt pool → stream → the falls
 m.river([(45, 30), (48, 36), (52, 42), (63, 45)], 1.3)
 m.tall(28, 42, 5, 3); m.tall(13, 29, 5, 3); m.tall(30, 10, 5, 3); m.tall(51, 8, 5, 2.5); m.tall(40, 41, 3, 2)
 m.path([(32, 47), (32, 38), (22, 32), (22, 25)])
@@ -91,7 +92,7 @@ m.look(around(52, 14, 3, 1), 'A watchtower, broken off at the knees. Claw marks 
 m.chest(55, 16)
 m.clear(56, 36, 3); m.put('fc_n_statue', 56, 35)
 m.look(around(56, 35), 'A knight in old armour, kneeling in the snow. Someone took a chisel to its eyes long ago. The plaque reads HERO OF THE NORTH PASS — the name beneath has been scraped away, letter by letter.')
-for (x, y) in [(27, 30), (36, 34), (17, 27), (46, 15)]:
+for (x, y) in [(27, 30), (36, 34), (17, 27), (38, 18)]:
     m.put('fc_n_rock1', x, y); m.look(around(x, y), 'A standing stone with a blue light pulsing at its heart, slow as breathing. The light leans toward your eyes when you come close.')
 m.put('fc_n_sign', 30, 40); m.look(around(30, 40), 'sign_north')
 log(m, 'n_stairs', 58, 21, 2, 'fc_n_log')
@@ -108,6 +109,7 @@ MAPS['fc_north'] = m
 m = M('fc_east', 64, 48, 'east', 303)
 m.cliff(9, 30, 62, stairs=(40,))
 falls(m, 33, 9, 'e')
+m.river([(38, 0), (37, 4), (34, 8)], 1.1)   # a stream off the high ground feeds the falls
 m.river([(34, 17), (28, 22), (26, 30), (22, 47)], 1.3)
 m.tall(10, 31, 6, 3); m.tall(27, 37, 5, 3); m.tall(51, 20, 6, 3); m.tall(9, 15, 5, 3); m.tall(52, 42, 4, 2)
 m.path([(0, 27), (18, 27), (30, 28), (46, 28), (63, 28)], 1.4)
@@ -143,6 +145,7 @@ MAPS['fc_east'] = m
 m = M('fc_south', 64, 48, 'south', 404)
 m.cliff(14, 1, 62, stairs=(32,))
 falls(m, 12, 14, 's')
+m.river([(16, 0), (14, 6), (12, 13)], 1.1)   # the fen's stream tips over the cliff
 m.river([(13, 23), (16, 29), (19, 32)], 1.2)
 m.pond(20, 33, 6, 3.6); m.pond(45, 34, 5, 3.6); m.pond(31, 42, 5, 2.6)
 m.tall(20, 7, 6, 3); m.tall(40, 9, 5, 2.5); m.tall(36, 28, 4, 2.5); m.tall(55, 30, 4, 3); m.tall(8, 34, 3, 3)
@@ -178,6 +181,7 @@ m.cliff(12, 1, 30, stairs=(16,))
 m.cliff(36, 14, 30, rows=3)
 falls(m, 26, 12, 'w')
 m.river([(36, 0), (35, 14), (37, 26), (35, 47)], 1.5)
+m.river([(35, 4), (30, 6), (27, 11)], 1.0)   # a branch of the river runs to the cliff edge and falls
 m.river([(28, 20), (34, 21)], 1.0)
 m.tall(48, 17, 6, 3); m.tall(24, 30, 6, 3); m.tall(56, 31, 4, 3); m.tall(27, 43, 5, 2.5); m.tall(8, 30, 4, 3)
 m.path([(63, 24), (20, 24), (0, 24)], 1.2)
