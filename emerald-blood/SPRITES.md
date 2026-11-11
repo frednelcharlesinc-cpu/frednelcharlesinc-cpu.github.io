@@ -42,6 +42,12 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Custom (non-template) sheets: see `art11/build_rt2.py` (Ren Stage II), `art13/build.py` (Hesk, Nix), `art14/build.py` (Corvin, Bertrand) —
   manual boxes per row, same output format.
 
+## Wardrobe (js/wardrobe.js)
+- Outfits: any HD set named `<base>_o_<id>` or `c_<hero>_o_<id>` appears in the Wardrobe by itself. Cut an outfit sheet with
+  `pool_cut.py <sheet> ren_o_ronin battle` (→ `c_ren_o_ronin`); optional set fields `label`, `unlock` (a `G.S.f` flag).
+- Dyes are built in the browser: Main = dark cloth, Accent = red–violet trim and hair. Heroes: me/ren, veil, kess, liora, oren, dace, tamsin.
+- Sprite style from 2026-11-11: realistic proportions, NOT chibi (head ≈ 1/8 of body height).
+
 ## Testing
 - Local server: `cd /home/claude/eb-build/out && python3 -m http.server 8765` (run in background).
 - Playwright harness: `/tmp/claude-0/-home-claude/7a5a8c55-a33b-57be-9427-8927ce3db7fc/scratchpad/pt/` (`au*.py`, start from `au30.py`:

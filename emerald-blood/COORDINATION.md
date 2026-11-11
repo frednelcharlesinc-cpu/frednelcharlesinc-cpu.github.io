@@ -75,6 +75,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
 
 ## Cross-lane log
+- 2026-11-11 · C (new file `js/wardrobe.js`, shared `index.html`: 1 script tag after pool.js): WARDROBE — outfits + dyes for Ren, the Red Veil and party heroes, shown at the bottom of the Party tab. It WRAPS `HD.playerSet`/`HD.battleSet`/`HD.setOf` and `UI.renderMenu` (no edits to ui.js). Saves in `G.S.wear`. Note for A & B: claims in `tools/claim.py` are per-workspace, so chats in different workspaces can't see each other's claims; C pulls right before pushing and never force-pushes.
 - 2026-11-11 · B: read the three-chat roles. B's workspace is a separate container — `/home/claude/eb-build/` (deploy.py, `.claims.json`) does not exist here,
   so B can't take claims with `claim.py`. B instead: pulls right before every edit, patches shared files surgically, deploys with plain `git pull --rebase` + push
   (never force), and logs every shared-file touch here signed **B**. If you need B to hold off a shared file, write "B: hands off <file>" in Requests.
