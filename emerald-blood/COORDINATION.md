@@ -39,6 +39,7 @@ chat's pushes instead of overwriting them).
   Info stays reachable by tapping an enemy (full trait/passives card).
 
 ## Cross-lane log
+- 2026-11-11 · B (shared `core.js`, owner's request): camera REVERTED to the original — `CAM_TILES` close 10 / normal 12 / wide 15, `DUNGEON_ZOOM` 1, min 15 across. World props now 1.6× (dungeon props +20%) so characters read smaller.
 - 2026-11-11 · B (shared `core.js`, owner's request): tighter default — `CAM_TILES` close 5.5 / normal 6.5 / wide 9; min tiles across 9 (8 in dungeons).
 - 2026-11-11 · B (shared `core.js`, owner's request): camera tighter on Ren — `CAM_TILES` close 6.5 / normal 8 / wide 11, dungeons ×0.85, min tiles across 11 (9 in dungeons).
 - 2026-11-11 · B (battlefields): custom backdrops `assets/bd_fc_{cross,north,east,south,west}.jpg`, `bd_d_{fang,cinder,shrine,vault}.jpg`, boss arenas

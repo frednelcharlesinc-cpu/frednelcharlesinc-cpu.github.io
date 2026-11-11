@@ -39,12 +39,12 @@ const BATTLE_STRIP = 92;
 const BATTLE_UNITS = 372;
 // THE OVERWORLD CAMERA IS MEASURED IN TILES, not a zoom number: the same framing on every phone, in either orientation.
 // Normal ≈ a handheld Pokémon screen: 12 tiles tall, and never fewer than 15 tiles across. Settings → Camera picks Close / Normal / Wide.
-const CAM_TILES = { close: 5.5, normal: 6.5, wide: 9 };   // tight on Ren: you see him and what's right around him
-const DUNGEON_ZOOM = .85;   // dungeons sit the camera closer still (fewer tiles tall)
+const CAM_TILES = { close: 10, normal: 12, wide: 15 };
+const DUNGEON_ZOOM = 1;   // dungeons use the same framing as the overworld
 function camMode() { const s = G.settings || {}; return s.cam || (s.wideCam ? 'wide' : 'normal'); }
 function setView(mode) {
   let z = 1;
-  if (mode === 'world' || mode === 'dialog') { const dun = typeof World !== 'undefined' && World.scene && World.scene.dungeon, tall = (CAM_TILES[camMode()] || 6.5) * (dun ? DUNGEON_ZOOM : 1), across = Math.max(dun ? 8 : 9, tall * 1.5);
+  if (mode === 'world' || mode === 'dialog') { const dun = typeof World !== 'undefined' && World.scene && World.scene.dungeon, tall = (CAM_TILES[camMode()] || 12) * (dun ? DUNGEON_ZOOM : 1), across = Math.max(15, tall * 1.5);
     const sc = Math.min(cv.height / (tall * 32), cv.width / (across * 32)); z = sc / G.view.base; }
   if (mode === 'battle') z = VIEW_H / BATTLE_UNITS;   // battles are framed a little wider than story scenes
   G.view.scale = G.view.base * z; G.view.fullH = cv.height / G.view.scale; G.view.w = cv.width / G.view.scale;
@@ -87,7 +87,7 @@ async function boot() {
   initBT();
   step(0.25, 'Gathering the townsfolk…');
   G.img.props = await loadImg('assets/props.png?v=4');
-  await Promise.all([['props2', 2], ['props3', 1], ['props4', 1], ['props5', 'b8ca90ec']].map(async ([n, v]) => { try { const [p, i] = await Promise.all([loadJSON(`assets/${n}.json?v=${v}`), loadImg(`assets/${n}.png?v=${v}`)]); Object.assign(G.props, p); G.img[n] = i; } catch (e) { console.warn(n, e); } }));
+  await Promise.all([['props2', 2], ['props3', 1], ['props4', 1], ['props5', 'f3ed08df']].map(async ([n, v]) => { try { const [p, i] = await Promise.all([loadJSON(`assets/${n}.json?v=${v}`), loadImg(`assets/${n}.png?v=${v}`)]); Object.assign(G.props, p); G.img[n] = i; } catch (e) { console.warn(n, e); } }));
   const partNames = Object.keys(G.man.parts);
   let n = 0;
   await Promise.all(partNames.map(async p => { G.img['part_' + p] = await loadImg('assets/parts/' + p + '.png'); step(0.25 + 0.5 * (++n / partNames.length)); }));

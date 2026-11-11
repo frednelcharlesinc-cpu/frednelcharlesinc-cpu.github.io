@@ -34,7 +34,7 @@ def load(n, src=SPR):
 
 PROPS = {}   # key -> Image
 def addp(key, img): PROPS[key] = img; return key
-BIG = 1.3   # the world is built bigger than the people in it
+BIG = 1.6   # the world is built bigger than the people in it
 def rs(img, f): return img.resize((max(1, round(img.width * f)), max(1, round(img.height * f))), Image.LANCZOS)
 for b in 'nesw':
     for i in (1, 2, 3): addp(f'fc_{b}tree{i}', rs(load(f'{b}_tree{i}'), BIG))
@@ -46,16 +46,16 @@ for n in ['n_bush1', 'n_bush2', 'n_bush3', 'e_bush1', 'e_bush2', 'e_bush3', 's_b
           'pot1', 'barrel', 'crates', 'lantern', 'well', 'n_bridge', 'e_bridge']:
     addp('fc_' + n, load(n) if ('sign' in n or n in ('lantern', 'pot1', 'barrel', 'crates')) else rs(load(n), BIG))
 for b in 'nesw':
-    c = load(f'{b}_cave'); addp(f'fc_{b}cave', rs(c, 196 / c.width))
+    c = load(f'{b}_cave'); addp(f'fc_{b}cave', rs(c, 236 / c.width))
     f = load(f'{b}_fall', SMALL)
-    addp(f'fc_{b}fall', f.resize((70, 205) if b in 'ne' else (104, 215), Image.LANCZOS))
+    addp(f'fc_{b}fall', f.resize((72, 240) if b in 'ne' else (112, 250), Image.LANCZOS))
 import glob as _g
 for _f in sorted(_g.glob(SPR + 'd*_*.png')):
     _n = os.path.basename(_f)[:-4]; addp('fc_' + _n, load(_n))
-addp('fc_ancient', rs(load('n_tree3'), 2.5))
-addp('fc_grandtree', rs(load('w_tree3'), 1.95))
-addp('fc_swampking', rs(load('s_tree3'), 1.6))
-addp('fc_emberking', rs(load('e_tree3'), 2.0))
+addp('fc_ancient', rs(load('n_tree3'), 3.0))
+addp('fc_grandtree', rs(load('w_tree3'), 2.35))
+addp('fc_swampking', rs(load('s_tree3'), 1.95))
+addp('fc_emberking', rs(load('e_tree3'), 2.4))
 
 def pack():
     items = sorted(PROPS.items(), key=lambda kv: -kv[1].height)

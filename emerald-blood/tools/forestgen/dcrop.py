@@ -3,12 +3,12 @@ from PIL import Image
 import numpy as np
 SPEC = {
  'cinder': {'wall': ['0', '1', '2'], 'floor': ['4', '5', '6', '13'], 'lava': ['14'],
-            'props': {'torch': ('7', 64), 'bones': ([1248, 56, 132, 98], 60), 'coal': ('17', 64), 'rubble': ([1245, 203, 145, 120], 70), 'throne': ('23', 250),
-                      'pillar': ('25', 108), 'gate': ('20', 64), 'stairsup': ('21', 70)}},
+            'props': {'torch': ('7', 77), 'bones': ([1248, 56, 132, 98], 72), 'coal': ('17', 77), 'rubble': ([1245, 203, 145, 120], 84), 'throne': ('23', 300),
+                      'pillar': ('25', 130), 'gate': ('20', 77), 'stairsup': ('21', 84)}},
  'fang': {'wall': ['10', '11', '12'], 'floor': ['31', '32', '33', '34', '35'], 'lava': [],
-          'props': {'torch': ('18', 62), 'bones': ([1015, 185, 105, 82], 56), 'nest': ('23', 80), 'antlers': ([1276, 176, 100, 90], 54), 'crystal1': ('17', 76),
-                    'crystal2': ('21', 62), 'crystal3': ('54', 60), 'altar': ('63', 240), 'pillar': ([298, 575, 66, 175], 110), 'pillar2': ([388, 575, 66, 175], 110),
-                    'stalag1': ('70', 96), 'stalag2': ('69', 110), 'stalag3': ('72', 70), 'rock1': ('67', 82), 'gate': ('45', 64)}},
+          'props': {'torch': ('18', 74), 'bones': ([1015, 185, 105, 82], 67), 'nest': ('23', 96), 'antlers': ([1276, 176, 100, 90], 65), 'crystal1': ('17', 91),
+                    'crystal2': ('21', 74), 'crystal3': ('54', 72), 'altar': ('63', 288), 'pillar': ([298, 575, 66, 175], 132), 'pillar2': ([388, 575, 66, 175], 132),
+                    'stalag1': ('70', 115), 'stalag2': ('69', 132), 'stalag3': ('72', 84), 'rock1': ('67', 98), 'gate': ('45', 77)}},
 }
 for sheet, S in SPEC.items():
     a = np.array(Image.open(sheet + '.jpg').convert('RGB')).astype(float); boxes = json.load(open(sheet + '_boxes.json'))
