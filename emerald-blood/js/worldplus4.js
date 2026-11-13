@@ -56,15 +56,21 @@
     woods_s: [['The Bog Lurker', 'm_lizard'], ['Gutsack', 'm_gourd'], ['Wick-Eater', 'm_ratfolk']],
     woods_w: [['The Grove Butcher', 'm_goblin'], ['Gnasher', 'm_ratfolk'], ['Barkhide', 'm_tusker']]
   };
+  // hunter ranks: every bounty paid counts. Higher rank = tougher marks, bigger purses.
+  const RANKS = [['Copper', 0], ['Bronze', 2], ['Silver', 5], ['Gold', 9], ['Mithril', 14]];
+  const rankIx = () => { const n = S_().bountiesPaid || 0; let i = 0; RANKS.forEach((r, k) => { if (n >= r[1]) i = k; }); return i; };
+  const rankMul = () => 1 + .2 * rankIx();
+  const ELDER = [['The Elder Stag-Wolf', 'rime_alpha', 'woods_n'], ['The Cinder Matriarch', 'm_drake', 'woods_e'], ['The Mire King', 'm_troll', 'woods_s'], ['The Horned Hermit', 'm_minotaur', 'woods_w']];
   const week = () => Math.floor(((typeof Cal !== 'undefined' ? Cal.day() : 1) - 1) / 7);
   function bounties() {
     const S = S_(), w = week();
     if (!S.bounty || S.bounty.week !== w) S.bounty = { week: w, list: FOREST.map((sc, i) => { const q = QUARRY[sc]; const [name, base] = q[(w + i) % q.length]; return { scene: sc, name, base: ENEMY[base] ? base : Object.keys(ENEMY).find(k => k === 'lupine') || base, state: 'open' }; }) };
+    if (rankIx() >= 2 && !S.bounty.list.some(b => b.elder)) { const e = ELDER[w % ELDER.length]; if (ENEMY[e[1]]) S.bounty.list.push({ scene: e[2], name: e[0], base: e[1], state: 'open', elder: 1 }); }
     return S.bounty.list;
   }
   function bountyEnemy(b) {
-    const key = 'bty_' + b.name.replace(/\W/g, '').toLowerCase(), B = ENEMY[b.base]; if (!B) return null;
-    if (!ENEMY[key]) ENEMY[key] = Object.assign({}, B, { name: b.name, img: B.img || b.base, hp: Math.round(B.hp * 2.6), atk: Math.round(B.atk * 1.3), def: (B.def || 0) + 2, brk: Math.round((B.brk || 40) * 1.6), xp: Math.round((B.xp || 10) * 4), gold: Math.round((B.gold || 5) * 3), size: Math.max(1.35, B.size || 1), trait: 'Bounty mark' + (B.trait ? ' · ' + B.trait.split(/ — |\(/)[0].trim() : '') });
+    const m = rankMul() * (b.elder ? 1.5 : 1), key = 'bty_' + b.name.replace(/\W/g, '').toLowerCase() + '_' + rankIx(), B = ENEMY[b.base]; if (!B) return null;
+    if (!ENEMY[key]) ENEMY[key] = Object.assign({}, B, { name: b.name, img: B.img || b.base, hp: Math.round(B.hp * 2.6 * m), atk: Math.round(B.atk * 1.3 * Math.sqrt(m)), def: (B.def || 0) + 2, brk: Math.round((B.brk || 40) * 1.6), xp: Math.round((B.xp || 10) * 4), gold: Math.round((B.gold || 5) * 3), size: Math.max(b.elder ? 1.6 : 1.35, B.size || 1), trait: (b.elder ? 'Elder mark' : 'Bounty mark') + (B.trait ? ' · ' + B.trait.split(/ — |\(/)[0].trim() : '') });
     return key;
   }
   const boardImg = (() => { let S; return () => S || (S = sheet(x => {
@@ -73,8 +79,9 @@
     for (const [a, b, c] of [[15, 20, '#e8dcc0'], [27, 19, '#efe4c8'], [39, 21, '#e2d4b4']]) { R(x, c, a, b, 10, 13); R(x, '#a03020', a + 3, b + 2, 4, 4); R(x, '#5a4a3a', a + 2, b + 8, 6, 1); R(x, '#5a4a3a', a + 2, b + 10, 5, 1); }
   })); })();
   async function boardTalk() {
-    const ch = await ask(null, null, 'The Crossroads wanted board. Fresh notices are nailed over old ones.', ['Bounties', "Explorer's tally", 'Leave']);
-    if (ch === 0) return bountyMenu(); if (ch === 1) return tally();
+    const ex = boardExtras.filter(x => !x.show || x.show());
+    const ch = await ask(null, null, `The Crossroads wanted board. Fresh notices are nailed over old ones. (Hunter rank: ${RANKS[rankIx()][0]})`, ['Bounties', "Explorer's tally", ...ex.map(x => typeof x.label === 'function' ? x.label() : x.label), 'Leave']);
+    if (ch === 0) return bountyMenu(); if (ch === 1) return tally(); if (ex[ch - 2]) return ex[ch - 2].run();
   }
   async function bountyMenu() {
     const L = bounties(), st = b => ({ open: '', hunt: ' — hunting', done: ' — slain! collect', paid: ' — paid' })[b.state];
@@ -83,10 +90,27 @@
     if (b.state === 'open') { b.state = 'hunt'; await narr(`WANTED: ${b.name}. Last seen in ${SCENES[b.scene].subtitle}. A red X will show on your map there.`); save(); }
     else if (b.state === 'hunt') await narr(`${b.name} is still out there in ${SCENES[b.scene].subtitle}. Look for the red X on your map.`);
     else if (b.state === 'done') {
-      b.state = 'paid'; const gold = 220 + Math.floor(Math.random() * 180); G.S.gold += gold; const n = giveRare(); UI.hud(); sfx('level');
-      await narr(`The board-keeper's strongbox pays out: ${gold} gold${n ? ` and a <b style="color:#ffd36a">${n}</b>` : ''}. "${b.name}? Good riddance."`); save();
+      b.state = 'paid'; const r0 = rankIx(), gold = Math.round((220 + Math.floor(Math.random() * 180)) * rankMul() * (b.elder ? 2 : 1)); G.S.gold += gold; const n = giveRare(), n2 = b.elder ? giveRare() : ''; UI.hud(); sfx('level');
+      S_().bountiesPaid = (S_().bountiesPaid || 0) + 1;
+      await narr(`The board-keeper's strongbox pays out: ${gold} gold${n ? ` and a <b style="color:#ffd36a">${n}</b>` : ''}${n2 ? ` and a <b style="color:#ffd36a">${n2}</b>` : ''}. "${b.name}? Good riddance."`);
+      if (rankIx() > r0) await rankUp(rankIx());
+      save();
     } else await narr('Already paid. Check back when the notices change.');
   }
+  async function rankUp(i) {
+    sfx('level'); toast(`<b style="color:#ffd36a">HUNTER RANK: ${RANKS[i][0].toUpperCase()}</b>`, 3200);
+    const msg = { 1: 'The board-keeper nails a bronze tack beside your name. Your marks will be tougher now — and pay better.',
+      2: 'Silver. The keeper unlocks a second strongbox: ELDER MARKS — old, huge, and very rarely seen. One will be posted each week.',
+      3: 'Gold rank. The keeper hands you a folded cloak of stitched trophy-hides. "Hunters see that, they get out of your way."',
+      4: 'Mithril. There are maybe three living hunters with that tack. Every purse on the board pays you nearly double what it pays anyone else.' }[i];
+    if (msg) await narr(msg);
+    if (i === 3 && typeof Gear !== 'undefined' && RECIPES.huntermantle) { const S = Gear.st(); S.gear.own.huntermantle = (S.gear.own.huntermantle || 0) + 1; await narr('<b style="color:#ffd36a">Hunter\'s Mantle</b> added to your gear. (Menu → Gear to wear it.)'); }
+  }
+  if (typeof RECIPES !== 'undefined' && !RECIPES.huntermantle) {
+    if (typeof PARTS !== 'undefined' && !PARTS.huntermark) PARTS.huntermark = { n: "Hunter's Mark", v: 0, use: 'Given at Gold hunter rank.' };
+    RECIPES.huntermantle = { n: "Hunter's Mantle", slot: 'armor', p: { huntermark: 1 }, g: 0, s: { hp: 18, def: 3, spd: 2 } };
+  }
+  const boardExtras = [];
   let hunted = null;
   async function spawnBounty(W, scene) {
     hunted = null; const b = bounties().find(x => x.scene === scene && x.state === 'hunt'); if (!b) return;
@@ -255,7 +279,7 @@
   }
   async function trophies() {
     const S = S_(), f = F(), bosses = Object.keys(f).filter(k => /^clear_d_/.test(k)).length, sb = Object.keys(f).filter(k => /^dx_.*_sb\d$/.test(k)).length;
-    const bty = ((S.bounty || {}).list || []).filter(b => b.state === 'paid').length + (S.bountiesPaid || 0);
+    const bty = `${S.bountiesPaid || 0} (${RANKS[rankIx()][0]} rank)`;
     await narr(`Your trophy stand — dungeon lords beaten: ${bosses} · secret bosses: ${sb} · bounties: ${bty} · rare beasts befriended: ${S.rareCaught || 0} · fish caught: ${S.fishCaught || 0} · Chronicle stones: ${(S.lore12 || []).length}/12.`);
   }
   const HOME_CAMP = { id: 'home', scene: 'woods_w', name: 'Your homestead', get at() { return HOME_AT(); }, show: () => home().tier >= 3 };
@@ -328,5 +352,5 @@
     } catch (e) { }
   };
   hookRuins();
-  window.WorldPlus4 = { get rare() { return rare; }, bounties, forestStats, spot, HOME_AT, BOARD_AT, MOON_AT };
+  window.WorldPlus4 = { get rare() { return rare; }, get hunted() { return hunted; }, huntFight, boardExtras, RANKS, rankIx, giveRare, pay, reach, covered, bounties, forestStats, spot, HOME_AT, BOARD_AT, MOON_AT };
 })();
