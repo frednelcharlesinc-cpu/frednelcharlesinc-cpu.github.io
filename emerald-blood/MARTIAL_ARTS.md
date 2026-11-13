@@ -74,7 +74,7 @@ Tamsin's bow is also a blade: its limbs are edged steel, and when she lights the
 ## Kairo — Scar-Spark Blade
 *Base: Four Cuts · Weapon: a straight single-edged sword whose edge glows green*
 
-Kairo and Ren have been keeping score since they were six. Kairo learned the Four Cuts the loud way - in Green Eclipse fights, with every cut thrown at full strength - and the sparks are what happens when a blade swung that hard meets anything. He has never seen a style he couldn't beat by trying harder. He has seen one now.
+Kairo and Ren have been keeping score since they were six. The night Thornvale burned, Kairo ran back into the fire and pulled eleven people out, and his body learned the fire: it stopped being allowed to hurt him. He left the burn on his face to scar so he would never forget. His sword art grew out of that night - the Four Cuts thrown at full strength, every one throwing sparks, and the more he is hurt the hotter his scars burn (Scar Fuel). He has never met a style he couldn't beat by trying harder. He has met one now.
 
 - Stance: aggressive forward lean, sword held high and back
 - Opener: SCAR-SPARK RUSH - 7 frames: a running slash that throws green sparks and ash
