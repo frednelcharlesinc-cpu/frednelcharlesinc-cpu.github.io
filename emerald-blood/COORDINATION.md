@@ -75,6 +75,9 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
 
 ## Cross-lane log
+- 2026-11-12 · B (new file `js/worldplus.js`, script tag after dungeonx.js in index.html): see-through tall props, hidden caches, night glows, wildlife,
+  camp fast travel (`G.S.camps`), world-map pins for the woods' dungeons (`dg_fang`, `dg_cinder`, `dg_shrine`, `dg_dragvault`).
+  Shared `world.js`, 2 lines in `drawProp`: `if (o.fade) c.globalAlpha = o.fade; … c.globalAlpha = 1;` — props with `o.fade` draw see-through.
 - 2026-11-12 · B: truly hidden secrets in the woods' dungeons — secret rooms & the lever vault are painted as rock (overlays `assets/dsec_<dungeon>_<n>.webp`
   laid onto a canvas copy of `World.mapImg` when opened), solid on the collision grid and mini map (`World.mmLocal`), chests/torches/secret bosses only appear
   once opened. Mini map fog now floods over walkable ground only (no seeing through walls). `dungeons.js`: `D.exact` keeps chests on their exact tiles.
