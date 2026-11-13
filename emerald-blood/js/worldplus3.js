@@ -9,7 +9,7 @@
    5. FISHING — face any pond or river in the woods and press A. Wait for the bite, then reel it in.
    6. TREASURE MAPS — forest and grotto chests sometimes hold a torn map. The X shows on your mini map: dig there. */
 (function () {
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };
   const S_ = () => G.S, F = () => G.S.f;
   const blank = (() => { let S; return () => { if (S) return S; S = document.createElement('canvas'); S.width = 64 * 9; S.height = 64 * 12; return S; }; })();
   const sleep = ms => new Promise(r => setTimeout(r, ms));

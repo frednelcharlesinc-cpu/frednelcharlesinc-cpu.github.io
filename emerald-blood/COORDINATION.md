@@ -78,6 +78,11 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-13 · B: **THE DEEP WOODS** — four new 64×48 zones past each forest's old dead-end road (new maps `fc_north2/east2/south2/west2`, scenes
+  `woods_n2` Frostpine Heights, `woods_e2` The Scorched Road, `woods_s2` Saltreed Marsh, `woods_w2` The Drowned Ford; generator `tools/forestgen/layouts2.py`).
+  The old "you can't go further" messages now sit at the FAR edge of each new zone, so the story's limits (Mountain Pass, Highmark road, Coast Road, Millbrook) still hold.
+  Each zone: 5–6 chests (one behind a waterfall in N/E/W), camp + fire, landmark & lore look-texts, a log shortcut, tougher encounter tables, roamers, caches.
+  **For A:** encounter lists in `forest4.js` (`deep(...)`) are B's picks — rebalance freely; landmark texts are drafts.
 - 2026-11-13 · B (new files `js/worldplus7.js` + `js/townlife.js`, script tags after worldplus6.js; 1-line patch in worldplus3 fishing for bait):
   worldplus7 — Vessa Crane arc (`G.S.vessa`, joins elder-mark fights), thunderstorms + lightning crystals, blood moon (1 night/week; **wraps `Battle.start`** to elite-clone
   non-boss foes in the woods, `blood_<enemy>`), field journal (`G.S.journal`, records base enemy keys on every win), hidden falls in the 4 forest dungeons (scenes `dfall_<id>`),

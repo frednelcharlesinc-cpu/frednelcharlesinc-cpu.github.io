@@ -8,7 +8,7 @@
    5. CAMP FAST TRAVEL — find a forest camp (walk near it) and you can travel between every camp you've found from its campfire.
    6. MAP PINS — the four woods' dungeons on the world map. */
 (function () {
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };
   const F = () => G.S.f;
   const night = () => (typeof Ambient !== 'undefined' && Ambient.night) || 0;
   const fc = () => World.map && World.map.fc && MK[G.S.map];
