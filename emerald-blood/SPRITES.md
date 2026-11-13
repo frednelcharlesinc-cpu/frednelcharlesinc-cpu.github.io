@@ -50,6 +50,8 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Facing: every battle sheet is drawn facing RIGHT (`faces:'right'`); the game mirrors it for the party, who stand on the right facing left. Checked in battle 2026-11-12 with Ren's new sheet.
 - Ren's new 7×7 sheet = Wardrobe outfit `c_ren_o_sheathed` ("Sheathed Draw (new)"), world frames copied from `ren`. Effect-only frames (the loose crescent) were dropped; stray pixels cleaned from dodge frames.
 
+- MOVES sheets: `pool_cut.py <sheet> <key> movesren7|moves7|vane7` merges into the same set as the battle sheet (Ren: key `ren_o_sheathed`). One move per row; effects must be on the character's frame.
+
 ## 12 × 12 sheets (older) (owner's standard from 2026-11-11)
 - Prompts: MASTER A (people) / MASTER B (monsters) / boss line — rows in `tools/pool/spec.py` BATTLE12 / MONSTER12.
 - Cut: `python3 tools/pool/pool_cut.py <sheet> <key> battle12|monster12` (works from the repo copy; writes straight into assets/).

@@ -157,3 +157,26 @@ The city guard's doctrine, written by men who expected to hold a gate, not win a
 - **dorran** — Red Hand Hatchets: two hatchets: throws and chops
 - **brask** — Toll-Chain Flail: spiked flail
 - **iska** — Tidecall: trident: wave strikes
+
+## Ren's road through the Sheathed Draw (proposal — owner's request 2026-11-12)
+Ren learns Vane's art in pieces as his grade rises. Sprites: the MOVES sheet (Attack A/B + Rise/Fall/Wind/Needle + Sheathe & Draw) and the VANE sheet (`art_*` anims) — see SPRITES.md.
+
+| Grade | What he can do |
+|---|---|
+| E | Attack (2 timed strikes), single cuts, Horizon Draw |
+| D | 2-cut techniques (Crescent, Heron Drop, Anvil Needle) |
+| C | **Tiger's Descent** (new), Mirage Step |
+| B | 3-cut techniques (Falling Star, Tide Lattice) |
+| A | **Four Seasons** — sheathe, then one DRAW releases all four cuts as four slashes |
+| S | 5-cut flows (Moon Over Water, **Thousand Needles**) |
+| SS | 6-cut answers (**Last Light**, **Sword Saint's Reply**) |
+| SSS+ | **First Snow** — Vane's own art |
+
+New techniques (not in the game yet — gameplay is Chat A's):
+- **TIGER'S DESCENT** (grade C): leaps high with the blade sheathed, draws in mid-air and falls on the enemy in one diagonal cleaving cut that crosses their whole body, landing crouched as the blade clicks home
+- **MIRAGE STEP** (grade C): vanishes into an afterimage, reappears behind the enemy and cuts through; the afterimage fades a beat later
+- **HORIZON DRAW** (grade E): one draw-cut across the whole enemy line; a long green horizon-line hangs in the air after the blade is home
+- **THOUSAND NEEDLES** (grade S): a blur of point-first thrusts straight from the sheath, dozens of thin green lines hitting at once
+- **SWORD SAINT'S REPLY** (grade SS): stands perfectly still with eyes closed as the enemy strikes, then a single counter-draw and six slashes appear on the attacker at once
+- **LAST LIGHT** (grade SS): six flowing cuts in a rhythm (rise, fall, wind, rise, fall, rise), the blade leaving a trail of emerald light that hangs in the air
+- **FIRST SNOW** (grade SSS): Vane's own art: total stillness, one invisible cut, the air freezes and snow falls; the enemy only notices the cut after the blade is home

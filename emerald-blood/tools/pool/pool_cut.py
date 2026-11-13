@@ -1,5 +1,5 @@
 """Animation pool cutter.
-usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12|battle7|monster7|move7> [--left] [--h=260]
+usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12|battle7|monster7|move7|movesren7|moves7|vane7> [--left] [--h=260]
   battle12 / monster12 : the 12 rows x 12 frames sheets (spec.py BATTLE12 / MONSTER12)
 Cuts a standard Life or Battle sheet (see spec.py / *_template.png), stores the frames under src/<key>/<kind>/,
 then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every sheet that character has.
@@ -8,8 +8,9 @@ then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every
 import sys, os, json, numpy as np
 from PIL import Image
 from scipy import ndimage as nd
-from spec import LIFE, BATTLE, BATTLE12, MONSTER12, BATTLE7, MONSTER7, MOVE7
-SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12, 'battle7': BATTLE7, 'monster7': MONSTER7, 'move7': MOVE7}
+from spec import LIFE, BATTLE, BATTLE12, MONSTER12, BATTLE7, MONSTER7, MOVE7, MOVES7_REN, MOVES7, VANE7
+SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12, 'battle7': BATTLE7, 'monster7': MONSTER7, 'move7': MOVE7,
+         'movesren7': MOVES7_REN, 'moves7': MOVES7, 'vane7': VANE7}
 HERE = os.path.dirname(os.path.abspath(__file__))
 # works in eb-build/pool (writes to eb-build/out) and in the repo copy tools/pool (writes to the game's own assets)
 GAME = os.path.join(HERE, '..', 'out') if os.path.isdir(os.path.join(HERE, '..', 'out', 'assets')) else os.path.join(HERE, '..', '..')
@@ -85,7 +86,7 @@ def cut_sheet(path, kind, left=False):
             hs = [np.where(keep[:, a:b].any(1))[0] for a, b in cols]; hh = [(h.max() - h.min()) if len(h) else 0 for h in hs]
             if hh and len(cols) > 2: cols = [c for c, h in zip(cols, hh) if h >= max(hh) * .5]   # a lone spark or dust cloud isn't a frame
             n = max(1, len(cols))
-        if kind in ('battle12', 'monster12', 'battle7', 'monster7', 'move7') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
+        if kind in ('battle12', 'monster12', 'battle7', 'monster7', 'move7', 'movesren7', 'moves7', 'vane7') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
         while len(cols) > n:   # too many: merge the closest pair, or drop the thinnest
             gaps = [(cols[i + 1][0] - cols[i][1], i) for i in range(len(cols) - 1)]
             g, i = min(gaps)
@@ -189,7 +190,7 @@ def seven(Bt, C):
     return {k: v for k, v in o.items() if v}
 
 def build(key):
-    root = os.path.join(HERE, 'src', key); kinds = [k for k in ('life', 'battle') if os.path.isdir(os.path.join(root, k))]
+    root = os.path.join(HERE, 'src', key); kinds = [k for k in ('life', 'battle', 'moves', 'arts') if os.path.isdir(os.path.join(root, k))]
     allf = []; idx = {}
     for kind in kinds:
         man = json.load(open(os.path.join(root, kind, 'frames.json')))
@@ -197,12 +198,13 @@ def build(key):
             allf.append((kind, nm, Image.open(os.path.join(root, kind, fn))))
     # one resolution for the whole set: the reference frame of each kind is scaled to H
     HT = 260
-    refimg = {k: next((im for kk, nm, im in allf if kk == k and nm == ('idle' if k == 'life' else 'combat')), None) for k in kinds}
+    REF = {'life': 'idle', 'battle': 'combat', 'moves': 'attackA', 'arts': 'art_tiger'}
+    refimg = {k: next((im for kk, nm, im in allf if kk == k and nm == REF[k]), None) or next((im for kk, nm, im in allf if kk == k), None) for k in kinds}
     x = y = rh = 0; AW = 2048; items = []; frames = []
     for kind, nm, im in allf:
         r = refimg[kind] or im; s = HT / r.height; im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
         if x + im.width > AW: x = 0; y += rh + 2; rh = 0
-        ax, ay = anchor(im, torso=(kind == 'battle' and nm in TORSO))
+        ax, ay = anchor(im, torso=(kind in ('moves', 'arts') or (kind == 'battle' and nm in TORSO)))
         items.append((im, x, y)); frames.append([x, y, im.width, im.height, round(ax, 1), round(ay, 1), float(HT - 2)])
         idx.setdefault(kind + ':' + nm, []).append(len(frames) - 1); x += im.width + 2; rh = max(rh, im.height)
     sheet = Image.new('RGBA', (AW, y + rh + 2))
@@ -222,6 +224,17 @@ def build(key):
     for k in ('pdodge', 'pd1', 'pd2', 'pd3', 'pd4'): A[k] = A['dodge']
     if Bt('cmbA') or Bt('lunge'): A.update(twelve(Bt, C))
     elif Bt('opener') or (Bt('light') and not Bt('cmbA')): A.update(seven(Bt, C))
+    # MOVES sheets: each row is one real attack of the game (Attack variants + the Four roles + Ren's sheathe/draw and Vane arts)
+    Mv = lambda n: g(n, 'moves')
+    if Mv('attackA'):
+        if key.startswith('ren'):   # Ren's attack variants are picked by name in hdsprites.js / fourcuts.js (L=cmb3, S=cmb4, W=cmb2, P=thr)
+            A.update({k: v for k, v in dict(cmb1=Mv('attackA'), fist=Mv('attackA'), cmb5=Mv('attackB'), cmb3=Mv('lift'), cmb4=Mv('brk'), cmb2=Mv('sweep'),
+                      thr=Mv('pierce'), thrust=Mv('pierce'), sheathe=Mv('sheathe'), fourdraw=Mv('fourdraw'), cmb6=Mv('fourdraw')).items() if v})
+        else:   # allies play halfslash / jump / slash / thrust for L / S / W / P
+            A.update({k: v for k, v in dict(cmb1=Mv('attackA'), cmb2=Mv('attackB'), fist=Mv('attackA'), halfslash=Mv('lift'), jump=Mv('brk'), slash=Mv('sweep'),
+                      backslash=Mv('sweep'), thrust=Mv('pierce'), thr=Mv('pierce'), finisher=Mv('finisher'), cmb6=Mv('finisher')).items() if v})
+    for k2, L2 in idx.items():
+        if k2.startswith('arts:'): A[k2[5:]] = L2
     if A.get('hurt') and A.get('combat'):   # a hit flinches; lying-down frames belong to the KO
         ch = sorted(frames[i][3] for i in A['combat'])[len(A['combat']) // 2]
         down = [i for i in A['hurt'] if frames[i][3] < ch * .7]
@@ -261,7 +274,7 @@ def build(key):
                 else: ratio2 = ratio
                 nh = frames[ids[0]][3]; nref = round(nh / ratio2, 1)
                 for k2, L2 in idx.items():
-                    if k2.startswith(kind + ':'):
+                    if k2.startswith(kind + ':') or (kind == 'battle' and k2.startswith(('moves:', 'arts:'))):
                         for j in L2: frames[j][6] = nref
             print('  kept the old on-screen size')
         except Exception as e: print('  (size match skipped:', e, ')')
@@ -279,7 +292,7 @@ def build(key):
 if __name__ == '__main__':
     path, key, kind = sys.argv[1], sys.argv[2], sys.argv[3]
     left = '--left' in sys.argv
-    fr = cut_sheet(path, kind, left); spec_kind = kind; kind = 'life' if kind in ('life', 'move7') else 'battle'
+    fr = cut_sheet(path, kind, left); spec_kind = kind; kind = 'life' if kind in ('life', 'move7') else 'moves' if kind in ('movesren7', 'moves7') else 'arts' if kind == 'vane7' else 'battle'
     d = os.path.join(HERE, 'src', key, kind); os.makedirs(d, exist_ok=True)
     for f in os.listdir(d): os.remove(os.path.join(d, f))
     man = []
