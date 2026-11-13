@@ -63,9 +63,24 @@ const HD = {
       const p = m[i - 1], w = Math.max(1, Math.ceil(p.width / 2)), h = Math.max(1, Math.ceil(p.height / 2));
       if (w < 64 || h < 64) return m[i - 1];
       const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
-      x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(p, 0, 0, w, h); m.push(c);
+      x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(p, 0, 0, w, h); this.sharpen(x, w, h, i === 1 ? .55 : .4); m.push(c);
     }
     return m[L];
+  },
+  /* SHARPEN (Chat C, 2026-11-13): an unsharp mask on each shrunk copy, so small sprites keep crisp outlines and detail.
+     Only colour is sharpened (never the transparent edge), and only where a pixel and its neighbours are all solid,
+     so no light halos appear around the outline. Runs once per sheet per size. */
+  sharpen(x, w, h, amt) {
+    let D; try { D = x.getImageData(0, 0, w, h); } catch (e) { return; }
+    const p = D.data, o = new Uint8ClampedArray(p), W4 = w * 4;
+    for (let y = 1; y < h - 1; y++) for (let i = y * W4 + 4, e = y * W4 + W4 - 4; i < e; i += 4) {
+      if (o[i + 3] < 250 || o[i - 1] < 250 || o[i + 7] < 250 || o[i - W4 + 3] < 250 || o[i + W4 + 3] < 250) continue;
+      for (let k = 0; k < 3; k++) {
+        const v = o[i + k], bl = (o[i - 4 + k] + o[i + 4 + k] + o[i - W4 + k] + o[i + W4 + k]) / 4;
+        p[i + k] = v + (v - bl) * amt;
+      }
+    }
+    x.putImageData(D, 0, 0);
   },
   dI(c, img, sx, sy, sw, sh, dx, dy, dw, dh) {
     let T = 1; try { const t = c.getTransform(); T = Math.hypot(t.a, t.b); } catch (e) {}
