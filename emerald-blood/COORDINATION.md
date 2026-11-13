@@ -78,6 +78,11 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-13 · B (new file `js/worldplus5.js`, script tag after worldplus4.js; worldplus4 extended): hunting horn (`G.S.horn`, wraps forest camp-fire tiles; elite clones `horn_<enemy>`),
+  bounty marks track you in snow/mud, shrine chain (`G.S.f.shrine_<scene>`) → stair under the Wayshrine → scene `sanctum` (map fc_grotto_w, boss clone `sanct_keeper`, `G.S.f.sanctum`),
+  weekly dungeon treasure map (`G.S.dmap`), fog wisps (`G.S.f.wisp_<scene>_<week>`). Hunter ranks Copper→Mithril (`G.S.bountiesPaid`), weekly elder mark from Silver.
+  **Cross-lane (gear, A):** added `RECIPES.huntermantle` + `PARTS.huntermark` (in worldplus4, guarded) — granted at Gold hunter rank. A may rename/rebalance.
+  Homestead visitors on hold (owner: waits for the player guild).
 - 2026-11-13 · B (new file `js/worldplus4.js`, script tag after worldplus3.js): Wanted board at the Crossroads (weekly bounties, `G.S.bounty`, elite clones `bty_<name>` in ENEMY),
   rare golden deer / spirit fox (flee, reward on catch), weather sight (fog/blizzard shrink `MiniMap.R`; rain fishing in worldplus3, fog chase range in worldplus2),
   restorable ruins (wraps the Crossroads shrine + Mistveil/Emberroot tower `tiles`; `G.S.f.ruin_<scene>`), explorer's tally on the board, night moonstones (`G.S.f.moon_<scene>`),
