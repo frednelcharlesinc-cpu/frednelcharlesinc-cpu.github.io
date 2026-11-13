@@ -78,6 +78,14 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-13 · B (new `js/worldplus8.js` + `js/townlife2.js`, tags after townlife.js; new glade maps `fc_glade_n/e/s/w` via `tools/forestgen/layouts3.py`):
+  worldplus8 — fake trees → secret glades (scenes `glade_<zone>`), lookout rocks (reveal mini map), night stepping stones / winter ice / summer dry riverbeds,
+  wandering events (burning cart, wounded traveller, lost child), birds from bushes, eyes in the dark, goblin–bandit skirmishes, Drag waystones (`G.S.waystones`,
+  second fast-travel net), weather shrines, zones that "remember" you (`G.S.zk` wins per zone → peddler, then settlers + lower encRate), monthly Gate Surge
+  (days 8–14: rifts forced, refugees, Scorched Road barricaded via exit `check`), PHOTO MODE (📷 button, `body.photo` hides UI, CSS filters on #game).
+  **Second `Battle.start` wrapper** (counts wins per zone only). townlife2 — gifts & hearts for Ashford regulars (wraps their `talk` on load: their own talk runs
+  first, then an optional gift prompt), the bard, the Ironjaw Three (`crew_brannoc` clone), lost-and-found job, Inquisition checkpoint on the Ashford→woods exit
+  (`check`, every 4th day after `vaneDone`). **For A:** Ashford NPC favourites/heart rewards and all lines are B drafts — please make them yours.
 - 2026-11-13 · B: **THE DEEP WOODS** — four new 64×48 zones past each forest's old dead-end road (new maps `fc_north2/east2/south2/west2`, scenes
   `woods_n2` Frostpine Heights, `woods_e2` The Scorched Road, `woods_s2` Saltreed Marsh, `woods_w2` The Drowned Ford; generator `tools/forestgen/layouts2.py`).
   The old "you can't go further" messages now sit at the FAR edge of each new zone, so the story's limits (Mountain Pass, Highmark road, Coast Road, Millbrook) still hold.

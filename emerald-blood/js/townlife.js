@@ -64,7 +64,10 @@
   }
   const jobLabel = j => (j.t === 'pet' ? `Lost ${j.kind}: ${j.name} (for ${j.who}) — in ${SCENES[j.scene].subtitle}` : j.t === 'herb' ? `${j.n}× ${QITEM[j.item] && QITEM[j.item].name} for ${j.who}` : `A letter for ${j.camp}`) + ({ open: '', on: ' — taken', ready: ' — done! collect', paid: ' — paid' })[j.state];
   async function jobsMenu() {
-    const L = jobs(); const ch = await ask(null, null, 'ODD JOBS — pinned on by the townsfolk:', [...L.map(jobLabel), 'Back']); const j = L[ch]; if (!j) return;
+    const L = jobs(), lost = window.TownLife.lostItem && TownLife.lostItem();
+    const lostLabel = lost ? `Lost & found: ${lost.what} (for ${lost.who})` + ({ open: '', on: ' — taken', ready: ' — found! return it', paid: ' — returned' })[lost.state] : null;
+    const ch = await ask(null, null, 'ODD JOBS — pinned on by the townsfolk:', [...L.map(jobLabel), ...(lostLabel ? [lostLabel] : []), 'Back']);
+    if (lost && ch === L.length) return TownLife.extraJob(); const j = L[ch]; if (!j) return;
     if (j.state === 'open') {
       j.state = 'on';
       await narr(j.t === 'pet' ? `"${j.name} slipped out after a squirrel and ran all the way to ${SCENES[j.scene].subtitle}. Please bring ${j.kind === 'cat' ? 'her' : 'him'} home!" — ${j.who}`
@@ -164,7 +167,7 @@
     const r = await _load(name, ...a);
     try {
       if (name === TOWN) {
-        const b = firstFree([[24, 21], [23, 21], [24, 20], [25, 20]]) || freeNear(30, 25, againstWall, 7); if (b) { World.col[b[1]][b[0]] = 1; World.ents.push(new Ent({ id: 'townboard', x: b[0], y: b[1], dir: 'down', img: boardImg(), size: 1.25, pickup: 1, name: 'Town board', talk: townBoard, qm: () => jobs().some(j => j.state === 'ready') ? '?' : null })); }
+        const b = firstFree([[24, 21], [23, 21], [24, 20], [25, 20]]) || freeNear(30, 25, againstWall, 7); if (b) { World.col[b[1]][b[0]] = 1; World.ents.push(new Ent({ id: 'townboard', x: b[0], y: b[1], dir: 'down', img: boardImg(), size: 1.25, pickup: 1, name: 'Town board', talk: townBoard, qm: () => jobs().some(j => j.state === 'ready') || (window.TownLife.lostItem && TownLife.lostItem().state === 'ready') ? '?' : null })); }
         if (night() < .55) { const s = firstFree([[37, 21], [23, 21], [37, 22], [22, 22]]); if (s) { World.col[s[1]][s[0]] = 1; World.ents.push(new Ent({ id: 'tstall', x: s[0], y: s[1], dir: 'down', img: stallImg(trader().col), size: 1.4, pickup: 1, name: 'Stall', talk: stallTalk })); } }
         const n = night();
         for (const e of World.ents) {
