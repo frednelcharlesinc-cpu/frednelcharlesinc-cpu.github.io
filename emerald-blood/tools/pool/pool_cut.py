@@ -1,5 +1,5 @@
 """Animation pool cutter.
-usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12> [--left] [--h=260]
+usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12|battle7|monster7> [--left] [--h=260]
   battle12 / monster12 : the 12 rows x 12 frames sheets (spec.py BATTLE12 / MONSTER12)
 Cuts a standard Life or Battle sheet (see spec.py / *_template.png), stores the frames under src/<key>/<kind>/,
 then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every sheet that character has.
@@ -8,8 +8,8 @@ then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every
 import sys, os, json, numpy as np
 from PIL import Image
 from scipy import ndimage as nd
-from spec import LIFE, BATTLE, BATTLE12, MONSTER12
-SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12}
+from spec import LIFE, BATTLE, BATTLE12, MONSTER12, BATTLE7, MONSTER7
+SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12, 'battle7': BATTLE7, 'monster7': MONSTER7}
 HERE = os.path.dirname(os.path.abspath(__file__))
 # works in eb-build/pool (writes to eb-build/out) and in the repo copy tools/pool (writes to the game's own assets)
 GAME = os.path.join(HERE, '..', 'out') if os.path.isdir(os.path.join(HERE, '..', 'out', 'assets')) else os.path.join(HERE, '..', '..')
@@ -85,7 +85,7 @@ def cut_sheet(path, kind, left=False):
             hs = [np.where(keep[:, a:b].any(1))[0] for a, b in cols]; hh = [(h.max() - h.min()) if len(h) else 0 for h in hs]
             if hh and len(cols) > 2: cols = [c for c, h in zip(cols, hh) if h >= max(hh) * .5]   # a lone spark or dust cloud isn't a frame
             n = max(1, len(cols))
-        if kind in ('battle12', 'monster12') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
+        if kind in ('battle12', 'monster12', 'battle7', 'monster7') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
         while len(cols) > n:   # too many: merge the closest pair, or drop the thinnest
             gaps = [(cols[i + 1][0] - cols[i][1], i) for i in range(len(cols) - 1)]
             g, i = min(gaps)
@@ -128,7 +128,7 @@ def cut_sheet(path, kind, left=False):
             frames.append((nm, im))
     return frames
 
-TORSO = ('light', 'heavy', 'special', 'parry', 'guard', 'cmbA', 'cmbB', 'thrust', 'pparry', 'combo', 'lunge', 'roar', 'taunt')
+TORSO = ('light', 'heavy', 'special', 'parry', 'guard', 'cmbA', 'cmbB', 'thrust', 'pparry', 'combo', 'lunge', 'roar', 'taunt', 'opener')
 def anchor(im, torso=False):
     a = np.array(im)[..., 3] > 100; H, W = a.shape; rows = np.where(a.sum(1) >= 3)[0]; feet = rows.max() + 1 if len(rows) else H
     band = a[int(H * .15):int(H * .5)] if torso else a[max(0, int(feet - H * .55)):max(1, int(feet - H * .08))]
@@ -169,6 +169,25 @@ def twelve(Bt, C):
         for i in range(4): o['pd%d' % (i + 1)] = Bt('dodge')
     return {k: v for k, v in o.items() if v}
 
+def seven(Bt, C):
+    # the 7x7 sheets: fewer, better frames, each game animation reuses the right row
+    q = lambda L, i, n: L[i * len(L) // n:(i + 1) * len(L) // n] or L
+    run, sp, g, d = Bt('run') or C, Bt('special'), Bt('guard'), Bt('dodge')
+    o = dict(combat=C, idle=C, walk=run, run=run, special=sp, spellcast=sp, guard=g, parry=g, dodge=d, pdodge=d,
+             hurt=Bt('hurt'), ko=Bt('ko'), victory=Bt('victory') or Bt('enraged'))
+    if Bt('opener'):   # people
+        op, cb = Bt('opener'), Bt('combo')
+        o.update(draw=op, fist=q(cb, 0, 3), cmb1=q(cb, 0, 3), cmb2=q(cb, 1, 3), cmb3=q(cb, 2, 3), cmb4=q(op, 0, 2), cmb5=q(op, 1, 2), cmb6=sp,
+                 slash=op, halfslash=q(cb, 1, 3), backslash=cb, thrust=q(cb, 2, 3), thr=q(cb, 2, 3), pp1=g, pp2=q(op, 0, 2), pp3=q(op, 1, 2), ppfin=op,
+                 jump=q(d, 0, 2), land=q(d, 1, 2))
+    else:   # monsters
+        l, h = Bt('light'), Bt('heavy')
+        o.update(draw=sp, fist=l, cmb1=q(l, 0, 3), cmb2=q(l, 1, 3), cmb3=q(l, 2, 3), cmb4=q(h, 0, 3), cmb5=q(h, 1, 3), cmb6=q(h, 2, 3),
+                 slash=h, halfslash=q(h, 1, 2), backslash=l, thrust=h, thr=h, enraged=Bt('enraged'), jump=q(d, 0, 2), land=q(d, 1, 2))
+        for k in ('pp1', 'pp2', 'pp3', 'ppfin'): o[k] = g
+    for i in range(4): o['pd%d' % (i + 1)] = d
+    return {k: v for k, v in o.items() if v}
+
 def build(key):
     root = os.path.join(HERE, 'src', key); kinds = [k for k in ('life', 'battle') if os.path.isdir(os.path.join(root, k))]
     allf = []; idx = {}
@@ -202,6 +221,7 @@ def build(key):
     for k in ('pp1', 'pp2', 'pp3', 'ppfin'): A[k] = A['parry']
     for k in ('pdodge', 'pd1', 'pd2', 'pd3', 'pd4'): A[k] = A['dodge']
     if Bt('cmbA') or Bt('lunge'): A.update(twelve(Bt, C))
+    elif Bt('opener') or (Bt('light') and not Bt('cmbA')): A.update(seven(Bt, C))
     if A.get('hurt') and A.get('combat'):   # a hit flinches; lying-down frames belong to the KO
         ch = sorted(frames[i][3] for i in A['combat'])[len(A['combat']) // 2]
         down = [i for i in A['hurt'] if frames[i][3] < ch * .7]
@@ -222,7 +242,7 @@ def build(key):
     portraits(key, bust)
     meta = json.load(open(os.path.join(OUT, 'hd.json')))
     old = meta.get('c_' + key)
-    if key.startswith(('m_', 'b_')) or '--monster' in sys.argv or Bt('lunge'):   # monsters: row 6's last frames are ENRAGED, used when they berserk
+    if key.startswith(('m_', 'b_')) or '--monster' in sys.argv or Bt('lunge') or (Bt('light') and not Bt('cmbA')):   # monsters: row 6's last frames are ENRAGED, used when they berserk
         en = Bt('enraged') or Bt('victory')
         if en: A['enraged'] = en
         if old and 'desperate' in old.get('anims', {}) and en: A['desperate'] = Bt('desperate') or en

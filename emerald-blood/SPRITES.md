@@ -42,7 +42,12 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Custom (non-template) sheets: see `art11/build_rt2.py` (Ren Stage II), `art13/build.py` (Hesk, Nix), `art14/build.py` (Corvin, Bertrand) —
   manual boxes per row, same output format.
 
-## 12 × 12 sheets (owner's standard from 2026-11-11)
+## 7 × 7 sheets (owner's standard from 2026-11-12 — replaces 12 × 12)
+- Order: DESIGN sheet first (model sheet: front/side/back/stance/weapon/heads/palette), then the 7×7 battle sheet, which must match it.
+- Rows: STANCE · ADVANCE · DRAW (Ren only) or OPENER · COMBO · SIGNATURE · GUARD 3 + DODGE 4 · HURT 2 + KO 3 + VICTORY 2. Monsters: IDLE · PROWL · ATTACK · HEAVY · SPECIAL · BRACE 3 + EVADE 4 · HURT 2 + KO 3 + RAGE 2.
+- Cut: `pool_cut.py <sheet> <key> battle7|monster7`. Martial arts per character: `MARTIAL_ARTS.md`. Prompt pack (owner's page) holds every prompt.
+
+## 12 × 12 sheets (older) (owner's standard from 2026-11-11)
 - Prompts: MASTER A (people) / MASTER B (monsters) / boss line — rows in `tools/pool/spec.py` BATTLE12 / MONSTER12.
 - Cut: `python3 tools/pool/pool_cut.py <sheet> <key> battle12|monster12` (works from the repo copy; writes straight into assets/).
   Every game anim gets its own frames: cmb1–6 from COMBO A/B, pp1–3/ppfin from the perfect-parry counter, pd1–4 from the perfect dodge, rise, victory2 (taunt).

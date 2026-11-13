@@ -47,3 +47,23 @@ MONSTER12 = [  # monsters and monster bosses — side view facing right
   ('HURT & KO', [('hurt', 4), ('ko', 8)]),
   ('RAGE', [('enraged', 6), ('desperate', 6)]),
 ]
+
+# 7 × 7 sheets (2026-11-12, owner: quality over quantity). Row 3 is Ren's DRAW; everyone else draws their own style's OPENER there.
+BATTLE7 = [
+  ('STANCE', [('combat', 7)]),
+  ('ADVANCE', [('run', 7)]),
+  ('DRAW / OPENER', [('opener', 7)]),
+  ('COMBO', [('combo', 7)]),
+  ('SIGNATURE ART', [('special', 7)]),
+  ('GUARD & DODGE', [('guard', 3), ('dodge', 4)]),
+  ('HURT, KO & VICTORY', [('hurt', 2), ('ko', 3), ('victory', 2)]),
+]
+MONSTER7 = [
+  ('IDLE', [('combat', 7)]),
+  ('PROWL', [('run', 7)]),
+  ('ATTACK', [('light', 7)]),
+  ('HEAVY', [('heavy', 7)]),
+  ('SPECIAL', [('special', 7)]),
+  ('BRACE & EVADE', [('guard', 3), ('dodge', 4)]),
+  ('HURT, KO & RAGE', [('hurt', 2), ('ko', 3), ('enraged', 2)]),
+]

@@ -8,16 +8,16 @@
 const FightStyle = {
   T: {
     // heroes
-    me: { n: "Vane's Sheathed Sword", col: '120,255,170', mark: 'crescent', dodge: 'after', parry: '200,255,220' },
+    me: { n: 'The Sheathed Draw', col: '120,255,170', mark: 'crescent', dodge: 'after', parry: '200,255,220' },
     veil: { n: 'Red Veil', col: '255,90,90', mark: 'x', dodge: 'smoke', parry: '255,160,160' },
     kess: { n: 'Shadowstep Knife-Dance', col: '190,140,255', mark: 'x', dodge: 'shadow', parry: '220,190,255' },
     liora: { n: 'Moonwater Spear', col: '225,238,255', mark: 'thrust', dodge: 'vault', parry: '210,230,255' },
-    oren: { n: 'Forgeheart Breaker', col: '255,140,60', mark: 'impact', dodge: 'brace', parry: '255,190,90' },
+    oren: { n: 'Anvil Breaker', col: '255,140,60', mark: 'impact', dodge: 'brace', parry: '255,190,90' },
     dace: { n: 'Iron Vow Axe', col: '150,220,150', mark: 'crescent', dodge: 'brace', parry: '200,210,200' },
     tamsin: { n: 'Wildfire Archery', col: '255,160,70', mark: 'arrow', dodge: 'vault', parry: '255,200,120' },
     // rivals & named fighters (by sprite / enemy key)
     kairo: { n: 'Scar-Spark Blade', col: '130,255,140', mark: 'crescent', dodge: 'smoke', parry: '200,255,180' },
-    vane: { n: 'The Sheathed Sword', col: '235,245,255', mark: 'crescent', dodge: 'after', parry: '255,255,255' },
+    vane: { n: 'The Sheathed Draw', col: '235,245,255', mark: 'crescent', dodge: 'after', parry: '255,255,255' },
     halvard: { n: 'Pale Liturgy', col: '255,245,190', mark: 'impact', dodge: 'blink', parry: '255,250,220' },
     voss: { n: 'Wall Doctrine', col: '210,215,225', mark: 'thrust', dodge: 'brace', parry: '230,235,245' },
     corran: { n: 'The Rules', col: '170,200,255', mark: 'crescent', dodge: 'after', parry: '200,220,255' },
@@ -33,8 +33,8 @@ const FightStyle = {
     garrick: { n: 'Bulwark', col: '230,205,150', mark: 'impact', dodge: 'brace', parry: '240,220,170' },
     tilda: { n: 'Anvil Fist', col: '255,150,70', mark: 'impact', dodge: 'after', parry: '255,190,110' },
     sylwen: { n: 'Tempest Dance', col: '130,230,255', mark: 'thrust', dodge: 'water', parry: '170,240,255' },
-    caspian: { n: 'Imperial Twin Blades', col: '255,80,90', mark: 'x', dodge: 'after', parry: '255,150,150' },
-    cael: { n: 'Ardent Light', col: '255,250,210', mark: 'crescent', dodge: 'blink', parry: '255,255,230' },
+    caspian: { n: 'The Unbowed Draw', col: '255,80,90', mark: 'x', dodge: 'after', parry: '255,150,150' },
+    cael: { n: 'Ardent Light', col: '255,250,210', mark: 'thrust', dodge: 'blink', parry: '255,255,230' },
     iska: { n: 'Tidecall', col: '120,200,255', mark: 'thrust', dodge: 'water', parry: '170,220,255' },
     acolyte: { n: 'Lantern Rite', col: '255,200,120', mark: 'impact', dodge: 'after', parry: '255,220,160' },
     bandit: { n: 'Cutthroat', col: '255,215,190', mark: 'crescent', dodge: 'vault', parry: '255,230,210' },
