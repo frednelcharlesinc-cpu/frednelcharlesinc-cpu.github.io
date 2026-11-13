@@ -366,6 +366,15 @@ for key, b, s, deco in [('fc_grotto_n', 'dun_n', 21, ['fc_dfang_crystal1', 'fc_d
                         ('fc_grotto_w', 'dun_w', 24, ['fc_w_rock1', 'fc_w_rock3', 'fc_w_bush2'])]:
     g = grotto(key, b, s, deco); g.data.pop('dungeon'); MAPS[key] = g
 
+# ============================== THE RIFT — a Gate that tears open in the woods now and then
+m = M('fc_gate', 30, 22, 'dun_gate', 31); m.k[:] = 8
+m.brush(15, 18, 3.4, 7); m.line([(15, 16), (15, 12)], 1.0, 7); m.brush(15, 10, 3.2, 7); m.brush(7, 8, 3.0, 7); m.brush(23, 8, 3.0, 7)
+m.line([(12, 10), (8, 8)], .9, 7); m.line([(18, 10), (22, 8)], .9, 7); m.line([(15, 7), (15, 4)], 1.0, 7); m.brush(15, 3, 2.6, 7); m.k[21, 15] = 7
+m.k[0, :] = 8; m.k[:, 0] = 8; m.k[:, 29] = 8
+m.col[:] = 0; m.col[m.k == 8] = 1
+m.data['rift'] = {'start': [15, 20], 'exit': [15, 21], 'guards': [[7, 8], [23, 8], [15, 7]], 'chest': [15, 2]}
+MAPS['fc_gate'] = m
+
 # ============================== write
 maps = json.load(open('/home/claude/eb/maps_orig.json'))
 FCL = {}
@@ -398,7 +407,7 @@ for key, m in MAPS.items():
             import hashlib; vv = hashlib.md5(open(fn, 'rb').read()).hexdigest()[:8]
             dx['art'].append([x0 * 32, y0 * 32, vv])
     else:
-        img = paint_dungeon(m) if (key.startswith('d_') or key.startswith('fc_grotto')) else paint(m); mm_rows = None
+        img = paint_dungeon(m) if (key.startswith('d_') or key.startswith('fc_grotto') or key == 'fc_gate') else paint(m); mm_rows = None
     img.convert('RGB').save(f'{REPO}/assets/map_{key}.webp', 'WEBP', quality=88, method=6)
     import hashlib; ver = hashlib.md5(open(f'{REPO}/assets/map_{key}.webp', 'rb').read()).hexdigest()[:8]   # cache-buster: phones always get the matching image
     entry = {'w': m.w, 'h': m.h, 'col': [''.join(str(int(v)) for v in row) for row in m.col], 'props': m.props,

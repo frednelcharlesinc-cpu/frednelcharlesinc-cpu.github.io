@@ -26,6 +26,7 @@ BIOME = {
               tall=['#2f6a1a', '#45852a', '#64a83a'], water='#3a8e9a', wall='w_wall', stone='#8f8c6a', ptype='flag'),
  'dun_n': dict(floor='#55657a', wallc='#1c232c', wall='n_wall', tiles='dfang', nfloor=5, nwall=3), 'dun_e': dict(floor='#6e4e36', wallc='#1a1010', wall='e_wall', tiles='dcinder', nfloor=4, nwall=3, lava=4),
  'dun_s': dict(floor='#355a4a', wallc='#0f1d17', wall='s_wall'), 'dun_w': dict(floor='#66664a', wallc='#202010', wall='w_wall'),
+ 'dun_gate': dict(floor='#3e2c5c', wallc='#120a20', wall='w_wall', walltint=(.55, .38, .95), runes=1),
 }
 
 # ---------------------------------------------------------------- props atlas
@@ -340,8 +341,14 @@ def paint_dungeon(m):
         x, y = rs_.randint(0, W), rs_.randint(0, H); r = rs_.randint(1, 4)
         d.ellipse([x, y, x + r, y + r * .7], fill=tuple(int(c * .7) for c in fl))
     wall = load(B['wall'], SMALL).resize((32, 32), Image.LANCZOS)
+    if 'walltint' in B:
+        wa = np.array(wall).astype(float); lum = wa[..., :3].mean(-1, keepdims=True); wa[..., :3] = lum * np.array(B['walltint']); wall = Image.fromarray(np.clip(wa, 0, 255).astype(np.uint8))
     dark = hexc(B['wallc'])
     k = m.k
+    if B.get('runes'):   # glowing rune specks in the rift floor
+        for _ in range(int(W * H / 900)):
+            x, y = rs_.randint(0, W), rs_.randint(0, H)
+            if k[y // T, x // T] == 7: d.rectangle([x, y, x + 2, y + 2], fill=['#c58aff', '#7af0ff', '#ff7ad8'][rs_.randint(3)])
     if 'tiles' in B:   # the user's dungeon sheet: real floor & wall tiles, drawn at 2x2 tiles so the stones read at the people's scale
         fl_t = [load(f"{B['tiles']}_floor{i}_64", SMALL) for i in range(B['nfloor'])]
         wl_t = [load(f"{B['tiles']}_wall{i}_64", SMALL) for i in range(B['nwall'])]
