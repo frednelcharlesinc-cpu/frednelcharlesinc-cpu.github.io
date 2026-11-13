@@ -25,8 +25,10 @@ const Wardrobe = {
       .map(k => [k, M[k].label || k.split('_o_')[1].replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())]);
   },
   /* the set this hero should draw with right now ('' / missing pieces fall back to the original) */
+  DEFAULT: { me: 'c_ren_o_sheathed' },   // a hero's default look when the player hasn't picked one ('' = Original)
   resolve(id, set) {
-    const w = this.of(id); if (!HD.meta) return set;
+    const w = Object.assign({}, this.of(id)); if (!HD.meta) return set;
+    if (w.o === undefined && this.DEFAULT[id]) w.o = this.DEFAULT[id];
     if (w.o && HD.meta[w.o] && HD.img[w.o]) set = w.o;
     if (!w.d && !w.a) return set;
     const key = `${set}~${w.d || ''}~${w.a || ''}`;
@@ -79,7 +81,8 @@ const Wardrobe = {
       return `<button class="wd-sw${(cur || '') === key ? ' on' : ''}" data-wid="${id}" data-wk="${k}" data-wv="${key}" title="${nm}" style="background:${bg}">${key === '' ? '✕' : ''}</button>`;
     }).join('');
     return `<div class="stat wd"><h3>👘 Wardrobe</h3><p class="muted">Outfits and colours. New outfits appear here as they're made.</p>${this.who().map(id => {
-      const H = this.HEROES[id], w = this.of(id), outs = this.outfits(id), t = this.thumb(id);
+      const H = this.HEROES[id], w = Object.assign({}, this.of(id)), outs = this.outfits(id), t = this.thumb(id);
+      if (w.o === undefined && this.DEFAULT[id] && outs.some(o => o[0] === this.DEFAULT[id])) w.o = this.DEFAULT[id];
       return `<div class="wd-row"><div class="wd-pic">${t ? `<img src="${t}" alt="">` : ''}</div><div class="wd-opts"><b>${H.name}</b>
         ${outs.length ? `<div class="wd-l">Outfit</div><div>${[['', 'Original'], ...outs].map(([k, nm]) => `<button class="wd-o${(w.o || '') === k ? ' on' : ''}" data-wid="${id}" data-wk="o" data-wv="${k}">${nm}</button>`).join('')}</div>` : ''}
         ${H.accentOnly ? '' : `<div class="wd-l">Main colour</div><div>${sw(id, 'd', this.MAIN, w.d)}</div>`}
