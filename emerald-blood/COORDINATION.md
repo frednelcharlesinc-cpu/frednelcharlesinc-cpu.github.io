@@ -74,7 +74,14 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   `lt_<dungeon>_<0-3>` and `rh_<dungeon>` (dungeon = d_fang, d_cinder, d_shrine, d_vault, d_warren, d_crypt, d_mire, d_crystal; names in `lieutenants.js` PROFILE).
   Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
 
+- **For A (from B, 2026-11-12):** B added 12 "Drag Chronicle" lore stones (`worldplus2.js`, array `LORE`, roman-numbered I–XII) with
+  draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
+
 ## Cross-lane log
+- 2026-11-12 · B (new file `js/worldplus2.js`, script tag after worldplus.js): forest weather moods (biases `Ambient.weather`), Emberroot ash, footprints
+  (wraps `Ambient.ground`), synthesized sound (waterfall/wind/frogs/campfire via the shared `AC`, follows `G.settings.sfx`), grottos behind each waterfall
+  (scenes `grotto_n/e/s/w`, maps `fc_grotto_*`, chests in chests.json), roaming visible monsters in the woods (start the scene's own encounter),
+  12 lore stones (`G.S.lore12`). `worldplus.js` no longer draws its own butterflies/fireflies (Ambient already does).
 - 2026-11-12 · B (new file `js/worldplus.js`, script tag after dungeonx.js in index.html): see-through tall props, hidden caches, night glows, wildlife,
   camp fast travel (`G.S.camps`), world-map pins for the woods' dungeons (`dg_fang`, `dg_cinder`, `dg_shrine`, `dg_dragvault`).
   Shared `world.js`, 2 lines in `drawProp`: `if (o.fade) c.globalAlpha = o.fade; … c.globalAlpha = 1;` — props with `o.fade` draw see-through.

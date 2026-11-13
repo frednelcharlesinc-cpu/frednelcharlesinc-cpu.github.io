@@ -4,7 +4,7 @@
    2. HIDDEN CACHES — 3 buried caches in every forest (2 at the Crossroads), tucked into the trees. Invisible until you're
       close; then a faint glint. Dig for gold and crafting parts.
    3. NIGHT GLOW — at night the woods light up: glowing mushrooms, the giant trees, standing stones, waterfalls, cave mouths.
-   4. WILDLIFE — birds that peck and scatter when Ren comes close, fish jumping in the ponds, butterflies by day, fireflies by night.
+   4. WILDLIFE — birds that peck and scatter when Ren comes close, fish jumping in the ponds (Ambient adds butterflies/fireflies).
    5. CAMP FAST TRAVEL — find a forest camp (walk near it) and you can travel between every camp you've found from its campfire.
    6. MAP PINS — the four woods' dungeons on the world map. */
 (function () {
@@ -99,15 +99,6 @@
       if (sx < -20 || sy < -20 || sx > w + 20 || sy > h + 20) continue;
       if (ph < .12) { const k = ph / .12, jx = sx - 8 + k * 16, jy = sy - Math.sin(k * Math.PI) * 12; c.fillStyle = 'rgba(200,220,235,.9)'; c.fillRect(jx - 2, jy - 1, 4, 2); }
       if (ph > .1 && ph < .3) { const k = (ph - .1) / .2; c.strokeStyle = `rgba(255,255,255,${(.6 * (1 - k)).toFixed(2)})`; c.lineWidth = 1; c.beginPath(); c.ellipse(sx + 8, sy, 3 + k * 9, 1.5 + k * 3, 0, 0, 7); c.stroke(); }
-    }
-    // butterflies by day, fireflies by night
-    const fire = n > .35, col = fire ? (G.S.map === 'woods_s' ? '120,255,220' : '230,255,140') : ({ woods_n: '235,245,255', woods_e: '255,170,60' }[G.S.map] || '255,240,160');
-    for (const m of motes) {
-      const x = ((m.x * w + Math.sin(t / 1400 + m.p * 3) * 30) % w + w) % w, y = ((m.y * h + Math.cos(t / 1700 + m.p) * 22) % h + h) % h;
-      const a = fire ? (.35 + .6 * Math.max(0, Math.sin(t / 380 + m.p * 9))) : .8;
-      if (!fire && m.p > 2.5) continue;
-      c.fillStyle = `rgba(${col},${a.toFixed(2)})`;
-      if (fire) c.fillRect(x, y, 2, 2); else { const f = Math.sin(t / 90 + m.p * 7) > 0; c.fillRect(x - (f ? 2 : 1), y, f ? 2 : 1, 2); c.fillRect(x + 1, y, f ? 2 : 1, 2); }
     }
   }
 
