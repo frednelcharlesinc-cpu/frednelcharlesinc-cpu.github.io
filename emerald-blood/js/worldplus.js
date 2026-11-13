@@ -117,8 +117,8 @@
   const found = () => (G.S.camps = G.S.camps || {});
   async function campTalk(c, before) {
     if (before) await before();
-    found()[c.scene] = 1;
-    const list = CAMPS.filter(o => found()[o.scene] && o.scene !== c.scene);
+    found()[c.id || c.scene] = 1;
+    const list = CAMPS.filter(o => found()[o.id || o.scene] && o !== c && (!o.show || o.show()));
     if (!list.length) { await narr('A good place to rest. (Find the other forest camps and you can travel between them from here.)'); return; }
     const ch = await ask(null, null, 'Travel to another camp?', [...list.map(o => o.name), 'Stay here']);
     const dest = list[ch]; if (!dest) return;
@@ -133,7 +133,7 @@
   }
   function discover() {
     const p = World.player; if (!p) return;
-    for (const c of CAMPS) if (c.scene === G.S.map && !found()[c.scene] && Math.abs(p.x - c.at[0]) + Math.abs(p.y - c.at[1]) <= 5) {
+    for (const c of CAMPS) if (c.scene === G.S.map && !c.id && !found()[c.scene] && Math.abs(p.x - c.at[0]) + Math.abs(p.y - c.at[1]) <= 5) {
       found()[c.scene] = 1; toast(`<b style="color:#ff9a3a">CAMP FOUND</b> — ${c.name}. Rest at its fire to travel between camps.`, 3400); save();
     }
   }
@@ -189,5 +189,5 @@
     } catch (e) { }
   };
   hookCamps();
-  window.WorldPlus = { CAMPS, cacheSpots };
+  window.WorldPlus = { CAMPS, cacheSpots, campTalk };
 })();

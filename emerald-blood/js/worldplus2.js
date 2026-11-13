@@ -134,7 +134,8 @@
       if (!e.roam || e.move) continue;
       const d = Math.abs(e.x - p.x) + Math.abs(e.y - p.y);
       if (d <= 1) { fight(e); return; }
-      if (d <= 5) {   // it has your scent: one step closer
+      const sight = typeof Ambient !== 'undefined' && Ambient.weather === 'fog' ? 3 : (typeof Weather !== 'undefined' && Weather.kind === 'blizzard' && G.S.map === 'woods_n' ? 3 : 5);
+      if (d <= sight) {   // it has your scent: one step closer (fog and blizzards blind them too)
         const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([a, b]) => [e.x + a, e.y + b]).filter(([x, y]) => World.free(x, y, e))
           .sort((a, b) => (Math.abs(a[0] - p.x) + Math.abs(a[1] - p.y)) - (Math.abs(b[0] - p.x) + Math.abs(b[1] - p.y)));
         if (opts.length) { e.wait = 600; e.startMove(opts[0][0], opts[0][1], 230); if (!e.bubble && Math.random() < .3) e.say('!', 700); }

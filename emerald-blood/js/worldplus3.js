@@ -90,9 +90,10 @@
       if (r !== 0) return;
       const S = S_(); S.fishCaught = S.fishCaught || 0;
       const roll = Math.random();
-      if (roll < .25) { await narr('The line goes slack. Whatever it was, it\'s smarter than you.'); return; }
+      const rain = typeof Ambient !== 'undefined' && Ambient.weather === 'rain';   // fish bite in the rain
+      if (roll < (rain ? .08 : .25)) { await narr('The line goes slack. Whatever it was, it\'s smarter than you.'); return; }
       S.fishCaught++;
-      if (roll > .93) { const n = giveRare(); G.S.gold += 60; sfx('level'); await narr(`A huge old fish — and something glitters in its belly: <b style="color:#ffd36a">${n || 'a coin purse'}</b>! (+60 gold)`); }
+      if (roll > (rain ? .86 : .93)) { const n = giveRare(); G.S.gold += 60; sfx('level'); await narr(`A huge old fish — and something glitters in its belly: <b style="color:#ffd36a">${n || 'a coin purse'}</b>! (+60 gold)`); }
       else { const g = 10 + Math.floor(Math.random() * 25), kind = ({ woods_n: 'an ice trout', woods_e: 'an ember perch', woods_s: 'a glowing mudfish', woods_w: 'a river bass', woods: 'a pond carp' })[G.S.map] || 'a fish'; G.S.gold += g; sfx('blip'); await narr(`You land ${kind}! A traveller would pay ${g} gold for that. (Fish caught: ${S.fishCaught})`); }
       UI.hud(); save();
     } finally { fishing = false; }
