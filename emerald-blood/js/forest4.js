@@ -11,9 +11,10 @@
    The old 'woods' key is the Crossroads, so every road and story beat that sends you "to the woods" still works. */
 (function () {
   const H = SCENES.woods;
-  const isWoods = m => /^woods(_[news])?$/.test(m || '');
+  const isWoods = m => /^woods(_[news]2?)?$/.test(m || '');
   window.isWoods = isWoods;
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west',
+    woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };   // the deep woods beyond each forest's old dead end
   const D = k => FCL[MK[k] || k];
   const F_ = () => G.S.f;
 
@@ -97,6 +98,16 @@
   forest('woods_e', 'The East Woods', 'Emberroot Wilds', { bd: 'fc_east', async onEnter() { if (G.S.q && G.S.q.toll === 'active') await tollMen(); } });
   forest('woods_s', 'The South Woods', 'Glimmerfen', { bd: 'fc_south' });
   forest('woods_w', 'The West Woods', 'The Old Grove', { bd: 'fc_west' });
+  // THE DEEP WOODS — past the roads that used to be dead ends (tougher, and each with its own secrets)
+  const deep = (list, bd) => function () { return { enemies: pickEnc(list), bd }; };
+  if (FCL.fc_north2) forest('woods_n2', 'The Deep North', 'Frostpine Heights', { weather: 'snow', bd: 'fc_north', encRate: .12,
+    encounters: deep([['rime_lupine', 'rime_lupine'], ['rime_alpha'], ['rime_lupine', 'rime_alpha'], ['m_skeleton', 'rime_lupine'], ['lupine_alpha', 'rime_lupine']], 'fc_north') });
+  if (FCL.fc_east2) forest('woods_e2', 'The Deep East', 'The Scorched Road', { bd: 'fc_east', encRate: .12,
+    encounters: deep([['bandit', 'bandit', 'm_goblin_shaman'], ['m_tusker', 'm_goblin'], ['m_drake'], ['m_orc', 'bandit'], ['m_tusker', 'm_tusker']], 'fc_east') });
+  if (FCL.fc_south2) forest('woods_s2', 'The Deep South', 'Saltreed Marsh', { bd: 'fc_south', encRate: .12,
+    encounters: deep([['m_lizard', 'm_lizard'], ['m_troll'], ['m_lizard', 'm_gourd'], ['m_ratfolk', 'm_ratfolk', 'm_lizard'], ['m_troll', 'm_lizard']], 'fc_south') });
+  if (FCL.fc_west2) forest('woods_w2', 'The Deep West', 'The Drowned Ford', { bd: 'fc_west', encRate: .12,
+    encounters: deep([['m_goblin', 'm_goblin', 'm_goblin_shaman'], ['m_orc'], ['m_ratfolk', 'm_orc'], ['m_minotaur'], ['lupine_alpha', 'm_goblin']], 'fc_west') });
 
   /* ---- dungeons: one under every forest ---- */
   if (typeof ENEMY !== 'undefined') Object.assign(ENEMY, {

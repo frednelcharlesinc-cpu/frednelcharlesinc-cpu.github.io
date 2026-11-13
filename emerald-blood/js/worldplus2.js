@@ -11,14 +11,15 @@
    6. THE DRAG CHRONICLE — 12 lore stones across the four woods and their grottos. Every 4 found: a reward.
    (Lore text drafted by B; Chat A may rewrite it — it's in LORE below.) */
 (function () {
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };
   const GROTTO = { woods_n: ['grotto_n', 'fc_grotto_n'], woods_e: ['grotto_e', 'fc_grotto_e'], woods_s: ['grotto_s', 'fc_grotto_s'], woods_w: ['grotto_w', 'fc_grotto_w'] };
   const F = () => G.S.f, S_ = () => G.S;
   const blank = (() => { let S; return () => { if (S) return S; S = document.createElement('canvas'); S.width = 64 * 9; S.height = 64 * 12; return S; }; })();
   const near = (a, b, d) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= d;
 
   /* ---------- 1. weather moods ---------- */
-  const MOOD = { woods_s: [['rain', 5], ['fog', 3], ['clear', 2]], woods_w: [['wind', 5], ['clear', 3], ['fog', 1]], woods_e: [['clear', 4], ['wind', 2]], woods: [['clear', 4], ['wind', 1], ['rain', 1], ['fog', 1]] };
+  const MOOD = { woods_s: [['rain', 5], ['fog', 3], ['clear', 2]], woods_w: [['wind', 5], ['clear', 3], ['fog', 1]], woods_e: [['clear', 4], ['wind', 2]], woods: [['clear', 4], ['wind', 1], ['rain', 1], ['fog', 1]],
+    woods_s2: [['fog', 5], ['rain', 4], ['clear', 1]], woods_w2: [['fog', 3], ['wind', 3], ['rain', 2], ['clear', 2]], woods_e2: [['clear', 3], ['wind', 3]] };
   function moodWeather(scene) {
     if (typeof Ambient === 'undefined' || !MOOD[scene] || !Ambient.outdoors || !Ambient.outdoors()) return;
     const o = MOOD[scene], tot = o.reduce((s, x) => s + x[1], 0); let r = Math.random() * tot, k = 'clear';
@@ -40,7 +41,7 @@
 
   /* ---------- 2. footprints ---------- */
   let prints = [];
-  const PRINT = { woods_n: 'rgba(120,140,165,', woods_s: 'rgba(30,24,14,' };
+  const PRINT = { woods_n: 'rgba(120,140,165,', woods_s: 'rgba(30,24,14,', woods_n2: 'rgba(120,140,165,', woods_s2: 'rgba(30,24,14,' };
   function stepPrint(p) {
     if (!PRINT[G.S.map]) return;
     const M = World.map; if (!M || !M.mm || !M.mm[p.y] || !'gtp'.includes(M.mm[p.y][p.x])) return;

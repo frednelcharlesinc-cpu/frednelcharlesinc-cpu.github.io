@@ -9,7 +9,7 @@
    5. FISHING — face any pond or river in the woods and press A. Wait for the bite, then reel it in.
    6. TREASURE MAPS — forest and grotto chests sometimes hold a torn map. The X shows on your mini map: dig there. */
 (function () {
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };
   const S_ = () => G.S, F = () => G.S.f;
   const blank = (() => { let S; return () => { if (S) return S; S = document.createElement('canvas'); S.width = 64 * 9; S.height = 64 * 12; return S; }; })();
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -90,7 +90,7 @@
       if (r !== 0) return;
       const S = S_(); S.fishCaught = S.fishCaught || 0;
       const roll = Math.random();
-      const rain = typeof Ambient !== 'undefined' && Ambient.weather === 'rain';   // fish bite in the rain
+      const rain = (typeof Ambient !== 'undefined' && Ambient.weather === 'rain') || ((G.S.bait || 0) > 0 && G.S.bait-- > 0);   // fish bite in the rain
       if (roll < (rain ? .08 : .25)) { await narr('The line goes slack. Whatever it was, it\'s smarter than you.'); return; }
       S.fishCaught++;
       if (roll > (rain ? .86 : .93)) { const n = giveRare(); G.S.gold += 60; sfx('level'); await narr(`A huge old fish — and something glitters in its belly: <b style="color:#ffd36a">${n || 'a coin purse'}</b>! (+60 gold)`); }
