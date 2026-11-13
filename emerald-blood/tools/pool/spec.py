@@ -80,19 +80,19 @@ MOVE7 = [
 ]
 
 # MOVES sheets (2026-11-12, owner: "a sheet just for moves"). Each row is one move, 7 frames, wired to the game's real attacks:
-# ATTACK A/B = the two timed strikes of Attack (two variants) · the Four (LIFT/BREAK/SWEEP/PIERCE = js/fourcuts.js roles L/S/W/P).
-MOVES7_REN = [   # Ren: the Four Cuts. Row 7 = the Sheathe Phase and the DRAW that releases four slashes (Four Seasons)
-  ('ATTACK A', [('attackA', 7)]), ('ATTACK B', [('attackB', 7)]),
-  ('RISE', [('lift', 7)]), ('FALL', [('brk', 7)]), ('WIND', [('sweep', 7)]), ('NEEDLE', [('pierce', 7)]),
+# ATTACK rows = variants of the 2-hit Attack. Allies: LAUNCHER/GUARD BREAKER/SWEEP/THRUST play halfslash/jump/slash/thrust.
+MOVES7_REN = [   # Ren (Four Cuts retired 2026-11-12): Attack's 5 variants (each strike of the 2-hit Attack picks one), a thrust, and the Fourfold Draw
+  ('ATTACK A', [('attackA', 7)]), ('ATTACK B', [('attackB', 7)]), ('ATTACK C', [('attackC', 7)]), ('ATTACK D', [('attackD', 7)]),
+  ('ATTACK E', [('attackE', 7)]), ('THRUST', [('pierce', 7)]),
   ('SHEATHE & DRAW', [('sheathe', 3), ('fourdraw', 4)]),
 ]
-MOVES7 = [   # everyone else: their own Four (Lines / Strikes / Shadows) + a finisher
+MOVES7 = [   # everyone else: Attack variants, four attack types of their own martial art, a finisher
   ('ATTACK A', [('attackA', 7)]), ('ATTACK B', [('attackB', 7)]),
-  ('LIFT', [('lift', 7)]), ('BREAK', [('brk', 7)]), ('SWEEP', [('sweep', 7)]), ('PIERCE', [('pierce', 7)]),
+  ('LAUNCHER', [('lift', 7)]), ('GUARD BREAKER', [('brk', 7)]), ('SWEEP', [('sweep', 7)]), ('THRUST', [('pierce', 7)]),
   ('FINISHER', [('finisher', 7)]),
 ]
 VANE7 = [   # Ren's advanced Vane techniques, learned as he ranks up (anim names art_<id>)
   ('TIGER\'S DESCENT', [('art_tiger', 7)]), ('MIRAGE STEP', [('art_mirage', 7)]), ('HORIZON DRAW', [('art_horizon', 7)]),
-  ('THOUSAND NEEDLES', [('art_needles', 7)]), ('SWORD SAINT\'S REPLY', [('art_reply', 7)]), ('LAST LIGHT', [('art_lastlight', 7)]),
+  ('FOURFOLD DRAW', [('art_fourfold', 7)]), ('THOUSAND NEEDLES', [('art_needles', 7)]), ('SWORD SAINT\'S REPLY', [('art_reply', 7)]),
   ('FIRST SNOW', [('art_firstsnow', 7)]),
 ]

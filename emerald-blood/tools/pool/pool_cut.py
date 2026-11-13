@@ -227,8 +227,8 @@ def build(key):
     # MOVES sheets: each row is one real attack of the game (Attack variants + the Four roles + Ren's sheathe/draw and Vane arts)
     Mv = lambda n: g(n, 'moves')
     if Mv('attackA'):
-        if key.startswith('ren'):   # Ren's attack variants are picked by name in hdsprites.js / fourcuts.js (L=cmb3, S=cmb4, W=cmb2, P=thr)
-            A.update({k: v for k, v in dict(cmb1=Mv('attackA'), fist=Mv('attackA'), cmb5=Mv('attackB'), cmb3=Mv('lift'), cmb4=Mv('brk'), cmb2=Mv('sweep'),
+        if key.startswith('ren'):   # each strike of Ren's Attack picks one of cmb1-cmb5 (hdsprites.js); thr for thrusts
+            A.update({k: v for k, v in dict(cmb1=Mv('attackA'), fist=Mv('attackA'), cmb2=Mv('attackB'), cmb3=Mv('attackC'), cmb4=Mv('attackD'), cmb5=Mv('attackE'),
                       thr=Mv('pierce'), thrust=Mv('pierce'), sheathe=Mv('sheathe'), fourdraw=Mv('fourdraw'), cmb6=Mv('fourdraw')).items() if v})
         else:   # allies play halfslash / jump / slash / thrust for L / S / W / P
             A.update({k: v for k, v in dict(cmb1=Mv('attackA'), cmb2=Mv('attackB'), fist=Mv('attackA'), halfslash=Mv('lift'), jump=Mv('brk'), slash=Mv('sweep'),
