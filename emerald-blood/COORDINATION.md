@@ -78,6 +78,13 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-13 · B (new files `js/worldplus7.js` + `js/townlife.js`, script tags after worldplus6.js; 1-line patch in worldplus3 fishing for bait):
+  worldplus7 — Vessa Crane arc (`G.S.vessa`, joins elder-mark fights), thunderstorms + lightning crystals, blood moon (1 night/week; **wraps `Battle.start`** to elite-clone
+  non-boss foes in the woods, `blood_<enemy>`), field journal (`G.S.journal`, records base enemy keys on every win), hidden falls in the 4 forest dungeons (scenes `dfall_<id>`),
+  escort jobs (`G.S.escort`), dungeon echo stones after a clear (`G.S.f.decho_<id>`), mount stamina in the woods (`G.S.mstam`; calls `Mounts.ride(null)` only).
+  townlife — Ashford: renown (computed), town board with odd jobs (`G.S.jobs`), fountain gossip (wraps tile 30,23), weekly travelling stall, tag with the kids,
+  folk greet you by renown (wraps folk `talkLines`/kid `talk` on load), crier shouts your deeds, most folk go home at night, window glows, seasonal bunting.
+  **For A:** all Vessa / echo / townsfolk lines are B drafts — rewrite freely (arrays `DECHO`, `GREET`, `hints()`, Vessa in `vessaTalk`).
 - 2026-11-13 · B (new file `js/worldplus6.js`, script tag after worldplus5.js): night constellations → star-shards (`G.S.f.star_<scene>`), rival hunter Vessa Crane
   (clones `rival_vessa_<n>` of `bandit`; bounty state `lost`; `G.S.rivalWins`), seasonal bosses (`season_<season>` clones, `G.S.f.sboss_<week>`), repairable bridges/ladders
   (`G.S.f.fix_<scene>_b|l`, opens col; drawn via `Ambient.ground`), forest echoes at the 4 history statues (`G.S.f.echo_<scene>`), night market at the Crossroads (`G.S.market`),

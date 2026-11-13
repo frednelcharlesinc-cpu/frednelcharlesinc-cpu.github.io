@@ -352,5 +352,5 @@
     } catch (e) { }
   };
   hookRuins();
-  window.WorldPlus4 = { get rare() { return rare; }, get hunted() { return hunted; }, huntFight, boardExtras, RANKS, rankIx, giveRare, pay, reach, covered, bounties, forestStats, spot, HOME_AT, BOARD_AT, MOON_AT };
+  window.WorldPlus4 = { boardTalk, mapAll, get rare() { return rare; }, get hunted() { return hunted; }, huntFight, boardExtras, RANKS, rankIx, giveRare, pay, reach, covered, bounties, forestStats, spot, HOME_AT, BOARD_AT, MOON_AT };
 })();

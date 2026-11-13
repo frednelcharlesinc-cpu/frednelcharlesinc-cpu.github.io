@@ -90,7 +90,7 @@
       if (r !== 0) return;
       const S = S_(); S.fishCaught = S.fishCaught || 0;
       const roll = Math.random();
-      const rain = typeof Ambient !== 'undefined' && Ambient.weather === 'rain';   // fish bite in the rain
+      const rain = (typeof Ambient !== 'undefined' && Ambient.weather === 'rain') || ((G.S.bait || 0) > 0 && G.S.bait-- > 0);   // fish bite in the rain
       if (roll < (rain ? .08 : .25)) { await narr('The line goes slack. Whatever it was, it\'s smarter than you.'); return; }
       S.fishCaught++;
       if (roll > (rain ? .86 : .93)) { const n = giveRare(); G.S.gold += 60; sfx('level'); await narr(`A huge old fish — and something glitters in its belly: <b style="color:#ffd36a">${n || 'a coin purse'}</b>! (+60 gold)`); }
