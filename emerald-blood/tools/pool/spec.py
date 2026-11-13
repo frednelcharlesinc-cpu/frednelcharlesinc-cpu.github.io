@@ -67,3 +67,14 @@ MONSTER7 = [
   ('BRACE & EVADE', [('guard', 3), ('dodge', 4)]),
   ('HURT, KO & RAGE', [('hurt', 2), ('ko', 3), ('enraged', 2)]),
 ]
+
+# 7 × 7 MOVEMENT sheet (2026-11-12): real walk and run cycles for the overworld. Stored with the life frames.
+MOVE7 = [
+  ('WALK DOWN', [('walk_down', 7)]),
+  ('WALK UP', [('walk_up', 7)]),
+  ('WALK SIDE', [('walk_side', 7)]),
+  ('RUN DOWN', [('run_down', 7)]),
+  ('RUN UP', [('run_up', 7)]),
+  ('RUN SIDE', [('run_side', 7)]),
+  ('IDLE', [('idle', 3), ('idle_up', 2), ('idle_side', 2)]),
+]

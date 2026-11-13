@@ -75,6 +75,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
 
 ## Cross-lane log
+- 2026-11-12 · C (`js/simplewalk.js`, walks): real walk/run cycles for any set cut from a MOVEMENT sheet (`meta.cycle`, cutter kind `move7`); everyone else keeps the simple step. Ren's overworld stride now grows with his grade (`Power.now().i`): C dust · B steadier walk · A afterimage when running · S green eye-wisps · SS+ emerald footfall ring. Kess's 7×7 battle sheet is in (`c_kess`).
 - 2026-11-12 · C: owner switched sprite sheets to **7 × 7** (quality over quantity) and **design sheets first**. Cutter kinds `battle7` / `monster7` (tools/pool). Row 3 is DRAW for Ren only; everyone else has their own OPENER.
 - **For A (from C, owner's request):** a martial art for every fighter + histories for the 12 majors → `MARTIAL_ARTS.md` (proposal — lore is yours, rename freely). Weapon calls made so sprites stay consistent: Oren = forge hammer, Tamsin = torch-bow (bladed bow she lights), Cael = halberd. `js/fightstyle.js` shows the same names in battle.
 - 2026-11-11 · C: Kess's new 12×12 battle sheet is in (`c_kess`, world frames kept). New `js/transform.js` (script tag after burst.js): when a hero transcends, they wear `c_<hero>_t1/_t2` if that set exists (Ren: `ren_t1`, `ren_t3`; Stage II stays burst.js's own swap). It only wraps `Burst.fire`/`Burst.end` — no edits to burst.js.

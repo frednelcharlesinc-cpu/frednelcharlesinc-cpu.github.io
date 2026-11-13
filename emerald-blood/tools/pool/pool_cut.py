@@ -1,5 +1,5 @@
 """Animation pool cutter.
-usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12|battle7|monster7> [--left] [--h=260]
+usage: python3 pool_cut.py <sheet.jpg> <key> <life|battle|battle12|monster12|battle7|monster7|move7> [--left] [--h=260]
   battle12 / monster12 : the 12 rows x 12 frames sheets (spec.py BATTLE12 / MONSTER12)
 Cuts a standard Life or Battle sheet (see spec.py / *_template.png), stores the frames under src/<key>/<kind>/,
 then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every sheet that character has.
@@ -8,8 +8,8 @@ then rebuilds out/assets/hd/c_<key>.png|webp and its entry in hd.json from every
 import sys, os, json, numpy as np
 from PIL import Image
 from scipy import ndimage as nd
-from spec import LIFE, BATTLE, BATTLE12, MONSTER12, BATTLE7, MONSTER7
-SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12, 'battle7': BATTLE7, 'monster7': MONSTER7}
+from spec import LIFE, BATTLE, BATTLE12, MONSTER12, BATTLE7, MONSTER7, MOVE7
+SPECS = {'life': LIFE, 'battle': BATTLE, 'battle12': BATTLE12, 'monster12': MONSTER12, 'battle7': BATTLE7, 'monster7': MONSTER7, 'move7': MOVE7}
 HERE = os.path.dirname(os.path.abspath(__file__))
 # works in eb-build/pool (writes to eb-build/out) and in the repo copy tools/pool (writes to the game's own assets)
 GAME = os.path.join(HERE, '..', 'out') if os.path.isdir(os.path.join(HERE, '..', 'out', 'assets')) else os.path.join(HERE, '..', '..')
@@ -85,7 +85,7 @@ def cut_sheet(path, kind, left=False):
             hs = [np.where(keep[:, a:b].any(1))[0] for a, b in cols]; hh = [(h.max() - h.min()) if len(h) else 0 for h in hs]
             if hh and len(cols) > 2: cols = [c for c, h in zip(cols, hh) if h >= max(hh) * .5]   # a lone spark or dust cloud isn't a frame
             n = max(1, len(cols))
-        if kind in ('battle12', 'monster12', 'battle7', 'monster7') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
+        if kind in ('battle12', 'monster12', 'battle7', 'monster7', 'move7') and not single: n = max(len(cols), len(groups))   # 12x12: keep every frame the artist drew
         while len(cols) > n:   # too many: merge the closest pair, or drop the thinnest
             gaps = [(cols[i + 1][0] - cols[i][1], i) for i in range(len(cols) - 1)]
             g, i = min(gaps)
@@ -124,7 +124,7 @@ def cut_sheet(path, kind, left=False):
             im = Image.fromarray(np.dstack([out, al * 255]).astype(np.uint8)); bb = im.getbbox()
             if not bb: continue
             im = im.crop(bb)
-            if left and (kind != 'life' or nm == 'walk_side'): im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            if left and (kind not in ('life', 'move7') or nm in ('walk_side', 'run_side', 'idle_side')): im = im.transpose(Image.FLIP_LEFT_RIGHT)
             frames.append((nm, im))
     return frames
 
@@ -208,7 +208,7 @@ def build(key):
     sheet = Image.new('RGBA', (AW, y + rh + 2))
     for im, xx, yy in items: sheet.alpha_composite(im, (xx, yy))
     sheet.save(os.path.join(OUT, 'c_%s.png' % key), optimize=True); sheet.save(os.path.join(OUT, 'c_%s.webp' % key), quality=90, alpha_quality=100, method=6)
-    g = lambda n, k=None: idx.get((k or ('life' if n in ('idle', 'walk_down', 'walk_up', 'walk_side', 'work') or n.startswith(('em_', 'g_')) else 'battle')) + ':' + n, [])
+    g = lambda n, k=None: idx.get((k or ('life' if n in ('idle', 'walk_down', 'walk_up', 'walk_side', 'work', 'run_down', 'run_up', 'run_side', 'idle_up', 'idle_side') or n.startswith(('em_', 'g_')) else 'battle')) + ':' + n, [])
     L = lambda n: g(n, 'life'); Bt = lambda n: g(n, 'battle')
     C = Bt('combat') or L('walk_side')[:1] or L('idle')[:1]
     light, heavy, spec = Bt('light') or C, Bt('heavy') or Bt('light') or C, Bt('special') or Bt('heavy') or C
@@ -230,6 +230,9 @@ def build(key):
     idl = L('idle') or C[:1]; side = L('walk_side') or C
     A.update(ow_down=idl[:1], ow_idle=idl, ow_down_walk=L('walk_down') or side, ow_up=(L('walk_up') or idl)[:1], ow_up_walk=L('walk_up') or L('walk_down') or side,
              ow_side=side[:1], ow_side_walk=side, work=L('work'))
+    if L('run_side'):   # a movement sheet: real walk + run cycles in every direction (simplewalk.js plays them when meta.cycle)
+        A.update(ow_up=(L('idle_up') or L('walk_up') or idl)[:1], ow_side=(L('idle_side') or side)[:1],
+                 ow_down_run=L('run_down') or L('walk_down'), ow_up_run=L('run_up') or L('walk_up'), ow_side_run=L('run_side'))
     for n in ('em_talk', 'em_nod', 'em_laugh', 'em_angry', 'em_sad', 'em_shock', 'g_point', 'g_wave', 'g_bow', 'g_cross', 'g_kneel', 'g_sit'):
         if L(n): A[n] = L(n)
     life_h = next((im.height for kk, nm, im in allf if kk == 'life' and nm == 'idle'), None)
@@ -263,7 +266,11 @@ def build(key):
             print('  kept the old on-screen size')
         except Exception as e: print('  (size match skipped:', e, ')')
     A = {k: v for k, v in A.items() if v}
+    old_meta = meta.get('c_' + key) or {}
     meta['c_' + key] = dict(img='c_%s.png' % key, faces='right', frames=frames, anims=A, pool=kinds)
+    for keep in ('label', 'unlock'):
+        if old_meta.get(keep): meta['c_' + key][keep] = old_meta[keep]
+    if A.get('ow_side_run'): meta['c_' + key]['cycle'] = 1
     meta['v'] = meta.get('v', 20) + 1; open(os.path.join(OUT, 'hd.json'), 'w').write(json.dumps(meta, separators=(',', ':')))
     pv = Image.new('RGBA', sheet.size, (40, 60, 50, 255)); pv.alpha_composite(sheet)
     pv.convert('RGB').resize((sheet.width // 2, max(1, sheet.height // 2))).save(SP + 'pool_%s.png' % key)
@@ -272,7 +279,7 @@ def build(key):
 if __name__ == '__main__':
     path, key, kind = sys.argv[1], sys.argv[2], sys.argv[3]
     left = '--left' in sys.argv
-    fr = cut_sheet(path, kind, left); spec_kind = kind; kind = 'life' if kind == 'life' else 'battle'
+    fr = cut_sheet(path, kind, left); spec_kind = kind; kind = 'life' if kind in ('life', 'move7') else 'battle'
     d = os.path.join(HERE, 'src', key, kind); os.makedirs(d, exist_ok=True)
     for f in os.listdir(d): os.remove(os.path.join(d, f))
     man = []
