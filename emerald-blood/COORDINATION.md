@@ -78,6 +78,10 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-13 · B (new file `js/worldplus6.js`, script tag after worldplus5.js): night constellations → star-shards (`G.S.f.star_<scene>`), rival hunter Vessa Crane
+  (clones `rival_vessa_<n>` of `bandit`; bounty state `lost`; `G.S.rivalWins`), seasonal bosses (`season_<season>` clones, `G.S.f.sboss_<week>`), repairable bridges/ladders
+  (`G.S.f.fix_<scene>_b|l`, opens col; drawn via `Ambient.ground`), forest echoes at the 4 history statues (`G.S.f.echo_<scene>`), night market at the Crossroads (`G.S.market`),
+  dungeon run plaques by forest cave mouths (`G.S.dbest`). Vessa Crane is a new named character — A/C may want lines/portrait (currently uses the bandit sprite).
 - 2026-11-13 · B (new file `js/worldplus5.js`, script tag after worldplus4.js; worldplus4 extended): hunting horn (`G.S.horn`, wraps forest camp-fire tiles; elite clones `horn_<enemy>`),
   bounty marks track you in snow/mud, shrine chain (`G.S.f.shrine_<scene>`) → stair under the Wayshrine → scene `sanctum` (map fc_grotto_w, boss clone `sanct_keeper`, `G.S.f.sanctum`),
   weekly dungeon treasure map (`G.S.dmap`), fog wisps (`G.S.f.wisp_<scene>_<week>`). Hunter ranks Copper→Mithril (`G.S.bountiesPaid`), weekly elder mark from Silver.

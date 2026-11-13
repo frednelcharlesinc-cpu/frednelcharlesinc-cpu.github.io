@@ -84,7 +84,7 @@
     if (ch === 0) return bountyMenu(); if (ch === 1) return tally(); if (ex[ch - 2]) return ex[ch - 2].run();
   }
   async function bountyMenu() {
-    const L = bounties(), st = b => ({ open: '', hunt: ' — hunting', done: ' — slain! collect', paid: ' — paid' })[b.state];
+    const L = bounties(), st = b => ({ open: '', hunt: ' — hunting', done: ' — slain! collect', paid: ' — paid', lost: ' — claimed by a rival' })[b.state];
     const ch = await ask(null, null, `This week's marks (new notices every 7 days):`, [...L.map(b => `${b.name} · ${SCENES[b.scene].subtitle}${st(b)}`), 'Back']);
     const b = L[ch]; if (!b) return;
     if (b.state === 'open') { b.state = 'hunt'; await narr(`WANTED: ${b.name}. Last seen in ${SCENES[b.scene].subtitle}. A red X will show on your map there.`); save(); }
@@ -95,7 +95,7 @@
       await narr(`The board-keeper's strongbox pays out: ${gold} gold${n ? ` and a <b style="color:#ffd36a">${n}</b>` : ''}${n2 ? ` and a <b style="color:#ffd36a">${n2}</b>` : ''}. "${b.name}? Good riddance."`);
       if (rankIx() > r0) await rankUp(rankIx());
       save();
-    } else await narr('Already paid. Check back when the notices change.');
+    } else await narr(b.state === 'lost' ? `Someone has nailed a note over it: "TAKEN. — V.C."` : 'Already paid. Check back when the notices change.');
   }
   async function rankUp(i) {
     sfx('level'); toast(`<b style="color:#ffd36a">HUNTER RANK: ${RANKS[i][0].toUpperCase()}</b>`, 3200);
