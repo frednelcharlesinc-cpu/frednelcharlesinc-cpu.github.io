@@ -82,10 +82,30 @@ const HD = {
     }
     x.putImageData(D, 0, 0);
   },
+  ups: new WeakMap(),
+  upFrame(img, sx, sy, sw, sh, K) {
+    let m = this.ups.get(img); if (!m) this.ups.set(img, m = new Map());
+    const key = sx + ',' + sy + ',' + sw + ',' + sh + ',' + K; let u = m.get(key);
+    if (!u) {
+      u = document.createElement('canvas'); u.width = Math.max(1, Math.round(sw * K)); u.height = Math.max(1, Math.round(sh * K));
+      const x = u.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(img, sx, sy, sw, sh, 0, 0, u.width, u.height);
+      if (m.size > 400) m.clear(); m.set(key, u);
+    }
+    return u;
+  },
   dI(c, img, sx, sy, sw, sh, dx, dy, dw, dh) {
     let T = 1; try { const t = c.getTransform(); T = Math.hypot(t.a, t.b); } catch (e) {}
     const eff = Math.abs(dw / sw) * T, sm = c.imageSmoothingEnabled, sq = c.imageSmoothingQuality;
-    if (eff >= .92 || !(img.width > 0)) { c.imageSmoothingEnabled = false; c.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh); c.imageSmoothingEnabled = sm; return; }
+    if (!(img.width > 0)) return;
+    if (eff >= .92) {
+      /* SHARP UPSCALE (Chat C, 2026-11-13): at an uneven zoom (1.4x on a phone) plain nearest-neighbour doubles some pixels and not
+         others, which smears edges. Enlarge the frame by a whole number first, then shrink that smoothly to the exact size. */
+      const K = Math.ceil(eff - .02);
+      if (K < 2 || Math.abs(eff - Math.round(eff)) < .04) { c.imageSmoothingEnabled = false; c.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh); c.imageSmoothingEnabled = sm; return; }
+      const up = this.upFrame(img, sx, sy, sw, sh, Math.min(K, 4));
+      c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(up, 0, 0, up.width, up.height, dx, dy, dw, dh);
+      c.imageSmoothingEnabled = sm; c.imageSmoothingQuality = sq; return;
+    }
     let L = 0; while (eff * (1 << (L + 1)) <= 1 && L < 4) L++;
     const m = L ? this.mip(img, L) : img, f = m.width / img.width;
     c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';

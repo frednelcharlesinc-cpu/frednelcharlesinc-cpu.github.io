@@ -28,6 +28,13 @@
       try { const lo = this.lo(); for (const k of Object.keys(lo)) if (Array.isArray(lo[k])) lo[k] = lo[k].map(n => gone(n) ? '' : n); } catch (e) { }
       return P;
     };
+    // a move bar saved before the retirement still lists 'Four Cuts' — clear those slots whenever the bar is read
+    const _lo = MoveBar.lo.bind(MoveBar);
+    MoveBar.lo = function () {
+      const lo = _lo();
+      for (const k of Object.keys(lo)) if (Array.isArray(lo[k])) for (let i = 0; i < lo[k].length; i++) if (lo[k][i] && gone(lo[k][i])) lo[k][i] = '';
+      return lo;
+    };
   }
   // the Four's page under Last Light (Stones menu) goes too
   FOUR.menuHTML = function () { return ''; };
