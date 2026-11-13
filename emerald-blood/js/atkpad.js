@@ -90,7 +90,7 @@ const MoveBar = {
   const chip = document.createElement('div'); chip.id = 'atkHint'; chip.className = 'hide'; document.body.append(chip);
   const feel = el => { el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); sfx('blip'); try { navigator.vibrate && navigator.vibrate(12); } catch (e) { } setTimeout(() => el.classList.remove('on'), 140); };
   let cur = null, turns = 0, tab = (() => { try { return localStorage.getItem('eb_mbtab2') || 'phys'; } catch (e) { return 'phys'; } })();
-  const target = a => { const L = Battle.alive('e'), calm = L.filter(e => !e.panic); const lt = a.lastTarget && !a.lastTarget.ko && !a.lastTarget.panic && a.lastTarget; return lt || calm[0] || L[0] || null; };
+  const target = a => { const sh = e => typeof AI2 !== 'undefined' && AI2.shielded(e), A = Battle.alive('e'), L0 = A.filter(e => !sh(e)), L = L0.length ? L0 : A, calm = L.filter(e => !e.panic); const lt = a.lastTarget && !a.lastTarget.ko && !a.lastTarget.panic && !sh(a.lastTarget) && a.lastTarget; return lt || calm[0] || L[0] || null; };
   const hide = () => { chip.classList.add('hide'); gp.classList.add('hide'); bar.classList.add('hide'); cur = null; };
   const go = fn => { const c = cur; hide(); if (typeof AT !== 'undefined') { AT.fold(); AT.btn.classList.add('hide'); } Battle.closeMenu(); fn(c); };
   const onDown = (el, fn) => el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (!cur) return; try { audioUnlock(); } catch (x) { } fn(el); });
