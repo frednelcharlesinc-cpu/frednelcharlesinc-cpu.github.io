@@ -21,6 +21,7 @@
     x.beginPath(); x.moveTo(28, 34); x.lineTo(20, 38); x.moveTo(35, 40); x.lineTo(44, 44); x.stroke();
     x.fillStyle = 'rgba(160,220,255,.35)'; x.fillRect(30, 36, 2, 2); x.fillRect(31, 46, 2, 2);
   }));
+  const blankImg = () => cache.blank || (cache.blank = sheet(() => { }));
   const SYM = { sun: '#ffd34a', moon: '#cfe6ff', star: '#c58aff' };
   const glyph = (x, sym, cx, cy) => {
     x.fillStyle = SYM[sym];
@@ -52,8 +53,8 @@
   async function crack(id, i) {
     const c = await ask(null, null, 'A cold draught whistles through cracks in this wall. Something is hollow behind it.', ['Smash it', 'Leave it']);
     if (c !== 0) return;
-    const [x, y] = DX(id).cracks[i]; F()[`dx_${id}_crack${i}`] = 1;
-    World.ents = World.ents.filter(e => e.id !== 'dxcrack_' + i); if (World.col[y]) World.col[y][x] = 0;
+    F()[`dx_${id}_crack${i}`] = 1;
+    World.ents = World.ents.filter(e => e.id !== 'dxcrack_' + i); await reveal(id, i, World);
     World.shake = 300; sfx('hit'); toast('<b style="color:#9fd8ff">SECRET PASSAGE</b> — the wall caves in.', 2600); save();
   }
   let seq = [];
@@ -71,7 +72,8 @@
     }
     if (seq.length < 3) { await narr(`You pull the ${L.sym.toUpperCase()} lever. It locks down with a heavy CLUNK.`); return; }
     seq = []; F()[key] = 1;
-    const [gx, gy] = D.gate; World.ents = World.ents.filter(n => n.id !== 'dxgate'); if (World.col[gy]) World.col[gy][gx] = 0;
+    World.ents = World.ents.filter(n => n.id !== 'dxgate'); await reveal(id, 2, World);
+    if (!F()[`dx_${id}_relic`]) World.ents.push(new Ent({ id: 'dxrelic', x: D.relic[0], y: D.relic[1], dir: 'down', img: Pick.sheet('chest_gold_c'), pickup: 1, name: 'Relic chest', talk: () => relic(id) }));
     World.shake = 400; sfx('level'); await narr('MOON. STAR. SUN. Stone grinds on stone, and far away a vault gate rises into the ceiling.'); toast('<b style="color:#ffd34a">THE VAULT IS OPEN</b>', 2600); save();
   }
   async function relic(id) {
@@ -96,24 +98,78 @@
     save();
   }
 
+  /* ---------- the hidden rooms ----------
+     region i (0,1 = secret rooms behind cracked walls, 2 = the lever vault) is solid rock on the map, the mini map
+     and the collision grid until it's opened. Its chests, torches and secret boss don't exist until then. */
+  const isOpen = (id, i) => i === 2 ? F()[`dx_${id}_vault`] : F()[`dx_${id}_crack${i}`];
+  const stash = {};
+  async function overlay(id, i) {
+    const D = DX(id), a = D.art && D.art[i]; if (!a) return;
+    let img; try { img = await loadImg(`assets/dsec_${id}_${i}.webp?v=${a[2]}`); } catch (e) { return; }
+    if (!(World.mapImg instanceof HTMLCanvasElement) || !World.mapImg.__dx) {
+      const cv = document.createElement('canvas'); cv.width = World.mapImg.width; cv.height = World.mapImg.height; cv.__dx = 1;
+      cv.getContext('2d').drawImage(World.mapImg, 0, 0); World.mapImg = cv;
+    }
+    World.mapImg.getContext('2d').drawImage(img, a[0], a[1]);
+  }
+  function mmOpen(id, i) {
+    const D = DX(id), M = World.map; const rows = (World.mmLocal || M.mm).map(r => r.split(''));
+    for (const [x, y] of D.regions[i]) if (rows[y]) rows[y][x] = 'f';
+    World.mmLocal = rows.map(r => r.join('')); if (typeof MiniMap !== 'undefined') MiniMap.ckey = '';
+  }
+  async function reveal(id, i, W) {
+    const D = DX(id);
+    for (const [x, y] of D.regions[i]) if (W.col[y]) W.col[y][x] = 0;
+    await overlay(id, i); mmOpen(id, i);
+    const st = stash[id + i]; if (st) { W.ents.push(...st.ents); W.extraProps.push(...st.props); W.lights.push(...st.lights); delete stash[id + i]; }
+    if (i < 2) await spawnSB(W, id, D.secret.find(s => s.i === i));
+    W.buildPropList();
+  }
+  function hide(id, i, W) {
+    const set = new Set(DX(id).regions[i].map(t => t + ''));
+    const inR = (x, y) => set.has(x + ',' + y);
+    // chests are matched by the spot they were made for (another loader may have nudged them out of the "wall")
+    const home = e => { const m = /:(\d+),(\d+)$/.exec(e.id); return m ? [+m[1], +m[2]] : [e.x, e.y]; };
+    const st = stash[id + i] = { ents: W.ents.filter(e => /^chest_/.test(e.id) && inR(...home(e))), props: W.extraProps.filter(p => inR(p.x, p.y)),
+      lights: W.lights.filter(L => !L.follow && inR(Math.floor(L.x / TILE), Math.floor(L.y / TILE))) };
+    for (const e of st.ents) { const [x, y] = home(e); e.x = x; e.y = y; e.px = x * TILE + 16; e.py = y * TILE + 26; }
+    W.ents = W.ents.filter(e => !st.ents.includes(e)); W.extraProps = W.extraProps.filter(p => !st.props.includes(p)); W.lights = W.lights.filter(L => !st.lights.includes(L));
+  }
+  async function spawnSB(W, id, s) {
+    if (!s || F()[`dx_${id}_sb${s.i}`] || W.ents.some(e => e.id === 'dxsb_' + s.i)) return;
+    const E = mkSB(id, s.i); let img; try { img = await npcImg(E.img); } catch (e) { return; }
+    W.ents.push(new Ent({ id: 'dxsb_' + s.i, x: s.x, y: s.y, dir: 'down', img, size: window.isDragon && isDragon(E) ? 2.3 : 1.55, name: E.name, ai: 'turn', turns: ['down', 'left', 'right'], talk: () => secretBoss(id, s.i) }));
+  }
+  // a draught leaks out of each unopened crack: a few dust motes drift from the wall when Ren is close
+  const _render = World.render.bind(World);
+  World.render = function (c, t) {
+    _render(c, t);
+    try {
+      const D = DX(G.S.map); if (!D || !World.player || World.loading) return;
+      const p = World.player, cx = Math.round(World.cam.x), cy = Math.round(World.cam.y);
+      D.cracks.forEach(([x, y], i) => {
+        if (isOpen(G.S.map, i) || Math.abs(p.x - x) + Math.abs(p.y - y) > 6) return;
+        for (let k = 0; k < 4; k++) {
+          const ph = ((t / 2600) + k / 4) % 1, sx = x * TILE + 16 + Math.sin(t / 700 + k * 2) * 6 + (ph * 22) * (k % 2 ? 1 : -1), sy = y * TILE + 22 + ph * 18;
+          c.fillStyle = `rgba(200,225,255,${(.55 * (1 - ph)).toFixed(2)})`; c.fillRect(sx - cx, sy - cy, 2, 2);
+        }
+      });
+    } catch (e) { }
+  };
   async function setup(W, id) {
-    const D = DX(id); if (!D) return; const f = F(); seq = [];
+    const D = DX(id); if (!D) return; const f = F(); seq = []; W.mmLocal = null;
+    if (D.regions) for (let i = 0; i < D.regions.length; i++) { if (isOpen(id, i)) await reveal(id, i, W); else hide(id, i, W); }
     D.cracks.forEach(([x, y], i) => {
-      if (f[`dx_${id}_crack${i}`]) { if (W.col[y]) W.col[y][x] = 0; return; }
-      if (W.col[y]) W.col[y][x] = 1;
-      W.ents.push(new Ent({ id: 'dxcrack_' + i, x, y, dir: 'down', img: crackImg(), pickup: 1, name: 'Cracked wall', talk: () => crack(id, i) }));
+      if (f[`dx_${id}_crack${i}`]) return;
+      W.ents.push(new Ent({ id: 'dxcrack_' + i, x, y, dir: 'down', img: blankImg(), pickup: 1, name: '', talk: () => crack(id, i) }));
     });
     const [gx, gy] = D.gate, solved = f[`dx_${id}_vault`];
-    if (W.col[gy]) W.col[gy][gx] = solved ? 0 : 1;
     if (!solved) W.ents.push(new Ent({ id: 'dxgate', x: gx, y: gy, dir: 'down', img: Lieutenants.gateSheet(), pickup: 1, name: 'Vault gate',
       talk: () => narr('A vault gate of black iron. No keyhole — only three carved symbols: a sun, a moon, a star. Somewhere in this dungeon, levers move it.') }));
     D.levers.forEach((L, i) => W.ents.push(new Ent({ id: 'dxlever_' + i, x: L.x, y: L.y, dir: 'down', img: leverImg(L.sym, solved ? 1 : 0), pickup: 1, name: 'Lever', talk: () => pull(id, i) })));
     W.ents.push(new Ent({ id: 'dxclue', x: D.clue[0], y: D.clue[1] + 1, dir: 'down', img: tabletImg(), pickup: 1, name: 'Carving', talk: () => narr(D.cluetext) }));
-    if (!f[`dx_${id}_relic`]) W.ents.push(new Ent({ id: 'dxrelic', x: D.relic[0], y: D.relic[1], dir: 'down', img: Pick.sheet('chest_gold_c'), pickup: 1, name: 'Relic chest', talk: () => relic(id) }));
-    for (const s of D.secret) {
-      if (f[`dx_${id}_sb${s.i}`]) continue; const E = mkSB(id, s.i); let img; try { img = await npcImg(E.img); } catch (e) { continue; }
-      W.ents.push(new Ent({ id: 'dxsb_' + s.i, x: s.x, y: s.y, dir: 'down', img, size: window.isDragon && isDragon(E) ? 2.3 : 1.55, name: E.name, ai: 'turn', turns: ['down', 'left', 'right'], talk: () => secretBoss(id, s.i) }));
-    }
+    if (!f[`dx_${id}_relic`] && solved) W.ents.push(new Ent({ id: 'dxrelic', x: D.relic[0], y: D.relic[1], dir: 'down', img: Pick.sheet('chest_gold_c'), pickup: 1, name: 'Relic chest', talk: () => relic(id) }));
+    // (secret bosses appear when their room is opened — see reveal())
   }
   const _load = World.load.bind(World);
   World.load = async function (name, ...a) {

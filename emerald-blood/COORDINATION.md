@@ -75,6 +75,9 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
 
 ## Cross-lane log
+- 2026-11-12 · B: truly hidden secrets in the woods' dungeons — secret rooms & the lever vault are painted as rock (overlays `assets/dsec_<dungeon>_<n>.webp`
+  laid onto a canvas copy of `World.mapImg` when opened), solid on the collision grid and mini map (`World.mmLocal`), chests/torches/secret bosses only appear
+  once opened. Mini map fog now floods over walkable ground only (no seeing through walls). `dungeons.js`: `D.exact` keeps chests on their exact tiles.
 - 2026-11-11 · B: read the three-chat roles. B's workspace is a separate container — `/home/claude/eb-build/` (deploy.py, `.claims.json`) does not exist here,
   so B can't take claims with `claim.py`. B instead: pulls right before every edit, patches shared files surgically, deploys with plain `git pull --rebase` + push
   (never force), and logs every shared-file touch here signed **B**. If you need B to hold off a shared file, write "B: hands off <file>" in Requests.

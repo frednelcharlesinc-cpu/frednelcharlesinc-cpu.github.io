@@ -204,9 +204,17 @@ const MiniMap = {
   fog() { const S = G.S, k = World.scene.map || G.S.map; S.fcfog = S.fcfog || {}; const M = World.map; let f = S.fcfog[k]; if (!f || f.length !== M.w * M.h) f = S.fcfog[k] = '0'.repeat(M.w * M.h); return [k, f]; },
   reveal() {
     if (!this.on()) return; const M = World.map, p = World.player; if (!p) return; let [k, f] = this.fog(); const a = f.split(''); let ch = 0;
-    for (let y = p.y - this.R; y <= p.y + this.R; y++) for (let x = p.x - this.R; x <= p.x + this.R; x++) {
-      if (x < 0 || y < 0 || x >= M.w || y >= M.h || (x - p.x) ** 2 + (y - p.y) ** 2 > this.R * this.R) continue;
-      const i = y * M.w + x; if (a[i] !== '1') { a[i] = '1'; ch = 1; }
+    // flood out from Ren over open ground only; walls/trees at the edge get mapped, whatever is behind them doesn't
+    const col = World.col, R2 = this.R * this.R, seen = new Set([p.x + ',' + p.y]), q = [[p.x, p.y]];
+    const mark = (x, y) => { if (x < 0 || y < 0 || x >= M.w || y >= M.h) return; const i = y * M.w + x; if (a[i] !== '1') { a[i] = '1'; ch = 1; } };
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) mark(x + dx, y + dy);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+        if (seen.has(k) || (nx - p.x) ** 2 + (ny - p.y) ** 2 > R2 || !col[ny] || col[ny][nx] !== 0) continue;
+        seen.add(k); q.push([nx, ny]);
+      }
     }
     if (ch) { G.S.fcfog[k] = a.join(''); this.ckey = ''; }
   },
@@ -216,7 +224,8 @@ const MiniMap = {
     if (this.ckey !== k + s) {
       const cv = this.cache || (this.cache = document.createElement('canvas')); cv.width = w; cv.height = h; const x = cv.getContext('2d');
       x.clearRect(0, 0, w, h); x.fillStyle = 'rgba(6,10,8,.55)'; x.fillRect(0, 0, w, h);
-      for (let yy = 0; yy < M.h; yy++) { const row = M.mm[yy]; for (let xx = 0; xx < M.w; xx++) if (f[yy * M.w + xx] === '1') { x.fillStyle = this.C[row[xx]] || '#333'; x.fillRect(xx * s, yy * s, s, s); } }
+      const MM = World.mmLocal || M.mm;
+      for (let yy = 0; yy < M.h; yy++) { const row = MM[yy]; for (let xx = 0; xx < M.w; xx++) if (f[yy * M.w + xx] === '1') { x.fillStyle = this.C[row[xx]] || '#333'; x.fillRect(xx * s, yy * s, s, s); } }
       this.ckey = k + s;
     }
     const vw = G.view.w, pad = 10 * zk, X = Math.round(vw - w - pad), Y = this.big ? Math.round(G.view.h * .5 - h / 2) : Math.round(40 * zk);
@@ -226,8 +235,8 @@ const MiniMap = {
     const seen = (tx, ty) => f[ty * M.w + tx] === '1';
     const dot = (tx, ty, col, r) => { c.fillStyle = col; c.beginPath(); c.arc(X + tx * s + s / 2, Y + ty * s + s / 2, r, 0, 7); c.fill(); };
     for (const e of World.ents) {
-      if (/^chest_/.test(e.id) && seen(e.x, e.y) && !(G.S.chests || {})[e.id.slice(6)]) dot(e.x, e.y, '#ffd34a', s * .7 + .8);
-      if (/^cave_|^stairs$/.test(e.id) && seen(e.x, e.y)) dot(e.x, e.y, '#c58aff', s + 1);
+      if (/^chest_|^dxrelic$/.test(e.id) && seen(e.x, e.y) && !(G.S.chests || {})[e.id.slice(6)]) dot(e.x, e.y, '#ffd34a', s * .7 + .8);
+      if (/^cave_|^stairs$|^dxgate$/.test(e.id) && seen(e.x, e.y)) dot(e.x, e.y, '#c58aff', s + 1);
       if (/^(boss|lt_\d|dxsb_\d)$/.test(e.id) && seen(e.x, e.y)) dot(e.x, e.y, '#ff4a4a', s + 1);
     }
     for (const L of World.lights) { const tx = Math.floor(L.x / TILE), ty = Math.floor(L.y / TILE); if (!L.follow && seen(tx, ty) && World.map.dungeon === undefined) dot(tx, ty, '#ff9a3a', s * .8 + 1); }
@@ -244,7 +253,7 @@ const MiniMap = {
   const _step = World.onStep.bind(World);
   World.onStep = function (e) { const r = _step(e); if (e && e.isPlayer) MiniMap.reveal(); return r; };
   const _load = World.load.bind(World);
-  World.load = async function (...a) { const r = await _load(...a); MiniMap.ckey = ''; MiniMap.reveal(); return r; };
+  World.load = async function (...a) { World.mmLocal = null; const r = await _load(...a); MiniMap.ckey = ''; MiniMap.reveal(); return r; };
   // tap the mini map to enlarge / shrink it (captured before the world sees the tap)
   addEventListener('pointerdown', ev => {
     const b = MiniMap.box; if (!b || !MiniMap.on()) return;
