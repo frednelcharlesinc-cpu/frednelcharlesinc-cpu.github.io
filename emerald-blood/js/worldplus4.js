@@ -12,7 +12,7 @@
    7. YOUR HOMESTEAD — a clearing in the Old Grove. Buy the deed, then build it up: a tent to rest in, a garden that
       grows herbs while you're away, a trophy stand — and it becomes a camp you can fast-travel to. */
 (function () {
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };
   const FOREST = ['woods_n', 'woods_e', 'woods_s', 'woods_w'];
   const S_ = () => G.S, F = () => G.S.f;
   const sheet = draw => { const one = document.createElement('canvas'); one.width = one.height = 64; const x = one.getContext('2d'); draw(x); const S = document.createElement('canvas'); S.width = 64 * 9; S.height = 64 * 12; const s = S.getContext('2d'); for (let r = 0; r < 12; r++) for (let f = 0; f < 9; f++) s.drawImage(one, f * 64, r * 64); return S; };

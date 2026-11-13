@@ -1,7 +1,7 @@
 /* ================= THE HUNT, DEEPER =================
    1 body parts you can aim at and break (each break drops that part and weakens the monster)
    2 carving after a big kill (timing taps for extra parts)
-   3 weapon upgrade trees: Fang (crit-strikes), Drake (fire), Bone (mana), Crystal (the longest edge)
+   3 weapon upgrade trees: Fang (crit-strikes), Drake (fire), Bone (mana), Crystal (clean, steady damage)
    4 Moss, the Drag smith's apprentice — a sewer rescue, and Emerald Dawn's own forge (tempered +6, Emerald etching)
    5 armour sets   6 the Field Guide   7 tempered monsters   8 blade skills (SP)   9 Guild hunt contracts
    10 Nyx sniffs out parts   11 rarity colours   +  gear now counts toward enemy scaling (never too easy) */
@@ -17,7 +17,7 @@ const PATHS = {
   fang: { n: 'Fang line', d: 'Perfect strikes cut deeper: +8% perfect-hit damage per level.', col: '#ffffff', p: ['fang', 'claw'] },
   drake: { n: 'Drake line', d: 'A fire edge: 10% per level that a hit sets the target BURNING.', col: '#ff7a3a', p: ['scale', 'claw'] },
   bone: { n: 'Bone line', d: 'A mana edge: +5 MP per level, and each hit restores 1 MP.', col: '#b48aff', p: ['bone', 'dust'] },
-  crystal: { n: 'Crystal line', d: 'The longest edge: +40 edge per level and dulls 18% slower per level.', col: '#7fe3ff', p: ['crystal', 'gel'] }
+  crystal: { n: 'Crystal line', d: 'Flawless steel: +4% damage per level on every hit.', col: '#7fe3ff', p: ['crystal', 'gel'] }
 };
 const SETS = {
   pack: { n: 'Pack Hunter', a: 'hidecoat', c: 'fangcharm', d: '+10% damage for each ally still standing.' },
@@ -28,9 +28,9 @@ const SETS = {
   moon: { n: 'Moonweave', a: 'silkcloak', c: 'crystalcharm', d: '+2 MP back at the start of each of your turns.' }
 };
 const BSKILL = {
-  keen: { n: 'Keen Edge', c: 2, d: 'Your blade dulls 20% slower.' },
-  whet: { n: 'Whetstone Master', c: 2, d: 'Whetstones restore the whole edge.' },
-  razor: { n: 'Razor\'s Focus', c: 3, d: '+10% damage while your edge is WHITE.' },
+  keen: { n: 'Keen Edge', c: 2, d: '+5% damage on every hit.' },
+  whet: { n: 'Finisher', c: 2, d: '+15% damage against foes under 30% HP.' },
+  razor: { n: 'Razor\'s Focus', c: 3, d: '+10% damage while you are above half HP.' },
   carver: { n: 'Master Carver', c: 2, d: 'Harvest one extra part from every big hunt.' }
 };
 Object.assign(Gear, {
@@ -99,7 +99,7 @@ const Moss = {
       return `<div class="stat"><h3>${esc(Gear.nm(w))} <span class="muted">· ${WEAPON[w] || 'weapon'} +${bl.lv}${bl.path ? ' · ' + PATHS[bl.path].n : ''}${bl.etched ? ' · Emerald-etched' : ''}</span></h3>
         ${bl.lv >= 6 ? '<p class="muted">TEMPERED. Nothing left to teach this steel.</p>' : `<button class="btn" data-t6="${w}" ${okT ? '' : 'disabled'}>Temper to +6 (2 Tempered Shards, 1200g)</button>`}
         ${bl.etched ? '' : `<button class="btn" data-et="${w}" ${okE ? '' : 'disabled'}>Emerald etching (1 Alpha Heart, 2 Mana Crystal, 300g)</button>`}
-        <p class="muted" style="font-size:11px;margin:2px 0">Tempering needs a +5 blade: +3 ATK and +50 edge. Etching: a green line down the steel — +20 edge, dulls 25% slower.</p></div>`; };
+        <p class="muted" style="font-size:11px;margin:2px 0">Tempering needs a +5 blade: +3 ATK. Etching: a green line down the steel — +4% damage.</p></div>`; };
     $('#menuCard').innerHTML = `<div class="mside"><div class="mhead"><h2>Moss's Forge</h2><button id="mClose">Close ✕</button></div><p class="muted">"Human smiths won't touch tempered steel. Too proud, or too scared. I'm neither."</p><p><b style="color:#ffd36a">${S.gold}g</b> · Tempered Shards: ${S.parts.tempered || 0}</p></div><div class="mbody">${W.map(row).join('')}</div>`;
     bindTap($('#mClose'), () => UI.closeMenu());
     $$('#menuCard [data-t6]').forEach(b => bindTap(b, () => { const w = b.dataset.t6, bl = Gear.blade(w); S.parts.tempered -= 2; S.gold -= 1200; bl.lv = 6; bl.sharp = Gear.max(w); sfx('level'); save(); this.open(); }));
@@ -149,7 +149,11 @@ const Moss = {
         if (bl.path === 'fang' && grade === 'perfect') m *= 1 + bl.lv * .08;
         if (set === 'pack') m *= 1 + .1 * Math.max(0, this.alive('p').length - 1);
         if (set === 'viper' && t.broken) m *= 1.2;
-        if (Gear.sk(w, 'razor') && Gear.edge(w)[1] === 'White') m *= 1.1;
+        if (Gear.sk(w, 'razor') && a.hp > a.maxHp * .5) m *= 1.1;
+        if (Gear.sk(w, 'keen')) m *= 1.05;
+        if (Gear.sk(w, 'whet') && t.hp < t.maxHp * .3) m *= 1.15;
+        if (bl.path === 'crystal') m *= 1 + bl.lv * .04;
+        if (bl.etched) m *= 1.04;
         if (t.bparts && B.aim) { aimP = t.bparts.find(p => p.id === B.aim && !p.broken); if (aimP) m *= .9; }
       }
     } catch (e) { }
@@ -298,8 +302,6 @@ const Contracts = {
   Gear.bind = function () { _b(); const S = this.st();
     $$('#menuCard [data-bs]').forEach(b => bindTap(b, () => { const [w, k] = b.dataset.bs.split('|'), c = BSKILL[k].c; if (((S.sp && S.sp[w]) || 0) < c) return; S.sp[w] -= c; S.bsk[w] = S.bsk[w] || {}; S.bsk[w][k] = 1; sfx('level'); save(); UI.renderMenu(); }));
     if (this.inGuild()) Contracts.bind();
-    // whetstone master: a full edge
-    if (Object.keys(S.bsk || {}).length) $$('#menuCard [data-wh]').forEach(b => { const w = b.dataset.wh; if (this.sk(w, 'whet')) bindTap(b, () => { const bl = this.blade(w); bl.sharp = this.max(w); }); });
   };
   // parts toast colours
   const _d = Gear.drops.bind(Gear); Gear.drops = function (es) { return _d(es); };
