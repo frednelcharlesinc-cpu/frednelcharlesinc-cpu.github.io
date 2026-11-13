@@ -47,6 +47,9 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Rows: STANCE · ADVANCE · DRAW (Ren only) or OPENER · COMBO · SIGNATURE · GUARD 3 + DODGE 4 · HURT 2 + KO 3 + VICTORY 2. Monsters: IDLE · PROWL · ATTACK · HEAVY · SPECIAL · BRACE 3 + EVADE 4 · HURT 2 + KO 3 + RAGE 2.
 - Cut: `pool_cut.py <sheet> <key> battle7|monster7`. Martial arts per character: `MARTIAL_ARTS.md`. Prompt pack (owner's page) holds every prompt.
 
+- Facing: every battle sheet is drawn facing RIGHT (`faces:'right'`); the game mirrors it for the party, who stand on the right facing left. Checked in battle 2026-11-12 with Ren's new sheet.
+- Ren's new 7×7 sheet = Wardrobe outfit `c_ren_o_sheathed` ("Sheathed Draw (new)"), world frames copied from `ren`. Effect-only frames (the loose crescent) were dropped; stray pixels cleaned from dodge frames.
+
 ## 12 × 12 sheets (older) (owner's standard from 2026-11-11)
 - Prompts: MASTER A (people) / MASTER B (monsters) / boss line — rows in `tools/pool/spec.py` BATTLE12 / MONSTER12.
 - Cut: `python3 tools/pool/pool_cut.py <sheet> <key> battle12|monster12` (works from the repo copy; writes straight into assets/).
