@@ -78,6 +78,10 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-13 · B (new file `js/worldplus4.js`, script tag after worldplus3.js): Wanted board at the Crossroads (weekly bounties, `G.S.bounty`, elite clones `bty_<name>` in ENEMY),
+  rare golden deer / spirit fox (flee, reward on catch), weather sight (fog/blizzard shrink `MiniMap.R`; rain fishing in worldplus3, fog chase range in worldplus2),
+  restorable ruins (wraps the Crossroads shrine + Mistveil/Emberroot tower `tiles`; `G.S.f.ruin_<scene>`), explorer's tally on the board, night moonstones (`G.S.f.moon_<scene>`),
+  homestead in the Old Grove (`G.S.home`, tiers 1–3; tier 3 adds camp `{id:'home'}` to `WorldPlus.CAMPS`). Boat crossing on hold by owner.
 - 2026-11-13 · B (new file `js/worldplus3.js`, script tag after worldplus2.js): mini map markers + chest/cache counter (wraps `MiniMap.draw`),
   Gate rifts in the woods (scene `gate_rift`, map `fc_gate`, `G.S.gateEv`; elite clones `rift_<enemy>` added to ENEMY), seasons by week (`Cal.day()`),
   vine climbing (`G.S.f.climbHook`, given in the first grotto), fishing (wraps `World.interact` only for water tiles in the woods), treasure maps (`G.S.tmaps`).
