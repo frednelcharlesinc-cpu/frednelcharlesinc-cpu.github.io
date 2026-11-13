@@ -261,19 +261,35 @@ def dungeon2(key, biome, seed):
     if specials[2][0] == 1 and abs(ys[2] - ys[0]) <= 7: specials[2] = [69, 42 - 5, 74, 42]
     for R in specials: room(*R)
     def link(R):
+        """carve the hidden passage; return (door tile, every tile that stays hidden until it's opened)"""
         c = ctr(R); n = min(inner, key=lambda j: abs(P(j)[0] - c[0]) + abs(P(j)[1] - c[1]))
-        door = (R[2] + 1, c[1]) if R[0] < 10 else (R[0] - 1, c[1])
+        before = m.k.copy()
         m.line([c, (P(n)[0], c[1]), P(n)], .6, 7)
-        return door
+        inR = lambda x, y: R[0] <= x <= R[2] and R[1] <= y <= R[3]
+        new = lambda x, y: m.k[y, x] == 7 and before[y, x] == 8
+        oldfloor = lambda x, y: before[y, x] == 7 and not inR(x, y)
+        from collections import deque
+        seen = {c: 0}; q = deque([c]); door = None
+        while q:
+            x, y = q.popleft()
+            if not inR(x, y) and any(oldfloor(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                if door is None or seen[(x, y)] < seen[door]: door = (x, y)
+                continue          # the passage ends here: this tile is the cracked wall / gate
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                t = (x + dx, y + dy)
+                if t not in seen and 0 < t[0] < W_ - 1 and 0 < t[1] < H_ - 1 and (inR(*t) or new(*t)): seen[t] = seen[(x, y)] + 1; q.append(t)
+        return door, list(seen)   # the search stops at the walls of the known dungeon, so this is exactly the hidden part
     lever = min(inner, key=lambda i: abs(ctr(rooms[i])[0] - 38) + abs(ctr(rooms[i])[1] - 24))
     clue = max(inner, key=lambda i: abs(ctr(rooms[i])[0] - ctr(rooms[lever])[0]) + abs(ctr(rooms[i])[1] - ctr(rooms[lever])[1]))
     secretR, VR = specials[:2], specials[2]
     data = {'cracks': [], 'secret': [], 'gate': None, 'levers': [], 'clue': None, 'relic': None, 'theme': key}
-    for R in secretR: data['cracks'].append(link(R))
-    data['gate'] = link(VR)
+    data['regions'] = []
+    for R in secretR: d_, reg = link(R); data['cracks'].append(d_); data['regions'].append(reg)
+    d_, reg = link(VR); data['gate'] = d_; data['regions'].append(reg)
     m.k[49:, :] = 8; m.k[:, 0] = 8; m.k[:, W_ - 1] = 8; m.k[0, :] = 8
     m.col[:] = 0; m.col[m.k == 8] = 1
-    for (x, y) in data['cracks'] + [data['gate']]: m.col[y, x] = 1   # sealed until opened in the game
+    for reg in data['regions']:
+        for (x, y) in reg: m.col[y, x] = 1   # solid rock until it's opened in the game
     # levers along the lever-hall's back wall, the clue on the far room's back wall
     LR = rooms[lever]; xs = [LR[0] + 1 + j * max(2, (LR[2] - LR[0] - 2) // 2) for j in range(3)]
     for sym, x in zip(['sun', 'moon', 'star'], xs): data['levers'].append({'x': x, 'y': LR[1], 'sym': sym})
@@ -286,7 +302,7 @@ def dungeon2(key, biome, seed):
         out = []
         for _ in range(60):
             x, y = rng.randint(R[0], R[2]), rng.randint(R[1], R[3])
-            if (x, y) in taken or m.col[y, x] or any(abs(x - a) + abs(y - b) < 3 for a, b in out): continue
+            if (x, y) in taken or m.k[y, x] != 7 or any(abs(x - a) + abs(y - b) < 3 for a, b in out): continue
             out.append((x, y)); taken.add((x, y)); taken.add((x, y + 1)); taken.add((x, y - 1))
             if len(out) == n: break
         return out
@@ -303,7 +319,7 @@ def dungeon2(key, biome, seed):
     m.data['dx'] = data
     # decoration from the user's sheets (or simple rubble)
     t = {'dun_e': 'dcinder', 'dun_n': 'dfang'}.get(biome)
-    keep = set(taken) | {(x, y) for (x, y) in data['cracks'] + [data['gate']]}
+    keep = set(taken) | {(x, y) for (x, y) in data['cracks'] + [data['gate']]} | {t for reg in data['regions'] for t in reg}
     for (x, y) in list(keep): keep |= {(x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
     m.data['lava'] = []
     if t:
@@ -327,17 +343,68 @@ def dungeon2(key, biome, seed):
 for key, b, s in [('d_fang', 'dun_n', 11), ('d_cinder', 'dun_e', 12), ('d_shrine', 'dun_s', 13), ('d_vault', 'dun_w', 14)]:
     MAPS[key] = dungeon2(key, b, s); MAPS[key].data['dx'].update({k: v for k, v in THEME[key].items()})
 
+# ============================== GROTTOS behind each waterfall (small hidden caves)
+def grotto(key, biome, seed, deco):
+    m = M(key, 22, 15, biome, seed); m.k[:] = 8; rng = m.rng
+    m.brush(11, 7, 5.2, 7); m.brush(6, 8, 3.2, 7); m.brush(16, 6, 3.4, 7); m.brush(11, 3.5, 2.6, 7); m.line([(11, 9), (11, 13)], .9, 7); m.k[14, 11] = 7
+    m.k[0, :] = 8; m.k[:, 0] = 8; m.k[:, 21] = 8
+    m.col[:] = 0; m.col[m.k == 8] = 1
+    keep = {(11, 13), (11, 14), (11, 12), (11, 4), (11, 5), (5, 8), (17, 6)}
+    for (x, y) in [(10, 4), (12, 4)]: keep.add((x, y))
+    m.data['grotto'] = {'start': [11, 13], 'exit': [11, 14], 'stone': [11, 4], 'chests': [[5, 8], [17, 6]]}
+    for y in range(1, 14):
+        for x in range(1, 21):
+            if m.k[y, x] != 7 or (x, y) in keep: continue
+            n8 = sum(m.k[y + dy, x + dx] == 7 for dx in (-1, 0, 1) for dy in (-1, 0, 1)) - 1
+            wn = m.k[y - 1, x] == 8 or m.k[y, x - 1] == 8 or m.k[y, x + 1] == 8
+            if wn and n8 >= 4 and rng.random() < .3: m.props.append({'k': rng.choice(deco), 'x': x, 'y': y}); m.col[y, x] = 1
+    m.data['dungeon'] = None
+    return m
+for key, b, s, deco in [('fc_grotto_n', 'dun_n', 21, ['fc_dfang_crystal1', 'fc_dfang_crystal2', 'fc_dfang_crystal3', 'fc_dfang_stalag3']),
+                        ('fc_grotto_e', 'dun_e', 22, ['fc_dcinder_coal', 'fc_dcinder_rubble', 'fc_e_rock1']),
+                        ('fc_grotto_s', 'dun_s', 23, ['fc_s_mush1', 'fc_s_mush2', 'fc_s_mush3', 'fc_s_mush4', 'fc_s_rock1']),
+                        ('fc_grotto_w', 'dun_w', 24, ['fc_w_rock1', 'fc_w_rock3', 'fc_w_bush2'])]:
+    g = grotto(key, b, s, deco); g.data.pop('dungeon'); MAPS[key] = g
+
 # ============================== write
 maps = json.load(open('/home/claude/eb/maps_orig.json'))
 FCL = {}
 for key, m in MAPS.items():
-    img = paint_dungeon(m) if key.startswith('d_') else paint(m)
+    dx = m.data.get('dx')
+    if dx and dx.get('regions'):
+        # the hidden rooms are painted as solid rock; each one gets an overlay that's laid down when it's opened
+        kfull = m.k.copy(); full = paint_dungeon(m)
+        for reg in dx['regions']:
+            for (x, y) in reg: m.k[y, x] = 8
+        img = paint_dungeon(m); mm_rows = minimap_rows(m); kbase = m.k.copy(); m.k[:] = kfull
+        dr = ImageDraw.Draw(img)
+        for (x, y) in dx['cracks']:   # a hairline crack — easy to miss
+            X, Y = x * 32, y * 32
+            dr.line([X + 15, Y + 4, X + 12, Y + 13, X + 17, Y + 19, X + 14, Y + 28], fill=(14, 12, 10), width=1)
+            dr.line([X + 12, Y + 13, X + 7, Y + 16], fill=(14, 12, 10), width=1)
+        dx['art'] = []
+        for i, reg in enumerate(dx['regions']):
+            tiles = set(reg)
+            for (x, y) in reg:   # the wall faces standing over the room come with it
+                for up in (1, 2):
+                    if y - up >= 0 and kfull[y - up, x] == 8: tiles.add((x, y - up))
+            xs = [t[0] for t in tiles]; ys = [t[1] for t in tiles]
+            x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
+            crop = full.crop((x0 * 32, y0 * 32, x1 * 32, y1 * 32)).convert('RGBA')
+            a = Image.new('L', crop.size, 0); ad = ImageDraw.Draw(a)
+            for (x, y) in tiles: ad.rectangle([(x - x0) * 32, (y - y0) * 32, (x - x0) * 32 + 31, (y - y0) * 32 + 31], fill=255)
+            crop.putalpha(a)
+            fn = f'{REPO}/assets/dsec_{key}_{i}.webp'; crop.save(fn, 'WEBP', quality=88, method=6)
+            import hashlib; vv = hashlib.md5(open(fn, 'rb').read()).hexdigest()[:8]
+            dx['art'].append([x0 * 32, y0 * 32, vv])
+    else:
+        img = paint_dungeon(m) if (key.startswith('d_') or key.startswith('fc_grotto')) else paint(m); mm_rows = None
     img.convert('RGB').save(f'{REPO}/assets/map_{key}.webp', 'WEBP', quality=88, method=6)
     import hashlib; ver = hashlib.md5(open(f'{REPO}/assets/map_{key}.webp', 'rb').read()).hexdigest()[:8]   # cache-buster: phones always get the matching image
     entry = {'w': m.w, 'h': m.h, 'col': [''.join(str(int(v)) for v in row) for row in m.col], 'props': m.props,
-             'grass': m.data.get('grass', []), 'ext': 'webp', 'v': ver, 'fc': 1, 'mm': minimap_rows(m)}
+             'grass': m.data.get('grass', []), 'ext': 'webp', 'v': ver, 'fc': 1, 'mm': mm_rows or minimap_rows(m)}
     if 'dungeon' in m.data:
-        entry['dungeon'] = m.data.pop('dungeon'); entry['dungeon']['style'] = {'d_fang': 'crypt', 'd_cinder': 'warren', 'd_shrine': 'mire', 'd_vault': 'crypt'}[key]
+        entry['dungeon'] = m.data.pop('dungeon'); entry['dungeon']['exact'] = 1; entry['dungeon']['style'] = {'d_fang': 'crypt', 'd_cinder': 'warren', 'd_shrine': 'mire', 'd_vault': 'crypt'}[key]
     maps[key] = entry
     for lk in m.data['look']: lk['t'] = [t for t in lk['t'] if m.inb(t[0], t[1]) and m.col[t[1], t[0]] == 1]
     FCL[key] = {k: v for k, v in m.data.items() if k != 'grass'}
@@ -347,5 +414,6 @@ open(REPO + '/js/fc_data.js', 'w').write('/* generated by the forest builder: la
 
 ch = json.load(open('/home/claude/eb/chests_orig.json'))
 for key, m in MAPS.items():
-    if not key.startswith('d_'): ch[key] = m.data['chests']; ch['ent_' + key] = []
+    if key.startswith('fc_grotto'): ch[key] = m.data['grotto']['chests']; ch['ent_' + key] = []
+    elif not key.startswith('d_'): ch[key] = m.data['chests']; ch['ent_' + key] = []
 json.dump(ch, open(REPO + '/assets/chests.json', 'w'), separators=(',', ':'))

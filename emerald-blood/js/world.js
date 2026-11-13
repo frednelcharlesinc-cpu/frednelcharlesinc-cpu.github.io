@@ -230,7 +230,9 @@ const World = {
       const [sx, sy, sw, sh] = md.r, x = o.dx - cx, y = o.dy - cy;
       if (x > w || y > h || x + sw < 0 || y + sh < 0) return;
       if (md.sh && typeof WorldFeel !== 'undefined') WorldFeel.propShadow(c, o.p.x * TILE + 16 - cx + (md.door !== undefined ? (md.tw * TILE) / 2 - 16 : 0), o.by - cy, md.sh);
+      if (o.fade) c.globalAlpha = o.fade;   // B: see-through when Ren is behind it (worldplus.js sets o.fade)
       c.drawImage(md.img ? (G.img[md.img] || PI) : PI, sx, sy, sw, sh, x, y, sw, sh);
+      if (o.fade) c.globalAlpha = 1;
     };
     this.flat.forEach(drawProp);
     if (typeof Ambient !== 'undefined') try { Ambient.ground(c, cx, cy, t, w, h); } catch (e) { }

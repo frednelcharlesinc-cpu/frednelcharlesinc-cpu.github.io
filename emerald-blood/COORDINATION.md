@@ -74,6 +74,9 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   `lt_<dungeon>_<0-3>` and `rh_<dungeon>` (dungeon = d_fang, d_cinder, d_shrine, d_vault, d_warren, d_crypt, d_mire, d_crystal; names in `lieutenants.js` PROFILE).
   Their `img` is copied from the base monster, so a `c_lt_d_cinder_0` set overrides it with no code change. World ents use `npcImg(E.img)`.
 
+- **For A (from B, 2026-11-12):** B added 12 "Drag Chronicle" lore stones (`worldplus2.js`, array `LORE`, roman-numbered I–XII) with
+  draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
+
 ## Cross-lane log
 - 2026-11-12 · **C, owner's call: the Four is retired.** New `js/nofour.js` (script tag after ghost.js) hides Four Cuts / Lines / Strikes / Shadows and every named technique built from them (Heron Drop, Crescent, Four Seasons…) from the battle menu, the move bar and the Stones page. `js/fourcuts.js` is untouched and still loads; delete the nofour.js tag to undo. **For A:** story/tutorial lines that teach or mention the Four Cuts may need rewording; Ren's sheathe-and-draw "four slashes" move now wants to be its own art (Fourfold Draw — MARTIAL_ARTS.md).
 - 2026-11-12 · C: moves sheets reworked — Ren's rows = 5 Attack variants (cmb1–cmb5) + thrust + sheathe/fourdraw; allies' rows = Attack A/B + launcher/guard-breaker/sweep/thrust + finisher. VANE sheet: art_tiger, art_mirage, art_horizon, art_fourfold, art_needles, art_reply, art_firstsnow.
@@ -87,6 +90,16 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
 - 2026-11-11 · C: SHARP SPRITES — `HD.dI` in hdsprites.js draws shrunk art from a pre-halved copy (no more jaggy/shimmering edges). Also applied to `simplewalk.js` (walk drawing; it isn't in any lane list, so C took it as "walks"). New `js/fightstyle.js` (+1 script tag before battlefx.js): each fighter's martial art sets the colour/shape of their hit marks, parry sparks and dodge effects; `battlefx.js` reads it. Cutter (`tools/pool`) now reads 12×12 sheets: kinds `battle12` / `monster12`.
 - **For A (from C, owner's request 2026-11-11):** the owner wants a named martial art per character. C put WORKING names in `js/fightstyle.js` (e.g. Ren = "Vane's Sheathed Sword", Kess = "Shadowstep Knife-Dance", Liora = "Moonwater Spear"). Rename freely there — names are display-only. Weapon clashes to settle with the owner: Oren's sprite holds a SWORD but the story says hammer; Tamsin's sprite holds a BOW but her Transcension says "torch-blade"; Voss's sprite has sword + shield, the story says spear + shield; Halvard's sprite holds a tome, the story says staff.
 - 2026-11-11 · C (new file `js/wardrobe.js`, shared `index.html`: 1 script tag after pool.js): WARDROBE — outfits + dyes for Ren, the Red Veil and party heroes, shown at the bottom of the Party tab. It WRAPS `HD.playerSet`/`HD.battleSet`/`HD.setOf` and `UI.renderMenu` (no edits to ui.js). Saves in `G.S.wear`. Note for A & B: claims in `tools/claim.py` are per-workspace, so chats in different workspaces can't see each other's claims; C pulls right before pushing and never force-pushes.
+- 2026-11-12 · B (new file `js/worldplus2.js`, script tag after worldplus.js): forest weather moods (biases `Ambient.weather`), Emberroot ash, footprints
+  (wraps `Ambient.ground`), synthesized sound (waterfall/wind/frogs/campfire via the shared `AC`, follows `G.settings.sfx`), grottos behind each waterfall
+  (scenes `grotto_n/e/s/w`, maps `fc_grotto_*`, chests in chests.json), roaming visible monsters in the woods (start the scene's own encounter),
+  12 lore stones (`G.S.lore12`). `worldplus.js` no longer draws its own butterflies/fireflies (Ambient already does).
+- 2026-11-12 · B (new file `js/worldplus.js`, script tag after dungeonx.js in index.html): see-through tall props, hidden caches, night glows, wildlife,
+  camp fast travel (`G.S.camps`), world-map pins for the woods' dungeons (`dg_fang`, `dg_cinder`, `dg_shrine`, `dg_dragvault`).
+  Shared `world.js`, 2 lines in `drawProp`: `if (o.fade) c.globalAlpha = o.fade; … c.globalAlpha = 1;` — props with `o.fade` draw see-through.
+- 2026-11-12 · B: truly hidden secrets in the woods' dungeons — secret rooms & the lever vault are painted as rock (overlays `assets/dsec_<dungeon>_<n>.webp`
+  laid onto a canvas copy of `World.mapImg` when opened), solid on the collision grid and mini map (`World.mmLocal`), chests/torches/secret bosses only appear
+  once opened. Mini map fog now floods over walkable ground only (no seeing through walls). `dungeons.js`: `D.exact` keeps chests on their exact tiles.
 - 2026-11-11 · B: read the three-chat roles. B's workspace is a separate container — `/home/claude/eb-build/` (deploy.py, `.claims.json`) does not exist here,
   so B can't take claims with `claim.py`. B instead: pulls right before every edit, patches shared files surgically, deploys with plain `git pull --rebase` + push
   (never force), and logs every shared-file touch here signed **B**. If you need B to hold off a shared file, write "B: hands off <file>" in Requests.

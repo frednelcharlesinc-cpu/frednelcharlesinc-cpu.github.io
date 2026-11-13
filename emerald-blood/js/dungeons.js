@@ -79,7 +79,7 @@ async function spawnExtras(W, name) {
   const free = (x, y) => { for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, -1], [1, -1], [-1, -1]]) if (!occupied(x + dx, y + dy)) return [x + dx, y + dy]; return null; };
   const spots = D ? D.chests.map((p, i) => [...p, i === D.chests.length - 1 ? 'gold' : 'iron']) : (CHESTPOS[mk] || []).map(p => [...p, 'wood']);
   for (const [x0, y0, tier] of spots) {
-    const p = free(x0, y0); if (!p) continue; const key = `${name}:${x0},${y0}`, opened = !!S.chests[key];
+    const p = D && D.exact ? [x0, y0] : free(x0, y0); if (!p) continue; const key = `${name}:${x0},${y0}`, opened = !!S.chests[key];   // exact: chests in hidden rooms stay put (dungeonx hides them)
     const e = new Ent({ id: 'chest_' + key, x: p[0], y: p[1], dir: 'down', img: Pick.sheet(`chest_${tier}_${opened ? 'o' : 'c'}`), pickup: 1, talk: async ent => {
       if (S.chests[key]) { await narr('Empty. Someone — you — got here first.'); return; }
       if (tier === 'gold' && D && !S.f['clear_' + name]) { await narr('The great chest is sealed by a ward that pulses in time with something deeper in the dungeon. Defeat what guards it first.'); return; }
