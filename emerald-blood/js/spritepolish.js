@@ -152,6 +152,8 @@
       const L = bloomLevel() + (a.morph > 0 ? 3 : 0);
       if (L && Math.random() < .06 * L) PARTS.push({ x: x + 6 * S + (Math.random() - .5) * 10, y: y - (20 + Math.random() * 30) * S, vy: -.35, vx: .15, t: now, life: 1400, col: Math.random() < .25 ? '#ff7a3a' : '#5a5560', r: 1.3 + Math.random() });
     }
+    // TORN-EAR (story, Chapter I): barely grown on the first hunt, bigger on the second, full-grown on the third
+    if (a && a.key === 'rx_tornear' && typeof ENEMY !== 'undefined' && ENEMY.rx_tornear) { const n = Math.max(0, Math.min(2, Math.round(((ENEMY.rx_tornear.hp || 60) - 60) / 22))), g = [.78, .9, 1.04][n]; sx *= g; sy *= g; }
     cur = { rim, rimCol: rc, layers, flash: anim === 'hurt' && age < 130 ? .85 * (1 - age / 130) : 0 };
     const feet = y + 2 * S;
     try {
