@@ -228,7 +228,7 @@ async function talkTam() {
   f.h2 = 'done'; Story.gainXp(55); Opinion.add('hope', .5);
   Intel.add('you', 'Brother Tam: nineteen children under the mill sing to a D-stone "for the Prince-Regent". The inner door needs the Inquisitor\'s Seal — Sister Verity carries it on the supply road through the East Woods.');
   World.remove('tam');
-  if (G.S.map === 'woods_e' && !World.ent('convoy')) { const [x, y] = freeNear('woods', 35, 16); await World.addNpc({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
+  if (G.S.map === 'woods_e' && !World.ent('convoy')) { const [x, y] = freeNear('woods', 53, 24); await World.addNpc({ id: 'convoy', sprite: 'acolyte', x, y, dir: 'down', name: 'Sister Verity', talk: convoyAmbush, qm: () => '!' }); }
   Story.quest('Ambush Sister Verity\'s supply convoy on the wagon road in the East Woods (east from the crossroads) and take the Inquisitor\'s Seal.');
 }
 // 3 — THE SUPPLY ROAD

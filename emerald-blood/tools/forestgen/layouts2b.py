@@ -52,6 +52,12 @@ def log(m, lid, x, y, w, key):
     x, y = z(x), z(y); m.data['logs'].append({'id': lid, 'x': x, 'y': y, 'w': w, 'k': key})
     for i in range(w): m.res.add((x + i, y))
 def around(x, y, w=1, h=1): return [(x + dx, y + dy) for dx in range(-1, w + 1) for dy in range(-1, h + 1)]
+def meadow(m, x, y, rx, ry):
+    """a wide open field for riding: cleared of trees, grass-free, with a race from one end to the other"""
+    for yy in range(int(y - ry), int(y + ry) + 1):
+        for xx in range(int(x - rx), int(x + rx) + 1):
+            if ((xx - x) / rx) ** 2 + ((yy - y) / ry) ** 2 <= 1: m.res.add((xx, yy))
+    m.data.setdefault('meadow', []).append([x, y, rx, ry])
 def gather(m, pts): m.data['gather'] = Z(pts)
 
 # ============================== NORTH 2 — FROSTPINE HEIGHTS (beyond Mistveil's buried road)
@@ -84,7 +90,9 @@ m.exit(x=31, x2=33, y=47, to='woods_n', tx=34, ty=1, dir='down', label='Mistveil
 m.exit(x=31, x2=33, y=0, msg='Past here the Mountain Pass climbs into a wall of white. The snow is over your head — you would need the thaw, or wings.')
 # --- new ground (big coords): the Icefall Steps, a frozen shrine and a wolf den
 m.rpath([(48, 60), (70, 62), (86, 56), (88, 48)], 1.1); m.rpath([(20, 54), (8, 60), (6, 66)], 1.0)
-m.rtall(76, 58, 6, 3); m.rtall(14, 62, 5, 3); m.rpond(80, 40, 5, 3)
+meadow(m, 62, 64, 8, 3); m.rtall(14, 62, 5, 3); m.rpond(80, 40, 5, 3)
+m.rpath([(83, 9), (95, 10)], 1.0); M.exit(m, x=95, y=9, y2=11, to='woods_e2', tx=0, ty=0, dir='right', label='The Scorched Road')
+m.rpath([(15, 12), (0, 12)], 1.0); M.exit(m, x=0, y=11, y2=13, to='woods_w2', tx=0, ty=0, dir='left', label='The Drowned Ford')
 m.rclear(88, 46, 3); m.rput('fc_n_statue', 88, 45); m.rlook(around(88, 45), 'A frost-giant\'s fallen helm, big as a cart. Inside it, someone has built a tiny shrine of pine cones and blue beads.')
 m.rclear(8, 64, 2); m.rput('fc_n_rock2', 8, 64); m.rlook(around(8, 64), 'Bones everywhere, gnawed clean. A wolf den — the wolves are long gone. Something bigger moved in, and then it left too.')
 m.rchest(90, 50); m.rchest(4, 68); m.rchest(70, 66)
@@ -120,7 +128,9 @@ m.exit(x=0, y=26, y2=28, to='woods_e', tx=62, ty=28, dir='left', label='Emberroo
 m.exit(x=63, y=27, y2=29, msg='The road runs on east for days, past the sealed Gate site and on to Highmark. Better to take the carriage from Ashford.')
 # --- new ground: the Ash Fields and the old toll-house
 m.rpath([(46, 60), (60, 66), (80, 62)], 1.1); m.rpath([(72, 39), (82, 30), (90, 22)], 1.0)
-m.rtall(66, 64, 6, 3); m.rtall(86, 26, 5, 3)
+meadow(m, 64, 67, 8, 3); m.rtall(86, 26, 5, 3)
+m.rpath([(87, 7), (87, 0)], 1.0); M.exit(m, x=86, x2=88, y=0, to='woods_n2', tx=0, ty=0, dir='up', label='Frostpine Heights')
+m.rpath([(80, 62), (84, 71)], 1.0); M.exit(m, x=83, x2=85, y=71, to='woods_s2', tx=0, ty=0, dir='down', label='Saltreed Marsh')
 m.rclear(80, 60, 3); m.rput('fc_e_ruins', 80, 59, block=((-1, 0), (0, 0), (1, 0))); m.rlook(around(79, 59, 3, 1), 'The old toll-house. The ledger on the counter lists every traveller for a year. The last forty pages are all one name, written over and over: FRATENAPTOR.')
 m.rclear(90, 20, 2); m.rput('fc_e_rock1', 90, 20); m.rlook(around(90, 20), 'A boulder fused to glass on one side, as if something breathed on it once.')
 m.rchest(92, 18); m.rchest(84, 66); m.rchest(4, 66)
@@ -150,7 +160,9 @@ m.exit(x=31, x2=33, y=0, to='woods_s', tx=32, ty=46, dir='up', label='Glimmerfen
 m.exit(x=31, x2=33, y=47, msg='The causeway runs on into grey water. The tide is in — the Coast Road is under it. Another day.')
 # --- new ground: the Shell Midden and the smuggler's hut
 m.rpath([(48, 60), (70, 62), (88, 58)], 1.1); m.rpath([(33, 51), (14, 58), (6, 62)], 1.0)
-m.rtall(78, 64, 6, 3); m.rtall(10, 56, 5, 3); m.rpond(60, 50, 6, 3)
+meadow(m, 76, 65, 8, 3); m.rtall(10, 56, 5, 3); m.rpond(60, 50, 6, 3)
+m.rpath([(88, 58), (95, 58)], 1.0); M.exit(m, x=95, y=57, y2=59, to='woods_e2', tx=0, ty=0, dir='right', label='The Scorched Road')
+m.rpath([(6, 62), (0, 62)], 1.0); M.exit(m, x=0, y=61, y2=63, to='woods_w2', tx=0, ty=0, dir='left', label='The Drowned Ford')
 m.rclear(88, 56, 3); m.rput('fc_s_tent', 87, 55, block=((-1, 0), (0, 0), (1, 0))); m.rlook(around(86, 54, 3, 1), 'A smuggler\'s hut on stilts. The crates are empty, but every one is stamped with the Guild seal — upside down.')
 m.rclear(6, 62, 2); m.rput('fc_s_rock2', 6, 62); m.rlook(around(6, 62), 'A midden of shells, centuries deep. Pressed into it like a fossil: a child\'s bracelet with a green glass bead.')
 m.rchest(90, 60); m.rchest(4, 66); m.rchest(70, 68)
@@ -185,7 +197,9 @@ m.exit(x=63, y=23, y2=25, to='woods_w', tx=1, ty=24, dir='right', label='The Old
 m.exit(x=0, y=23, y2=25, msg='The ford is too deep to cross — the river is high, and the old stepping stones are under a fathom of water. Millbrook will have to wait.')
 # --- new ground: the drowned chapel and the Drag orchard
 m.rpath([(60, 46), (70, 58), (86, 62)], 1.1); m.rpath([(18, 57), (10, 64), (6, 68)], 1.0)
-m.rtall(78, 60, 6, 3); m.rtall(12, 62, 5, 3)
+meadow(m, 76, 58, 8, 3); m.rtall(12, 62, 5, 3)
+m.rpath([(58, 70), (58, 71)], 1.0); M.exit(m, x=57, x2=59, y=71, to='woods_s2', tx=0, ty=0, dir='down', label='Saltreed Marsh')
+m.rpath([(75, 9), (75, 0)], 1.0); M.exit(m, x=74, x2=76, y=0, to='woods_n2', tx=0, ty=0, dir='up', label='Frostpine Heights')
 m.rclear(86, 62, 3); m.rput('fc_w_mural', 86, 61, block=((-2, 0), (-1, 0), (0, 0), (1, 0), (2, 0))); m.rlook([(x, 61) for x in range(84, 89)], 'A drowned chapel\'s back wall. The Accord saints painted on it have all been given green eyes — scratched in, very small, by many different hands.')
 m.rclear(8, 66, 2); m.rput('fc_w_statue', 8, 66); m.rlook(around(8, 66), 'Old fruit trees in rows — an orchard nobody tends. A Drag gardener in stone still kneels among them, pruning knife in hand.')
 m.rchest(90, 66); m.rchest(4, 70); m.rchest(60, 70)

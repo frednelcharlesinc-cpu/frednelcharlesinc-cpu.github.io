@@ -24,7 +24,7 @@
     map: 'reef', title: 'The Drowned Hollow', subtitle: 'DANGER — B-rank monsters · an A-rank sleeps here', music: 'woods', bd: 'crystal', encRate: .1, tint: 'rgba(0,40,70,.12)',
     encounters() { const L = [['reef_stalker'], ['reef_stalker', 'reef_stalker'], ['reef_drake'], ['reef_wraith'], ['reef_stalker', 'reef_wraith']]; return { enemies: L[Math.floor(Math.random() * L.length)], bd: 'crystal', noElite: 1 }; },
     exits: [
-      { x: 22, x2: 25, y: 58, to: 'woods_n', tx: 7, ty: 23, dir: 'down', label: 'North Woods' },
+      { x: 22, x2: 25, y: 58, to: 'woods_n', tx: typeof FCL !== 'undefined' ? FCL.fc_north.npc.reefback[0] : 7, ty: typeof FCL !== 'undefined' ? FCL.fc_north.npc.reefback[1] : 23, dir: 'down', label: 'North Woods' },
       { x: 5, x2: 6, y: 2, msg: 'An iron gate, rusted shut. On the far side, the sound of the sea — real waves, miles from any coast.' }
     ],
     tiles: {},

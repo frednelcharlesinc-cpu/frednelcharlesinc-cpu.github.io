@@ -27,7 +27,7 @@
   function renown() {
     const S = S_(), f = F(), c = (re) => Object.keys(f).filter(k => re.test(k) && f[k]).length;
     return (S.bountiesPaid || 0) * 2 + (f.sanctum ? 6 : 0) + (S.seasonKills || 0) * 3 + (S.jobsDone || 0) + (S.escortsDone || 0) * 2 + (S.rivalWins || 0) * 2
-      + c(/^shrine_woods/) + c(/^ruin_/) * 2 + c(/^clear_d_/) * 3 + c(/^echo_woods/) + (S.rareCaught || 0) + ((S.home || {}).tier || 0);
+      + Object.keys(S.townUp || {}).length * 2 + (S.lordKills || 0) * 2 + (f.warden ? 6 : 0) + c(/^shrine_woods/) + c(/^ruin_/) * 2 + c(/^clear_d_/) * 3 + c(/^echo_woods/) + (S.rareCaught || 0) + ((S.home || {}).tier || 0);
   }
   const TIERS = [[0, 'a stranger'], [5, 'a familiar face'], [15, 'a local hero'], [30, 'the Legend of Ashford']];
   const tier = () => { const r = renown(); let i = 0; TIERS.forEach((t, k) => { if (r >= t[0]) i = k; }); return i; };
@@ -123,8 +123,8 @@
     R(x, 'rgba(0,0,0,.3)', 6, 58, 52, 4); R(x, '#4a3020', 8, 26, 3, 32); R(x, '#4a3020', 53, 26, 3, 32); R(x, '#6b4a2a', 6, 44, 52, 12); R(x, '#8a6038', 6, 44, 52, 2);
     for (let i = 0; i < 7; i++) R(x, i % 2 ? '#efe4c8' : col, 4 + i * 8, 18, 8, 10); R(x, '#2a1a10', 4, 27, 56, 2);
     R(x, '#c8a040', 14, 38, 6, 6); R(x, '#a03020', 24, 39, 6, 5); R(x, '#6aa040', 34, 38, 5, 6); R(x, '#d8d0b8', 44, 39, 7, 5); });
-  async function stallTalk() {
-    const T = trader(), S = S_(); S.stallBuy = S.stallBuy && S.stallBuy.week === week() ? S.stallBuy : { week: week(), got: {} };
+  async function stallTalk(T0) {
+    const T = (T0 && T0.items) ? T0 : trader(), S = S_(); S.stallBuy = S.stallBuy && S.stallBuy.week === week() ? S.stallBuy : { week: week(), got: {} };
     await narr(`A travelling stall — ${T.n}. "Only here this week, friend!"`);
     const its = T.items.filter(i => !S.stallBuy.got[i[0]]); if (!its.length) { await narr('"Sold you all I had! Next week, someone else will be here."'); return; }
     const ch = await ask(null, null, 'Buy something?', [...its.map(i => `${i[0]} — ${i[1]}g`), 'Just looking']); const it = its[ch]; if (!it) return;
@@ -168,7 +168,8 @@
     try {
       if (name === TOWN) {
         const b = firstFree([[24, 21], [23, 21], [24, 20], [25, 20]]) || freeNear(30, 25, againstWall, 7); if (b) { World.col[b[1]][b[0]] = 1; World.ents.push(new Ent({ id: 'townboard', x: b[0], y: b[1], dir: 'down', img: boardImg(), size: 1.25, pickup: 1, name: 'Town board', talk: townBoard, qm: () => jobs().some(j => j.state === 'ready') || (window.TownLife.lostItem && TownLife.lostItem().state === 'ready') ? '?' : null })); }
-        if (night() < .55) { const s = firstFree([[37, 21], [23, 21], [37, 22], [22, 22]]); if (s) { World.col[s[1]][s[0]] = 1; World.ents.push(new Ent({ id: 'tstall', x: s[0], y: s[1], dir: 'down', img: stallImg(trader().col), size: 1.4, pickup: 1, name: 'Stall', talk: stallTalk })); } }
+        if (night() < .55) { const s = firstFree([[37, 21], [23, 21], [37, 22], [22, 22]]); if (s) { World.col[s[1]][s[0]] = 1; World.ents.push(new Ent({ id: 'tstall', x: s[0], y: s[1], dir: 'down', img: stallImg(trader().col), size: 1.4, pickup: 1, name: 'Stall', talk: () => stallTalk() })); } }
+        if (night() < .55 && (S_().townUp || {}).market) { const s = firstFree([[22, 23], [38, 23], [21, 22]]), T2 = TRADERS[(week() + 1) % TRADERS.length]; if (s) { World.col[s[1]][s[0]] = 1; World.ents.push(new Ent({ id: 'tstall2', x: s[0], y: s[1], dir: 'down', img: stallImg(T2.col), size: 1.4, pickup: 1, name: 'Stall', talk: () => stallTalk(T2) })); } }
         const n = night();
         for (const e of World.ents) {
           if (!e.folk) continue;
@@ -187,8 +188,8 @@
     return r;
   };
   async function townBoard() {
-    const t = tier(), ch = await ask(null, null, `The Ashford town board. (Ashford sees you as ${TIERS[t][1]}.)`, ['Odd jobs', 'Bounties & more', 'Leave']);
-    if (ch === 0) return jobsMenu(); if (ch === 1) return W4().boardTalk();
+    const t = tier(), ch = await ask(null, null, `The Ashford town board. (Ashford sees you as ${TIERS[t][1]}.)`, ['Odd jobs', 'Bounties & more', 'Fund the town', 'Dungeon reports', 'Leave']);
+    if (ch === 0) return jobsMenu(); if (ch === 1) return W4().boardTalk(); if (ch === 2 && window.WorldPlus10) return WorldPlus10.fundMenu(); if (ch === 3 && window.WorldPlus10) return WorldPlus10.moodsBoard();
   }
   const _step = World.onStep.bind(World);
   World.onStep = function (e) {
