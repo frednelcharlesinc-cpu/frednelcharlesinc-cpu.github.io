@@ -188,8 +188,15 @@
     return r;
   };
   async function townBoard() {
-    const t = tier(), ch = await ask(null, null, `The Ashford town board. (Ashford sees you as ${TIERS[t][1]}.)`, ['Odd jobs', 'Bounties & more', 'Fund the town', 'Tackle shop', 'Dungeon reports', 'Leave']);
-    if (ch === 0) return jobsMenu(); if (ch === 1) return W4().boardTalk(); if (ch === 2 && window.WorldPlus10) return WorldPlus10.fundMenu(); if (ch === 3 && window.Fishing) return Fishing.tackleShop(); if (ch === 4 && window.WorldPlus10) return WorldPlus10.moodsBoard();
+    const t = tier(), ch = await ask(null, null, `The Ashford town board. (Ashford sees you as ${TIERS[t][1]}.)`, ['Odd jobs', 'Bounties & more', 'Town services', 'Leave']);
+    if (ch === 0) return jobsMenu(); if (ch === 1) return W4().boardTalk(); if (ch === 2) return services();
+  }
+  // everything else the town offers — other files add entries to TownLife.services
+  const SERV = [];
+  async function services() {
+    const base = [['Fund the town', () => window.WorldPlus10 && WorldPlus10.fundMenu()], ['Tackle shop', () => window.Fishing && Fishing.tackleShop()], ['Dungeon reports', () => window.WorldPlus10 && WorldPlus10.moodsBoard()]];
+    const L = [...base, ...SERV.filter(x => !x.show || x.show()).map(x => [typeof x.label === 'function' ? x.label() : x.label, x.run])];
+    const c = await ask(null, null, 'Town services:', [...L.map(x => x[0]), 'Back']); if (L[c]) return L[c][1]();
   }
   const _step = World.onStep.bind(World);
   World.onStep = function (e) {
@@ -218,5 +225,5 @@
           else { c.beginPath(); c.moveTo(px - 3, py); c.lineTo(px + 3, py); c.lineTo(px + sw, py + 8); c.closePath(); c.fill(); } } }
     } catch (e) { }
   };
-  window.TownLife = { renown, tier, jobs, hints, deeds, trader, freeNear };
+  window.TownLife = { services: SERV, renown, tier, jobs, hints, deeds, trader, freeNear };
 })();

@@ -60,7 +60,7 @@
     if (over.length && performance.now() > capWarn) { capWarn = performance.now() + 4000; toast(`🎒 Satchel full — left behind: ${over.join(', ')}. (Upgrade the satchel in Ashford.)`, 3200); }
   }
   function addIng(id, n = 1) { const F = st(); F.ing[id] = (F.ing[id] || 0) + n; clampCaps(); }
-  function addMeal(key, n = 1) { if (mealCount() + n > CAP().meals) { toast('🎒 No room for more meals — eat something first!', 2600); return false; } st().meals[key] = (st().meals[key] || 0) + n; return true; }
+  function addMeal(key, n = 1) { if (mealCount() + n > CAP().meals) { toast('🎒 No room for more meals — eat something first!', 2600); return false; } st().meals[key] = (st().meals[key] || 0) + n; const F = st(); F.book = F.book || {}; F.book[key.split(':')[0]] = 1; return true; }
 
   /* ---------- art: little pixel icons, drawn once ---------- */
   const ART = {};
@@ -84,7 +84,7 @@
       if (sh === 'feast') { P('#e8e8f0', 0, 11, 16, 4); P('#d86a2a', 2, 6, 6, 6); P('#c8c8d8', 8, 7, 6, 4); P(pal[0], 6, 3, 4, 3); P('#ffe080', 12, 5, 2, 2); } }
     return (ART[k] = c.toDataURL());
   }
-  const ingIcon = id => icon(ING[id] && ING[id][1] === 'fish' || ING[id] && ING[id][1] === 'legend' ? 'fish' : 'ing', id);
+  const ingIcon = id => icon(window.Fishing && Fishing.FISH[id] ? 'fish' : 'ing', id);
   const img = (src, sz = 28) => `<img src="${src}" style="width:${sz}px;height:${sz}px;image-rendering:pixelated;vertical-align:middle">`;
   const mealName = key => { const [id, q] = key.split(':'); return `${QN[+q]} ${DISH[id][0]}`; };
   const fx = (key) => { const [id, q] = key.split(':'), E = DISH[id][1], m = QM[+q], o = {}; for (const k of Object.keys(E)) o[k] = k === 'mp' ? Math.round(E[k] * m) : Math.min(k === 'hp' ? 1 : .5, E[k] * m); return o; };
@@ -161,14 +161,17 @@
         const sell = atAshford ? ' · tap an ingredient to sell it' : '';
         overlay(`<h3>🎒 Satchel <span class="muted">(level ${tier() + 1})</span></h3>
           <div class="muted">Tonics ${G.S.items.tonic}/${C.tonic} · Ethers ${G.S.items.ether}/${C.ether} · Meals ${mealCount()}/${C.meals} · In a fight you can grab ${C.perFight} times</div>
-          <h3 style="margin-top:8px">Meals</h3>${meals.length ? meals.map(k => `<div class="row">${img(icon('meal', k.split(':')[0]), 30)}<div style="flex:1"><b>${mealName(k)}</b> ×${F.meals[k]}<div class="muted">${fxText(fx(k))}</div></div><button data-eat="${k}">Eat</button></div>`).join('') : '<div class="muted">No meals. Cook at any campfire.</div>'}
+          <h3 style="margin-top:8px">Meals</h3>${meals.length ? meals.map(k => `<div class="row">${img(icon('meal', k.split(':')[0]), 30)}<div style="flex:1"><b>${mealName(k)}</b> ×${F.meals[k]}<div class="muted">${fxText(fx(k))}</div></div><button data-eat="${k}">Eat</button>${window.FoodX && FoodX.canShare() ? ` <button data-share="${k}">Share</button>` : ''}</div>`).join('') : '<div class="muted">No meals. Cook at any campfire.</div>'}
           <h3 style="margin-top:8px">Ingredients</h3><div class="grid">${ings.length ? ings.map(k => `<div class="cell" data-ing="${k}">${img(ingIcon(k), 30)}<br>${ING[k][0]}<br>×${F.ing[k]}${atAshford ? `<br><span class="muted">${ING[k][2]}g</span>` : ''}</div>`).join('') : '<div class="muted">Nothing yet — beasts, monsters and fish drop food.</div>'}</div>
           <div class="muted" style="margin-top:4px">Ingredient stacks hold ${C.ing}${sell}.</div>
           ${atAshford ? `<div style="margin-top:8px"><button id="upSat" ${tier() >= 4 ? 'disabled' : ''}>Bigger satchel — ${[150, 300, 500, 800][tier()] || '—'}g</button></div>` : ''}
-          <div style="margin-top:10px;text-align:right"><button id="fClose">Close</button></div>`);
+          <div style="margin-top:10px;text-align:right"><button id="fBook">📖 Recipes</button> <button id="fLog">🐟 Fish log</button> <button id="fClose">Close</button></div>`);
         ov.querySelectorAll('[data-eat]').forEach(b => tap(b, () => { const k = b.dataset.eat, o = fx(k); st().meals[k]--; try { eatOutside(o); } catch (e) { } toast(`You eat the ${mealName(k)}. ${fxText(o)}`, 2200); save(); draw(); }));
         if (atAshford) ov.querySelectorAll('[data-ing]').forEach(c => tap(c, () => { const k = c.dataset.ing; if (!st().ing[k]) return; st().ing[k]--; G.S.gold += ING[k][2]; UI.hud(); sfx('coin'); draw(); }));
         tap(ov.querySelector('#upSat'), () => { const cost = [150, 300, 500, 800][tier()]; if (!cost || G.S.gold < cost) { toast('Not enough gold.', 1600); return; } G.S.gold -= cost; S_().satchel = tier() + 1; UI.hud(); sfx('level'); toast('🎒 A bigger satchel! More room — and one more grab per fight.', 2600); save(); draw(); });
+        ov.querySelectorAll('[data-share]').forEach(b => tap(b, async () => { if (window.FoodX) { await FoodX.share(b.dataset.share); draw(); } }));
+        tap(ov.querySelector('#fBook'), async () => { if (window.FoodX) { await FoodX.book(); draw(); } });
+        tap(ov.querySelector('#fLog'), async () => { if (window.FoodX) { await FoodX.fishTank(false); draw(); } });
         tap(ov.querySelector('#fClose'), () => { closeOv(); res(); });
       };
       draw();
@@ -247,5 +250,5 @@
   setInterval(() => { try { if (G.S && G.mode === 'world') clampCaps(); } catch (e) { } }, 3000);
   setInterval(() => { try { document.body.classList.toggle('inworld', G.mode === 'world' && !World.loading); } catch (e) { } }, 250);
   hookBattleMenu(); button();
-  window.Food = { ING, DISH, RECIPES, addIng, addMeal, satchel, cook, recipeFor, CAP, st, icon, ingIcon, rollDrops, clampCaps, heatGame, overlay, closeOv, img, mealName, fx, fxText, get used() { return usedThisFight; } };
+  window.Food = { meals: () => st().meals, ING, DISH, RECIPES, addIng, addMeal, satchel, cook, recipeFor, CAP, st, icon, ingIcon, rollDrops, clampCaps, heatGame, overlay, closeOv, img, mealName, fx, fxText, get used() { return usedThisFight; } };
 })();

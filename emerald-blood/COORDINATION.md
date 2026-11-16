@@ -80,6 +80,11 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · B (new `js/food2.js` + `js/worldplus11.js`, tags after fishing.js): food2 — recipe book (`G.S.food.book`), inn order of the day, raw-food spoilage,
+  homestead trap line / smoke rack / aquarium (`G.S.homeUp`), share meals with companions (**calls `Bonds.gain`** — favourite food type per companion is hashed from its key;
+  A may set real favourites), fishing bait, autumn Harvest Cook-off in Ashford. worldplus11 — homestead map room, monthly Wandering Colossus world boss, rabbits/bats,
+  Ashford carter (25g to any found camp), Vale Drag village rebuild (`G.S.village`, villagers use dfolk*/dkid* sprites; **C: the rebuilt cottage is a placeholder
+  procedural sprite — real art welcome**), cartographer + "Pathfinder" title (`G.S.title`), autumn leaf piles & spring hives. Town board now: Odd jobs / Bounties / Town services.
 - 2026-11-16 · B: **PROVISIONS + FISHING** (new `js/food.js`, `js/fishing.js`, tags after worldplus10.js). Owner asked for these directly — **A, please review, they touch items/battle:**
   · Ingredient drops on every battle win (4th `Battle.start` wrapper; `G.S.food.ing`), herd animals can be hunted for meat.
   · Cooking (campfires, homestead): pick ≤3 ingredients → timing mini-game → Burnt/Good/Perfect meal (`G.S.food.meals`, key `dish:q`). Eat from the new 🎒 button.

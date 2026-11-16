@@ -12,7 +12,7 @@
    7. YOUR HOMESTEAD — a clearing in the Old Grove. Buy the deed, then build it up: a tent to rest in, a garden that
       grows herbs while you're away, a trophy stand — and it becomes a camp you can fast-travel to. */
 (function () {
-  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };
+  const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west', woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2', vale: 'fc_vale' };
   const FOREST = ['woods_n', 'woods_e', 'woods_s', 'woods_w'];
   const S_ = () => G.S, F = () => G.S.f;
   const sheet = draw => { const one = document.createElement('canvas'); one.width = one.height = 64; const x = one.getContext('2d'); draw(x); const S = document.createElement('canvas'); S.width = 64 * 9; S.height = 64 * 12; const s = S.getContext('2d'); for (let r = 0; r < 12; r++) for (let f = 0; f < 9; f++) s.drawImage(one, f * 64, r * 64); return S; };
@@ -268,6 +268,7 @@
     const opts = ['Rest (full heal)'];
     if (H.tier === 1) opts.push('Build a garden — 300g'); if (H.tier === 2) opts.push('Build a trophy stand — 500g');
     if (window.Food) opts.push('Cook at your fire');
+    const HX = (window.HomeX || []).filter(x => !x.show || x.show()); for (const x of HX) opts.push(typeof x.label === 'function' ? x.label() : x.label);
     opts.push('Travel to a camp', 'Leave');
     const ch = await ask(null, null, 'Your homestead.', opts), pick = opts[ch];
     if (pick === 'Rest (full heal)') { Story.heal(); await narr('You sleep by your own fire. It\'s the best sleep you\'ve had in years.'); save(); }
@@ -275,6 +276,7 @@
     else if (pick && pick.startsWith('Build a trophy') && await pay(500, 'Raise a trophy stand')) { H.tier = 3; await narr('A carved stand for your trophies. Your homestead is a camp now — you can fast-travel here from any campfire.'); save(); await World.go('woods_w', HOME_AT()[0], HOME_AT()[1] + 1, 'up'); }
     else if (pick === 'Travel to a camp' && window.WorldPlus) await WorldPlus.campTalk(HOME_CAMP);
     else if (pick === 'Cook at your fire') await Food.cook();
+    else { const x = (window.HomeX || []).find(x => (typeof x.label === 'function' ? x.label() : x.label) === pick); if (x) await x.run(); }
   }
   async function garden() {
     const H = home(), grown = (S_().steps || 0) - (H.plant || 0);
