@@ -3,7 +3,10 @@
    · WEATHER ON THE BODY: in snow every fighter's breath fogs; in rain water drips off them (battle), and Ren's breath fogs in snowy places in the world.
    · REN'S FACE IN BATTLE: his portrait flashes in the corner on the big moments - a PERFECT strike (grin), a perfect dodge or parry (focused),
      a heavy hit taken (shout), dropping low (glare) - using the dialogue faces we already have.
-   Off switch: G.settings.polish = false (or polishOff: { trail, breath, drip, face }). */
+   · COUNTER FREEZE: a perfect parry freezes the fight for a beat with a lean-in zoom and a gold flash.
+   · ENEMY TELLS: before a heavy hit the enemy crouches and glows orange (red = unparryable) - dodge it.
+   · HITS BY SIZE: big monsters barely budge when struck, small ones get knocked back hard.
+   Off switch: G.settings.polish = false (or polishOff: { trail, breath, drip, face, freeze, tell, weight }). */
 (function () {
   if (typeof HD === 'undefined') return;
   const on = (k) => !(G.settings && (G.settings.polish === false || (G.settings.polishOff && G.settings.polishOff[k])));
@@ -22,7 +25,31 @@
 
   const _bt = HD.bt.bind(HD);
   HD.bt = function (c, img, anim, f, x, y, s) {
-    const r = _bt(c, img, anim, f, x, y, s);
+    const H0 = img && img.__hd, B0 = typeof Battle !== 'undefined' && Battle.B;
+    let pre = null;
+    if (H0 && B0 && c && c.canvas === MAIN()) {
+      let a = null; for (const q of B0.actors) if (Math.abs(q.x - x) < 1.5 && Math.abs(q.y - y) < 1.5) { a = q; break; }
+      if (a && !a.ko) {
+        const now = performance.now(), S = s || 1, feet = y + 2 * S, sz = a.size || 1;
+        // HITS BY SIZE: the knockback the battle already applied, scaled - big monsters barely budge, small ones fly
+        let kb = 0; if (on('weight') && a.kbx) kb = a.kbx * ((sz >= 1.3 ? .35 : sz <= .85 ? 1.6 : 1) - 1);
+        // ENEMY TELLS: on its turn, before a heavy or unparryable skill lands, it crouches and glows
+        let tell = 0; const sk = a.side === 'e' && a.next, heavy = sk && sk.hits && (sk.hits.some(h => h.unp || h.m >= 1.4) || sk.hits.reduce((t, h) => t + (h.m || 0), 0) >= 1.7);
+        if (on('tell') && heavy && B0.cur === a && (anim === 'combat' || anim === 'idle')) tell = .5 + .5 * Math.sin(now / 90);
+        if (kb || tell) pre = { kb, tell, feet, S, sz, unp: sk && sk.hits && sk.hits.some(h => h.unp) };
+      }
+    }
+    let r;
+    if (pre) {
+      c.save(); c.translate(pre.kb, 0);
+      if (pre.tell) {
+        const h = (HD.BT_H || 80) * pre.S * pre.sz, col = pre.unp ? '255,60,60' : '255,170,60';
+        c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(x, pre.feet - h * .45, h * .05, x, pre.feet - h * .45, h * .6);
+        g.addColorStop(0, `rgba(${col},${.5 * pre.tell})`); g.addColorStop(1, `rgba(${col},0)`); c.fillStyle = g; c.beginPath(); c.ellipse(x, pre.feet - h * .45, h * .45, h * .62, 0, 0, 7); c.fill(); c.restore();
+        c.translate(x, pre.feet); c.scale(1 + .04 * pre.tell, 1 - .05 * pre.tell); c.translate(-x, -pre.feet);
+      }
+      try { r = _bt(c, img, anim, f, x, y, s); } finally { c.restore(); }
+    } else r = _bt(c, img, anim, f, x, y, s);
     const H = img && img.__hd; if (!H || !c || c.canvas !== MAIN()) return r;
     try {
       const B = typeof Battle !== 'undefined' && Battle.B, S = s || 1, now = performance.now(), h = (HD.BT_H || 80) * S;
@@ -102,6 +129,8 @@
   const _tx = Battle.text.bind(Battle);
   Battle.text = function (a, s, col, dy, big) {
     try { if (a && a.isMe && !(G.S && G.S.kid)) { if (s === 'PERFECT!') face('grin'); else if (s === 'PERFECT DODGE' || s === 'PERFECT PARRY') face('focused'); } } catch (e) { }
+    // COUNTER FREEZE: a perfect parry stops time for a beat and the camera leans in on the parrier
+    try { const B = this.B; if (B && a && on('freeze') && s === 'PERFECT PARRY') { B.hitstop = Math.max(B.hitstop || 0, 170); B.punch = Math.max(B.punch || 0, .06); B.punchX = a.x; B.punchY = a.y - 34; B.flash = Math.max(B.flash || 0, .25); B.flashCol = '255,236,150'; } } catch (e) { }
     return _tx(a, s, col, dy, big);
   };
   const _dm = Battle.damage.bind(Battle);
