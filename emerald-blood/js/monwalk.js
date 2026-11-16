@@ -17,7 +17,9 @@
     if (M && M.body) return M.body; return FLY.test(b) ? 'fly' : QUAD.test(b) ? 'quad' : 'biped'; };
   const roamSet = e => { try { const k = e.roam && e.roam.enc && e.roam.enc.enemies && e.roam.enc.enemies[0], E = k && ENEMY[k]; return E ? (E.img || k) : ''; } catch (x) { return ''; } };
   const _nn = HD.npcName.bind(HD);
-  HD.npcName = function (e) { const n = _nn(e); if (e && e.roam && (!n || /^roam/.test(n))) return roamSet(e) || n; return n; };
+  const OWN = { moss: 'moss' };   // named NPCs drawn from a shared townsfolk sprite who now have their own sheet
+  HD.npcName = function (e) { const n = _nn(e); if (e && e.roam && (!n || /^roam/.test(n))) return roamSet(e) || n;
+    if (e && OWN[e.id] && HD.meta && HD.meta['c_' + OWN[e.id]]) return OWN[e.id]; return n; };
 
   const MONSTER = set => { const b = String(set).replace(/^c_/, ''); return /^(m_|b_|sw_|reef_|lupine|rime_|mana_)/.test(b) || (typeof ENEMY !== 'undefined' && ENEMY[b] && !ENEMY[b].human); };
   const _draw = Ent.prototype.draw;
