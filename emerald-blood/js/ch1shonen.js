@@ -82,10 +82,10 @@ const RX = {
     await fadeOut(500); await this.card('MEANWHILE', ['The mountains — Kairo, age eleven', 'A cave above the south road — Kairo, age twelve', 'An Inquisition waystation — Kairo, age thirteen', 'A ridge in the dark', 'A burning toll-house — Kairo, age fifteen'][n]);
     const K = 'kairo';
     if (n === 0) { await narr('Night. A cage wagon on its side in the mud. A boy with half his face wrapped in a burned shirt drags the door open with one arm.');
-      await narr('Inside: a girl of five, shaking. Tamsin.'); await say(K, 'neutral', 'Hey. Hey. It\'s okay. I\'m a Drag too. See?');
-      await narr('His arm flares black and green as he pulls her out — scales, then skin — and he bites down on a scream so she won\'t hear it.');
-      await say('tamsin', 'shock', 'Your arm…'); await say(K, 'happy', 'It\'s fine. It\'s always fine.');
-      await narr('He tears a strip off his sleeve and ties a terrible knot around her wrist.'); await say(K, 'neutral', 'There. So you can always find us.'); }
+      await narr('Inside: a boy of nine, all elbows and fury, who bites the first hand that reaches for him. Dace.'); await say(K, 'neutral', 'Ow. Okay. Fair. I\'m a Drag too. See?');
+      await narr('His arm flares black and green as he wrenches the bars apart — scales, then skin — and he bites down on a scream so the boy won\'t hear it.');
+      await narr('Dace, staring: "…Your arm."'); await say(K, 'happy', 'It\'s fine. It\'s always fine.');
+      await narr('He tears a strip off his sleeve and ties a terrible knot around the boy\'s wrist.'); await say(K, 'neutral', 'There. So you can always find us.'); }
     if (n === 1) { await narr('A cave. Six children asleep in a pile. Kairo, awake, scratching a mark into the rock wall with a nail.');
       await narr('REN: 0. KAIRO: 1.'); await say(K, 'neutral', '…He\'s not dead. He\'d never let me win by dying.');
       await say('tamsin', 'neutral', 'Kairo. The others want a name. For us.'); await say(K, 'neutral', 'Name?');
@@ -269,5 +269,42 @@ RX.catTrick = async function () {
       if (tx < fol.x - 1) { c.translate(fol.x - cx, 0); c.scale(-1, 1); c.translate(-(fol.x - cx), 0); }
       c.drawImage(img, Math.round(fol.x - cx - 12 * s), Math.round(fol.y - cy - 22 * s), 24 * s, 24 * s); c.restore(); } catch (e) { }
     return out;
+  };
+})();
+
+/* ---------------- THE MASKED STRANGER (between the Seal and the Old Mill) ----------------
+   On the south road, a hooded, masked fighter drops out of the trees and frees a cage wagon with you.
+   He ties the worst knot you've ever seen on a freed child's wrist. You've only ever seen ONE person tie it like that.
+   (At the mill, when Kairo pulls his hood back, foreshadow.js lets Ren put it together.) */
+ALLY.mask_k = ALLY.mask_k || { name: 'Masked Stranger', drag: 1, sprite: 'rebel', color: '#ff7a3a', hp: 120, mp: 20, atk: 16, def: 6, spd: 14, arts: ['cleave'] };
+CHAR.mask_k = CHAR.mask_k || { name: 'Masked Stranger', sprite: 'rebel' };
+RX.masked = async function () {
+  const f = F(); if (f.maskFight) return; f.maskFight = 1; World.busy = true; UI.controls(false);
+  try {
+    await narr('Wagon wheels on the south road. A cage wagon rattles out of the trees — four Inquisition guards, and small green eyes behind the bars.');
+    await narr('Before you can move, someone drops out of the branches onto the lead guard. Hooded. Masked. Fast — faster than anyone you\'ve seen outside the Realm.');
+    await say('mask_k', null, 'Don\'t just stand there. Left side\'s yours.');
+    await Battle.start({ enemies: ['acolyte', 'acolyte', 'cleaner'], allies: ['mask_k'], noFlee: true, bd: 'forest', music: 'battle', intro: 'A cage wagon — and a masked stranger' });
+    Story.heal(true);
+    await narr('The stranger rips the cage door off its hinges with one hand. A dozen children pour out into the trees — and every one of them knows exactly where to run.');
+    await say('mask_k', null, 'You cut like an old man I heard stories about. Sheathed, then gone. Then sheathed again.');
+    const c = await ask('me', 'neutral', '…', ['"Who are you?"', '"Take off the mask."', '"Thanks."']);
+    if (c === 0) await say('mask_k', null, 'Nobody you\'d remember.');
+    if (c === 1) await say('mask_k', null, 'No. …Not yet.');
+    if (c === 2) await say('mask_k', null, 'Don\'t thank me. Just don\'t get in my way when it counts.');
+    await narr('The last child out is tiny and terrified. The stranger kneels and ties a strip of cloth around her wrist. The knot is awful. Lopsided. Hopeless.');
+    await narr('You know that knot. You\'ve only ever seen ONE person tie it that badly.');
+    await me('shock', '(…No. It can\'t be.)');
+    await narr('When you look up, the road is empty.');
+    toast('<b>The Masked Stranger</b> — who ties knots like that?', 3200);
+  } finally { World.busy = false; UI.controls(true); }
+};
+(function () {
+  const _l = World.load.bind(World);
+  World.load = async function (name, x, y, dir) {
+    const r = await _l(name, x, y, dir);
+    try { const f = G.S && G.S.f; if (f && name === 'woods' && f.sealGot && !f.halvardBeaten && !f.maskFight && !G.S.kid && typeof Arcs !== 'undefined')
+      Arcs.whenIdle(async () => { if (G.S.map === 'woods' && !F().maskFight) await RX.masked(); }); } catch (e) { }
+    return r;
   };
 })();
