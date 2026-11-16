@@ -713,11 +713,14 @@ const Battle = {
     if (!ranged) await this.home(e);
     if (allParried && !t.ko && !e.ko && !B.leafTrain) {
       await this.msg('COUNTERATTACK!', 600); sfx('counter'); B.dim = .5; B.dimCol = '60,50,10';
-      await this.dash(t, e.x + 52, e.y + 2, 180);
+      // no travel: the riposte is cut where you stand, and the cut arrives where they stand
       t.anim = t.isMe ? 'backslash' : 'slash'; this.play(t, t.anim, t.isMe ? 13 : 6, 40);
-      await wait(220);
+      await wait(160);
+      const cc = t.isMe && typeof BAND_COL !== 'undefined' ? BAND_COL[Power.now().band] : '#ffe08a';
+      B.fx.push({ dline: 1, x1: t.x, y1: t.y - 40, x2: e.x, y2: e.y - 40, col: cc, w: 4, t: 0, life: 260 });
+      this.spark(e.x, e.y - 40, cc, 16); B.shake = Math.max(B.shake || 0, 8); sfx('crit');
       this.resolveHit(t, e, 1.8, 'perfect', { unblockable: 1, brk: 16, src: 'counter' });
-      await wait(300); await this.home(t); B.dim = 0;
+      await wait(300); B.dim = 0;
     }
   },
   defend(e, t, h) {
