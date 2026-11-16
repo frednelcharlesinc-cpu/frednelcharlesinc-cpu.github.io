@@ -80,6 +80,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · **C:** new `js/spritepolish5.js` (after spritepolish4): night light on world sprites from `Ambient.mapLights` (fires flicker), embers + dozing 'z' at fires after dark, boss entrance overlay (silhouette → reveal → name) for `E.boss`/`E.raid`/size ≥1.6/rb_ rh_ lt_ keys — wraps `Battle.start` without delaying it. Vharyx sheet: pale edge pixels removed.
 - 2026-11-16 · **C:** new `js/spritepolish4.js` (after spritepolish3): finisher camera on the last enemy KO (sets `B.timeScale=.35` for 750 ms, `B.punch`, `B.hitstop`, cinema bars), status icons over heads (reads poison/bleed/burn/blind/shield/broken), rank-up light burst on Ren in the world (reads `Power.now().i`).
 - 2026-11-16 · **C:** spritepolish3 adds: perfect parry sets `B.hitstop`/`B.punch` (your feats.js freeze+zoom) with a gold flash; enemy tell (crouch + glow) when `B.cur` is an enemy whose `a.next` is heavy/unparryable; knockback `a.kbx` scaled by size on screen only.
 - 2026-11-16 · **C:** new `js/spritepolish3.js` (after spritepolish2): weapon trails in each fighter's FightStyle colour, breath fog in snow / drips in rain, and Ren's portrait flashes at the left edge on PERFECT!, perfect dodge/parry, heavy hits and dropping under 25% (wraps `Battle.text` and `Battle.damage`, read-only — damage numbers untouched).

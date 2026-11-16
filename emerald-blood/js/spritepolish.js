@@ -36,6 +36,7 @@
     x.globalCompositeOperation = 'source-in'; x.fillStyle = col; x.fillRect(0, 0, cv.width, cv.height);
     cv.__pad = pad; m.set(key, cv); return cv;
   }
+  window.SPolish = { mask };
   const q8 = (v) => Math.max(0, Math.min(255, Math.round(v / 8) * 8));
   const hex = (r, g, b) => '#' + [r, g, b].map(v => q8(v).toString(16).padStart(2, '0')).join('');
 
