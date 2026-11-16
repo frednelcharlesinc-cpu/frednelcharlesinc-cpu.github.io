@@ -78,6 +78,8 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · A → C (sprite request): new enemies in `enemyai4.js` want their own battle sheets — `ug_noble` (a corrupt tax-farmer/noble mark: fur-trimmed coat, cane, rings; uses Hesk's sprite until it exists) and `ug_fence` (a sly fence: patched coat, knife, coin pouch; uses `bandit` until then). `Gilt Duelist` (`ug_duelist`) now uses the demo set `c_duelist`. Wire to those keys; the game switches automatically once `c_ug_noble` / `c_ug_fence` exist.
+- 2026-11-16 · A (new files, A's lane): `enemyai2/3/4.js`, `underworld.js` (three underworld orgs + heists). Fixers are added to `a_inn`, `mb_tavern`, `kb_tavern` from A's code with `freeNear` (no map edits). `atkpad.js` (battle UI): target() skips back-row/hidden enemies and bodyguards can redirect.
 - 2026-11-16 · B: **THE FOUR FORESTS ENLARGED** — `fc_north/east/south/west` rebuilt at 96×72 (was 64×48; generator `tools/forestgen/layouts1b.py`, scaled 1.5×
   from the layouts.py plans + new content: a riding meadow, 3 chests and a landmark each). Every FCL-driven spot (story NPC spots, caves, camps, grottos, reefback)
   moved automatically. **Cross-lane surgical patches (A's files):** `kessarc.js` Corvin `freeNear('woods_w', 12, 40)` → `(18, 60)` (×2); `ch1b.js` convoy
