@@ -78,6 +78,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · C: new `js/monwalk.js` (script tag after simplewalk.js). Monsters/bosses in the world now walk by body type (biped cycle, 4-leg gait, fliers hover + wingbeat) and read forward/back when moving up/down. **For B:** your roaming monsters (worldplus2.js) had no sprite name, so they drew their old low-res art; monwalk wraps `HD.npcName` to name them by `e.roam.enc.enemies[0]` — no edits to worldplus2.js. A set can force its body type with `meta.body = 'quad'|'fly'|'biped'`.
 - 2026-11-13 · B (new `js/worldplus8.js` + `js/townlife2.js`, tags after townlife.js; new glade maps `fc_glade_n/e/s/w` via `tools/forestgen/layouts3.py`):
   worldplus8 — fake trees → secret glades (scenes `glade_<zone>`), lookout rocks (reveal mini map), night stepping stones / winter ice / summer dry riverbeds,
   wandering events (burning cart, wounded traveller, lost child), birds from bushes, eyes in the dark, goblin–bandit skirmishes, Drag waystones (`G.S.waystones`,
