@@ -21,6 +21,7 @@
   async function vista(z) {
     F()['vista_' + z] = 1; const t0 = World.tint; World.tint = 'rgba(255,230,180,.12)'; banner("WORLD'S END", SCENES[z].subtitle, 2200); sfx('level');
     for (const l of VISTA[z]) await narr(l);
+    const CL = window.WorldPlus10 && WorldPlus10.CLUE[z]; if (CL) { await narr('Wedged under the stone: ' + CL); const n4 = Object.keys(VISTA).filter(k => F()['vista_' + k]).length; if (n4 >= 4) await narr('Four scraps. Laid side by side they make one map — of a valley you have never seen. And at the Crossroads, something is waiting to show you the way.'); }
     World.tint = t0; const n = rare(); G.S.gold += 150; UI.hud(); await narr(`Tucked behind the stone: 150 gold${n ? ` and a ${gold$(n)}` : ''}, left by the last traveller who stood here.`);
     const c = Object.keys(VISTA).filter(k => F()['vista_' + k]).length; toast(`<b>WORLD'S END ${c}/4</b>`, 2400); save();
   }

@@ -14,7 +14,7 @@
   const isWoods = m => /^woods(_[news]2?)?$/.test(m || '');
   window.isWoods = isWoods;
   const MK = { woods: 'fc_cross', woods_n: 'fc_north', woods_e: 'fc_east', woods_s: 'fc_south', woods_w: 'fc_west',
-    woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2' };   // the deep woods beyond each forest's old dead end
+    woods_n2: 'fc_north2', woods_e2: 'fc_east2', woods_s2: 'fc_south2', woods_w2: 'fc_west2', vale: 'fc_vale' };   // the deep woods beyond each forest's old dead end
   const D = k => FCL[MK[k] || k];
   const F_ = () => G.S.f;
 
@@ -106,6 +106,8 @@
     encounters: deep([['bandit', 'bandit', 'm_goblin_shaman'], ['m_tusker', 'm_goblin'], ['m_drake'], ['m_orc', 'bandit'], ['m_tusker', 'm_tusker']], 'fc_east') });
   if (FCL.fc_south2) forest('woods_s2', 'The Deep South', 'Saltreed Marsh', { bd: 'fc_south', encRate: .12,
     encounters: deep([['m_lizard', 'm_lizard'], ['m_troll'], ['m_lizard', 'm_gourd'], ['m_ratfolk', 'm_ratfolk', 'm_lizard'], ['m_troll', 'm_lizard']], 'fc_south') });
+  if (FCL.fc_vale) forest('vale', 'The Hidden Vale', 'The Vale of Echoes', { bd: 'fc_west', encRate: .1,
+    encounters: deep([['m_wartotaur'], ['m_vampire'], ['m_minotaur', 'm_goblin_shaman'], ['m_ghoul', 'm_ghoul'], ['m_orc', 'm_orc']], 'fc_west') });
   if (FCL.fc_west2) forest('woods_w2', 'The Deep West', 'The Drowned Ford', { bd: 'fc_west', encRate: .12,
     encounters: deep([['m_goblin', 'm_goblin', 'm_goblin_shaman'], ['m_orc'], ['m_ratfolk', 'm_orc'], ['m_minotaur'], ['lupine_alpha', 'm_goblin']], 'fc_west') });
 
@@ -272,4 +274,22 @@ const MiniMap = {
     const x = (ev.clientX - r.left) * sx, y = (ev.clientY - r.top) * sy;
     if (x >= b[0] - 6 && x <= b[0] + b[2] + 6 && y >= b[1] - 14 && y <= b[1] + b[3] + 6) { MiniMap.big = !MiniMap.big; MiniMap.ckey = ''; ev.stopPropagation(); ev.preventDefault(); }
   }, true);
+  /* ---- saves from before the four forests grew to 96x72 (B, 2026-11-16): move positions/keys on those maps by 1.5x, once ---- */
+  {
+    const BIGF = { woods_n: 1, woods_e: 1, woods_s: 1, woods_w: 1 }, zz = v => Math.floor(v * 1.5 + .5);
+    const _ldB = World.load.bind(World);
+    World.load = async function (name, x, y, dir) {
+      try {
+        const S = G.S;
+        if (S && S.f && !S.f.fcBig) {
+          S.f.fcBig = 1;
+          if (BIGF[name] && typeof x === 'number' && x === S.x && y === S.y) { x = zz(x); y = zz(y); }
+          if (S.dret && BIGF[S.dret.map]) { S.dret.x = zz(S.dret.x); S.dret.y = zz(S.dret.y); }
+          if (S.chests) for (const k of Object.keys(S.chests)) { const m = /^(woods_[nesw]):(\d+),(\d+)$/.exec(k); if (m) { S.chests[`${m[1]}:${zz(+m[2])},${zz(+m[3])}`] = S.chests[k]; delete S.chests[k]; } }
+          if (S.fcfog) for (const k of ['fc_north', 'fc_east', 'fc_south', 'fc_west', 'fc_north2', 'fc_east2', 'fc_south2', 'fc_west2']) delete S.fcfog[k];
+        }
+      } catch (e) { }
+      return _ldB(name, x, y, dir);
+    };
+  }
 })();

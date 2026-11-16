@@ -86,6 +86,7 @@
     const ex = SCENES[TOWN] && (SCENES[TOWN].exits || []).find(e => e.to === 'woods'); if (!ex || ex.__cp) return; ex.__cp = 1; const prev = ex.check;
     ex.check = async () => {
       if (!checkpoint() || S_().cpPass === day()) return prev ? prev() : true;
+      if ((S_().townUp || {}).watch) { S_().cpPass = day(); await narr('Inquisitors at the East gate — but a watchman you know steps between you. "This one\'s with the watch, sirs. Errand for the Guild." They wave you through.'); return prev ? prev() : true; }
       await narr('Two Inquisitors in white stand at the East gate, checking every face against a sheaf of drawings. "You. Hood down. Let\'s see your eyes."');
       const opts = [], S = S_(), tier = TL() ? TL().tier() : 0;
       if (S.f.hoodGiven) opts.push('Keep the hood low and mumble about rain');

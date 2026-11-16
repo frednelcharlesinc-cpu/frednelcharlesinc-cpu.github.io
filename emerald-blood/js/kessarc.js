@@ -43,7 +43,7 @@ const KA = {
       f.ka = 'camp'; sfx('level');
       await say('kessE', 'neutral', '"South. The old ford — there\'s a hollow there where you can\'t see a fire from the road. That\'s where I\'d go if I were a coward with a cage."');
       Story.quest('The trail leads south to a hidden camp by the old ford (south-west of the West Woods). Edda and the children are there.');
-      if (G.S.map === 'woods_w' && !World.ent('corvin')) { const [x, y] = freeNear('woods_w', 12, 40); await World.addNpc({ id: 'corvin', sprite: 'corvin', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); }
+      if (G.S.map === 'woods_w' && !World.ent('corvin')) { const [x, y] = freeNear('woods_w', 18, 60); await World.addNpc({ id: 'corvin', sprite: 'corvin', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); }
     } else toast(`<b style="color:#c99bff">Trail</b> ${f.kaSign.length}/3`, 1600);
   },
   async camp() {
@@ -128,7 +128,7 @@ const KA = {
 (function () {
   const W = SCENES.woods_w; if (!W) return;
   KA_SIGNS.forEach(([x, y], i) => { const prev = W.tiles[x + ',' + y]; W.tiles[x + ',' + y] = async () => { if (AF().ka === 'woods' && !(AF().kaSign || []).includes(i)) return KA.sign(i); if (prev) return prev(); }; });
-  const _n = W.npcs; W.npcs = function () { const L = _n.call(this) || []; if (AF().ka === 'camp') { const [x, y] = freeNear('woods_w', 12, 40); L.push({ id: 'corvin', sprite: 'corvin', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); } return L; };
+  const _n = W.npcs; W.npcs = function () { const L = _n.call(this) || []; if (AF().ka === 'camp') { const [x, y] = freeNear('woods_w', 18, 60); L.push({ id: 'corvin', sprite: 'corvin', x, y, dir: 'up', name: 'Corvin', talk: () => KA.camp(), qm: () => '!' }); } return L; };
   // the trail marks
   const _r = World.render.bind(World);
   World.render = function (c, t) { const out = _r(c, t);

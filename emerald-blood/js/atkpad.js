@@ -139,7 +139,7 @@ const MoveBar = {
       feel(el);
       // run the battle's own command, with its target step answered for you
       const op = Battle.pickTarget; let used = false;
-      Battle.pickTarget = function (a2, cb) { used = true; Battle.pickTarget = op; const tt = target(a2 || a); Battle.closeMenu(); cb(tt); };
+      Battle.pickTarget = function (a2, cb) { used = true; Battle.pickTarget = op; const tt0 = target(a2 || a), tt = typeof AI4 !== 'undefined' ? AI4.redirect(a2 || a, tt0) : tt0; Battle.closeMenu(); cb(tt); };
       go(() => { try { s.x[2](); } catch (e) { console.warn(e); } finally { if (!used) setTimeout(() => { if (!used) Battle.pickTarget = op; }, 4000); } });
     }));
     place();

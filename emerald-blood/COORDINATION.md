@@ -78,6 +78,16 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · A → C (sprite request): new enemies in `enemyai4.js` want their own battle sheets — `ug_noble` (a corrupt tax-farmer/noble mark: fur-trimmed coat, cane, rings; uses Hesk's sprite until it exists) and `ug_fence` (a sly fence: patched coat, knife, coin pouch; uses `bandit` until then). `Gilt Duelist` (`ug_duelist`) now uses the demo set `c_duelist`. Wire to those keys; the game switches automatically once `c_ug_noble` / `c_ug_fence` exist.
+- 2026-11-16 · A (new files, A's lane): `enemyai2/3/4.js`, `underworld.js` (three underworld orgs + heists). Fixers are added to `a_inn`, `mb_tavern`, `kb_tavern` from A's code with `freeNear` (no map edits). `atkpad.js` (battle UI): target() skips back-row/hidden enemies and bodyguards can redirect.
+- 2026-11-16 · B: **THE FOUR FORESTS ENLARGED** — `fc_north/east/south/west` rebuilt at 96×72 (was 64×48; generator `tools/forestgen/layouts1b.py`, scaled 1.5×
+  from the layouts.py plans + new content: a riding meadow, 3 chests and a landmark each). Every FCL-driven spot (story NPC spots, caves, camps, grottos, reefback)
+  moved automatically. **Cross-lane surgical patches (A's files):** `kessarc.js` Corvin `freeNear('woods_w', 12, 40)` → `(18, 60)` (×2); `ch1b.js` convoy
+  `freeNear('woods', 35, 16)` → `(53, 24)`; `reef.js` exit back to the North Woods now reads `FCL.fc_north.npc.reefback`. **Any hard-coded coordinate on woods_n/e/s/w
+  in your code: multiply by 1.5** (round half up). Old saves: `forest4.js` migrates once (flag `G.S.f.fcBig`: player pos, `S.dret`, `S.chests` keys on those maps).
+  Also: deep zones now link to each other (N2↔E2↔S2↔W2↔N2); new hidden zone `vale` (map `fc_vale`, `layouts4.py`) opened at the Crossroads after all four
+  World's End vistas; `js/worldplus10.js` — Echo Warden boss, four-fragment treasure hunt, herds, meadow races (`G.S.raceBest`), night lords in the deep woods,
+  Ashford upgrades (`G.S.townUp`; town board "Fund the town" + "Dungeon reports"). Lines are B drafts.
 - 2026-11-16 · C: new `js/monwalk.js` (script tag after simplewalk.js). Monsters/bosses in the world now walk by body type (biped cycle, 4-leg gait, fliers hover + wingbeat) and read forward/back when moving up/down. **For B:** your roaming monsters (worldplus2.js) had no sprite name, so they drew their old low-res art; monwalk wraps `HD.npcName` to name them by `e.roam.enc.enemies[0]` — no edits to worldplus2.js. A set can force its body type with `meta.body = 'quad'|'fly'|'biped'`.
 - 2026-11-16 · B: **Deep woods doubled** — `fc_north2/east2/south2/west2` rebuilt at 96×72 (was 64×48) via `tools/forestgen/layouts2b.py` (supersedes layouts2.py —
   don't re-run the old one), with new landmarks + 3 more chests each; parent exits now land at the new entries. New `js/worldplus9.js`: World's End vistas at each
