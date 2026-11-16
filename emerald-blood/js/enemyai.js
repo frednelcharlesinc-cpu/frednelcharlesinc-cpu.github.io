@@ -76,7 +76,7 @@ const AI = {
     if (!B || !B.barks) return; const now = performance.now();
     B.barks = B.barks.filter(b => now - b.t0 < b.life && !b.a.ko);
     for (const b of B.barks) { const k = (now - b.t0) / b.life, al = k < .1 ? k / .1 : k > .85 ? (1 - k) / .15 : 1, a = b.a, s = (a.size || 1) * (typeof BT_SCALE !== 'undefined' ? BT_SCALE : 1);
-      c.save(); c.globalAlpha = al; c.font = '800 13px Nunito, sans-serif'; const w = Math.min(230, c.measureText(b.s).width + 18), x = Math.max(6, Math.min(G.view.w - w - 6, a.x - w / 2)), y = a.y - 118 * s - 22;
+      c.save(); c.globalAlpha = al; c.font = '800 13px Nunito, sans-serif'; const w = Math.min(360, c.measureText(b.s).width + 18), x = Math.max(6, Math.min(G.view.w - w - 6, a.x - w / 2)), y = Math.max(40, a.y - 118 * s - 22);
       c.fillStyle = 'rgba(255,252,240,.95)'; c.strokeStyle = 'rgba(20,16,10,.85)'; c.lineWidth = 2;
       c.beginPath(); c.roundRect ? c.roundRect(x, y, w, 24, 9) : c.rect(x, y, w, 24); c.fill(); c.stroke();
       c.beginPath(); c.moveTo(a.x - 5, y + 24); c.lineTo(a.x, y + 31); c.lineTo(a.x + 5, y + 24); c.fill();
