@@ -25,7 +25,7 @@ const Wardrobe = {
       .map(k => [k, M[k].label || k.split('_o_')[1].replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())]);
   },
   /* the set this hero should draw with right now ('' / missing pieces fall back to the original) */
-  DEFAULT: { me: 'c_ren_o_sheathed' },   // a hero's default look when the player hasn't picked one ('' = Original)
+  DEFAULT: { },   // (2026-11-16: owner wants old Ren back as the default; the new look stays as a Wardrobe outfit)   // a hero's default look when the player hasn't picked one ('' = Original)
   resolve(id, set) {
     const w = Object.assign({}, this.of(id)); if (!HD.meta) return set;
     if (w.o === undefined && this.DEFAULT[id]) w.o = this.DEFAULT[id];
