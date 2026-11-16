@@ -227,15 +227,19 @@
     for (const k of chestKeys) items.push(!!(S.chests || {})[k]);
     if (window.WorldPlus) WorldPlus.cacheSpots(scene).forEach((_, i) => items.push(!!F()[`cache_${scene}_${i}`]));
     if (fi >= 0) { const L = S.lore12 || []; items.push(L.includes(fi * 2), L.includes(fi * 2 + 1), L.includes(8 + fi), !!F()['grotto_' + scene]); }
-    items.push(!!(S.camps || {})[scene]);
+    if (!/2$/.test(scene)) items.push(!!(S.camps || {})[scene]);
+    if (scene !== 'woods') items.push(!!F()['glade_' + scene], !!F()['look_' + scene]);
+    items.push(!!(S.waystones || {})[scene]);
+    if (/2$/.test(scene)) items.push(!!F()['vista_' + scene]);
     if (fi >= 0) items.push(!!F()['moon_' + scene]);
     const n = items.filter(Boolean).length; return { n, of: items.length, pct: Math.round(100 * n / items.length) };
   }
   async function tally() {
     const S = S_(); S.tallyPaid = S.tallyPaid || {};
-    const rows = ['woods', ...FOREST].map(s => { const t = forestStats(s); return `${SCENES[s].subtitle === 'Where the four woods meet' ? 'The Crossroads' : SCENES[s].subtitle}: ${t.pct}% (${t.n}/${t.of})`; });
-    await narr("Explorer's tally — " + rows.join(' · '));
-    for (const s of ['woods', ...FOREST]) if (forestStats(s).pct >= 100 && !S.tallyPaid[s]) {
+    const DEEPS = ['woods_n2', 'woods_e2', 'woods_s2', 'woods_w2'].filter(s => SCENES[s]);
+    const rows = ['woods', ...FOREST, ...DEEPS].map(s => { const t = forestStats(s); return `${SCENES[s].subtitle === 'Where the four woods meet' ? 'The Crossroads' : SCENES[s].subtitle}: ${t.pct}% (${t.n}/${t.of})`; });
+    await narr("Explorer's tally — " + rows.slice(0, 5).join(' · ')); if (rows.length > 5) await narr('The deep woods — ' + rows.slice(5).join(' · '));
+    for (const s of ['woods', ...FOREST, ...DEEPS]) if (forestStats(s).pct >= 100 && !S.tallyPaid[s]) {
       S.tallyPaid[s] = 1; const n = giveRare(); G.S.gold += 300; UI.hud(); sfx('level');
       await narr(`You've uncovered every secret of ${s === 'woods' ? 'the Crossroads' : SCENES[s].subtitle}. The Adventurers' Guild pays explorers well: 300 gold${n ? ` and a <b style="color:#ffd36a">${n}</b>` : ''}.`); save();
     }

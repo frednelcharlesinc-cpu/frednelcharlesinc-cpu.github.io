@@ -78,6 +78,10 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · B: **Deep woods doubled** — `fc_north2/east2/south2/west2` rebuilt at 96×72 (was 64×48) via `tools/forestgen/layouts2b.py` (supersedes layouts2.py —
+  don't re-run the old one), with new landmarks + 3 more chests each; parent exits now land at the new entries. New `js/worldplus9.js`: World's End vistas at each
+  deep zone's far dead end (`G.S.f.vista_<zone>`), weekly dungeon moods GILDED / DARKNESS / SWARMING / QUIET (third `Battle.start` wrapper: +gold on GILDED wins only;
+  scales `SCENES[dungeon].encRate`). Explorer's tally now covers the deep woods (glade, lookout, waystone, vista).
 - 2026-11-13 · B (new `js/worldplus8.js` + `js/townlife2.js`, tags after townlife.js; new glade maps `fc_glade_n/e/s/w` via `tools/forestgen/layouts3.py`):
   worldplus8 — fake trees → secret glades (scenes `glade_<zone>`), lookout rocks (reveal mini map), night stepping stones / winter ice / summer dry riverbeds,
   wandering events (burning cart, wounded traveller, lost child), birds from bushes, eyes in the dark, goblin–bandit skirmishes, Drag waystones (`G.S.waystones`,
