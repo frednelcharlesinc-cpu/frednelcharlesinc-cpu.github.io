@@ -42,7 +42,10 @@
     // facing: side art faces right; up/down keep the last horizontal facing
     const want = this.face || 'left', flip = want !== 'right';
     // forward / backward cue for side-only art
-    const depth = M.cycle || side || !moving ? 1 : up ? .94 : 1.05;
+    const depth = M.cycle || side || !moving ? 1 : up ? .96 : 1.03;
+    /* turned toward / away from the camera: a side-only sprite is foreshortened (narrower, a slight
+       three-quarter turn that sways with each step), so walking up/down reads as front / back */
+    const turn = !M.cycle && moving && !side, sway = turn ? Math.sin((this.walkT || 0) / 140 * Math.PI) * .06 : 0;
     // motion per body type
     const ph = T / per * Math.PI;
     let lift = 0, rot = 0, sx = 1, sy = 1;
@@ -54,7 +57,7 @@
     c.fillStyle = `rgba(0,0,0,${sa})`; c.beginPath(); c.ellipse(x, y - 1, sw * (body === 'fly' ? 1 - Math.sin(now / 260) * .08 : 1), sw * .32, 0, 0, 7); c.fill();
     c.save(); if (this.alpha != null) c.globalAlpha = this.alpha;
     c.translate(x, y - lift); if (flip) c.scale(-1, 1); if (rot) c.rotate(rot);
-    c.scale(depth * sx, depth * sy);
+    c.scale(depth * sx * (turn ? (body === 'quad' ? .55 : .7) + sway : 1), depth * sy);
     if (up && moving && !M.cycle) c.filter = 'brightness(.88)';
     HD.dI(c, img, fr[0], fr[1], fr[2], fr[3], -fr[4] * k, -fr[5] * k, fr[2] * k, fr[3] * k);
     c.restore();
