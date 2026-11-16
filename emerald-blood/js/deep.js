@@ -187,6 +187,7 @@
     const r = await Battle.start({ enemies: [champKey()], boss: true, noFlee: true, bd: 'arena', music: 'boss', intro: 'VARRO THE UNBROKEN' });
     ast().champWeek = week();
     if (r !== 'win') { Story.heal(true); await narr('"Not this week," Varro says, offering you a hand up. "But you made them scream. Come back."'); save(); return; }
+    try { if (Deep.onChamp) await Deep.onChamp(); } catch (e) { }
     ast().champWins = (ast().champWins || 0) + 1; G.S.gold += 400; const x = rare(); UI.hud(); sfx('level'); cheer(1);
     await narr(`Varro hits the sand — and laughs. "NINETY-ONE," he shouts to the crowd, pointing at you. ${gold$('400 gold')}${x ? ` and a ${gold$(x)}` : ''}. He'll be back next week, and so can you.`); save();
   }

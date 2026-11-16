@@ -2,7 +2,7 @@ import hashlib,re,os
 os.chdir('/home/claude/frednelcharlesinc-cpu.github.io/emerald-blood')
 h=lambda f: hashlib.md5(open(f,'rb').read()).hexdigest()[:8]
 s=open('index.html').read()
-for f in ['core','reef','forest4','fc_data','lieutenants','dungeonx','dungeons','worldplus','worldplus2','worldplus3','worldplus4','worldplus5','worldplus6','worldplus7','townlife','worldplus8','townlife2','worldplus9','worldplus10','food','fishing','food2','worldplus11','deep','deep2','world']:
+for f in ['core','reef','forest4','fc_data','lieutenants','dungeonx','dungeons','worldplus','worldplus2','worldplus3','worldplus4','worldplus5','worldplus6','worldplus7','townlife','worldplus8','townlife2','worldplus9','worldplus10','food','fishing','food2','worldplus11','deep','deep2','deep3','world']:
     s=re.sub(r'<script src="js/%s.js\?v=\w+"></script>'%f, '<script src="js/%s.js?v=%s"></script>'%(f,h('js/%s.js'%f)), s)
 open('index.html','w').write(s)
 
