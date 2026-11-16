@@ -80,6 +80,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · **C:** new `js/spritepolish.js` (script tag at the end of index.html): battle rim light, white hit-flash + impact squash, attack wind-up/stretch, footstep dust for walking NPCs/monsters. Wraps `HD.bt`/`HD.blit` and `Ent.prototype.draw`. Off switch: `G.settings.polish = false`.
 - 2026-11-16 · B (new `js/food2.js` + `js/worldplus11.js`, tags after fishing.js): food2 — recipe book (`G.S.food.book`), inn order of the day, raw-food spoilage,
   homestead trap line / smoke rack / aquarium (`G.S.homeUp`), share meals with companions (**calls `Bonds.gain`** — favourite food type per companion is hashed from its key;
   A may set real favourites), fishing bait, autumn Harvest Cook-off in Ashford. worldplus11 — homestead map room, monthly Wandering Colossus world boss, rabbits/bats,

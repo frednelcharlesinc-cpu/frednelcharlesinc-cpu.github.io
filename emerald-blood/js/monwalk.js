@@ -22,6 +22,7 @@
     if (e && OWN[e.id] && HD.meta && HD.meta['c_' + OWN[e.id]]) return OWN[e.id]; return n; };
 
   const MONSTER = set => { const b = String(set).replace(/^c_/, ''); return /^(m_|b_|sw_|reef_|lupine|rime_|mana_)/.test(b) || (typeof ENEMY !== 'undefined' && ENEMY[b] && !ENEMY[b].human); };
+  window.MonWalk = { kind: (s) => kind(s), monster: (s) => MONSTER(s) };
   const _draw = Ent.prototype.draw;
   Ent.prototype.draw = function (c, cx, cy, t) {
     if (this.isPlayer || !HD.on() || !HD.OW || (G.S && G.S.kid)) return _draw.call(this, c, cx, cy, t);
