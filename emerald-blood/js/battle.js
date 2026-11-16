@@ -705,22 +705,16 @@ const Battle = {
       let style = 'normal';
       if (e.side === 'e' && ti >= 2 && !B.tutorial) { const r = Math.random(), fe = .12 + ti * .04, sn = .08 + ti * .03; style = r < fe ? (ti >= 3 ? FEINTS[Math.floor(Math.random() * FEINTS.length)] : Math.random() < .5 ? 'feint' : FEINTS[Math.floor(Math.random() * 2)]) : r < fe + sn ? 'snap' : 'normal'; }
       const r = await this.defend(e, t, Object.assign({ el, style }, h));
-      if (r === 'parry' || r === 'pparry') { parries++; streak++; if (streak >= 2) await this.clash(e, t, streak); } else streak = 0;
+      B.lastDef = r; if (r === 'parry' || r === 'pparry') { parries++; streak++; if (streak >= 2) await this.clash(e, t, streak); } else streak = 0;
       await wait(120);
     }
     $('#react').classList.add('hide'); Input.on('dodge', null); Input.on('parry', null); B.presses = null;
-    const allParried = parries === n && n > 0 && !sk.hits.some(h => h.unp);
+    const allParried = (parries === n && n > 0 && !sk.hits.some(h => h.unp)) || (n > 1 && this.counterOk && this.counterOk(t, e, B.lastDef));
     if (!ranged) await this.home(e);
     if (allParried && !t.ko && !e.ko && !B.leafTrain) {
       await this.msg('COUNTERATTACK!', 600); sfx('counter'); B.dim = .5; B.dimCol = '60,50,10';
-      // no travel: the riposte is cut where you stand, and the cut arrives where they stand
-      t.anim = t.isMe ? 'backslash' : 'slash'; this.play(t, t.anim, t.isMe ? 13 : 6, 40);
-      await wait(160);
-      const cc = t.isMe && typeof BAND_COL !== 'undefined' ? BAND_COL[Power.now().band] : '#ffe08a';
-      B.fx.push({ dline: 1, x1: t.x, y1: t.y - 40, x2: e.x, y2: e.y - 40, col: cc, w: 4, t: 0, life: 260 });
-      this.spark(e.x, e.y - 40, cc, 16); B.shake = Math.max(B.shake || 0, 8); sfx('crit');
-      this.resolveHit(t, e, 1.8, 'perfect', { unblockable: 1, brk: 16, src: 'counter' });
-      await wait(300); B.dim = 0;
+      await this.doCounter(t, e);
+      B.dim = 0;
     }
   },
   defend(e, t, h) {
@@ -808,6 +802,17 @@ const Battle = {
       this.hud();
       resolve(res);
     });
+  },
+  // the counter: cut where you stand, and the cut arrives where they stand (counters.js gives each fighter their own)
+  async doCounter(t, e) {
+    const B = this.B;
+    t.anim = t.isMe ? 'backslash' : 'slash'; this.play(t, t.anim, t.isMe ? 13 : 6, 40);
+    await wait(160);
+    const cc = t.isMe && typeof BAND_COL !== 'undefined' ? BAND_COL[Power.now().band] : '#ffe08a';
+    B.fx.push({ dline: 1, x1: t.x, y1: t.y - 40, x2: e.x, y2: e.y - 40, col: cc, w: 4, t: 0, life: 260 });
+    this.spark(e.x, e.y - 40, cc, 16); B.shake = Math.max(B.shake || 0, 8); sfx('crit');
+    this.resolveHit(t, e, 1.8, 'perfect', { unblockable: 1, brk: 16, src: 'counter' });
+    await wait(300);
   },
   async clash(e, t, n) {
     const B = this.B, mx = (e.x + t.x) / 2, my = (e.y + t.y) / 2 - 34;
