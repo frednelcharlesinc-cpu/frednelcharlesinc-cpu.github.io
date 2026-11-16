@@ -154,12 +154,14 @@
   function maybeRift(scene) {
     const S = S_(); if (scene === 'woods' || riftActive(scene)) return;
     if (S.gateEv && !S.gateEv.done && (S.steps || 0) < S.gateEv.until) return;   // one at a time
-    if ((S.steps || 0) - (S.gateLast || -9999) < 450 || Math.random() > .22) return;
+    const fcB = S.gateFc && S.gateFc.b, myB = (/^woods_([nesw])/.exec(scene) || [])[1];
+    if (fcB && myB !== fcB) return;   // the seer's forecast holds: the next tear opens where she said
+    if ((S.steps || 0) - (S.gateLast || -9999) < (fcB ? 200 : 450) || Math.random() > (fcB ? .6 : .22)) return;
     const M = World.map, reach = reachFrom(M, MK[scene]), p = World.player;
     const cand = (M.grass || []).filter(([x, y]) => reach.has(x + ',' + y) && Math.abs(x - p.x) + Math.abs(y - p.y) > 10 && M.col[y][x] === '0' && M.col[y + 1] && M.col[y + 1][x] === '0');
     if (!cand.length) return;
     const [x, y] = cand[Math.floor(Math.random() * cand.length)];
-    S.gateEv = { scene, x, y, until: (S.steps || 0) + 320, done: 0 }; S.gateLast = S.steps || 0;
+    S.gateEv = { scene, x, y, until: (S.steps || 0) + 320, done: 0 }; S.gateLast = S.steps || 0; delete S.gateFc; S.gateLog = S.gateLog || []; S.gateLog.push({ b: myB || 'w', scene, day: typeof Cal !== 'undefined' ? Cal.day() : 1 }); if (S.gateLog.length > 60) S.gateLog.shift();
     toast('<b style="color:#c58aff">A GATE HAS TORN OPEN</b> somewhere in these woods. It won\'t stay open long.', 3800); save();
   }
   async function enterRift() {

@@ -196,3 +196,6 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
 
 - 2026-11-16 (B) WORLD+13 — js/deep2.js: arena betting (Odds-Marta's book, 3 seeded monster bouts/day), arena sponsors (Millers/Anglers/Smiths), spreading cracks (each closed Gate → G.S.gatesClosed; fractures appear in the Underdeep at 1/2/4/6/9/12), mural rubbings → Archivist Pell (town services), 5 void fish in the Underdeep pool (the "anywhere" fish no longer bite there), echo duels (Mirror Pool, weekly; enemies use tinted copies of the player/ally sheets). deep.js got two hooks: Deep.onMural, Deep.onCup.
   → A: Odds-Marta, Archivist Pell and the echo lines are B drafts.
+
+- 2026-11-16 (B) WORLD+14 — js/deep3.js: arena seasons (28-day ladder vs 9 named rivals, G.S.arenaSeason; the arena board is now the ladder), crowd favourite (Battle.start wrapper reads Battle.B.st.hurt/perf in arena bouts), Underdeep void storms (seeded by day: up to 2 bridge groups go dark, the well always stays reachable), Drag ghost → 4 hidden mural sketches, Void Salt (void_/deep_ enemy drop) + 3 rift dishes, the Archive (after all 8 rubbings: lore books + gate map from G.S.gateLog), Madame Oyelle the seer (G.S.gateFc — worldplus3 maybeRift now honours it and logs gates).
+  → A: rival names, Oyelle, Pell's books and ghost sketch lines are B drafts.
