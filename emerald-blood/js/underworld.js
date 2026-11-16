@@ -3,8 +3,8 @@
    THE UNDERWORLD  (Chat A) — how Green Eclipse pays for its war
    Kairo's people don't rob farmers. They take their coin and their ears from people worse than them,
    through three "tables" that don't know who they really work for:
-     · THE TALLOW HAND  — smugglers & fences in Ashford's candle-cellars.      Fixer: Nessa Quill  (The Crooked Kettle)
-     · THE QUIET LEDGER — clerks and couriers who copy letters they shouldn't. Fixer: Jory Inkwell (The Drowned Duck, Millbrook)
+     · THE TALLOW HAND  — smugglers & fences in Ashford's candle-cellars.      Fixer: Nessa Crane  (The Crooked Kettle)
+     · THE INKWELL RING  — the Silent Ledger's back room: clerks who sell copies. Fixer: Jory Inkwell (The Drowned Duck, Millbrook)
      · THE GILT TABLE   — corrupt nobles & magistrates who dine on the vale.   Fixer: Steward Haskell (The Sheaf & Sickle, Kettlebrook)
    Jobs: HEISTS (a turn-based blueprint: patrols, vision cones, takedowns, smoke, a thrown coin, a lock to pick)
          and MARKS (a fight with BODYGUARDS — enemyai4.js). Every job pays you, and sends a cut to Green Eclipse:
@@ -13,10 +13,10 @@
    The RED VEIL is the smart way to do this work: seen as the Veil, it's the Veil's legend — seen as Ren, it's Ren's neck.
    ===================================================================================== */
 const UG_ORGS = {
-  tallow: { n: 'The Tallow Hand', col: '#ffcf7a', fixer: 'nessa', fx: 'Nessa Quill', spr: 'rebel2', scene: 'a_inn', at: [13, 3],
+  tallow: { n: 'The Tallow Hand', col: '#ffcf7a', fixer: 'nessa', fx: 'Nessa Crane', spr: 'rebel2', scene: 'a_inn', at: [13, 3],
     d: 'Smugglers and fences working out of Ashford\'s candle-cellars. They move anything — including the guns Green Eclipse fights with.' },
-  ledger: { n: 'The Quiet Ledger', col: '#9fd0ff', fixer: 'jory', fx: 'Jory Inkwell', spr: 'folk1', scene: 'mb_tavern', at: [17, 9],
-    d: 'Clerks, couriers and ferrymen who copy Crown letters and sell the copies. Kairo\'s eyes in every office in the vale.' },
+  ledger: { n: 'The Inkwell Ring', col: '#9fd0ff', fixer: 'jory', fx: 'Jory Inkwell', spr: 'folk1', scene: 'mb_tavern', at: [17, 9],
+    d: 'The Silent Ledger\'s back room: clerks, couriers and ferrymen who sell the copies the Silent Ledger won\'t. Kairo\'s eyes in every office in the vale.' },
   gilt: { n: 'The Gilt Table', col: '#e6b3ff', fixer: 'haskell', fx: 'Steward Haskell', spr: 'folk16', scene: 'kb_tavern', at: [17, 9],
     d: 'A supper club of nobles and magistrates who split the Registry\'s bounties. They pay the best. Kairo takes their money and leaks their secrets.' }
 };
@@ -65,7 +65,7 @@ const UG_JOBS = [
 ];
 const UG_NOTES = [[3, 'The Registry pays forty silver for every Drag it "registers". The Gilt Table takes a tenth of every payment. Lord Vellacourt chairs the Table.'],
   [6, 'The Tallow Hand sells D-stones to the Registry — and to buyers in the north that nobody will name. Nessa hates it. Nessa does it anyway.'],
-  [10, 'Kairo has had a man inside the Quiet Ledger for two years. Every copy you\'ve read, he read first.']];
+  [10, 'Kairo has had a man inside the Inkwell Ring for two years. Every copy you\'ve read, he read first.']];
 
 const UG = {
   st() { const S = G.S; S.ug = S.ug || {}; const u = S.ug; u.org = u.org || { tallow: 0, ledger: 0, gilt: 0 }; u.done = u.done || {}; u.funds = u.funds || 0; u.intel = u.intel || 0; return u; },
@@ -77,11 +77,11 @@ const UG = {
     try {
       await say('tamsin', 'neutral', 'Ren. Sit. Kairo wanted me to be the one to tell you how we eat.');
       await say('tamsin', 'neutral', 'Green Eclipse doesn\'t rob farmers. We take our coin — and our ears — from people worse than us.');
-      await say('tamsin', 'neutral', 'Three tables in this vale trade in what the Crown won\'t touch. The Tallow Hand: smugglers, right under this floor. The Quiet Ledger: clerks who copy letters they shouldn\'t. And the Gilt Table — nobles who dine on the vale and call it charity.');
+      await say('tamsin', 'neutral', 'Three tables in this vale trade in what the Crown won\'t touch. The Tallow Hand: smugglers, right under this floor. The Inkwell Ring: the Silent Ledger\'s back room, clerks who copy letters they shouldn\'t. And the Gilt Table — nobles who dine on the vale and call it charity.');
       await say('tamsin', 'happy', 'They don\'t know they work for us. Kairo likes it that way.');
       const c = await ask('tamsin', 'neutral', 'Do their jobs. Take their gold. Send us our cut, and bring us what you hear.', ['"Where do I find them?"', '"And if I get seen?"']);
       if (c === 1) await say('tamsin', 'anger', 'Then don\'t be YOU. You have a red scarf, don\'t you? Whatever the Veil does, nobody pins on Ren. Wear it for this work. Always.');
-      await say('tamsin', 'neutral', 'Nessa Quill, back corner of the Crooked Kettle. Jory Inkwell at the Drowned Duck in Millbrook. Steward Haskell at the Sheaf & Sickle in Kettlebrook — he serves the Gilt Table, and he\'s the worst of the three.');
+      await say('tamsin', 'neutral', 'Nessa Crane, back corner of the Crooked Kettle. Jory Inkwell at the Drowned Duck in Millbrook. Steward Haskell at the Sheaf & Sickle in Kettlebrook — he serves the Gilt Table, and he\'s the worst of the three.');
       Dlg.close(); toast('<b style="color:#a9c4ff">The Underworld</b> is open. Talk to the fixers in the three taverns for jobs. Every job sends a cut to Green Eclipse.', 5200); save();
     } finally { World.busy = false; }
   },
@@ -352,7 +352,7 @@ const Heist = {
 
 // ======================= the fixers & Tamsin in the world =======================
 (function () {
-  CHAR.nessa = CHAR.nessa || { name: 'Nessa Quill', sprite: 'rebel2' };
+  CHAR.nessa = CHAR.nessa || { name: 'Nessa Crane', sprite: 'rebel2' };
   CHAR.jory = CHAR.jory || { name: 'Jory Inkwell', sprite: 'folk1' };
   CHAR.haskell = CHAR.haskell || { name: 'Steward Haskell', sprite: 'folk16' };
   for (const [org, O] of Object.entries(UG_ORGS)) {
