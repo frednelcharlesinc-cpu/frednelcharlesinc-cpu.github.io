@@ -141,10 +141,15 @@
   }
 
   /* ---------- 2. gate rifts ---------- */
-  const RIFT = () => FCL.fc_gate && FCL.fc_gate.rift;
-  SCENES.gate_rift = { title: 'A Gate Rift', subtitle: 'The woods are gone. The sky is the wrong colour.', map: 'fc_gate', music: 'woods', noAmbient: 1, interior: 1, bd: 'd_vault',
+  // each forest tears into its own pocket of the void (deep.js adds the stair down to the Underdeep)
+  const RB = () => { const S = G.S || {}; if (S.pocketB) return S.pocketB; const m = /^woods_([nesw])/.exec((S.gateEv || {}).scene || ''); return m ? m[1] : 'w'; };
+  const RMAP = () => FCL['fc_rift_' + RB()] ? 'fc_rift_' + RB() : 'fc_gate';
+  const RIFT = () => FCL[RMAP()] && FCL[RMAP()].rift;
+  const riftBack = () => { const g = G.S.gateEv || {}; if (!G.S.pocketB && riftActive(g.scene)) return { to: g.scene, tx: g.x, ty: g.y + 1 };
+    const b = RB(), e = (FCL.fc_cross.exits || []).find(x => x.to === 'woods_' + b) || {}; return { to: 'woods_' + b, tx: e.tx || 24, ty: e.ty || 20 }; };
+  SCENES.gate_rift = { title: 'A Gate Rift', subtitle: 'The woods are gone. The sky is the wrong colour.', get map() { return RMAP(); }, music: 'woods', noAmbient: 1, interior: 1, bd: 'rift',
     setup(W) { W.tint = 'rgba(30,6,50,.42)'; const R = RIFT(); W.lights.push({ x: R.chest[0] * TILE + 16, y: R.chest[1] * TILE, r: 140, c: '200,120,255' }); },
-    npcs() { return []; }, get exits() { const g = G.S.gateEv || {}, R = RIFT(); return R ? [{ x: R.exit[0], y: R.exit[1], to: g.scene || 'woods', tx: g.x || 24, ty: (g.y || 20) + 1, dir: 'down' }] : []; } };
+    npcs() { return []; }, get exits() { const R = RIFT(), b = riftBack(); return R ? [{ x: R.exit[0], y: R.exit[1], to: b.to, tx: b.tx, ty: b.ty, dir: 'down', label: 'back through the tear' }] : []; } };
   function riftActive(scene) { const g = S_().gateEv; return g && !g.done && g.scene === scene && (S_().steps || 0) < g.until; }
   function maybeRift(scene) {
     const S = S_(); if (scene === 'woods' || riftActive(scene)) return;
@@ -160,10 +165,11 @@
   async function enterRift() {
     const c = await ask(null, null, 'A Gate hangs in the air, a wound of purple light. The air on the other side is wrong. Step through?', ['Step through', 'Not now']);
     if (c !== 0) return;
-    const R = RIFT(); await World.go('gate_rift', R.start[0], R.start[1], 'up');
+    delete G.S.pocketB; const R = RIFT(); await World.go('gate_rift', R.start[0], R.start[1], 'up');
   }
   async function riftSetup(W) {
     const R = RIFT(), g = S_().gateEv || {}, src = SCENES[g.scene] || SCENES.woods_n;
+    if (S_().pocketB || !riftActive(g.scene)) return;   // a quiet pocket: the guardians only wake while the tear is open
     if (!g.cleared) for (let i = 0; i < R.guards.length; i++) {
       if ((g.beat || []).includes(i)) continue;
       let enc; try { enc = src.encounters(); } catch (e) { continue; } const lead = enc && enc.enemies && enc.enemies[0]; if (!lead || !ENEMY[lead]) continue;
@@ -176,7 +182,7 @@
     if (!g.looted) W.ents.push(new Ent({ id: 'riftchest', x: R.chest[0], y: R.chest[1], dir: 'down', img: Pick.sheet('chest_gold_c'), pickup: 1, name: 'Rift chest', talk: riftChest }));
   }
   async function riftFight(i, enemies) {
-    const r = await Battle.start({ enemies, noFlee: true, bd: 'd_vault', music: 'boss', intro: 'RIFT GUARDIAN' });
+    const r = await Battle.start({ enemies, noFlee: true, bd: 'rift', music: 'boss', intro: 'RIFT GUARDIAN' });
     if (r === 'lose') { await Story.defeat(); return; }
     if (r !== 'win') return;
     const g = S_().gateEv; g.beat = g.beat || []; g.beat.push(i); World.ents = World.ents.filter(e => e.id !== 'rg_' + i); save();

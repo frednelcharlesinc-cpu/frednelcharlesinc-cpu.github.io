@@ -187,3 +187,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   Shared touches: index.html (2 script tags after pool.js), maps.json (d_fang/d_cinder/d_shrine/d_vault rebuilt 76x52), chests.json (fc_* keys), sw.js bump.
 - 2026-11-11 · B → A: moved the Kess arc trail marks and camp in `kessarc.js` to fit the new Old Grove map (fc_west).
 - 2026-11-11 · A: merged B's forest push by hand (before this system existed); nothing lost.
+
+- 2026-11-16 (B) WORLD+12 — js/deep.js + worldplus3 rift patch. Gates now tear into a per-forest void pocket (fc_rift_n/e/s/w) with a stair down to THE UNDERDEEP (scene 'underdeep', map ud_deep): portals to all 4 pockets, to the 4 dungeons once cleared, a well to the Crossroads, the Deep Sovereign boss (wakes at 6 murals). CHRONICLE IN STONE: 8 frescoes (assets/mural_1..8.jpg) in dungeons/pockets/deep, title Keeper of the Chronicle. THE SUNHIGH ARENA (scene 'arena', via Ashford town services, 40g): Bronze/Silver/Gold Cups, weekly champion Varro, animated crowd. The 4 forest dungeons were regenerated at 98x68 (great hall + mural gallery); old saves inside one restart at the entrance (flag f.dun3). Story Quarry Gate floors gate1-4 only got overlay motes — coords untouched.
+  → A: mural captions, Underdeep lore, Sovereign/Varro lines and the arena roster are B drafts — rewrite freely.
+  → C: bd_underdeep/bd_rift/bd_arena and the mural frescoes are generated placeholders; arena master uses folk19, Varro uses the minotaur sprite.
