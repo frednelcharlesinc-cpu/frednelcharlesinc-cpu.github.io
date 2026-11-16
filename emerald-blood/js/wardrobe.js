@@ -25,7 +25,7 @@ const Wardrobe = {
       .map(k => [k, M[k].label || k.split('_o_')[1].replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())]);
   },
   /* the set this hero should draw with right now ('' / missing pieces fall back to the original) */
-  DEFAULT: { },   // (2026-11-16: owner wants old Ren back as the default; the new look stays as a Wardrobe outfit)   // a hero's default look when the player hasn't picked one ('' = Original)
+  DEFAULT: { }, WORLD: { me: 'c_ren_o_sheathed' },   // world-only default (owner, 2026-11-16: new world sprite, old battle sprite + faces)   // (2026-11-16: owner wants old Ren back as the default; the new look stays as a Wardrobe outfit)   // a hero's default look when the player hasn't picked one ('' = Original)
   resolve(id, set) {
     const w = Object.assign({}, this.of(id)); if (!HD.meta) return set;
     if (w.o === undefined && this.DEFAULT[id]) w.o = this.DEFAULT[id];
@@ -101,7 +101,11 @@ const Wardrobe = {
   hook() {
     if (this.hooked || typeof HD === 'undefined' || typeof UI === 'undefined') return; this.hooked = 1; this.css();
     const W = this, pS = HD.playerSet.bind(HD), bS = HD.battleSet.bind(HD), sO = HD.setOf.bind(HD);
-    HD.playerSet = function () { const s = pS(); return s === 'ren' ? W.resolve('me', s) : s === 'veil' ? W.resolve('veil', s) : s; };
+    HD.playerSet = function () {
+      const s = pS();
+      if (s === 'ren') { const w = W.of('me'); if (w.o === undefined && W.WORLD.me && HD.meta && HD.meta[W.WORLD.me] && HD.img[W.WORLD.me]) return W.WORLD.me; return W.resolve('me', s); }
+      return s === 'veil' ? W.resolve('veil', s) : s;
+    };
     HD.battleSet = function () { const s = bS(); return s === 'ren' ? W.resolve('me', s) : s === 'veil' ? W.resolve('veil', s) : s; };
     HD.setOf = function (name, key) { const s = sO(name, key), id = s && W.heroOfSet(s); return id && id !== 'me' ? W.resolve(id, s) : s; };
     /* the Wardrobe lives at the bottom of the Party tab */
