@@ -776,8 +776,8 @@ const Battle = {
         const dd = (pressed[1] - T) * (slow ? 0.38 : 1);
         if (pressed[0] === 'dodge') { if (dd >= -110 * rk && dd <= 45 * rk) res = 'pdodge'; else if (dd >= -290 * rk && dd <= 75 * rk) res = 'dodge'; else res = dd > 0 ? 'late' : 'early'; }
         else if (P && !h.unp) { // cutting something in flight: only Ren, and only once Vane's Leaf Cut is his — a tighter window than a blade
-          if (!LeafCut.can(t)) res = 'noleaf'; else { if (dd >= -48 * rk * lk && dd <= 24 * rk * lk) res = 'pparry'; else if (dd >= -125 * rk * lk && dd <= 42 * rk * lk) res = 'parry'; else res = dd > 0 ? 'late' : 'early'; } }
-        else { if (h.unp) res = 'unp'; else if (dd >= -70 * rk && dd <= 35 * rk) res = 'pparry'; else if (dd >= -175 * rk && dd <= 60 * rk) res = 'parry'; else res = dd > 0 ? 'late' : 'early'; }
+          if (!LeafCut.can(t)) res = 'noleaf'; else { if (dd >= -32 * rk * lk && dd <= 16 * rk * lk) res = 'pparry'; else if (dd >= -125 * rk * lk && dd <= 42 * rk * lk) res = 'parry'; else res = dd > 0 ? 'late' : 'early'; } }
+        else { if (h.unp) res = 'unp'; else if (dd >= -47 * rk && dd <= 23 * rk) res = 'pparry'; else if (dd >= -175 * rk && dd <= 60 * rk) res = 'parry'; else res = dd > 0 ? 'late' : 'early'; }
       }
       const m = h.m;
       if (e.morph > 0 && (res === 'pdodge' || res === 'pparry')) { e.tempo = Math.max(.68, (e.tempo || 1) * .9); this.text(e, 'ADAPTING TO YOUR TIMING', '#ff8a6a', -40); }
