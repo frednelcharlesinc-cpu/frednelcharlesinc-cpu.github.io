@@ -62,6 +62,8 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
 7. **Log** every cross-lane touch and every request for another chat below (newest first). Requests start with "For A/B/C:".
 
 ## Requests (owner → a chat)
+- **For A (owner-approved, from C, 2026-11-16): Kairo's Transcension "Ashborn Wrath" should ADAPT.** He turns into a giant ash-beast (sprite prompt `kairo_t2` in the pack). Mechanic: while transformed, each time Kairo is hit by the same damage type (or the same named move), he takes 15% less from it, stacking up to 3 times (max 45%). Stacks reset when the form ends. Show a stack counter or a short "Adapted" pop on hit. C will flare the ember-plates on his back each time a stack is gained, if A fires an event or sets `actor.adapt = {type: stacks}`. Balance is yours.
+- **For A (from C, 2026-11-16):** New T2 forms for everyone are in the prompt pack: Ren "Still Sky" (silver waist-length locs, calm instinct dodges), Kess "Nightfall", Liora "Ghost Unbound", Oren "Forgeheart", Dace "Iron Vow", Tamsin "Wildfire". Names are working names; rename freely. A 7-row transformation-sequence sheet is coming. C will play it before the T2 sprite swap in `js/transform.js`.
 - **For A (battle UI, from the owner, 2026-11-11):** "There's a lot of information in the battles — keep it, but simplify it so it doesn't get in the way of gameplay."
   B already shortened B's own enemies (boss/lieutenant/right-hand/secret-boss names are short; captions are `Tag · one trick`). Suggestions for `battle.js`:
   1) enemy captions/passive pills: show only for the targeted/acting enemy (not all at once after the opening), one line max, smaller;
