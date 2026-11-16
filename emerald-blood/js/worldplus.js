@@ -117,6 +117,7 @@
   const found = () => (G.S.camps = G.S.camps || {});
   async function campTalk(c, before) {
     if (before) await before();
+    if (window.Food) { const c0 = await ask(null, null, 'The campfire crackles.', ['Cook a meal', 'Rest / travel', 'Leave']); if (c0 === 0) return Food.cook(); if (c0 !== 1) return; }
     found()[c.id || c.scene] = 1;
     const list = CAMPS.filter(o => found()[o.id || o.scene] && o !== c && (!o.show || o.show()));
     if (!list.length) { await narr('A good place to rest. (Find the other forest camps and you can travel between them from here.)'); return; }

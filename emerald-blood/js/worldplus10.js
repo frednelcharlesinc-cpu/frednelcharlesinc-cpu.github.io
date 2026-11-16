@@ -58,9 +58,13 @@
     if (!c) return; for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) { const x = c[0] + (i % 3) - 1, y = c[1] + Math.floor(i / 3); if (World.col[y] && World.col[y][x] === 0) herd.push({ k: kind, x, y, px: x * 32 + 16, py: y * 32 + 26, next: 0, flip: false, fear: 0 }); }
   }
   function herdTick(c, t, now) {
-    const p = World.player, [ox, oy] = cam();
+    const p = World.player, [ox, oy] = cam(); herd = herd.filter(a => !a.dead);
     for (const a of herd) {
       const d = Math.abs(a.x - p.x) + Math.abs(a.y - p.y);
+      if (d <= 1 && !a.dead && window.Food && !World.busy) {   // caught one — the hunt (Zelda-style)
+        a.dead = 1; const n = 1 + (Math.random() < .35 ? 1 : 0); Food.addIng('meat', n); const pr = Math.random() < .25; if (pr) Food.addIng('prime', 1); sfx('blip');
+        toast(`🍖 You bring down a ${a.k}: ${Food.img(Food.ingIcon('meat'), 18)} Raw Meat ×${n}${pr ? ` + ${Food.img(Food.ingIcon('prime'), 18)} Prime Cut` : ''}`, 2600); continue; }
+      if (a.dead) continue;
       if (now > a.next) {
         let opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [a.x + dx, a.y + dy]).filter(([x, y]) => World.col[y] && World.col[y][x] === 0 && !herd.some(b => b !== a && b.x === x && b.y === y) && !(x === p.x && y === p.y));
         if (d <= 4) { opts.sort((u, v) => (Math.abs(v[0] - p.x) + Math.abs(v[1] - p.y)) - (Math.abs(u[0] - p.x) + Math.abs(u[1] - p.y))); a.fear = 1; }

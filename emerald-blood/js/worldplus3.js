@@ -82,6 +82,7 @@
   /* ---------- 5. fishing ---------- */
   let fishing = false;
   async function fish() {
+    if (window.Fishing && window.Food) return Fishing.cast();   // the reel mini-game (fishing.js)
     if (fishing) return; fishing = true;
     try {
       await narr('You cut a line from your pack, bait it with a grub, and cast into the water…');

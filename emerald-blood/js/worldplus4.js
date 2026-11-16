@@ -267,12 +267,14 @@
     }
     const opts = ['Rest (full heal)'];
     if (H.tier === 1) opts.push('Build a garden — 300g'); if (H.tier === 2) opts.push('Build a trophy stand — 500g');
+    if (window.Food) opts.push('Cook at your fire');
     opts.push('Travel to a camp', 'Leave');
     const ch = await ask(null, null, 'Your homestead.', opts), pick = opts[ch];
     if (pick === 'Rest (full heal)') { Story.heal(); await narr('You sleep by your own fire. It\'s the best sleep you\'ve had in years.'); save(); }
     else if (pick && pick.startsWith('Build a garden') && await pay(300, 'Dig and fence a herb garden')) { H.tier = 2; H.plant = S_().steps || 0; await narr('A little fenced garden. Moonpetals grow here while you\'re away.'); save(); await World.go('woods_w', HOME_AT()[0], HOME_AT()[1] + 1, 'up'); }
     else if (pick && pick.startsWith('Build a trophy') && await pay(500, 'Raise a trophy stand')) { H.tier = 3; await narr('A carved stand for your trophies. Your homestead is a camp now — you can fast-travel here from any campfire.'); save(); await World.go('woods_w', HOME_AT()[0], HOME_AT()[1] + 1, 'up'); }
     else if (pick === 'Travel to a camp' && window.WorldPlus) await WorldPlus.campTalk(HOME_CAMP);
+    else if (pick === 'Cook at your fire') await Food.cook();
   }
   async function garden() {
     const H = home(), grown = (S_().steps || 0) - (H.plant || 0);

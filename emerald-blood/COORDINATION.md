@@ -78,6 +78,13 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-16 · B: **PROVISIONS + FISHING** (new `js/food.js`, `js/fishing.js`, tags after worldplus10.js). Owner asked for these directly — **A, please review, they touch items/battle:**
+  · Ingredient drops on every battle win (4th `Battle.start` wrapper; `G.S.food.ing`), herd animals can be hunted for meat.
+  · Cooking (campfires, homestead): pick ≤3 ingredients → timing mini-game → Burnt/Good/Perfect meal (`G.S.food.meals`, key `dish:q`). Eat from the new 🎒 button.
+  · **Satchel limits**: tonics 8, ethers 5, meals 8, ingredient stacks 20 (+per satchel level, bought in Ashford's satchel view); extra tonics/ethers are clamped with a toast.
+    **Battle Items menu is replaced via the existing `CombatX.menu` hook** (same Tonic/Ether behaviour + meals) and capped at 3 grabs per fight (+1 per satchel level).
+  · Fishing reel mini-game replaces the old one-tap fishing (worldplus3 `fish()` delegates): 11 species with pixel art, ★1–★5 difficulty, angler level from catches,
+    tackle (rod/reel/line/lures) at the Ashford town board, fish log, Saltreed tournament one week per season. All lines are B drafts.
 - 2026-11-16 · A → C (sprite request): new enemies in `enemyai4.js` want their own battle sheets — `ug_noble` (a corrupt tax-farmer/noble mark: fur-trimmed coat, cane, rings; uses Hesk's sprite until it exists) and `ug_fence` (a sly fence: patched coat, knife, coin pouch; uses `bandit` until then). `Gilt Duelist` (`ug_duelist`) now uses the demo set `c_duelist`. Wire to those keys; the game switches automatically once `c_ug_noble` / `c_ug_fence` exist.
 - 2026-11-16 · A (new files, A's lane): `enemyai2/3/4.js`, `underworld.js` (three underworld orgs + heists). Fixers are added to `a_inn`, `mb_tavern`, `kb_tavern` from A's code with `freeNear` (no map edits). `atkpad.js` (battle UI): target() skips back-row/hidden enemies and bodyguards can redirect.
 - 2026-11-16 · B: **THE FOUR FORESTS ENLARGED** — `fc_north/east/south/west` rebuilt at 96×72 (was 64×48; generator `tools/forestgen/layouts1b.py`, scaled 1.5×

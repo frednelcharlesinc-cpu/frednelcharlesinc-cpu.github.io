@@ -188,8 +188,8 @@
     return r;
   };
   async function townBoard() {
-    const t = tier(), ch = await ask(null, null, `The Ashford town board. (Ashford sees you as ${TIERS[t][1]}.)`, ['Odd jobs', 'Bounties & more', 'Fund the town', 'Dungeon reports', 'Leave']);
-    if (ch === 0) return jobsMenu(); if (ch === 1) return W4().boardTalk(); if (ch === 2 && window.WorldPlus10) return WorldPlus10.fundMenu(); if (ch === 3 && window.WorldPlus10) return WorldPlus10.moodsBoard();
+    const t = tier(), ch = await ask(null, null, `The Ashford town board. (Ashford sees you as ${TIERS[t][1]}.)`, ['Odd jobs', 'Bounties & more', 'Fund the town', 'Tackle shop', 'Dungeon reports', 'Leave']);
+    if (ch === 0) return jobsMenu(); if (ch === 1) return W4().boardTalk(); if (ch === 2 && window.WorldPlus10) return WorldPlus10.fundMenu(); if (ch === 3 && window.Fishing) return Fishing.tackleShop(); if (ch === 4 && window.WorldPlus10) return WorldPlus10.moodsBoard();
   }
   const _step = World.onStep.bind(World);
   World.onStep = function (e) {
