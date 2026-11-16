@@ -28,13 +28,15 @@
   /* ================= ARENA BETTING ================= */
   const POOL = ['m_goblin', 'bandit', 'm_orc', 'm_lizard', 'm_tusker', 'm_troll', 'm_minotaur', 'm_drake', 'm_ghoul', 'm_skeleton', 'm_vampire', 'm_ratfolk', 'm_goblin_shaman', 'm_wartotaur', 'm_gourd'];
   const pow = k => { const E = ENEMY[k]; return Math.pow(E.hp * E.atk * (1 + (E.def || 0) / 20), .6); };
-  function card() {
-    const r = rng(day() * 7919 + 13), L = POOL.filter(k => ENEMY[k]), out = [];
+  function card(d) {
+    d = d || day(); const r = rng(d * 7919 + 13), L = POOL.filter(k => ENEMY[k]), out = [];
     for (let i = 0; i < 3 && L.length > 1; i++) { const a = L[Math.floor(r() * L.length)]; let b = a; while (b === a) b = L[Math.floor(r() * L.length)];
       const pa = pow(a), pb = pow(b), p = Math.min(.85, Math.max(.15, pa / (pa + pb))); out.push({ a, b, p, oa: Math.max(1.1, Math.round(.92 / p * 10) / 10), ob: Math.max(1.1, Math.round(.92 / (1 - p) * 10) / 10) }); }
     return out;
   }
   const bk = () => { const S = S_(); if (!S.bets || S.bets.day !== day()) S.bets = { day: day(), done: {}, net: (S.bets && S.bets.net) || 0 }; return S.bets; };
+  const hash = n => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+  const betWinner = (d, i) => { const m = card(d)[i]; return m ? hash(d * 31 + i * 7 + 3) < m.p : true; };   // seeded, so a seer can know it
   async function bookie() {
     const C = card(), B = bk();
     const opts = C.map((m, i) => `${ENEMY[m.a].name} vs ${ENEMY[m.b].name}${B.done[i] ? ' — settled' : ` (×${m.oa} / ×${m.ob})`}`);
@@ -44,7 +46,7 @@
     const stakes = [10, 50, 100, 250].filter(s => G.S.gold >= s); if (!stakes.length) { await narr('"Come back with coin, sweetheart."'); return; }
     const si = await ask(null, null, 'Your stake?', [...stakes.map(s => s + 'g'), 'Back out']); const stake = stakes[si]; if (!stake) return;
     G.S.gold -= stake; UI.hud(); B.done[ch] = 1; save();
-    const aWins = Math.random() < m.p, won = (side === 0) === aWins, odds = side === 0 ? m.oa : m.ob;
+    const aWins = betWinner(day(), ch), won = (side === 0) === aWins, odds = side === 0 ? m.oa : m.ob;
     await simFight(m.a, m.b, aWins);
     if (won) { const pay = Math.round(stake * odds); G.S.gold += pay; B.net += pay - stake; UI.hud(); sfx('level'); if (window.Deep) Deep.cheer(); await narr(`${ENEMY[aWins ? m.a : m.b].name} wins! Odds-Marta counts out ${gold$(pay + ' gold')} with a sigh you can hear from the stands.`); }
     else { B.net -= stake; if (window.Deep) Deep.roar(.4); await narr(`${ENEMY[aWins ? m.a : m.b].name} wins. Your ${stake} gold disappears into Odds-Marta's apron. "Better luck, love."`); }
@@ -204,5 +206,5 @@
     return r;
   };
   if (window.TownLife && TownLife.services) TownLife.services.push({ label: 'Archivist Pell (mural rubbings)', run: archivist });
-  if (window.Deep) Object.assign(Deep, { onMural, onCup, bookie, card, sponsorTent, fracture, archivist, mirror, spots, countGate });
+  if (window.Deep) Object.assign(Deep, { onMural, onCup, bookie, card, betWinner, sponsorTent, fracture, archivist, mirror, spots, countGate });
 })();

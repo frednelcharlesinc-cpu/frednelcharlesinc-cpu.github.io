@@ -294,7 +294,7 @@ async function festival() {
   await say('oren', 'shock', "…No. No, it can't be. The Dread General. The Crown sent DREAD for us?");
   await say('oren', 'anger', "{name}! Don't let it touch you — fight, and look for a way out!");
   await Battle.start({ enemies: ['dread'], allies: ['oren'], noFlee: true, bd: 'dusk', boss: true, intro: 'DREAD, the Crown\'s General',
-    onTurn: async (B, Bt) => { if (B.turn >= 6) { await Bt.msg('Dread raises his blade.', 900); B.flash = 1.5; sfx('break'); await wait(500); B.actors.filter(a => a.side === 'p').forEach(a => { a.hp = 0; a.ko = true; a.anim = 'hurt'; a.frame = 5; }); Bt.hud(); await Bt.msg('BLACK SUN', 1400); return 'scripted'; } } });
+    onTurn: async (B, Bt) => { if (B.turn === 3 && !B.orenStand) { B.orenStand = 1; await Bt.msg('Oren steps in front of you, hammer up. "Not the children. Not while I\'m standing."', 1900); } if (B.turn >= 6) { await Bt.msg('Dread raises his blade.', 900); B.flash = 1.5; sfx('break'); await wait(500); B.actors.filter(a => a.side === 'p').forEach(a => { a.hp = 0; a.ko = true; a.anim = 'hurt'; a.frame = 5; }); Bt.hud(); await Bt.msg('BLACK SUN', 1400); return 'scripted'; } } });
   await narr('You\'re on the ground. Oren is on the ground. He isn\'t moving.');
   const il = await World.addNpc({ id: 'ilya', x: 29, y: 15, dir: 'right' });
   await say('ilya', null, "{SIB}!! Get up — please get up—");

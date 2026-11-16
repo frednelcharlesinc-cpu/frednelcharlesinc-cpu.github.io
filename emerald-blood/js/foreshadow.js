@@ -29,6 +29,10 @@ const FS = {
     ['thrones', 'Alone, you are a spark', [[null, null, 'Under the city, under the stones, under everything: a throne room. Empty thrones, too many to count.'],
       [null, null, 'One by one, something sits down in them.']]],
     ['eclipse', 'Like you\'re answering him', [['me', 'neutral', '(An eclipse covers the dawn.)'], ['me', 'neutral', '(…It\'s just a name.)']]],
+    ['promise', 'Sworn. Come on. If Ilya catches me', [['kairo', 'neutral', 'Wait — one more. Whoever gets strongest… protects everyone else. Even the one who lost. Deal?'], ['me', 'happy', '"Deal."'], ['kairo', 'happy', 'Good. Because it\'s going to be me.']]],
+    ['oren', 'Oren is on the ground. He isn\'t moving', [[null, null, 'His hammer is still in his hand. Even now, he\'s lying between you and Dread.']]],
+    ['ahead', 'You fight different. Like you\'re not trying to kill me', [[null, null, 'He flexes his arm. The ash on it glows, then dims, like a coal he chose not to blow on.'], ['kairoB', 'neutral', '…I wasn\'t using all of this. Next time I will.']]],
+    ['masked', 'You got tall', [['me', 'shock', 'The south road. The cage wagon. The masked one with the terrible knot… that was YOU.'], ['kairoB', 'happy', 'Took you long enough. You still cut like you\'re apologizing to the air.']], null, () => G.S.f.maskFight],
     ['hunt', 'leaning on a lamp post like she', [['liora', 'neutral', 'If they ever put your face on a wall, Drag — I\'m the one they\'ll send. Just so you know.'],
       ['me', 'neutral', '"And?"'], ['liora', 'happy', '"And nothing. Get in the coach."']]]
   ],
@@ -46,7 +50,7 @@ const FS = {
   Dlg.line = function (who, expr, text, choices) {
     const p = _line(who, expr, text, choices);
     if (busy || choices || typeof text !== 'string' || !G.S || !G.S.f) return p;
-    const hit = FS.AFTER.find(a => !FS.seen(a[0]) && text.includes(a[1]));
+    const hit = FS.AFTER.find(a => !FS.seen(a[0]) && text.includes(a[1]) && (!a[4] || a[4]()));
     if (!hit) return p;
     return Promise.resolve(p).then(async r => {
       FS.mark(hit[0]); busy = true;
