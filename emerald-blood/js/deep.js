@@ -53,6 +53,7 @@
   async function mural(n) {
     const first = !seen()[n]; sfx('blip');
     await showMural(n);
+    try { if (window.Deep && Deep.onMural) await Deep.onMural(n, first); } catch (e) { }
     if (!first) return;
     seen()[n] = 1; save();
     const k = seenN(); toast(`🏛️ <b>CHRONICLE IN STONE</b> — ${k} / 8`, 2800);
@@ -177,6 +178,7 @@
     const g = first ? cup.prize : Math.round(cup.prize / 3); G.S.gold += g; const rs = []; if (first) for (let k = 0; k < cup.rares; k++) { const x = rare(); if (x) rs.push(x); }
     UI.hud(); sfx('level'); cheer(1);
     await narr(`<b>${cup.name.toUpperCase()} — CHAMPION!</b> The stands go wild; flowers and coins rain onto the sand. ${gold$(g + ' gold')}${rs.map(x => `, a ${gold$(x)}`).join('')}.${first ? '' : ' (Repeat win — a smaller purse.)'}`);
+    try { if (Deep.onCup) await Deep.onCup(cup, first); } catch (e) { }
     if (cup.id === 'gold' && !F().sandChamp) { F().sandChamp = 1; S_().title = 'Champion of the Sand'; toast('🏆 TITLE EARNED — <b>CHAMPION OF THE SAND</b>', 3400); }
     save();
   }
