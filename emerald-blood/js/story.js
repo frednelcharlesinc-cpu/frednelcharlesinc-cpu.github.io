@@ -1411,19 +1411,22 @@ async function vaneYears() {
   const f = F(); f.resolve = f.resolve || 0;
   const step = async (ms) => { await fadeOut(ms || 600); await fadeIn(ms || 600); };
   // ---- YEAR 1: the hut, the breath, the first question ----
+  await RX.card('YEAR ONE', 'Survive');
   await Cine.play(CINE.years1(), { music: 'sad' });
   const c1 = await ask('vane', 'neutral', 'Make who pay? Name them.', ['The Inquisition. All of them.', 'Halvard. And Dread.', 'Whoever sold us out.']);
   if (c1 === 0) await say('vane', 'neutral', 'All of them. Thousands of men. Cooks, stable boys, the ones who joined because their village was starving. All of them?');
   else if (c1 === 1) { await say('vane', 'neutral', 'Two names. Better. Smaller graves. Still graves.'); f.resolve++; }
   else { await say('vane', 'sad', 'The traitor. Mm. Someone from your own valley, with your own eyes. When you find them, ask them why first. You may not like how much the answer sounds like you.'); f.resolve++; }
+  await RX.y1();
   // ---- YEAR 2: the wolf-mother ----
-  await step(); await Cine.play(CINE.years2(), { music: 'sad' });
-  const c2 = await ask('me', 'anger', '(Your blade is already raised.)', ['Finish it. It\'s a monster.', 'Lower the sword.']);
+  await step(); await RX.card('YEAR TWO', 'The Stick'); await Cine.play(CINE.years2(), { music: 'sad' });
+  const c2 = await ask('me', 'anger', '(Your blade is already raised.)', ['Finish it. It\'s a monster.', 'Lower the sword.']); f.wolfSpared = c2 === 1;
   if (c2 === 0) { await narr('You hesitate one heartbeat too long. The mother drags her cubs into the white and is gone.'); await say('vane', 'neutral', 'Your arm stopped on its own. Interesting. Your head said "monster." Your hand knew better.'); }
   else { f.resolve += 2; await narr('You lower the sword. The mother stares at you for a long time. Then she licks her cubs and limps away into the snow.'); await say('vane', 'happy', 'Hm.'); }
   await say('vane', 'neutral', 'She would have killed you to protect hers. So would you. Remember that the next time someone calls you a monster — and the next time you want to call someone one.');
+  await RX.y2();
   // ---- YEAR 3: the stones, the sons ----
-  await step(); await Cine.play(CINE.years3(), { music: 'battle' });
+  await step(); await RX.card('YEAR THREE', 'The Rival'); await Cine.play(CINE.years3(), { music: 'battle' });
   await Battle.start({ enemies: ['vane_spar'], noFlee: true, bd: 'snow', intro: 'Year Three — sparring between the stones', music: 'battle',
     onTurn: async (B, Bt) => { if (B.turn >= 7) { await Bt.msg('The old man takes a step back. Just one.', 1500); return 'scripted'; } } });
   Story.heal(true);
@@ -1438,8 +1441,9 @@ async function vaneYears() {
   if (c3 === 0) { await say('vane', 'neutral', 'And their sons?'); await me('anger', '…I would.'); await say('vane', 'sad', 'Then you\'re not ending anything, pup. You\'re just taking your turn.'); }
   else if (c3 === 1) { f.resolve++; await say('vane', 'neutral', 'Good. "I don\'t know" is where every honest answer starts.'); }
   else { f.resolve += 2; await say('vane', 'sad', 'Somebody. Easy word. It means the one who gets hit last and doesn\'t hit back. It\'s the hardest job there is.'); }
+  await RX.y3();
   // ---- YEAR 4: the stones that have a will ----
-  await step(); await Cine.play(CINE.years4(), { music: 'night' });
+  await step(); await RX.card('YEAR FOUR', 'Visitors'); await Cine.play(CINE.years4(), { music: 'night' });
   await say('vane', 'neutral', 'D-stones. Pieces of the tomb you were born under. Every king alive would kill to own one, and most of them have.');
   await say('vane', 'neutral', 'The small ones are tools. Set one in a blade, it bites deeper. In armor, it holds. In your Arts — it remembers them for you.');
   await say('vane', 'neutral', 'The middle ones are not tools. They have a will. They choose who carries them. Most men who force one end up carried BY it.');
@@ -1450,6 +1454,7 @@ async function vaneYears() {
   Stones.give('still');
   await me('neutral', '…Revenge is like the middle ones, isn\'t it. You think you\'re carrying it.');
   await say('vane', 'happy', '…Hm. You\'re getting annoying. That\'s how I know you\'re learning.'); f.resolve++;
+  await RX.y4();
   // ---- the egg in the shrine ----
   await narr('That night you go back to the ruined shrine alone. Something under the broken altar is warm — warmer than the stones, warmer than you.');
   await narr('An egg. Black as a starless night, the size of your two fists, wrapped in the rotted silk of an old Drag offering. When you touch it, it knocks back.');
@@ -1459,8 +1464,9 @@ async function vaneYears() {
   if (ce === 2) await say('vane', 'neutral', 'Then raise it so it doesn\'t. Same as you, pup. Nobody is born a monster. They\'re taught.');
   else await say('vane', 'happy', 'Hm. Keep it warm. Keep it secret. And for the love of every Elder, don\'t let it hatch in my bed.');
   f.dragonEgg = 1; sfx('level'); toast('Found a <b style="color:#8fd0ff">mysterious black egg</b>. Keep it warm.', 3600);
+  await RX.stones();
   // ---- YEAR 5: the lesson that isn't about the sword ----
-  await step(); await Cine.play(CINE.years5(), { music: 'sad' });
+  await step(); await RX.card('YEAR FIVE', 'The Last Lesson'); await Cine.play(CINE.years5(), { music: 'sad' });
   await say('vane', 'neutral', 'Out there, there\'s a whole generation of children with green eyes. Your age. Younger. Every one of them taught the same thing you were: hide, or hate.');
   await say('vane', 'neutral', 'Your friend in the mountains — the burned boy. The winds say he\'s gathering them. He\'ll lead them to a war. They\'ll follow, because nobody else ever offered them anything.');
   await say('vane', 'sad', 'I was the best killer of my generation, pup. Forty years. And when it was over, nothing I cut down had made one single thing better. I left nothing behind but a reputation and an empty sleeve.');
@@ -1537,6 +1543,7 @@ async function vaneFinal() {
   F().bladeBond = 0;
   sfx('level'); toast('You received <b style="color:#46ff95">Last Light</b>, Vane\'s blade.', 4000);
   G.S.stats.atk += 3; G.S.f.vaneDone = true;
+  if (F().dragonHatched) await RX.catTrick();
   await say('vane', 'sad', '…Go on. South, through the storm. You know how to breathe it now. Don\'t come back. Old men hate goodbyes.');
   Story.quest('Leave the Realm of No Return — south, through the storm.');
   World.ent('vane') && (World.ent('vane').talk = talkVaneStone);
