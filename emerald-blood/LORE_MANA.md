@@ -1,140 +1,142 @@
-# THE FOUR WAYS — how the world uses mana (owner-approved concept, 2026-11-17)
+# THE FOUR WAYS — how the world uses mana (owner-approved concept, revised 2026-11-17)
 Written by Chat C from the owner's brief. **Chat A owns this file from here** (lore + combat rules); Chat B owns where the
-trainers, temples, trials and regions sit on the map; Chat C owns how every art LOOKS. Rename anything — the owner has
-approved the *ideas*, not every name.
+trainers, temples, trials and regions sit on the map; Chat C owns how every art LOOKS. Rename anything.
 
-## The one rule that makes this ours
-All four are **the same mana**. Each culture made a different **deal** with it: a different name, a different source,
-a different **price**, and a different answer to the question *"what about the Drags?"* — which keeps the four arts
-tied to the game's heart (discrimination against the green-eyed).
+**OWNER REVISION (2026-11-17):**
+- **No ongoing conditions.** No oaths that crack, no geas that burn runes out, no rules you must keep to *use* an art. Once you have it, it's yours.
+- **Instead, GETTING these arts is brutally hard.** Hidden masters, near-death trials, steep requirements, real failure. Most people in the world never learn any of them; most who try fail.
+- **The South's Way is OPEN** — the drum/song (Cadence) idea was rejected. Needs a new concept from the owner.
+
+## The core idea
+All four are **the same mana**. Each culture found a different way to master it, with its own name for it and its own view
+of the Drags (which keeps the arts tied to the game's heart: discrimination against the green-eyed).
 
 | | NORTH | EAST | WEST | SOUTH |
 |---|---|---|---|---|
-| People | Vikings, jarls, oath-clans | rune-smiths, ink-monks, tattooed legions | elves | desert caravans, reef raiders, drum-clans |
-| They call mana | **WILL** ("mana is for weaklings — this is *Will*") | **INK** (mana that has been *written*) | **VERDANCE** (the world's breath) | **CADENCE** (mana that moves in rhythm) |
-| Source | the self — kept oaths | marks on skin and steel | the land, through stillness | the group, through rhythm |
-| Price | a broken oath cracks your Will | a broken geas burns the rune out | **Taking Root** — you become the world | a broken beat drops the whole crew |
-| On Drags | "Can't Hindsight a Drag. Unnatural." | runes refuse Drag blood (the ink burns green) | elves remember the Drags before the lies | the South sells Drags… and some clans hide them |
-| Their word for KAIGEN | the Quiet Oath | the Open Rune | Stillwater | the Perfect Beat |
+| People | Vikings, jarls, war-clans | rune-smiths, ink-monks, tattooed legions | elves | (open) |
+| They call mana | **WILL** ("mana is for weaklings — this is *Will*") | **INK** (mana that has been *written*) | **VERDANCE** (the world's breath) | (open) |
+| Source | the self | marks on skin and steel | the land, through stillness | (open) |
+| On Drags | "Can't Hindsight a Drag. Unnatural." | runes refuse Drag blood (the ink burns green) | elves remember the Drags before the lies | (open) |
+| Their word for KAIGEN | the Quiet Fury | the Open Rune | Stillwater | (open) |
 
-The **Drags** are the fifth answer: their mana is in their **blood** (the green; Drag Arts). They can't use any of the four the
-normal way — which is exactly why Ren learning a piece of each (by finding a way around each culture's rule) is the shonen
-spine of the journey. **No one has ever united all four Ways.** The Monarchs remember the last person who tried.
+The **Drags** use none of these normally: their mana is in their **blood** (the green; Drag Arts). Ren learning a piece of each Way, by
+finding a way around each culture's barrier, is the shonen spine of the journey. **No one has ever mastered every Way.**
 
-The universal tiers sit above the cultures: **Aura Force** (raw release, anyone strong) → **KAIGEN** (the state; can't be called)
-→ **Transcension** (the body changes; behind Kaigen's Second Door). A culture's Way is *technique*; the tiers are *what a fighter is*.
+Universal tiers sit above the cultures: **Aura Force** → **KAIGEN** (can't be called) → **Transcension** (behind Kaigen's Second Door).
+
+## How hard it is to learn — the shared ladder (use for every Way)
+Each Way has **3 tiers** (Novice → Veteran → Master). Every tier needs ALL of:
+1. **A teacher you have to find.** Masters hide, refuse students, or are dead; their students are scattered. Finding one is a quest chain (rumours, maps, side-bosses).
+2. **A level and stat wall.** Novice ~Lv 20, Veteran ~Lv 35, Master ~Lv 50 (A sets the numbers). No shortcuts.
+3. **A TRIAL that can be failed.** A hard scripted fight or ordeal, beaten under strict rules (no items, solo, a time limit, perfects only).
+   Failing costs real things: an **Injury** (−stats for a number of in-game days), the teacher's patience (a cooldown before you can retry),
+   and gold or materials for the next attempt.
+4. **Rare materials** (Eastern ink, Northern frost-iron, elder sap…) found in deep zones, raids and boss drops.
+5. **Time.** Training happens over in-game days at the teacher's camp; the party member is away (can't fight) while training.
+Master tier also needs **beating the teacher in a duel**, and most teachers only ever accept one student who reaches it.
 
 ---
 
-## NORTH — WILL (the oath-lands)
-**Philosophy:** strength is a promise you keep. A Northern warrior swears oaths aloud at the hearth; every kept oath hardens Will,
-every broken one cracks it (sometimes forever). A man's Will is literally his word — which is why Northerners never lie about small things.
+## NORTH — WILL
+**Philosophy:** strength forced into being. Northerners train Will the hard way — cold, hunger, holding a line until the body breaks and the Will doesn't.
+
+**How you get it:** a Northern war-master (a jarl's champion, or an exiled one) has to accept you. The trials:
+- *Novice — the Cold Watch:* survive a night-long battle in a blizzard (a long fight where everyone slowly loses HP each turn) without retreating.
+- *Veteran — the Iron Line:* hold a choke point against waves alone; one perfect parry missed resets the wave count.
+- *Master — the Jarl's Duel:* beat your teacher, who uses all three arts against you.
 
 **The three Will arts**
-1. **IRONING** (coating Will onto a weapon / body)
+1. **IRONING** (coating Will onto a weapon or body)
    - *Grey Iron* (novice): the edge goes dark; hits ignore 50% DEF.
-   - *Black Iron* (veteran): the weapon can't break; a coated PARRY deals guard damage to the attacker (Break gauge).
+   - *Black Iron* (veteran): the weapon can't break; a coated PARRY deals guard damage to the attacker.
    - *Forward Iron* (master): Will is coated into the air *ahead* of the swing — the blow lands a heartbeat before the blade; cannot be dodged.
-   - *Fist-iron*: unarmed Northerners coat their skin (Liora's kung-fu could learn this — a cross-culture moment).
+   - *Fist-iron*: unarmed fighters coat their skin (Liora's kung-fu could learn this).
 2. **HINDSIGHT** — they don't see the future; they *remember being hit* before it happens, as if they've already lost this fight once.
    - Battle: the enemy's next skill and target are shown; perfect-dodge/parry windows +40%.
-   - Mastery: "Long Hindsight" — remembers two moves ahead; Drags' perfect body control makes them blur in Hindsight (lore reason the North fears them).
-   - Counter: fighters in KAIGEN can't be Hindsighted ("there was nothing to remember — they hadn't decided yet").
-3. **KINGSWEIGHT** — the crushing presence. Only someone who has led others to their death can carry it (a story gate, not a level gate).
-   - On entering battle / once per fight: enemies below a strength threshold lose their turn, drop weapons, or flee; morale drops (`B.mor`, surrender systems already exist).
-   - Two Kingsweights clashing: the sky darkens, the ground splits — a cinematic beat, no damage, just who blinks.
-   - Ren's version later: a *green* Kingsweight — the Drags' own, which scares Northerners more than anything.
+   - Master: "Long Hindsight" — remembers two moves ahead.
+   - Drags' perfect body control blurs in Hindsight (the lore reason the North fears them). Fighters in KAIGEN can't be Hindsighted ("they hadn't decided yet").
+3. **KINGSWEIGHT** — the crushing presence. Master tier only, and rare even among masters.
+   - Once per fight: weaker enemies lose their turn, drop their weapons or flee; enemy morale crashes (the morale/surrender systems already exist).
+   - Two Kingsweights clashing: the sky darkens, the ground splits — who blinks first.
+   - Ren's version later: a *green* Kingsweight — the Drags' own.
 
-**Oath system (gameplay):** a party member can swear an oath at a hearth (e.g. "I will not retreat", "I will not use items in boss fights",
-"I will protect X"). Kept → permanent Will +1 (stronger Ironing). Broken → Will cracked for N battles. Oaths are visible on the character sheet.
-
-**People:** Jarl-captains, oath-skalds who record oaths in song, **Grimtusk** (one of the Uncrowned — tore a drawbridge off with Will-ironed hands).
-**Kaigen name:** *the Quiet Oath* — "when the oath is so true your body keeps it for you."
+**People:** jarl-champions, war-skalds, **Grimtusk** (an Uncrowned — tore a drawbridge off its chains with Will-ironed hands).
 
 ---
 
 ## EAST — INK (runes on skin and steel)
 **Philosophy:** mana is wild until it is *written*. Rune-smiths and ink-monks write mana into skin and steel; written mana never fades.
 
-**Rune tattoos**
-- Permanent: a stat boost **and** one ability. Max **3** per body; a 4th kills (the "ink fever").
-- **The rune chooses you.** Each rune has a *deed* it requires, proven at a rune-temple trial — really qualified, not bought:
-  - *Rune of Return* — only takes on someone who came back from certain death. (+SPD; once per battle, survive a lethal hit at 1 HP.)
-  - *Rune of Ember* — someone who walked into fire for another. (+ATK; hits burn.) — **Kairo qualifies.**
-  - *Rune of the Unbent* — someone who never knelt under torture/threat. (+DEF; immune to fear/Kingsweight.)
-  - *Rune of the Long Road* — walked the length of the continent. (+SPD, double travel speed.)
-  - *Rune of Ash-Sight* — buried someone they failed to save. (see hidden enemy HP/weakness.)
-  - *Rune of the Breaker* — broke a guard no one else could (Break gauge ×1.5).
-  - *Rune of Silence* — kept a secret that cost them everything (enemies can't read/predict you).
-- **Every rune has a GEAS** (a lifelong forbidden act). Break it → the rune burns out of the skin in front of everyone (a public shame).
-  e.g. Return: *never refuse shelter to someone in the rain.* Ember: *never let a fire die untended.* Unbent: *never bow.*
-- **Rune weapons are NAMED.** A weapon learns its name through deeds (kills a named foe, survives a duel, saves its wielder).
-  Speak the name → it RETURNS to the hand from anywhere (throw-and-recall attacks, disarm immunity). Lose the name (betray the deed) → it's steel again.
-  Story: a named weapon can *refuse* a new owner.
+**How you get a rune tattoo:** this is the hardest Way to enter.
+- Reach a rune-temple (hidden; the way there is a quest chain).
+- **Pass the temple's trial for that rune** — each rune has its own ordeal, e.g. the Rune of Return's trial is a fight you must survive
+  for 10 turns at 1 HP; the Rune of the Breaker's is breaking a guard no one has broken.
+- **Survive the inking.** The tattooing itself is a fight against the ink's mana (a scripted battle where the rune attacks *you*).
+  Lose and the ink fades — gold, materials and a long cooldown gone.
+- Rare Eastern ink (deep zones / raid drops) for every rune. Max **3** runes per body; the skin can't hold a fourth.
+
+**Example runes** (permanent stat boost + one ability, yours forever once taken):
+- *Return* — +SPD; once per battle survive a lethal hit at 1 HP.
+- *Ember* — +ATK; hits burn. (Kairo earns this one — a rivalry beat.)
+- *Unbent* — +DEF; immune to fear and Kingsweight.
+- *Long Road* — +SPD; faster travel.
+- *Ash-Sight* — see enemy HP and weak points.
+- *Breaker* — Break gauge ×1.5.
+- *Silence* — enemies can't read or predict you.
+
+**Rune weapons are NAMED.** A weapon is named by a rune-smith (rare, expensive, months of in-game time) after the wielder proves
+themselves to the smith in a duel. Speak the name → it RETURNS to the hand from anywhere (throw-and-recall attacks, can't be disarmed).
+Story: some old named weapons choose who may lift them.
 
 **Drags and Ink:** runes refuse Drag blood — the ink burns green and slides off. Eastern masters call it proof of the curse.
-Then **one rune takes on a Drag** (Ren) — and it's a rune no one has seen in 400 years. Huge story beat for the East arc.
+Then **one rune takes on a Drag** (Ren) — a rune no one has seen in 400 years. Big East-arc beat.
 
-**People:** ink-monks, rune-legions (soldiers wearing the same rune), smith-clans; **King Ash** (an Uncrowned: freed a quarry-camp; his runes are all burned out — he broke every geas on purpose).
-**Kaigen name:** *the Open Rune* — "the moment your whole body becomes one rune."
+**People:** ink-monks, rune-legions, smith-clans; **King Ash** (an Uncrowned).
 
 ---
 
 ## WEST — VERDANCE (the elves)
-**Philosophy:** the world breathes mana; be still and breathe with it. Elves draw mana in through **Stillness**.
+**Philosophy:** the world breathes mana; be still and breathe with it.
+
+**How you get it:** elves almost never teach outsiders. You need an elder's sponsorship (a long quest earning the trust of an elven grove), then:
+- *Novice — the Long Stillness:* a battle where you may not act at all for several turns while enemies attack; any action fails the trial.
+- *Veteran — the Rootless Walk:* cross a living forest that drinks mana from anyone who isn't perfectly calm (a maze where every misstep costs MP).
+- *Master — Taking Root:* breathe in more Verdance than your body can hold and come back out. Masters show bark-scars from this trial for the rest of their lives; those who fail become trees. (The great trees of the elven woods **are** elves who failed — still alive, still listening.)
 
 **Arts**
-- **Gathering** — spend turns perfectly still (no attack, no move) to breathe Verdance in; each turn stacks. Interrupted if hit hard.
-- **Greenmind** (the empowered state) — at full Verdance: +ATK/+DEF/+regeneration, attacks hit at range through the air itself, and the eyes show a **ring of leaf-light** (NOT sage markings).
-- **Rootstep** — a master can "become" the ground for a breath: teleport-dodge to anywhere they've stood.
-- **Drinking a Dominion** — a master can breathe in a monster's Dominion field and turn its power against it (pairs with the existing Dominion system).
+- **Gathering** — spend turns perfectly still to breathe Verdance in; each turn stacks power.
+- **Greenmind** (empowered state) — +ATK/+DEF/+regeneration, attacks reach through the air itself, a **ring of leaf-light** in the eyes.
+- **Rootstep** (veteran) — teleport-dodge to anywhere you've stood this battle.
+- **Drinking a Dominion** (master) — breathe in a monster's Dominion field and turn its power against it.
 
-**The price — TAKING ROOT:** breathe in too much and you become part of the world: bark creeps up the skin, then moss, then stone.
-The great trees of the elven woods **are** elves who went too deep — still alive, still listening. Elves fear their own art; masters
-carry a "root-mark" that spreads each time they overreach. In battle: staying in Greenmind too long adds Root stacks (slower, then rooted in place).
-
-**Already half in the game:** Vane's **Tomb Breath** (`G.S.f.cultivation`, "drink the mana in the air") is a Western technique →
-Vane once studied with the elves. Give him that backstory.
-**Drags and Verdance:** the oldest elves *remember the Drags before the lies*. The West is where Ren learns the truth about Fratenaptor — and where the elves refuse to say it in public.
-**Kaigen name:** *Stillwater* — "the surface goes still and you can see to the bottom."
+**Already half in the game:** Vane's **Tomb Breath** (`G.S.f.cultivation`) is a Western technique → Vane once studied with the elves.
+**Drags and Verdance:** the oldest elves *remember the Drags before the lies* — the West is where Ren learns the truth, and where the elves refuse to say it in public.
 
 ---
 
-## SOUTH — CADENCE (desert, reef, drum)
-**Philosophy:** mana moves in rhythm. One person is a note; a crew is a song. Southern power is **shared**.
-
-**Arts**
-- **War-drum / Chant** — a Cadence-keeper (drummer, singer, shanty-caller) lifts the whole party: +SPD/+ATK while the beat holds.
-- **The Shared Beat** — two fighters on the same rhythm share turns: a combo where both act in one turn (ties to LINKED KAIGEN — the South understands it best).
-- **Counter-beat** — break the enemy's rhythm: cancel enemy buffs/combos (their bards/drummers become priority targets).
-- **Bell-binding** — the Bell Concord's great bell (Highmark) is the oldest Cadence artifact on the continent; the Bell Truce works because the bell is literally binding mana.
-
-**The price — THE BROKEN BEAT:** if the keeper falls, *everyone* loses the beat at once (stagger the whole crew). Southern crews protect their drummer with their lives.
-**People:** **Mother Brine** (an Uncrowned: her shanties raise storms — sank three warships), Dustveil caravans, the **Hollow Saint's choir** (a heretic Cadence: singing to wake the dragon).
-**Drags and Cadence:** the South sells Drags… and some drum-clans hide them, smuggling them out in caravans with songs as passwords.
-**Kaigen name:** *the Perfect Beat* — "when you stop hearing the drum because you ARE the drum."
+## SOUTH — OPEN
+The owner rejected the drum/song idea. Waiting on a new concept.
 
 ---
 
 ## How Ren (and the party) touches each Way — the shonen spine
-- **North:** Ren swears his first oath (to Ilya's ribbon? to Kairo?) → learns Grey Iron on his katana; Hindsight fails on him (Drag) — a Northern master is shaken.
-- **East:** every rune refuses him… until the 400-year rune takes. (Kairo gets the Rune of Ember the normal way — a rivalry beat.)
-- **West:** the elves teach him Stillness → it deepens his Still Sky Transcension; he sees the truth about the Drags.
-- **South:** he learns the Shared Beat with Kess — which is how *they* first reach Linked Kaigen.
-- **Endgame:** a Drag who has touched all four Ways — the thing the Monarchs fear most.
+- **North:** a Northern master refuses him (can't Hindsight a Drag, "unnatural") — Ren earns the Cold Watch anyway; Grey Iron on his katana.
+- **East:** every rune refuses him… until the 400-year rune takes. Kairo gets Ember the normal way.
+- **West:** the elves teach him Stillness → it deepens his Still Sky Transcension; he learns the truth about the Drags.
+- **South:** (open)
+- **Endgame:** a Drag who has touched every Way — the thing the Monarchs fear most.
 
 ## Party leanings (suggestions)
-Ren — Drag blood + a piece of all four · Kess — South (Cadence; her knives on rhythm) · Liora — North (fist-iron) then West · Kairo — East (Ember rune) ·
-Oren — North (smith of Will-ironed steel) · Dace — North (Iron Vow = an oath) · Tamsin — South (fire-songs) · Vane — West (Tomb Breath) + his own sword.
+Ren — Drag blood + a piece of every Way · Liora — North (fist-iron), later West · Kairo — East (Ember) · Oren — North (smith of Will-ironed steel) ·
+Dace — North · Vane — West (Tomb Breath) + his own sword · Kess, Tamsin — (open; maybe the South once it's decided).
 
 ## The Eight Bandit Kings across the Ways
-**The Uncrowned** (the four who answer to no one): Grimtusk (North/Will), King Ash (East/burned runes), Mother Brine (South/Cadence), Old Gallows (? — maybe the only one who uses no Way at all, and still terrifies all of them).
-**Writ-Kings** (secretly hold a royal Writ): Gilded Hound and three others (one unnamed). The Crown can tear up a Writ overnight.
+**The Uncrowned** (answer to no one): Grimtusk (North), King Ash (East), Mother Brine (?), Old Gallows (maybe uses no Way at all, and still terrifies the others).
+**Writ-Kings** (secretly hold a royal Writ): Gilded Hound and three others. The Crown can tear up a Writ overnight.
 
 ## What C (sprites/animation) will add once A's rules exist
-- Ironing: a dark metallic sheen sweeping along the weapon; Forward Iron = a black shockline ahead of the swing.
-- Hindsight: a faint grey "ghost frame" of the enemy's attack shown a beat early (UI only).
-- Kingsweight: screen darkens, heavy vignette, the enemy sprites flinch/kneel.
-- Runes: glowing marks on the character's portrait + sprite flashes when a rune triggers; named-weapon recall streak.
-- Verdance: leaf-light eye rings, motes drawn inward while Gathering; bark/moss creeping on the sprite with Root stacks.
-- Cadence: a beat ring pulsing under the party in time with the music; drummer sprites bob to the rhythm.
+- Ironing: a dark metallic sheen along the weapon; Forward Iron = a black shockline ahead of the swing.
+- Hindsight: a faint grey preview of the enemy's attack shown a beat early (UI only).
+- Kingsweight: screen darkens, heavy vignette, enemies flinch/kneel.
+- Runes: glowing marks on the portrait + sprite flashes when a rune triggers; named-weapon recall streak.
+- Verdance: leaf-light eye rings, motes drawn inward while Gathering, bark-scars on masters' sprites.
