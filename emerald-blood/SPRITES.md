@@ -95,3 +95,8 @@ Read `COORDINATION.md` first (lanes, claims, deploy). Everything below is how th
 - Moss (Drag smith's apprentice) uses `folk5` — needs her own sprite + portrait. Dax costume sheet pending.
 - NAME CLASH (A is handling the lore side): the portraits `corvin` and `bertrand` were painted for Bandit Kings Corvin Ash / Bertrand Gall,
   but A gave them to the Kess-arc villains. Don't build more on those two portraits until A and the owner decide.
+
+## Sheet quality rules (Chat C, 2026-11-16)
+- Prompts now ask for a solid flat MAGENTA (#FF00FF) background with hard pixel edges. The cutter keys any flat background, and `tools/pool/edgeclean.py` strips white/magenta halos.
+- Atlases are saved as LOSSLESS webp (the old lossy q90 webp was softening every edge; the game loads .webp first).
+- Upload sheets as PNG. A JPG or screenshot adds blur and halos before the cutter ever sees them.

@@ -209,7 +209,11 @@ def build(key):
         idx.setdefault(kind + ':' + nm, []).append(len(frames) - 1); x += im.width + 2; rh = max(rh, im.height)
     sheet = Image.new('RGBA', (AW, y + rh + 2))
     for im, xx, yy in items: sheet.alpha_composite(im, (xx, yy))
-    sheet.save(os.path.join(OUT, 'c_%s.png' % key), optimize=True); sheet.save(os.path.join(OUT, 'c_%s.webp' % key), quality=90, alpha_quality=100, method=6)
+    try:   # strip white / magenta halos the generator left on the edges (tools/pool/edgeclean.py)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from edgeclean import clean
+        sheet = Image.fromarray(clean(np.array(sheet.convert('RGBA'))))
+    except Exception as e: print('edgeclean skipped:', e)
+    sheet.save(os.path.join(OUT, 'c_%s.png' % key), optimize=True); sheet.save(os.path.join(OUT, 'c_%s.webp' % key), lossless=True)   # lossless: lossy webp softened every edge
     g = lambda n, k=None: idx.get((k or ('life' if n in ('idle', 'walk_down', 'walk_up', 'walk_side', 'work', 'run_down', 'run_up', 'run_side', 'idle_up', 'idle_side') or n.startswith(('em_', 'g_')) else 'battle')) + ':' + n, [])
     L = lambda n: g(n, 'life'); Bt = lambda n: g(n, 'battle')
     C = Bt('combat') or L('walk_side')[:1] or L('idle')[:1]
