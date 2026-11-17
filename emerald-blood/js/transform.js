@@ -28,3 +28,19 @@
   const _e = Burst.end.bind(Burst);
   Burst.end = function (a) { const r = _e(a); try { if (!a.isMe && a.__preT) { a.img = a.__preT; a.__preT = null; } } catch (e) { } return r; };
 })();
+
+/* Cut-in art for the party (Chat C, 2026-11-16): Liora's and Kess's own Transcension cut-ins
+   (the glowing-eyes banner + the full figure in their aura), same layout as Ren's. */
+(function () {
+  if (typeof Burst === 'undefined') return;
+  const L = n => { const i = new Image(); i.src = 'assets/burst/' + n; return i; };
+  const ART = { liora: { fig: L('liora_fig.png'), ban: L('liora_eyes.jpg') }, kess: { fig: L('kess_fig.png'), ban: L('kess_eyes.jpg') } };
+  ART.kessE = ART.kess;
+  const _c = Burst.cut.bind(Burst);
+  Burst.cut = async function (who, title, sub, col, side) {
+    const A = side === 'p' && ART[who]; if (!A || !A.fig.naturalWidth) return _c(who, title, sub, col, side);
+    const B = Battle.B; if (!B) return;
+    B.cutin = { img: null, fig: A.fig, ban: A.ban, title, sub, col, t0: performance.now(), side }; B.flash = 1; B.flashCol = '255,255,255'; try { sfx('art'); } catch (e) { } B.shake = 10;
+    await wait(1250); if (B.cutin && B.cutin.title === title) B.cutin = null;
+  };
+})();

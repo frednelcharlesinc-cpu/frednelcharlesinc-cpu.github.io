@@ -202,10 +202,14 @@ def build(key):
     refimg = {k: next((im for kk, nm, im in allf if kk == k and nm == REF[k]), None) or next((im for kk, nm, im in allf if kk == k), None) for k in kinds}
     x = y = rh = 0; AW = 2048; items = []; frames = []
     for kind, nm, im in allf:
-        r = refimg[kind] or im; s = HT / r.height; im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+        # never upscale here: blowing a 110 px frame up to 260 px with LANCZOS is what made sheets soft.
+        # Frames stay at their real size and the game does the sharp upscale at draw time (HD.upFrame).
+        r = refimg[kind] or im; s = min(1.0, HT / r.height)
+        if s != 1: im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+        refh = round(r.height * s)
         if x + im.width > AW: x = 0; y += rh + 2; rh = 0
         ax, ay = anchor(im, torso=(kind in ('moves', 'arts') or (kind == 'battle' and nm in TORSO)))
-        items.append((im, x, y)); frames.append([x, y, im.width, im.height, round(ax, 1), round(ay, 1), float(HT - 2)])
+        items.append((im, x, y)); frames.append([x, y, im.width, im.height, round(ax, 1), round(ay, 1), float(refh - 2)])
         idx.setdefault(kind + ':' + nm, []).append(len(frames) - 1); x += im.width + 2; rh = max(rh, im.height)
     sheet = Image.new('RGBA', (AW, y + rh + 2))
     for im, xx, yy in items: sheet.alpha_composite(im, (xx, yy))
@@ -244,7 +248,7 @@ def build(key):
         down = [i for i in A['hurt'] if frames[i][3] < ch * .7]
         if down and len(down) < len(A['hurt']): A['hurt'] = [i for i in A['hurt'] if i not in down]; A['ko'] = down + [i for i in A.get('ko', []) if i not in down]
     # world
-    idl = L('idle') or C[:1]; side = L('walk_side') or C
+    idl = L('idle') or C[:1]; side = L('walk_side') or Bt('run') or C   # monsters prowl through the world on their PROWL row
     A.update(ow_down=idl[:1], ow_idle=idl, ow_down_walk=L('walk_down') or side, ow_up=(L('walk_up') or idl)[:1], ow_up_walk=L('walk_up') or L('walk_down') or side,
              ow_side=side[:1], ow_side_walk=side, work=L('work'))
     if L('run_side'):   # a movement sheet: real walk + run cycles in every direction (simplewalk.js plays them when meta.cycle)
