@@ -28,7 +28,7 @@
   const TRAIL = new WeakMap(); let cur = null, zcur = null;
   /* where the eye really is, found from the frame itself (cached per frame): glowing Drag-green pixels in the head if there are any,
      otherwise a point just inside the front of the face at eye height */
-  const EYE = new WeakMap();
+  const EYE = new WeakMap(), PREV = new WeakMap();
   function eyeOf(img, fr, faces) {
     let m = EYE.get(img); if (!m) EYE.set(img, m = new Map()); const key = fr[0] + ',' + fr[1]; if (m.has(key)) return m.get(key);
     let out = null;
@@ -39,19 +39,20 @@
       for (let py = 0; py < h && top < 0; py++) { let n = 0; for (let px = 0; px < w; px++) if (A(px, py) > 60) n++; if (n >= 3) top = py; }
       for (let py = h - 1; py >= 0 && bot < 0; py--) { for (let px = 0; px < w; px++) if (A(px, py) > 60) { bot = py; break; } }
       if (top >= 0 && bot > top) {
-        const fh = bot - top, y1 = top + Math.round(fh * .3); let sx = 0, sy = 0, n = 0;
-        for (let py = top; py < y1; py++) for (let px = 0; px < w; px++) { const o = (py * w + px) * 4, r = d[o], g = d[o + 1], b = d[o + 2];
-          if (d[o + 3] > 120 && g > 170 && g - r > 70 && g - b > 40) { sx += px; sy += py; n++; } }
-        if (n >= 2 && n < fh * 1.5) out = [sx / n, sy / n];
-        if (!out) {   // a face: the highest skin in the head, the eye a little below it at the front of the face
-          let st = -1; const y2 = top + Math.round(fh * .25);
-          for (let py = top; py < y2 && st < 0; py++) for (let px = 0; px < w; px++) { const o = (py * w + px) * 4, r = d[o], g = d[o + 1], b = d[o + 2];
-            if (d[o + 3] > 120 && r > 140 && r > g && g > b && r - b > 35 && r - b < 150) { st = py; break; } }
-          if (st >= 0) { const ey = Math.min(y2, st + Math.round(fh * .035)); let l = -1, r = -1;
-            for (let px = 0; px < w; px++) { const o = (ey * w + px) * 4; if (d[o + 3] > 120 && d[o] > 140 && d[o] > d[o + 1] && d[o + 1] > d[o + 2]) { if (l < 0) l = px; r = px; } }
-            if (l >= 0) out = faces === 'left' ? [l + 2, ey] : [r - 2, ey]; }
-        }
-        if (!out) {
+        const fh = bot - top, skin = (o) => d[o + 3] > 120 && d[o] > 120 && d[o] > d[o + 1] && d[o + 1] > d[o + 2] && d[o] - d[o + 2] > 30 && d[o] - d[o + 2] < 160;
+        // 1) the FACE: the highest band of skin in the top third (a raised sword or hair can't fool it - blades aren't skin)
+        let fy0 = -1; const yLim = top + Math.round(fh * .34);
+        for (let py = top; py < yLim && fy0 < 0; py++) { let n = 0; for (let px = 0; px < w; px++) if (skin((py * w + px) * 4)) n++; if (n >= 2) fy0 = py; }
+        if (fy0 >= 0) {
+          const fy1 = Math.min(h - 1, fy0 + Math.round(fh * .09)); let l = w, r = -1;
+          for (let py = fy0; py <= fy1; py++) for (let px = 0; px < w; px++) if (skin((py * w + px) * 4)) { if (px < l) l = px; if (px > r) r = px; }
+          // 2) a glowing Drag-green eye INSIDE the face box wins
+          let sx = 0, sy = 0, n = 0;
+          for (let py = fy0; py <= fy1 + 2; py++) for (let px = Math.max(0, l - 2); px <= Math.min(w - 1, r + 2); px++) { const o = (py * w + px) * 4, R = d[o], G = d[o + 1], B = d[o + 2];
+            if (d[o + 3] > 120 && G > 160 && G - R > 60 && G - B > 30) { sx += px; sy += py; n++; } }
+          if (n >= 1) out = [sx / n, sy / n];
+          else { const ey = fy0 + Math.round((fy1 - fy0) * .38), fw = Math.max(2, r - l); out = faces === 'left' ? [l + fw * .22, ey] : [r - fw * .22, ey]; }
+        } else {   // no face (monsters): just inside the front of the head at eye height
           const ey = top + Math.round(fh * .09); let l = -1, r = -1; for (let px = 0; px < w; px++) if (A(px, ey) > 60) { if (l < 0) l = px; r = px; }
           if (l >= 0) { const hw = Math.min(r - l, fh * .16); out = faces === 'left' ? [l + hw * .3, ey] : [r - hw * .3, ey]; }
         }
@@ -61,7 +62,8 @@
   }
   function drawZone(c, o, now) {
     const { a, zc, H, x, feet, hh, S } = o, rgb = hex2rgb(zc), dir = H.faces === 'left' ? -1 : 1;
-    const ex = o.ex != null ? o.ex : x + dir * hh * .06, ey = o.ey != null ? o.ey : feet - hh * .86, u = hh / 100;   // u: 1% of body height
+    let ex = o.ex != null ? o.ex : x + dir * hh * .06, ey = o.ey != null ? o.ey : feet - hh * .86; const u = hh / 100;   // u: 1% of body height
+    const P = PREV.get(a); if (P && Math.hypot(P[0] - ex, P[1] - ey) < hh * .35) { ex = P[0] + (ex - P[0]) * .45; ey = P[1] + (ey - P[1]) * .45; } PREV.set(a, [ex, ey]);   // glide, don't jump
     let T = TRAIL.get(a); if (!T) TRAIL.set(a, T = []);
     T.push([ex, ey, now]); while (T.length && now - T[0][2] > 110) T.shift();
     c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
