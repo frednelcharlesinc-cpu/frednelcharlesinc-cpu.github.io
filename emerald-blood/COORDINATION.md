@@ -62,6 +62,11 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
 7. **Log** every cross-lane touch and every request for another chat below (newest first). Requests start with "For A/B/C:".
 
 ## Requests (owner → a chat)
+- **For A + B (OWNER-APPROVED, 2026-11-17): GREAT BEASTS, BEARERS and ONYX — new section at the end of `LORE_MANA.md`.**
+  Seven Great Beasts (one is Mother Brine's sea-serpent, one chained under the Crown's capital, the Monarchs hunt them all); Bearers are shunned like Drags.
+  Onyx (companions.js `me`) becomes a real character: talks in Ren's head, scouts as a cat, sniffs out caches, reads intent; trust grows through 4 story beats.
+  **Onyx's power stops at the CLOAK** (Cloak I Night Mantle, Cloak II Starless Cloak — blue/black fire around Ren, body unchanged).
+  **Dragonification (Ren's Stage III Dragonoid) is a PURE DRAG ability** — no familiar involved. C has the Onyx + cloak design prompt in the pack.
 - **For A + B (OWNER-APPROVED WORLD LORE, 2026-11-17): THE FOUR WAYS of mana — read `LORE_MANA.md` (new, A owns it now).**
   North = **WILL** (Ironing / Hindsight / Kingsweight), East = **INK** (rune tattoos + named weapons that return), West = **VERDANCE** (elves; Stillness, Greenmind, Rootstep), South = **KIN / Beast-Bond** (the beast chooses you; Bond → Borrow → Kinform; Ren's little dragon is his bond-beast, a shapeshifter). **REVISED by owner:** NO ongoing conditions (no oaths, no geas) — instead every art is brutally hard to LEARN: hidden teachers, level walls, failable trials with injuries/cooldowns, rare materials, training time, Master = beat your teacher. The shared ladder is in LORE_MANA.md. Drags use none of them normally (their mana is blood) — Ren touching all four is the story spine. Each culture has its own word for Kaigen.
   - **A:** turn it into lore text, trainers/trials/quests and combat rules (the learning ladder, rune trials + inking fight, Gathering stacks). Owner wants it built big ("add on it drastically").

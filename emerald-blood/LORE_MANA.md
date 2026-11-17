@@ -133,9 +133,9 @@ Southern masters are few; most bonded fighters stay at Novice their whole lives.
 2. **BORROW** (veteran) — take on your beast's nature for a few turns: a sand-wyrm's armour (huge DEF), a reef shark's speed and bleed, a hawk's sight (see enemy weaknesses, never miss), a dune-cat's reflexes (dodge window ×2).
 3. **KINFORM** (master) — fighter and beast become one for a few turns: the beast's shape over your body (wings, armour, fins, claws). Not a Transcension — the body is borrowed, not changed — but it's the South's ultimate.
 
-**Drags and Kin:** beasts smell the dragon in Drag blood and flee; no beast has ever bonded with a Drag. Except one: **Ren's little dragon**
+**Drags and Kin:** beasts smell the dragon in Drag blood and flee; no beast has ever bonded with a Drag. Except one: **Onyx**, Ren's little dragon,
 already IS his bond. The South arc reveals what that means — and why it can change shape (into a cat, or anything): a bond-beast that shapeshifts is
-something no Southern master has ever heard of. Its Kinform with Ren could be a step toward his Dragonoid Stage III.
+something no Southern master has ever heard of. (Onyx's power stops at the CLOAK — see below. Dragonification is the Drags' own.)
 
 **People:** desert beast-riders, reef raiders, **Mother Brine** (an Uncrowned — her bond is a sea-serpent the size of a warship; that's how she sank three Imperial ships in one night).
 **Their word for Kaigen:** *the Hunter's Hush* — "when you and the beast breathe as one and the prey hasn't heard you yet."
@@ -146,7 +146,7 @@ something no Southern master has ever heard of. Its Kinform with Ren could be a 
 - **North:** a Northern master refuses him (can't Hindsight a Drag, "unnatural") — Ren earns the Cold Watch anyway; Grey Iron on his katana.
 - **East:** every rune refuses him… until the 400-year rune takes. Kairo gets Ember the normal way.
 - **West:** the elves teach him Stillness → it deepens his Still Sky Transcension; he learns the truth about the Drags.
-- **South:** no beast will bond with a Drag — then the South learns his dragon is a bond-beast that shapeshifts. Ren reaches Borrow and, much later, Kinform with it.
+- **South:** no beast will bond with a Drag — then the South learns Onyx is a bond-beast that shapeshifts. Ren and Onyx reach the Cloak.
 - **Endgame:** a Drag who has touched every Way — the thing the Monarchs fear most.
 
 ## Party leanings (suggestions)
@@ -164,3 +164,37 @@ Dace — North · Vane — West (Tomb Breath) + his own sword · Tamsin — Sout
 - Runes: glowing marks on the portrait + sprite flashes when a rune triggers; named-weapon recall streak.
 - Verdance: leaf-light eye rings, motes drawn inward while Gathering, bark-scars on masters' sprites.
 - Kin: a thread of light between fighter and beast; Borrow = the beast's colours and features ghosting over the fighter (scales, fins, feathers); Kinform needs its own sprite sheets (prompts from C).
+
+---
+
+## THE GREAT BEASTS & BEARERS (owner-approved, Naruto/Kurama-inspired, made our own — 2026-11-17)
+**The Great Beasts:** **seven** ancient beasts, each a shard of the old world's mana from before the Drags and Fratenaptor. Each has a name,
+a personality and a will of its own, and each can be bonded (Kin) by exactly one person in its lifetime.
+- Where they are: some wild (raid-tier lairs), **one bonded to Mother Brine** (her sea-serpent), **one chained under the Crown's capital** as a weapon,
+  the rest scattered — A/B decide.
+- **The Monarchs are hunting all seven** (our version of the Akatsuki plot) — a reason for the whole world to fight over them.
+- **Bearers:** anyone bonded to a Great Beast is a *Bearer* — feared and shunned everywhere, like the Drags. Bearers and Drags are natural allies;
+  Mother Brine is the first adult who truly understands Ren. Each of the other Great Beasts has a Bearer the party meets: rival, ally or tragedy —
+  each one a mini-boss arc.
+
+**ONYX, Ren's familiar — a character, not a pet** (already in the game: companions.js, black as a starless night, huge blue eyes, blue dragonfire,
+hatched from an egg in a ruined Drag shrine; the player can rename it; Hatchling → Whelp → Young Dragon as Ren ranks up)
+- **Personality (NOT a grumpy fox):** cheeky, curious, greedy for food, sleeps on Ren's head — and every so often an ancient memory leaks out of it in an
+  old, old voice, then it's a baby again and doesn't remember saying it.
+- **Talks to Ren in his head:** short lines during scenes and battles; opinions on NPCs; sometimes refuses to help.
+- **Jobs outside battle:** scouts disguised as a cat (or other small animals as it grows), sniffs out hidden chests/caches, reads a stranger's intent
+  (hostile/friendly hint before a talk), carries small things through gaps and locked bars.
+- **Its trust is earned through story, not grinding:**
+  1. at first it doesn't fully trust Ren;
+  2. a turning point — Onyx saves Ren on its own;
+  3. a real conversation where Ren learns what Onyx is (what is a dragon doing in a Drag shrine?);
+  4. they fight as equals.
+- **THE CLOAK — the furthest Onyx's power goes** (owner: Onyx's bond stops at the cloak):
+  - **Cloak I — Night Mantle:** a thin mantle of blue-black dragonfire over Ren; his eyes get a blue ring; he borrows Onyx's senses and speed
+    (see hidden enemies, +SPD, perfect windows wider).
+  - **Cloak II — Starless Cloak:** a full shroud of Onyx's fire wrapped around Ren — wings of dark blue flame from his back, a dragon-head hood of flame,
+    flame claws on his hands. Onyx fights *through* him (it takes some of Ren's turns with its own breath attacks). Ren's BODY does not change.
+- **DRAGONIFICATION is NOT Onyx's.** Ren's Stage III Dragonoid is a pure Drag ability — the dragon in Drag blood waking — and needs no familiar.
+  Any Drag strong enough could, in theory, reach it (huge story hook: the Dread General is a Drag…).
+- **Looks must never blur:** Onyx's Cloak = BLUE and BLACK fire around an unchanged body. Ren's Transcension = GREEN/SILVER, his own body changing.
+  Kaigen = colour drained, lightning in the eyes. Aura Force = flames in the fighter's own colour.
