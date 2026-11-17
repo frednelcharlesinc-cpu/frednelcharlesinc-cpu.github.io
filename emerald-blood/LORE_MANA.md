@@ -5,7 +5,7 @@ trainers, temples, trials and regions sit on the map; Chat C owns how every art 
 **OWNER REVISION (2026-11-17):**
 - **No ongoing conditions.** No oaths that crack, no geas that burn runes out, no rules you must keep to *use* an art. Once you have it, it's yours.
 - **Instead, GETTING these arts is brutally hard.** Hidden masters, near-death trials, steep requirements, real failure. Most people in the world never learn any of them; most who try fail.
-- **The South's Way is OPEN** — the drum/song (Cadence) idea was rejected. Needs a new concept from the owner.
+- **The South's Way is BEAST-BOND** (owner picked it; the drum/song idea was rejected).
 
 ## The core idea
 All four are **the same mana**. Each culture found a different way to master it, with its own name for it and its own view
@@ -13,11 +13,11 @@ of the Drags (which keeps the arts tied to the game's heart: discrimination agai
 
 | | NORTH | EAST | WEST | SOUTH |
 |---|---|---|---|---|
-| People | Vikings, jarls, war-clans | rune-smiths, ink-monks, tattooed legions | elves | (open) |
-| They call mana | **WILL** ("mana is for weaklings — this is *Will*") | **INK** (mana that has been *written*) | **VERDANCE** (the world's breath) | (open) |
-| Source | the self | marks on skin and steel | the land, through stillness | (open) |
-| On Drags | "Can't Hindsight a Drag. Unnatural." | runes refuse Drag blood (the ink burns green) | elves remember the Drags before the lies | (open) |
-| Their word for KAIGEN | the Quiet Fury | the Open Rune | Stillwater | (open) |
+| People | Vikings, jarls, war-clans | rune-smiths, ink-monks, tattooed legions | elves | desert tribes, reef-islanders, beast-riders |
+| They call mana | **WILL** ("mana is for weaklings — this is *Will*") | **INK** (mana that has been *written*) | **VERDANCE** (the world's breath) | **KIN** (the thread every living thing shares) |
+| Source | the self | marks on skin and steel | the land, through stillness | a bond with a beast |
+| On Drags | "Can't Hindsight a Drag. Unnatural." | runes refuse Drag blood (the ink burns green) | elves remember the Drags before the lies | beasts smell the dragon in Drag blood and flee |
+| Their word for KAIGEN | the Quiet Fury | the Open Rune | Stillwater | the Hunter's Hush |
 
 The **Drags** use none of these normally: their mana is in their **blood** (the green; Drag Arts). Ren learning a piece of each Way, by
 finding a way around each culture's barrier, is the shonen spine of the journey. **No one has ever mastered every Way.**
@@ -114,8 +114,31 @@ Then **one rune takes on a Drag** (Ren) — a rune no one has seen in 400 years.
 
 ---
 
-## SOUTH — OPEN
-The owner rejected the drum/song idea. Waiting on a new concept.
+## SOUTH — KIN (Beast-Bond)
+**Philosophy:** every living thing shares one thread of mana, KIN. Southern fighters don't push mana out of themselves; they tie their
+thread to a beast's, and the two become one fighter. Desert tribes bond sand-wyrms, dune-cats and great hawks; reef-islanders bond
+sharks, rays and sea-serpents.
+
+**How you get it:** you can't buy, tame or capture a bond. **The beast decides.**
+- *Novice — the First Bond:* find a wild beast in its own territory (rare spawns in Southern zones), follow it, survive it, and beat it
+  **without killing it** (a scripted fight where reducing it to 0 HP fails the trial; you have to Break it and hold it there). Only then
+  does it accept your thread. Fail and that beast is gone for good; you have to find another.
+- *Veteran — the Shared Hunt:* hunt alongside your beast through a dangerous zone; the beast fights its own way and you have to read it
+  (a battle where you can't command it, only follow its lead).
+- *Master — the Great Beast:* bond one of the continent's legendary beasts (a raid-tier fight in its lair; each Great Beast accepts only one bond in a lifetime).
+Southern masters are few; most bonded fighters stay at Novice their whole lives.
+
+**The three Kin arts**
+1. **BOND** (novice) — your beast fights beside you as a second fighter (its own turns, its own moves). It can be knocked out; it comes back after the battle.
+2. **BORROW** (veteran) — take on your beast's nature for a few turns: a sand-wyrm's armour (huge DEF), a reef shark's speed and bleed, a hawk's sight (see enemy weaknesses, never miss), a dune-cat's reflexes (dodge window ×2).
+3. **KINFORM** (master) — fighter and beast become one for a few turns: the beast's shape over your body (wings, armour, fins, claws). Not a Transcension — the body is borrowed, not changed — but it's the South's ultimate.
+
+**Drags and Kin:** beasts smell the dragon in Drag blood and flee; no beast has ever bonded with a Drag. Except one: **Ren's little dragon**
+already IS his bond. The South arc reveals what that means — and why it can change shape (into a cat, or anything): a bond-beast that shapeshifts is
+something no Southern master has ever heard of. Its Kinform with Ren could be a step toward his Dragonoid Stage III.
+
+**People:** desert beast-riders, reef raiders, **Mother Brine** (an Uncrowned — her bond is a sea-serpent the size of a warship; that's how she sank three Imperial ships in one night).
+**Their word for Kaigen:** *the Hunter's Hush* — "when you and the beast breathe as one and the prey hasn't heard you yet."
 
 ---
 
@@ -123,15 +146,15 @@ The owner rejected the drum/song idea. Waiting on a new concept.
 - **North:** a Northern master refuses him (can't Hindsight a Drag, "unnatural") — Ren earns the Cold Watch anyway; Grey Iron on his katana.
 - **East:** every rune refuses him… until the 400-year rune takes. Kairo gets Ember the normal way.
 - **West:** the elves teach him Stillness → it deepens his Still Sky Transcension; he learns the truth about the Drags.
-- **South:** (open)
+- **South:** no beast will bond with a Drag — then the South learns his dragon is a bond-beast that shapeshifts. Ren reaches Borrow and, much later, Kinform with it.
 - **Endgame:** a Drag who has touched every Way — the thing the Monarchs fear most.
 
 ## Party leanings (suggestions)
 Ren — Drag blood + a piece of every Way · Liora — North (fist-iron), later West · Kairo — East (Ember) · Oren — North (smith of Will-ironed steel) ·
-Dace — North · Vane — West (Tomb Breath) + his own sword · Kess, Tamsin — (open; maybe the South once it's decided).
+Dace — North · Vane — West (Tomb Breath) + his own sword · Tamsin — South (a great hawk; sight and fire) · Kess — (open).
 
 ## The Eight Bandit Kings across the Ways
-**The Uncrowned** (answer to no one): Grimtusk (North), King Ash (East), Mother Brine (?), Old Gallows (maybe uses no Way at all, and still terrifies the others).
+**The Uncrowned** (answer to no one): Grimtusk (North), King Ash (East), Mother Brine (South — a sea-serpent bond), Old Gallows (maybe uses no Way at all, and still terrifies the others).
 **Writ-Kings** (secretly hold a royal Writ): Gilded Hound and three others. The Crown can tear up a Writ overnight.
 
 ## What C (sprites/animation) will add once A's rules exist
@@ -140,3 +163,4 @@ Dace — North · Vane — West (Tomb Breath) + his own sword · Kess, Tamsin �
 - Kingsweight: screen darkens, heavy vignette, enemies flinch/kneel.
 - Runes: glowing marks on the portrait + sprite flashes when a rune triggers; named-weapon recall streak.
 - Verdance: leaf-light eye rings, motes drawn inward while Gathering, bark-scars on masters' sprites.
+- Kin: a thread of light between fighter and beast; Borrow = the beast's colours and features ghosting over the fighter (scales, fins, feathers); Kinform needs its own sprite sheets (prompts from C).
