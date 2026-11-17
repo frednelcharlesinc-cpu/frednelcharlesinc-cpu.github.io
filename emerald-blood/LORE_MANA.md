@@ -8,8 +8,10 @@ trainers, temples, trials and regions sit on the map; Chat C owns how every art 
 - **The South's Way is BEAST-BOND** (owner picked it; the drum/song idea was rejected).
 
 
-**OWNER RULE (2026-11-17, overrides any wording below): the Ways are mostly PASSIVE.** Ironing (coating), Verdance (sage power), Onyx's Cloaks
-and rune weapons are **add-ons that permanently improve a character's stats and abilities** — not modes you switch on, not actions that spend turns.
+**OWNER RULE (2026-11-17, overrides any wording below): the Ways are mostly PASSIVE.** Ironing (coating), Verdance (sage power)
+and rune weapons are **add-ons that permanently improve a character's stats and abilities** — not moves, not actions that spend turns.
+**Example: once Ren unlocks coating, he coats his blade AUTOMATICALLY as every fight begins** (a short visual at battle start) — it is never a menu move.
+**The exception is ONYX'S CLOAK: that is an active change** — Ren transforms into it during a fight (like a power-up moment), and it ends.
 Learn a tier → the bonus is simply always there. Read every art below through this rule:
 | Art | Passive effect (A sets numbers) |
 |---|---|
@@ -20,8 +22,8 @@ Learn a tier → the bonus is simply always there. Read every art below through 
 | **Rune weapons** (East) | can't be disarmed; thrown/recall follow-up hits; the weapon's own stat bonus grows with its name |
 | **Verdance** (West) | Greenmind becomes a permanent bonus: +regeneration each turn, +DEF/+ATK, longer reach; Rootstep = a % chance to auto-dodge |
 | **Kin / Beast-Bond** (South) | the beast fights beside you on its own (companion); Borrow = permanent traits from the beast (armour, speed, sight) |
-| **Onyx's Cloaks** | Night Mantle: +SPD, wider perfect windows, see hidden enemies · Starless Cloak: + Onyx's breath follow-ups and fire resistance |
-The few ACTIVE things stay the universal tiers: **Aura Force** (chosen), **Kaigen** (it happens), **Transcension** (story stages) — plus Kinform as the South's rare ultimate.
+| **Onyx's Cloaks — ACTIVE (the exception)** | Ren CHANGES into it mid-fight (a transformation moment, lasts a few turns). Night Mantle: +SPD, wider perfect windows, see hidden enemies · Starless Cloak: + Onyx's breath follow-ups and fire resistance |
+ACTIVE: the universal tiers — **Aura Force** (chosen), **Kaigen** (it happens), **Transcension** (story stages) — plus **Onyx's Cloak** (Ren changes into it) and Kinform as the South's rare ultimate.
 Visual (Chat C): passives show as small constant touches (a dark sheen on an Ironed blade, leaf-light in Verdance eyes, a faint blue mantle edge for the Cloak, rune glow on the portrait) so players can SEE what a character has learned.
 
 ## The core idea
