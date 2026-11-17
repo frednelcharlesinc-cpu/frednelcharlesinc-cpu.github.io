@@ -19,6 +19,8 @@
     let st = 1; try { st = this.stage(a) || 1; } catch (e) { }
     const r = await _f(a);
     try {
+      // AURA BURST (stage 1) is a trance, not a transformation: the body stays, the Zone visuals (aurazone.js) carry it.
+      if (st === 1) return r;
       const B = Battle.B, set = HD.on() && pick(a, st); if (!B || !set) return r;
       if (a.isMe) { const im = HD.sheet(set, HD.meta[set].faces !== 'left'); im.__hd.me = 1; B.renBts = im; if (HD.meta[set].anims.land) lift(performance.now()); }
       else { if (!a.__preT) a.__preT = a.img; const left = a.side !== 'e'; a.img = HD.sheet(set, (HD.meta[set].faces === 'left') !== left); }
