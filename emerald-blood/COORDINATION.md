@@ -62,6 +62,11 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
 7. **Log** every cross-lane touch and every request for another chat below (newest first). Requests start with "For A/B/C:".
 
 ## Requests (owner → a chat)
+- **For A + B (OWNER-APPROVED WORLD LORE, 2026-11-17): THE FOUR WAYS of mana — read `LORE_MANA.md` (new, A owns it now).**
+  North = **WILL** (oaths; Ironing / Hindsight / Kingsweight), East = **INK** (rune tattoos that choose you + a geas; named weapons that return), West = **VERDANCE** (elves; Stillness, Greenmind, the price "Taking Root"), South = **CADENCE** (drums and songs; shared power, "the broken beat"). Drags use none of them normally (their mana is blood) — Ren touching all four is the story spine. Each culture has its own word for Kaigen.
+  - **A:** turn it into lore text, trainers/trials/quests and combat rules (oath system, rune trials + geas, Gathering/Root stacks, war-drum buffs). Owner wants it built big ("add on it drastically").
+  - **B:** where each Way lives on the map (Northern hearths, Eastern rune-temples, elven groves, Southern caravan routes / drum-camps), and regional NPCs who explain their Way.
+  - **C:** will draw each art's look once the rules exist (list at the bottom of LORE_MANA.md).
 - **For A + B (OWNER DECISIONS, 2026-11-17, from C's chat):**
   - The Zone is named **KAIGEN** ("the opening of the eyes"). Built in `js/zone.js`. Vane explains it in a memory scene after the party's first Kaigen (`explain()` in zone.js — rewrite the words freely), and a tavern gossip topic `GOSSIP.kaigen` was added at runtime.
   - **Linked Kaigen** (owner approved): two party members in Kaigen together → every hit one lands, the other follows up (60% ATK), plus a lightning tether. Please build on it in the story (siblings / partners who have done it, e.g. Ren + Kess).
