@@ -62,6 +62,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
 7. **Log** every cross-lane touch and every request for another chat below (newest first). Requests start with "For A/B/C:".
 
 ## Requests (owner → a chat)
+- **For A (OWNER RULE, 2026-11-17): the Ways are mostly PASSIVE add-ons** — Ironing, Verdance, Onyx's Cloaks, rune weapons (and tattoos, Hindsight, Kingsweight, Borrow) permanently raise stats/abilities once learned; no switching on, no turn cost. Table at the top of LORE_MANA.md. Active stays: Aura Force, Kaigen, Transcension (+ Kinform).
 - **For A + B (OWNER-APPROVED, 2026-11-17): GREAT BEASTS, BEARERS and ONYX — new section at the end of `LORE_MANA.md`.**
   Seven Great Beasts (one is Mother Brine's sea-serpent, one chained under the Crown's capital, the Monarchs hunt them all); Bearers are shunned like Drags.
   Onyx (companions.js `me`) becomes a real character: talks in Ren's head, scouts as a cat, sniffs out caches, reads intent; trust grows through 4 story beats.

@@ -7,6 +7,23 @@ trainers, temples, trials and regions sit on the map; Chat C owns how every art 
 - **Instead, GETTING these arts is brutally hard.** Hidden masters, near-death trials, steep requirements, real failure. Most people in the world never learn any of them; most who try fail.
 - **The South's Way is BEAST-BOND** (owner picked it; the drum/song idea was rejected).
 
+
+**OWNER RULE (2026-11-17, overrides any wording below): the Ways are mostly PASSIVE.** Ironing (coating), Verdance (sage power), Onyx's Cloaks
+and rune weapons are **add-ons that permanently improve a character's stats and abilities** — not modes you switch on, not actions that spend turns.
+Learn a tier → the bonus is simply always there. Read every art below through this rule:
+| Art | Passive effect (A sets numbers) |
+|---|---|
+| **Ironing** (North) | Grey: hits ignore part of DEF · Black: weapon can't break + parries deal guard damage · Forward: a share of hits can't be dodged |
+| **Hindsight** (North) | perfect-dodge/parry windows wider; enemy's next move shown in the turn bar |
+| **Kingsweight** (North, master) | at the start of a fight, much weaker enemies may freeze, flee or surrender; enemy morale starts lower |
+| **Rune tattoos** (East) | already passive: a permanent stat boost + one ability each (max 3) |
+| **Rune weapons** (East) | can't be disarmed; thrown/recall follow-up hits; the weapon's own stat bonus grows with its name |
+| **Verdance** (West) | Greenmind becomes a permanent bonus: +regeneration each turn, +DEF/+ATK, longer reach; Rootstep = a % chance to auto-dodge |
+| **Kin / Beast-Bond** (South) | the beast fights beside you on its own (companion); Borrow = permanent traits from the beast (armour, speed, sight) |
+| **Onyx's Cloaks** | Night Mantle: +SPD, wider perfect windows, see hidden enemies · Starless Cloak: + Onyx's breath follow-ups and fire resistance |
+The few ACTIVE things stay the universal tiers: **Aura Force** (chosen), **Kaigen** (it happens), **Transcension** (story stages) — plus Kinform as the South's rare ultimate.
+Visual (Chat C): passives show as small constant touches (a dark sheen on an Ironed blade, leaf-light in Verdance eyes, a faint blue mantle edge for the Cloak, rune glow on the portrait) so players can SEE what a character has learned.
+
 ## The core idea
 All four are **the same mana**. Each culture found a different way to master it, with its own name for it and its own view
 of the Drags (which keeps the arts tied to the game's heart: discrimination against the green-eyed).
