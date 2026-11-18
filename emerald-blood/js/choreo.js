@@ -20,8 +20,13 @@
 
   /* 1) combos: each swing of Ren's attack is a different cut */
   const REN_COMBO = ['slash', 'cmb1', 'cmb2', 'cmb4'];
+  /* BREAKTHROUGHS (owner, 2026-11-17): every rank a fighter climbs makes their attacks faster and their swings cleaner.
+     Speed: animations play ~4.5% faster per rank (E 1.0 ... SSSS ~0.64). From C up their swings leave afterimages - more of them the higher they climb. */
+  const rank = (a) => { try { return Math.max(0, Math.min(8, Battle.rankOf(a) | 0)); } catch (e) { return 2; } };
+  const ATK = /slash|cmb|thr|thrust|cut|atk|attack|strike|bash|bite|claw|pd\d|pp|cast|spell|punch|kick|fist/;
   const _play = Battle.play.bind(Battle);
   Battle.play = function (a, anim, n, ms) {
+    if (!off() && a && ms && ATK.test(anim)) { ms = Math.max(30, ms * Math.max(.64, 1 - .045 * rank(a))); a.__atkT = performance.now(); }
     const r = _play(a, anim, n, ms);
     try {
       if (!off() && a && a.isMe && !G.S.kid && a.anim === 'slash' && a.__combo != null) {
@@ -92,4 +97,24 @@
     } catch (e) { }
     return out;
   };
+
+  /* afterimages: the last frames of a swing, left behind in a fading line */
+  if (typeof HD !== 'undefined') {
+    const _bt = HD.bt.bind(HD), MAIN = () => document.getElementById('game');
+    HD.bt = function (c, img, anim, f, x, y, s) {
+      try {
+        const B = Battle.B;
+        if (!off() && B && c && c.canvas === MAIN() && ATK.test(String(anim))) {
+          let a = null; for (const q of B.actors) if (Math.abs(q.x - x) < 1.5 && Math.abs(q.y - y) < 1.5) { a = q; break; }
+          const rk = a ? rank(a) : 0;
+          if (a && a.once && rk >= 2 && performance.now() - (a.__atkT || 0) < 900) {
+            const n = rk >= 6 ? 3 : rk >= 4 ? 2 : 1, dir = a.side === 'p' ? 1 : -1, H = img && img.__hd, L = H && H.anims && H.anims[anim] ? H.anims[anim].length : 1;
+            for (let i = n; i >= 1; i--) { const g = c.globalAlpha; c.globalAlpha = g * (.32 - i * .07);
+              _bt(c, img, anim, Math.max(0, f - i), x + dir * i * 9 * (s || 1), y, s); c.globalAlpha = g; }
+          }
+        }
+      } catch (e) { }
+      return _bt(c, img, anim, f, x, y, s);
+    };
+  }
 })();
