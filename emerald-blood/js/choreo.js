@@ -19,7 +19,7 @@
   }
 
   /* 1) combos: each swing of Ren's attack is a different cut */
-  const REN_COMBO = ['slash', 'cmb2', 'cmb4', 'cmb1'];
+  const REN_COMBO = ['slash', 'cmb1', 'cmb2', 'cmb4'];
   const _play = Battle.play.bind(Battle);
   Battle.play = function (a, anim, n, ms) {
     const r = _play(a, anim, n, ms);
