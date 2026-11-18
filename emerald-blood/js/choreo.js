@@ -142,4 +142,34 @@
       FL = fl; try { return _bt(c, img, anim, f, x, y, s); } finally { FL = null; }
     };
   }
+
+  /* DASH (owner, 2026-11-18): every dash into or out of a fight is a burst - dust kicked up at the start and the stop,
+     a trail of afterimages behind the runner, and speed lines while they're moving. */
+  if (Battle.dash) {
+    const _dash = Battle.dash.bind(Battle);
+    Battle.dash = async function (a, x, y, ms) {
+      if (off() || !a || !this.B) return _dash(a, x, y, ms);
+      const B = this.B, dir = Math.sign(x - a.x) || 1, dust = (px, py, n, push) => { for (let i = 0; i < n; i++) B.fx.push({ x: px + (Math.random() - .5) * 10, y: py - Math.random() * 4, vx: -dir * push * (.4 + Math.random()) + (Math.random() - .5), vy: -(.3 + Math.random() * 1.4), life: 280 + Math.random() * 260, t: 0, col: 'rgba(214,196,160,.85)', s: 2 + Math.random() * 2.5 }); };
+      dust(a.x, a.y, 12, 3); a.__dashing = 1; a.__trail = [];
+      try { return await _dash(a, x, y, ms); }
+      finally { a.__dashing = 0; dust(a.x, a.y, 10, -2); B.shake = Math.max(B.shake || 0, 1.5); setTimeout(() => { a.__trail = null; }, 140); }
+    };
+  }
+  if (typeof HD !== 'undefined') {
+    const _bt2 = HD.bt.bind(HD), MAIN2 = () => document.getElementById('game');
+    HD.bt = function (c, img, anim, f, x, y, s) {
+      try {
+        const B = Battle.B;
+        if (!off() && B && c && c.canvas === MAIN2()) for (const a of B.actors) if (a.__trail && Math.abs(a.x - x) < 1.5 && Math.abs(a.y - y) < 1.5) {
+          const T = a.__trail, now = performance.now(); if (a.__dashing) T.push([x, y, now]); while (T.length && now - T[0][2] > 130) T.shift();
+          const n = T.length; for (let i = 0; i < n - 1; i += 2) { const k = (i + 1) / n, g = c.globalAlpha; c.globalAlpha = g * .3 * k; _bt2(c, img, anim, f, T[i][0], T[i][1], s); c.globalAlpha = g; }
+          if (a.__dashing && n > 1) {   // speed lines along the run
+            const S0 = s || 1; c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 1.2;
+            for (let i = 0; i < 5; i++) { const ly = y - (8 + Math.random() * 60) * S0, len = (25 + Math.random() * 40) * S0, dx = Math.sign(x - T[0][0]) || 1; c.beginPath(); c.moveTo(x - dx * 10 * S0, ly); c.lineTo(x - dx * (10 * S0 + len), ly); c.stroke(); }
+            c.restore(); }
+          break; }
+      } catch (e) { }
+      return _bt2(c, img, anim, f, x, y, s);
+    };
+  }
 })();
