@@ -1,0 +1,1 @@
+- C: added `emerald-blood/js/choreo.js` (visual only). It wraps Battle.play, doAttack, resolveHit and render. Ren's attacks now cycle through slash/cmb2/cmb4/cmb1, targets flinch and get knocked back on hits, and parries show the defender's parry pose with a clash star, sparks, hitstop and the attacker recoiling. No damage or rules changed. Off switch: G.settings.choreoOff.
