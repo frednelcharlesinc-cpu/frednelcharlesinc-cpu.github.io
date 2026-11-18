@@ -2,3 +2,4 @@
 - C: Ren's battle set now uses only the new Hugging Face frames (129, 154–157) for every battle anim; the old versions are kept as `<anim>_old`. Glowing eye sockets were repainted as green pupils at the owner's request. No rules changed.
 - C: reverted the green-pupil eye repaint on Ren (owner request); the battle anim remap stays.
 - C: restored Ren's old battle anims (owner request); only 'slash' uses the HF draw.
+- C: Ren's battle set back on the HF frames only (owner request); the old anims are kept as <anim>_old.
