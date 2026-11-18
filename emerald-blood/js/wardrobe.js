@@ -106,7 +106,10 @@ const Wardrobe = {
       if (s === 'ren') { const w = W.of('me'); if (w.o === undefined && W.WORLD.me && HD.meta && HD.meta[W.WORLD.me] && HD.img[W.WORLD.me]) return W.WORLD.me; return W.resolve('me', s); }
       return s === 'veil' ? W.resolve('veil', s) : s;
     };
-    HD.battleSet = function () { const s = bS(); return s === 'ren' ? W.resolve('me', s) : s === 'veil' ? W.resolve('veil', s) : s; };
+    HD.battleSet = function () { const s = bS();
+      // owner, 2026-11-17: battle Ren is the green-eyed Ren (the one the new draw was made from) — clear a saved 'Sheathed Draw (new)' outfit once
+      try { const w = W.of('me'); if (s === 'ren' && w.o === 'c_ren_o_sheathed' && G.S && G.S.f && !G.S.f.wearReset1117) { G.S.f.wearReset1117 = 1; delete W.st().me.o; } } catch (e) { }
+      return s === 'ren' ? W.resolve('me', s) : s === 'veil' ? W.resolve('veil', s) : s; };
     HD.setOf = function (name, key) { const s = sO(name, key), id = s && W.heroOfSet(s); return id && id !== 'me' ? W.resolve(id, s) : s; };
     /* the Wardrobe lives at the bottom of the Party tab */
     const rM = UI.renderMenu.bind(UI);
