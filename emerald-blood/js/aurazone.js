@@ -1,6 +1,6 @@
 /* AURA FORCE + THE ZONE visuals (Chat C, 2026-11-17; revised: the Zone is now its own state, js/zone.js).
    AURA FORCE (burst.js stage-1 release): glow outline in their colour + heartbeat ring.
-   THE ZONE (a.zone > 0): a lightning aura around the body, lightning streaming from the eye. Every aura tightens with rank (S+ = a coating on the skin).
+   THE ZONE (a.zone > 0): dense steam of their colour rolling off a completely relaxed body (extreme focus), lightning only in the eyes. Every aura tightens with rank (S+ = a coating on the skin).
    (old notes:) Mechanics stay in burst.js (Chat A).
    Lore: an Aura Burst is not a transformation. The body stays the same; what changes is the fighter. Every strong fighter,
    human or Drag, friend or foe, can reach it: the noise drops away, time slows, they move as their strongest self.
@@ -67,21 +67,6 @@
     const { a, zc, H, x, feet, hh, S } = o, rgb = hex2rgb(zc), dir = H.faces === 'left' ? -1 : 1;
     let ex = o.ex != null ? o.ex : x + dir * hh * .06, ey = o.ey != null ? o.ey : feet - hh * .86; const u = hh / 100;   // u: 1% of body height
     const P = PREV.get(a); if (P && Math.hypot(P[0] - ex, P[1] - ey) < hh * .35) { ex = P[0] + (ex - P[0]) * .45; ey = P[1] + (ey - P[1]) * .45; } PREV.set(a, [ex, ey]);   // glide, don't jump
-    // THE LIGHTNING AURA: bolts crawl around the body; the higher the rank, the closer they hug it
-    { const t = rk(a) / 8, cx = x, cy = feet - hh * .5, rx = hh * (.3 - .16 * t), ry = hh * (.56 - .08 * t), nb = 5 + Math.round(t * 3);
-      c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
-      const fl2 = .7 + .3 * Math.random(); let gg = c.createRadialGradient(cx, cy, 0, cx, cy, ry * 1.05);   // the charged air around them
-      gg.addColorStop(0, `rgba(${rgb},${.16 * fl2})`); gg.addColorStop(.6, `rgba(${rgb},${.1 * fl2})`); gg.addColorStop(1, `rgba(${rgb},0)`);
-      c.save(); c.translate(cx, cy); c.scale(rx / ry * 1.2, 1); c.translate(-cx, -cy); c.fillStyle = gg; c.beginPath(); c.arc(cx, cy, ry * 1.05, 0, 7); c.fill(); c.restore();
-      for (let b = 0; b < nb; b++) { if (Math.random() < .15) continue;
-        const a0 = Math.random() * 6.28, span = .7 + Math.random() * .9, pts2 = [];
-        for (let i = 0; i <= 6; i++) { const an = a0 + span * i / 6, j = 1 + (Math.random() - .5) * .22; pts2.push([cx + Math.cos(an) * rx * j, cy + Math.sin(an) * ry * j]); }
-        for (const [wd, col] of [[4.5 * u, `rgba(${rgb},.3)`], [1.8 * u, `rgba(${rgb},.9)`], [.7 * u, 'rgba(255,255,255,1)']]) {
-          c.strokeStyle = col; c.lineWidth = Math.max(.6, wd); c.beginPath(); pts2.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); } }
-      // static at the feet
-      if (Math.random() < .5) { const sx = cx + (Math.random() - .5) * rx * 1.6; c.strokeStyle = `rgba(${rgb},.7)`; c.lineWidth = Math.max(.6, .6 * u);
-        c.beginPath(); c.moveTo(sx, feet); c.lineTo(sx + (Math.random() - .5) * 6 * u, feet - 5 * u); c.lineTo(sx + (Math.random() - .5) * 6 * u, feet - 10 * u); c.stroke(); }
-      c.restore(); }
     let T = TRAIL.get(a); if (!T) TRAIL.set(a, T = []);
     T.push([ex, ey, now]); while (T.length && now - T[0][2] > 110) T.shift();
     c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
@@ -110,14 +95,35 @@
     c.globalAlpha = 1; g = c.createRadialGradient(ex, ey, 0, ex, ey, 3 * u); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.5, `rgba(${rgb},.95)`); g.addColorStop(1, `rgba(${rgb},0)`);
     c.fillStyle = g; c.beginPath(); c.arc(ex, ey, 3 * u, 0, 7); c.fill(); c.restore();
   }
+  /* THE FOCUS AURA (owner, 2026-11-18): dense STEAM of their colour rolling off the body - the heat of extreme focus, completely calm.
+     Soft billows are born on the body's outline, swell and drift slowly upward; the higher the rank, the closer they cling. */
+  function drawFire(c, o, now) {
+    const { a, zc, x, feet, hh } = o, rgb = hex2rgb(zc), u = hh / 100, t = rk(a) / 8, w0 = hh * (.27 - .09 * t), n = 46;
+    const st = rgb.map(v => Math.round(v * .5 + 235 * .5));   // steam: their colour, washed toward white
+    c.save(); c.globalCompositeOperation = 'lighter';
+    let gg = c.createRadialGradient(x, feet - hh * .5, 0, x, feet - hh * .5, hh * .62);   // the heat haze the steam rises from
+    gg.addColorStop(0, `rgba(${rgb},.16)`); gg.addColorStop(.6, `rgba(${rgb},.09)`); gg.addColorStop(1, `rgba(${rgb},0)`);
+    c.fillStyle = gg; c.save(); c.translate(x, feet - hh * .5); c.scale(.62, 1); c.translate(-x, -(feet - hh * .5)); c.beginPath(); c.arc(x, feet - hh * .5, hh * .62, 0, 7); c.fill(); c.restore();
+    for (let i = 0; i < n; i++) {
+      const k = ((now / 1500) + i * .618) % 1, side = i % 2 ? 1 : -1, along = (i * .37) % 1;
+      const prof = Math.sin(Math.min(1, along * 1.15) * Math.PI * .5 + .35);
+      const px = x + side * w0 * (.5 + .5 * prof) * (1 + k * .5) + Math.sin(now / 700 + i * 1.7) * 3 * u;
+      const py = feet - hh * (.04 + along * .9) - k * hh * (.3 - .1 * t);
+      const r = (6 + 12 * k) * u * (1 - .25 * t), al = .42 * Math.sin(k * Math.PI);
+      const g = c.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, `rgba(${st},${al})`); g.addColorStop(.55, `rgba(${st},${al * .55})`); g.addColorStop(1, `rgba(${st},0)`);
+      c.globalCompositeOperation = i % 3 ? 'source-over' : 'lighter';   // real steam has body: most billows are soft and opaque-ish, some glow
+      c.fillStyle = g; c.beginPath(); c.arc(px, py, r, 0, 7); c.fill();
+    }
+    c.restore();
+  }
   const LZ = [];
 
   const _blit = HD.blit.bind(HD);
   HD.blit = function (c, img, fr, x, y, h, extra) {
     _blit(c, img, fr, x, y, h, extra);
-    if (zcur && fr && !zcur.done && window.SPolish) { try {   // a flickering electric edge on the body itself
+    if (zcur && fr && !zcur.done && window.SPolish) { try {   // a soft hot sheen where the steam leaves the body
       const k = h / fr[6], t = rk(zcur.a) / 8, cv = window.SPolish.mask(img, fr[0], fr[1], fr[2], fr[3], (t >= .62 ? 'rim:' : 'glow:') + zcur.zc), p = cv.__pad || 0;
-      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= Math.random() < .2 ? .4 : .85 + Math.random() * .15; c.imageSmoothingEnabled = true;
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= .45 + .1 * Math.sin(performance.now() / 300); c.imageSmoothingEnabled = true;
       c.translate(x, y); if (extra && extra.rot) c.rotate(extra.rot); if (extra && extra.sy) c.scale(1, extra.sy);
       c.drawImage(cv, -fr[4] * k - p * k, -fr[5] * k - p * k, cv.width * k, cv.height * k); c.restore(); } catch (e) { } }
     if (zcur && fr && !zcur.done) { try { const k = h / fr[6], e = eyeOf(img, fr, zcur.H.faces); if (e) { zcur.ex = x + (e[0] - fr[4]) * k; zcur.ey = y + (e[1] - fr[5]) * k * (extra && extra.sy || 1); } zcur.done = 1; } catch (e) { } }
@@ -142,7 +148,7 @@
     let a = null; for (const q of B.actors) if (Math.abs(q.x - x) < 1.5 && Math.abs(q.y - y) < 1.5) { a = q; break; }
     const col = zoneOf(a), zc = zoneCol(a); if (!col && !zc) return _bt(c, img, anim, f, x, y, s);
     const now = performance.now(), S = s || 1, hh = (HD.BT_H || 80) * S * (a.size || 1), feet = y + 2 * S;
-    let r; const zE = zc ? { a, zc, H, x, feet, hh, S } : null; zcur = zE;
+    let r; const zE = zc ? { a, zc, H, x, feet, hh, S } : null; zcur = zE; if (zE) { try { drawFire(c, zE, now); } catch (e) { } }
     try {
     if (col) {   // AURA FORCE: outline of light + heartbeat
       const rgb = hex2rgb(col), hex = '#' + rgb.map(v => v.toString(16).padStart(2, '0')).join(''), t = rk(a) / 8, loose = 1 - Math.min(1, t / .62), beat = (now % 1200) / 1200;
