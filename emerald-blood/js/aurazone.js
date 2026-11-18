@@ -146,7 +146,8 @@
   HD.bt = function (c, img, anim, f, x, y, s) {
     const H = img && img.__hd, B = Battle.B; if (!H || !B || !c || c.canvas !== MAIN() || !on()) return _bt(c, img, anim, f, x, y, s);
     let a = null; for (const q of B.actors) if (Math.abs(q.x - x) < 1.5 && Math.abs(q.y - y) < 1.5) { a = q; break; }
-    const col = zoneOf(a), zc = zoneCol(a); if (!col && !zc) return _bt(c, img, anim, f, x, y, s);
+    // a fighter drawn with their own Zone sprites already carries the aura
+    const col = zoneOf(a), zc = a && a.__zsprite ? null : zoneCol(a); if (!col && !zc) return _bt(c, img, anim, f, x, y, s);
     const now = performance.now(), S = s || 1, hh = (HD.BT_H || 80) * S * (a.size || 1), feet = y + 2 * S;
     let r; const zE = zc ? { a, zc, H, x, feet, hh, S } : null; zcur = zE; if (zE) { try { drawFire(c, zE, now); } catch (e) { } }
     try {

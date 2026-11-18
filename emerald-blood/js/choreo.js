@@ -135,7 +135,7 @@
           if (a && a.once && rk >= 2 && performance.now() - (a.__atkT || 0) < 900) {
             const n = rk >= 6 ? 3 : rk >= 4 ? 2 : 1, dir = a.side === 'p' ? 1 : -1, H = img && img.__hd, L = H && H.anims && H.anims[anim] ? H.anims[anim].length : 1;
             for (let i = n; i >= 1; i--) { const g = c.globalAlpha; c.globalAlpha = g * (.32 - i * .07);
-              _bt(c, img, anim, Math.max(0, f - i), x + dir * i * 9 * (s || 1), y, s); c.globalAlpha = g; }
+              try { _bt(c, img, anim, Math.max(0, f - i), x + dir * i * 9 * (s || 1), y, s); } catch (e) { if (!window.__ghostErr) { window.__ghostErr = 1; console.warn('ghost', e); } } finally { c.globalAlpha = g; } }
           }
         }
       } catch (e) { }
