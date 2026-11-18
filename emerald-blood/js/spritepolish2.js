@@ -64,6 +64,7 @@
   /* ---------- ribbons on Ren ---------- */
   function ribbons() { const f = G.S && G.S.f || {}, out = []; if (f.ribbon) out.push(['#2fcf6a', '#167a3a']); if (f.isoldeRibbon) out.push(['#ffcf3a', '#a87a12']); return out; }
   function drawRibbons(c, x, y, h, back, now, moving) {
+    if (!(G.settings && G.settings.ribbons)) return;   // owner, 2026-11-17: removed (the green ribbon read as a stray string on Ren)
     const R = ribbons(); if (!R.length || !on('ribbon')) return;
     R.forEach(([col, dark], i) => {
       const bx = x + back * h * (.06 + i * .02), by = y - h * (.47 - i * .01), L = h * .13, sw = Math.sin(now / (moving ? 110 : 420) + i * 1.7) * h * (moving ? .035 : .015);

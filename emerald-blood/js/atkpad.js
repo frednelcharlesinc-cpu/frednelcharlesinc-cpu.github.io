@@ -150,8 +150,16 @@ const MoveBar = {
     const a = c.a, fh = G.view.fullH || G.view.h, W = bar.offsetWidth || 300, H = bar.offsetHeight || 90;
     const sx = a.x / G.view.w * innerWidth, sy = (a.y - 66 * BT_SCALE * (a.size || 1)) / fh * innerHeight;
     let top = 8; for (const el of document.querySelectorAll('#bparty')) { const r = el.getBoundingClientRect(); if (r.height) top = Math.max(top, r.bottom + 4); }
-    bar.style.left = Math.max(8, Math.min(innerWidth - W - 58, sx - W / 2)) + 'px';
-    bar.style.top = Math.max(top, Math.min(innerHeight - H - 96, sy - H)) + 'px';
+    // (Chat C, owner request 2026-11-17) the bar no longer sits on the fighters' heads: it docks in the open sky between
+    // the two sides, just under the party boxes, so no sprite is ever covered. G.settings.mbarFloat = true restores the old float.
+    if (G.settings && G.settings.mbarFloat) {
+      bar.style.left = Math.max(8, Math.min(innerWidth - W - 58, sx - W / 2)) + 'px';
+      bar.style.top = Math.max(top, Math.min(innerHeight - H - 96, sy - H)) + 'px';
+    } else {
+      const mid = innerWidth * .46;   // the gap between the enemy line (left) and the party (right)
+      bar.style.left = Math.max(8, Math.min(innerWidth - W - 58, mid - W / 2)) + 'px';
+      bar.style.top = Math.max(top, 8) + 'px';
+    }
   }
   addEventListener('resize', place);
 

@@ -108,6 +108,7 @@ Still unclear? Pick the chat whose one-sentence job above fits best — and say 
   draft text about the Drags, Fratenaptor, Transcension and the Accord. Lore is your lane — rewrite any line freely (keep 12 entries; order = found order doesn't matter).
 
 ## Cross-lane log
+- 2026-11-17 · **C (owner request):** js/atkpad.js `place()` — the move bar docks in the open gap under the party boxes instead of floating over the active fighter's head (old float: `G.settings.mbarFloat = true`). wardrobe.js: battle Ren always uses the `ren` set (outfits/dyes are world-only now). Ribbons on Ren turned off.
 - 2026-11-17 · **C:** zone.js → KAIGEN, Linked Kaigen follow-ups, Second Door (wraps Burst.fire), Vane's explanation (wraps Battle.start, plays after the first Kaigen battle), `GOSSIP.kaigen` tavern topic. aurazone.js: Kaigen drains the world's colour; Transcension cracks the ground.
 - 2026-11-17 · **C:** NEW MECHANIC FILE `js/zone.js` (owner asked C directly): the Zone. aurazone.js now draws Aura Burst (glow + heartbeat) and the Zone (lightning from the eyes, vignette) separately.
 - 2026-11-17 · **C:** new `js/aurazone.js` (after spritepolish5); reads `a.burst`+`a.stage1` (party) and `a.eburst`+`EBURST` (enemies). transform.js: no sprite swap for stage-1 releases.
