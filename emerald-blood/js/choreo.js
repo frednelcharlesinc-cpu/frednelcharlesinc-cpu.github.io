@@ -47,6 +47,10 @@
     try {
       const B = this.B, S = BT_SCALE, dir = t.x > a.x ? 1 : -1, big = grade === 'perfect';
       if (a.__combo != null) a.__combo++;
+      // S+ COATING FLASH: a fighter of S rank or higher has their aura on the skin - at the moment of impact it flares like steel
+      const nowT = performance.now();
+      if ((r === 'hit' || r === 'parried' || r === 'absorbed') && rank(t) >= 5) t.__coatT = nowT;
+      if ((r === 'hit' || r === 'parried' || r === 'ko') && rank(a) >= 5) a.__coatT = nowT;
       if (r === 'hit' && !t.ko) {
         pose(t, 'hurt', big ? 70 : 55);                              // the flinch
         t.kbv = (t.kbv || 0) + dir * (big ? 10 : 5);                 // shoved along the line of the blow
@@ -101,7 +105,28 @@
   /* afterimages: the last frames of a swing, left behind in a fading line */
   if (typeof HD !== 'undefined') {
     const _bt = HD.bt.bind(HD), MAIN = () => document.getElementById('game');
+    const hex2 = (h) => { h = String(h || '').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); return h.length === 6 ? '#' + h : null; };
+    const coatCol = (a) => { try { if (a.side === 'p' && typeof BURST !== 'undefined') { const D = BURST[Burst.key(a)]; if (D && D.col) return hex2(D.col); } if (typeof EBURST !== 'undefined' && EBURST[a.key]) return hex2(EBURST[a.key][2]); } catch (e) { } return '#e6f4ff'; };
+    let FL = null;
+    const _blit = HD.blit.bind(HD);
+    HD.blit = function (c, img, fr, x, y, h, extra) {
+      const r = _blit(c, img, fr, x, y, h, extra);
+      if (FL && fr && window.SPolish) { const f0 = FL; FL = null; try {
+        const k = h / fr[6], draw = (kind, al) => { const cv = window.SPolish.mask(img, fr[0], fr[1], fr[2], fr[3], kind + f0.col), p = cv.__pad || 0;
+          c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha *= al; c.imageSmoothingEnabled = true; c.translate(x, y);
+          if (extra && extra.rot) c.rotate(extra.rot); if (extra && extra.sy) c.scale(1, extra.sy);
+          c.drawImage(cv, -fr[4] * k - p * k, -fr[5] * k - p * k, cv.width * k, cv.height * k); c.restore(); };
+        draw('fill:', .35 * f0.al); draw('rim:', f0.al); draw('rim:', f0.al); draw('glow:', .8 * f0.al);
+      } catch (e) { } }
+      return r;
+    };
     HD.bt = function (c, img, anim, f, x, y, s) {
+      let fl = null;
+      try {
+        const B0 = Battle.B;
+        if (!off() && B0 && c && c.canvas === MAIN()) for (const q of B0.actors) if (q.__coatT && Math.abs(q.x - x) < 1.5 && Math.abs(q.y - y) < 1.5) {
+          const dt = performance.now() - q.__coatT; if (dt < 260) fl = { col: coatCol(q), al: 1 - dt / 260 }; else q.__coatT = 0; break; }
+      } catch (e) { }
       try {
         const B = Battle.B;
         if (!off() && B && c && c.canvas === MAIN() && ATK.test(String(anim))) {
@@ -114,7 +139,7 @@
           }
         }
       } catch (e) { }
-      return _bt(c, img, anim, f, x, y, s);
+      FL = fl; try { return _bt(c, img, anim, f, x, y, s); } finally { FL = null; }
     };
   }
 })();
