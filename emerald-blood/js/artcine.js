@@ -82,4 +82,14 @@
       return r;
     };
   }
+
+  // keep the screen clean during action: an enemy's trait caption hides while it's away from its spot, and during cut-ins
+  if (typeof BT_TIP === 'function') {
+    const _tip = BT_TIP;
+    BT_TIP = function (B, a) {
+      const v = _tip(B, a);
+      try { if (B && (B.cutin || CAM || (a && a.hx != null && Math.hypot(a.x - a.hx, a.y - a.hy) > 10))) return 0; } catch (e) { }
+      return v;
+    };
+  }
 })();
